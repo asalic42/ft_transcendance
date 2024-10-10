@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset = "UTF-8">
+        <title> Hello Cube ! </title>
+        <style>
+            body {margin: 0}
+        </style>
+    </head>
+    <body>
+        <script type="module">
+            import * as THREE from 'https://cdn.jsdelivr.net/npm/three/build/three.module.js';
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const greenMaterial = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+            const cube = new THREE.Mesh(geometry, greenMaterial);
+            cube.position.x = -4;
+            scene.add(cube);
+            camera.position.z = 5;
+            
+            const geoBis = new THREE.BoxGeometry(1, 1, 1);
+            const pinkMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff} );
+            const cubeBis = new THREE.Mesh(geoBis, pinkMaterial);
+            cubeBis.position.x = 4
+            scene.add(cubeBis);
+            
+            const geo = new THREE.BoxGeometry(2, 2, 2);
+            const whiteMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff} );
+            const materials = [
+                pinkMaterial,
+                pinkMaterial,
+                greenMaterial,
+                greenMaterial,
+                whiteMaterial,
+                whiteMaterial
+            ];
+
+            const cubeBiColor = new THREE.Mesh(geo, materials);
+            scene.add(cubeBiColor);
+
+            function animate() {
+
+                requestAnimationFrame( animate );
+
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+
+                cubeBis.rotation.x += 0.01;
+                cubeBis.rotation.y += 0.01;
+
+                cubeBiColor.rotation.x += 0.05;
+                cubeBiColor.rotation.y += 0.05;
+
+                renderer.render( scene, camera );
+            }
+            animate();
+                        
+        </script>
+    </body>
+</html>
+
+<!-- Ne pas oublier de liberer les ressources a la fin:
+
+       <    scene.remove(cube);
+            scene.remove(cubeBis);
+            scene.remove(cubeBiColor);
+            
+            cube.geometry.dispose();
+            cubeBis.geoBis.dispose();
+            cubeBiColor.geo.dispose();      >
+
+    en trouvant un moyen de detecter lorsque le processus s'arrete -->
