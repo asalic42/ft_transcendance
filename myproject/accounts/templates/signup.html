@@ -1,0 +1,6 @@
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">S'inscrire</button>
+    <p>Tu es un fidèle ? Ce lien est pour toi <a href="{% url 'signin' %}">Je suis un bon fidèle</a>.</p>
+</form>
