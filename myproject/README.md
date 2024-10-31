@@ -49,7 +49,7 @@ Bien, à la racine où se trouve le fichier `manage.py`, cette fois, tapez les i
 
 - Pour toucher directement en manuel, il faut installer Django :
 ```bash
-pip3 install django
+pip3 install django (assurer-vous d'avoir pip d'installé)
 ```
 
 -  Connectez-vous au shell Django :
@@ -83,6 +83,8 @@ Enfin bref, je ne vais pas tous les faire non plus. Il faudra juste supprimer le
 Normalement, question clé secrète, tout est configuré. Passons à Docker.
 
 ## Docker un vieil ami
+
+Avant de poursuivre, assurez-vous d'avoir docker et docker-compose.
 
 Pour vous faciliter la tâche, car je suis un bon et musclé, je vous ai créé un petit script `log.sh`.
 
