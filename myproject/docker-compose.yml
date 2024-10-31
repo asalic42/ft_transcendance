@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: mysqldb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: admin@123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgres://user:admin@123@db/mysqldb
+    depends_on:
+      db:
+        condition: service_healthy
+    
+volumes:
+  postgres_data:
