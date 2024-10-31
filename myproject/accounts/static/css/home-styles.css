@@ -1,0 +1,8 @@
+/* static/mon_app/styles.css */
+body {
+    background-color: #f8f9fa; /* Couleur de fond douce */
+}
+
+h1 {
+    color: hsl(187, 73%, 36%); /* Couleur personnalisée pour le titre */
+}
