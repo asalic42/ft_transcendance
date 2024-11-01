@@ -19,24 +19,24 @@ if [ $# -ne 1 ]; then
     echo -e "${BLUE}[ COMMANDES ]${NC}"
     echo -e "\n├ ${PURPLE_N}BUILD${NC}"
 
-    echo -e "│\t> ${BLUE_N}b-all${NC}       ${PURPLE}|${NC} Construction complète :"
+    echo -e "│\t> ${YELLOW_N}b-all${NC}       ${PURPLE}|${NC} Construction complète :"
     echo -e "│\t\t\tCrée les images Docker et les volumes, nécessaire pour un premier setup."
     
-    echo -e "│\n│\t> ${BLUE_N}b${NC}           ${PURPLE}|${NC} Construction partielle :"
+    echo -e "│\n│\t> ${YELLOW_N}b${NC}           ${PURPLE}|${NC} Construction partielle :"
     echo -e "│\t\t\tCrée uniquement les images Docker, utile pour les mises à jour sans toucher aux volumes."
    
     echo -e "\n├ ${PURPLE_N}REMOVE${NC}"
 
-    echo -e "│\t> ${BLUE_N}r-all${NC}       ${PURPLE}|${NC} Suppression totale :"
+    echo -e "│\t> ${YELLOW_N}r-all${NC}       ${PURPLE}|${NC} Suppression totale :"
     echo -e "│\t\t\tEnlève toutes les images et volumes Docker,"
     echo -e "│\t\t\t${RED_N}Attention${NC}, toutes les données seront perdues. Utilisez 'b-all' pour un nouveau setup après."
     
-    echo -e "│\n│\t> ${BLUE_N}r${NC}           ${PURPLE}|${NC} Suppression partielle :"
+    echo -e "│\n│\t> ${YELLOW_N}r${NC}           ${PURPLE}|${NC} Suppression partielle :"
     echo -e "│\t\t\tEnlève uniquement l'image Docker, les volumes restent intacts."
     
     echo -e "\n├ ${PURPLE_N}LAUNCH${NC}"
 
-    echo -e "│\t> ${BLUE_N}l${NC}           ${PURPLE}|${NC} Lancement de l'application :"
+    echo -e "│\t> ${YELLOW_N}l${NC}           ${PURPLE}|${NC} Lancement de l'application :"
     echo -e "│\t\t\tDémarre les services Docker et ouvre l'application dans le navigateur."
 
     echo -e "\n"
@@ -72,8 +72,10 @@ fi
 
 # FULL REMOVE
 if [ "$1" == "r-all" ]; then
+    echo -e "${BLUE}> Stopping docker services...${NC}"
+    sudo docker-compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    sudo docker-compose down -v
+    sudo docker system prune -a --volumes
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
@@ -95,15 +97,13 @@ if [ "$1" == "l" ]; then
         echo -e "${GREEN}> Docker services are already running.${NC}"
     fi
 
-    echo -e "${PURPLE}> Launching ...${NC}"
-    open http://127.0.0.1:8000
-
-    # Attendre que le navigateur soit fermé
-    while pgrep -f "http://127.0.0.1:8000" > /dev/null; do
+    # Attendre que le service soit accessible
+    until $(curl --output /dev/null --silent --head --fail http://127.0.0.1:8000); do
+        printf '.'
         sleep 1
     done
 
-    echo -e "${BLUE}> Stopping docker services...${NC}"
-    sudo docker-compose stop
+    echo -e "${GREEN}> Service is up! Opening browser...${NC}"
+    open http://127.0.0.1:8000
 fi
 

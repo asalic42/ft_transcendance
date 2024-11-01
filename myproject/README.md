@@ -19,7 +19,7 @@ etc
 ```
 Ici, vous devriez trouver
 ```
-DJANGO_SECRET_KEY='Follow instructions in README'
+DJANGO_SECRET_KEY=""
 ```
 
 Vous allez devoir générer une clé. Ça tombe bien, Django propose ce qu'il faut pour. Sinon, il aurait fallu utiliser **HashiCorp Vault**, qu'il faudra de toute façon utiliser pour la suite du projet. Mais histoire de faire vite... reprenons le .env, voulez-vous ?

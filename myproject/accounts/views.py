@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 |
 """
 
+@login_required
 def home(request):
     users = User.objects.all()              # > Ici on récupe tous les users
     return (render(request, 'home.html', {'users': users}))
