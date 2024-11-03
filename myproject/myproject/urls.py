@@ -16,10 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from accounts.views import signin
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', signin, name='signin'),
-    path('accounts/', include('accounts.urls')),
+    # path('admin/', admin.site.urls),  # Route vers la page d'administration de Django (commentée pour l'instant)
+
+    path('', RedirectView.as_view(url='signin')),  
+    # Redirige l'utilisateur de la page d'accueil vers la page de connexion (signin) par défaut
+
+    path('signin/', include('login_sys.urls')),    
+    # Inclut toutes les URLs liées à l'authentification (connexion et inscription) définies dans l'application login_sys
+
+    path('account/', include('home_sys.urls')),     
+    # Inclut toutes les URLs relatives aux fonctionnalités du compte (comme la gestion du profil) dans l'application home_sys
 ]

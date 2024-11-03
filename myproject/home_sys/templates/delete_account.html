@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <form method="post">
+        {% csrf_token %}
+        <p>Pensais-tu vraiment ce que tu disais Fils ? Attention, si oui, nous te fermerons définitivement les portes.</p>
+        <button type="submit">Je n'ai jamais été croyant 🖕</button>
+        <a href="{% url 'home' %}">C'était une blague</a>
+    </form>
+
+{% endblock %}

@@ -34,7 +34,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
+    'login_sys',
+    'home_sys',
 ]
 
 MIDDLEWARE = [
@@ -81,16 +81,6 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-""" DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mysqldb',
-        'USER' : 'user' ,
-        'PASSWORD' : 'admin@123' ,
-        'HOST' : 'localhost' ,
-        'PORT' : '' ,
-    }
-} """
 
 import os
 import dj_database_url
@@ -100,9 +90,6 @@ DATABASES = {
         default=os.getenv('DATABASE_URL', 'postgres://user:admin@123@localhost/mysqldb')
     )
 }
-
-print(DATABASES)
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -23,7 +23,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=postgres://user:admin@123@db/mysqldb
+      - DATABASE_URL=postgres://user:admin@123@db:5432/mysqldb
     depends_on:
       db:
         condition: service_healthy
