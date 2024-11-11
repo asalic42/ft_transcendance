@@ -1,0 +1,36 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="fr">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Aweb</title>
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    </head>
+    
+    <body>
+        
+        <header>
+            <h1>Bienvenue sur Aweb</h1>
+        </header>
+
+        <div class="subtitle">
+            <h2>Choix de map</h2>
+        </div>
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <script src="{% static 'js/move-circle.js' %}"></script>
+    </body>
+
+    <footer>
+        <p>C'etait ma premiere page web,</p>
+        <p>Awenax.</p>
+    </footer>
+
+</html>

@@ -1,0 +1,75 @@
+/* Creation d'un font style "Cartoon Bulles" */
+@font-face {
+    font-family: namakuFont;
+    src: url(../fonts/Namaku.ttf);
+    font-weight: 800 900;
+    font-stretch: 75% 125%;
+}
+
+.card-list .cards {
+    background: rgba(0, 0, 0, 0.2);
+    width: 500px;
+    padding:50px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 5%;
+    border: 5px solid rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+}
+
+.card-list .cards .map {
+    width:50px;
+    height: 50px;
+    min-height: 30vh;
+    min-width: 30vh;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.card-list .cards .map-name {
+    font-size: 2rem;
+    margin: 10px 0 60px;
+    color: white;
+}
+
+.card-list .cards .choose-map {
+    font-size: 1rem;
+    background-color: white;
+    color: rgb(0, 0, 0);
+    padding: 10px 75px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: 0.2 ease;
+    cursor: pointer;
+}
+
+.card-list .cards .choose-map:hover {
+    color: white;
+    background-color: rgba(92, 92, 92, 0.5);
+    border: 1px solid white;
+    border: 1px solid, transparent;
+}
+
+.swiper {
+    overflow: hidden;
+    max-width: 1200px;
+    margin: 0 70px 55px;
+}
+
+.swiper .swiper-pagination-bullet {
+    background: white;
+    width: 15px;
+    height: 15px;
+}
+
+.swiper .nav-button {
+    color: white;
+    transition: 0.2 ease;
+}
+
+.swiper .nav-button:hover {
+    color: rgba(92, 92, 92, 0.5);
+}

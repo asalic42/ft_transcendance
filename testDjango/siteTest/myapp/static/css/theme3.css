@@ -1,0 +1,12 @@
+html {
+    background: linear-gradient(0.25turn, rgb(57, 170, 76), rgb(105, 228, 115), rgb(179, 235, 191));
+    color: white;
+}
+
+header {
+    text-align: center;
+}
+
+section a {
+    color: black;
+}

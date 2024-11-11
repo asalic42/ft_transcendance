@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<link rel="stylesheet" href="{% static 'css/slider.css' %}">
+
+<!-- Slider main container -->
+<div class="container swipper">
+    <!-- Slides ! -->
+    <div class="swiper">
+        <div class="card-list swiper-wrapper">
+            <div class="cards swiper-slide">
+                <img src="{% static 'images/Bambous.png' %}" class="map">
+                <h2 class="map-name">Bambous Map</h2>
+                <button class="choose-map">Choose</button>
+            </div>
+            <div class="cards swiper-slide">
+                <img src="{% static 'images/Sakura.png' %}" class="map">
+                <h2 class="map-name">Spring Map</h2>
+                <button class="choose-map">Choose</button>
+            </div>
+            <div class="cards swiper-slide">
+                <img src="{% static 'images/Scary.png' %}" class="map">
+                <h2 class="map-name">Halloween Map</h2>
+                <button class="choose-map">Choose</button>
+            </div>
+            <div class="cards swiper-slide">
+                <img src="{% static 'images/Winter.png' %}" class="map">
+                <h2 class="map-name">Winter Map</h2>
+                <button class="choose-map">Choose</button>
+            </div>
+            <div class="cards swiper-slide">
+                <img src="{% static 'images/Water.png' %}" class="map">
+                <h2 class="map-name">Summer Map</h2>
+                <button class="choose-map">Choose</button>
+            </div>
+        </div>
+
+        <!-- For pagination -->
+        <div class="swiper-pagination"></div>
+        <!-- Navigation buttons -->
+        <div class="nav-button swiper-button-prev"></div>
+        <div class="nav-button swiper-button-next"></div>
+        <!-- Scrollbar -->
+         <!-- <div class="swiper-scrollbar"></div> -->
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="{% static 'js/swiper-script.js' %}"></script>
+
+
+{% endblock %}

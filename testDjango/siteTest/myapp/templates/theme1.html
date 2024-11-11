@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="fr">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>Aweb</title>
+        <link rel="stylesheet" href="{% static 'css/theme1.css' %}">
+    </head>
+
+    <body>
+
+        <header>
+            <h1>Bienvenue sur Aweb</h1>
+        </header>
+        
+        <section id="theme1">
+            <h2>Theme 1</h2>
+            <p>Ce theme est VIOLET</p>
+
+            <a href="{% url 'home' %}">C'est moche</a>
+        </section>
+
+    </body>
+
+</html>
