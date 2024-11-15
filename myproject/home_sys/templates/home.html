@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 
+<link rel="stylesheet" href="{% static 'css/home-style.css' %}">
 <h1>Bienvenue à toi fils !</h1>
 <p>Tu fais maintenant parti de la guild, voici tous les membres :</p>
 <ul>
@@ -10,6 +13,12 @@
     {% empty %}
         <li>Le Monastère vient d'ouvrir, il n'y a encore aucun fidèle...</li>
     {% endfor %}
+
 </ul>
+
+
+<canvas width="750" height="400" id="game"></canvas>
+<div id="ball"></div>
+<script src="{% static 'js/game.js' %}"></script>
 
 {% endblock %}
