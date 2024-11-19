@@ -57,6 +57,8 @@ function updatePlayers(player1Coords, player2Coords) {
 }
 
 function drawPlayer(player1Coords, player2Coords) {
+	
+	updatePlayers(player1Coords, player2Coords);
 
 	context.beginPath();
     context.moveTo(player1Coords.x1, player1Coords.y1);
@@ -74,41 +76,63 @@ function drawPlayer(player1Coords, player2Coords) {
 }
 
 function createBall() {
-	var ballCoords = {x : table.width / 2, y : table.height / 2, vx : Math.floor(Math.random() * 8), vy : Math.floor(Math.random() * 16)};
+	var ballCoords = {x : table.width / 2, y : table.height / 2, vx : Math.floor(Math.random() * 8), vy : Math.floor(Math.random() * 8)};
 
     // Initials points player 1
-	var player1Coords = {x1 :  50, y1 : (table.height / 2) - 25, x2 : 50, y2 : (table.height / 2) + 25, vy : 15};
+	var player1Coords = {x1 : 50, y1 : (table.height / 2) - 35, x2 : 50, y2 : (table.height / 2) + 35, vy : 12};
 
     // Initials points player 2
-	var player2Coords = {x1 : table.width -50, y1 : (table.height / 2) - 25, x2 : table.width -50, y2 : (table.height / 2) + 25, vy : 15};
+	var player2Coords = {x1 : table.width - 50, y1 : (table.height / 2) - 35, x2 : table.width - 50, y2 : (table.height / 2) + 35, vy : 12};
 	launchAnim(ballCoords, player1Coords, player2Coords);
 }
 
+let stop = 0;
+
 function launchAnim(ballCoords, player1Coords, player2Coords) {
-    window.requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+		if (stop)
+			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
-        updatePlayers(player1Coords, player2Coords);
         drawPlayer(player1Coords, player2Coords);
-        moveBall(ballCoords);
+        moveBall(ballCoords, player1Coords, player2Coords);
         launchAnim(ballCoords, player1Coords, player2Coords);
     });
 }
 
-function moveBall(ballCoords) {
+function isBallHittingPlayer(ballCoords, player1Coords, player2Coords) {
+	if (ballCoords.x - 10 < 50 &&
+			ballCoords.y - 10 <= player1Coords.y2 &&
+			ballCoords.y + 10 >= player1Coords.y1)
+			
+		return true;
+			
+	else if (ballCoords.x + 10 > 700 &&
+			ballCoords.y - 10 <= player2Coords.y2 &&
+			ballCoords.y + 10 >= player2Coords.y1)
+
+		return true;
+	return false;
+}
+
+function moveBall(ballCoords, player1Coords, player2Coords) {
 
 	// Conditions so that the ball bounces
     // from the edges
-    if (10 + ballCoords.x > table.width)
-        ballCoords.vx = -ballCoords.vx;
 
-    if (ballCoords.x - 10 < 0)
-        ballCoords.vx = -ballCoords.vx;
-
-    if (ballCoords.y + 10 > table.height)
-        ballCoords.vy = -ballCoords.vy;
-
-    if (ballCoords.y - 10 < 0)
+    if (isBallHittingPlayer(ballCoords, player1Coords, player2Coords)) 
+			{ballCoords.vx = -ballCoords.vx;}
+	else if (10 + ballCoords.x > table.width)
+		{
+			console.log("player 1 wins");
+			stop = 1;
+		}
+	else if (ballCoords.x - 10 < 0)
+		{
+			console.log("player 2 wins");
+			stop = 1;
+		}
+   else if (ballCoords.y - 10 < 0 || ballCoords.y + 10 > table.height)
         ballCoords.vy = -ballCoords.vy;
 
 	ballCoords.x += ballCoords.vx;	
