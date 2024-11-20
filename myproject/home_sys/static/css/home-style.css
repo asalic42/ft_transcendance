@@ -1,10 +1,15 @@
+#game {
+	width: 100%;
+	text-align:center;
+}
 
-/* * { */
-    /* background-color: black; */
-/* } */
-/*  */
 canvas {
     border: solid 5px #cc20ef;
     border-radius: 1%;
     position: relative;
+	display: inline;
+}
+
+#score {
+	text-align: center;
 }

@@ -29,6 +29,7 @@ main {
     /* Styles pour la section principale du contenu */
 
     margin-left: 8rem;                  /* Espace à gauche pour décaler le contenu */
+    margin-right: 8rem;                  /* Espace à gauche pour décaler le contenu */
     padding: 1rem;                      /* Remplissage intérieur */
     transition: margin-left 400ms ease;
 }

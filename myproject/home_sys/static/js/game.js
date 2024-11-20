@@ -2,12 +2,18 @@
 var table;
 var borders;
 var context;
-var ball = document.getElementById("ball");
+var score = document.getElementById("score");
+var count = 0;
 
+function getRandomArbitrary(min, max) {
+	var result = Math.random() * (max - min) + min;
+	if (result >= -4 && result <= 4)
+		return getRandomArbitrary(min, max);
+	return result;
+}
+  
 window.onload = function() {
     table = document.getElementById("game");
-    table.width = 1600;
-    table.height = 750;
     context = table.getContext("2d");
 
 	createBall();
@@ -71,74 +77,85 @@ function drawPlayer(player1Coords, player2Coords) {
 
 function createBall() {
     // Balls coords
-	var ballCoords = {x : table.width / 2, y : table.height / 2, vx : Math.floor((Math.random() * 8) +3), vy : Math.floor((Math.random() * 8) +3)};
+	var o_coords = {x : table.width / 2, y : table.height / 2};
+	var o_vector = {vx : Math.floor(getRandomArbitrary(-7, 7)), vy : Math.floor(getRandomArbitrary(-7, 7))};
+	var ball = {coords : o_coords, vector : o_vector, radius : 13};
 
     // Initials points player 1
 	var player1Coords = {x1 : 100, y1 : (table.height / 2) - 40, x2 : 105, y2 : (table.height / 2) + 40, vy : 12};
 
     // Initials points player 2
 	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 95, y2 : (table.height / 2) + 40, vy : 12};
-	launchAnim(ballCoords, player1Coords, player2Coords);
+	launchAnim(ball, player1Coords, player2Coords);
 }
 
 let stop = 0;
 
-function launchAnim(ballCoords, player1Coords, player2Coords) {
+function launchAnim(ball, player1Coords, player2Coords) {
     requestAnimationFrame(function () {
 		if (stop)
 			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
         drawPlayer(player1Coords, player2Coords);
-        moveBall(ballCoords, player1Coords, player2Coords);
-        launchAnim(ballCoords, player1Coords, player2Coords);
+        moveBall(ball, player1Coords, player2Coords);
+        launchAnim(ball, player1Coords, player2Coords);
     });
 }
 
-function isBallHittingPlayer(ballCoords, player1Coords, player2Coords) {
+function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 
-    if (ballCoords.x - 10 >= 100 && ballCoords.x - 108 <= 10 &&
-			ballCoords.y - 10 <= player1Coords.y2 &&
-			ballCoords.y + 10 >= player1Coords.y1)
+    if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 0.8) &&
+			ball.coords.y - ball.radius <= player1Coords.y2 + ball.radius / 2 &&
+			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2)
 			
 		return true;
-			
-	else if (ballCoords.x + 10 >= 1497 && ballCoords.x + 10 <= 1505 &&
-			ballCoords.y - 10 <= player2Coords.y2 &&
-			ballCoords.y + 10 >= player2Coords.y1)
+
+	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 0.8) && ball.coords.x + 10 <= player2Coords.x2 &&
+			ball.coords.y - ball.radius <= player2Coords.y2 + ball.radius / 2 &&
+			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2)
 
 		return true;
 	return false;
 }
 
-function moveBall(ballCoords, player1Coords, player2Coords) {
+function moveBall(ball, player1Coords, player2Coords) {
 
 	// Conditions so that the ball bounces
     // from the edges
 
-    if (!stop && isBallHittingPlayer(ballCoords, player1Coords, player2Coords)) 
-			{ballCoords.vx = -ballCoords.vx;}
+    if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
+		console.log(ball.vector.vx);
+		count++;
+		score.innerText = "Score : " + count;
+		ball.vector.vx = -(ball.vector.vx);
+		if (ball.vector.vx < 0 && ball.vector.vx > -30)
+			ball.vector.vx -= 1;
+		else if (ball.vector.vx < 30)
+			ball.vector.vx += 1;
+	}
 
-    else if (10 + ballCoords.x >= table.width)
+    else if (ball.radius + ball.coords.x >= table.width)
     {
         console.log("player 1 wins");
         stop = 1;
     }
-    else if (ballCoords.x - 10 <= 0)
+    else if (ball.coords.x - ball.radius <= 0)
     {
         console.log("player 2 wins");
         stop = 1;
     }
-    else if (ballCoords.y - 10 <= 0 || ballCoords.y + 10 >= table.height)
-        ballCoords.vy = -ballCoords.vy;
+    else if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height)
+        ball.vector.vy = -ball.vector.vy;
 
-    ballCoords.x += ballCoords.vx;	
-	ballCoords.y += ballCoords.vy;
+    ball.coords.x += ball.vector.vx;	
+	ball.coords.y += ball.vector.vy;
 
 	context.beginPath();
     context.strokeStyle = 'white';
-    context.arc(ballCoords.x, ballCoords.y, 10, Math.PI * 2, false);
+    context.arc(ball.coords.x, ball.coords.y, ball.radius + 2, Math.PI * 2, false);
     context.fillStyle = "black";
+    context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
     context.fill();
     context.stroke();
     context.closePath();
