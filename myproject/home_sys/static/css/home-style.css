@@ -1,16 +1,10 @@
 
+/* * { */
+    /* background-color: black; */
+/* } */
+/*  */
 canvas {
-    border: solid 2px #cc20ef;
+    border: solid 5px #cc20ef;
     border-radius: 1%;
     position: relative;
-}
-
-#ball {
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 39%;
-    left: 55.2%;
 }

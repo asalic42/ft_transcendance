@@ -1,8 +1,14 @@
+@font-face {
+    /*  Creation d'un font externe */
+    font-family: Namaku;
+    src: url(../fonts/Namaku.ttf);
+}
+
 :root {
     /* Définit les variables globales pour la taille de police et les couleurs */
     
     font-size: 16px;                    /* Taille de police de base */
-    font-family: 'Open Sans';           /* Police de caractère par défaut */
+    font-family: 'Open Sans';               /*  Police de caractère par défaut */
     --text-primary: #b6b6b6;          /* Couleur primaire du texte */
     --text-secondary: #ececec;        /* Couleur secondaire du texte */
     --bg-primary: #23232e;            /* Couleur de fond primaire */
@@ -24,7 +30,6 @@ main {
 
     margin-left: 8rem;                  /* Espace à gauche pour décaler le contenu */
     padding: 1rem;                      /* Remplissage intérieur */
-
     transition: margin-left 400ms ease;
 }
 
