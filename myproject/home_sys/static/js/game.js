@@ -1,8 +1,8 @@
-// variables
+// Variables
 var table;
-var borders;
 var context;
 var score = document.getElementById("score");
+var game = document.getElementById("game");
 var count = 0;
 
 function getRandomArbitrary(min, max) {
@@ -20,17 +20,15 @@ window.onload = function() {
 }
 
 function update() {
-    context.fillStyle = "black";
+
+    context.fillStyle = '#cc20ef';
     context.fillRect(0, 0, table.width, table.height);
+
+    context.fillStyle = "black";
+    context.fillRect(+5, +5, table.width -10, table.height-10);
 
     context.fillStyle = '#cc20ef';
     context.fillRect(table.width / 2, 0, 5, table.height);
-    // context.beginPath();
-    // context.moveTo(table.width / 2 , 0);
-    // context.lineTo(table.width / 2, table.height);
-    // context.strokeStyle = '#cc20ef';
-    // context.stroke();
-    // context.closePath();
 
     console.log('Creating player...');
 }
@@ -101,6 +99,8 @@ function launchAnim(ball, player1Coords, player2Coords) {
         moveBall(ball, player1Coords, player2Coords);
         launchAnim(ball, player1Coords, player2Coords);
     });
+    if (stop)
+        moveBall(ball, player1Coords, player2Coords);
 }
 
 function isBallHittingPlayer(ball, player1Coords, player2Coords) {
@@ -138,12 +138,16 @@ function moveBall(ball, player1Coords, player2Coords) {
     else if (ball.radius + ball.coords.x >= table.width)
     {
         console.log("player 1 wins");
+        winnerWindow(1);
         stop = 1;
+        return;
     }
     else if (ball.coords.x - ball.radius <= 0)
     {
         console.log("player 2 wins");
+        winnerWindow(2);
         stop = 1;
+        return;
     }
     else if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height)
         ball.vector.vy = -ball.vector.vy;
@@ -153,11 +157,39 @@ function moveBall(ball, player1Coords, player2Coords) {
 
 	context.beginPath();
     context.strokeStyle = 'white';
-    context.arc(ball.coords.x, ball.coords.y, ball.radius + 2, Math.PI * 2, false);
+    context.arc(ball.coords.x, ball.coords.y, ball.radius + 1, Math.PI * 2, false);
     context.fillStyle = "black";
     context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
     context.fill();
     context.stroke();
     context.closePath();
+}
+
+function winnerWindow(player) {
+    context.clearRect(0, 0, table.width, table.height);
+    context.fillStyle = "black";
+    context.fillRect(0, 0, table.width, table.height);
+    if (player == 1)
+        context.fillStyle = "blue";
+    else
+        context.fillStyle = "red";
+    context.fillRect(5, 5, table.width -10, table.height -10);
+
+    const text = "Player " + player + " wins !";
+    context.font = "bold 40px 'Namaku'";
+    context.fillStyle = "white";
+    context.textAlign = "center";    
+    context.fillText(text, table.width /2, table.height /2);
+
+    replay();
+}
+
+function replay() {
+    const button = document.getElementById("replay-button");
+    button.style.display = "block";  
+
+    button.addEventListener("click", () => {
+        window.location.reload();
+    });
 
 }

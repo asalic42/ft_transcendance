@@ -1,9 +1,3 @@
-@font-face {
-    /*  Creation d'un font externe */
-    font-family: Namaku;
-    src: url(../fonts/Namaku.ttf);
-}
-
 :root {
     /* Définit les variables globales pour la taille de police et les couleurs */
     

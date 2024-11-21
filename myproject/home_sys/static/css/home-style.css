@@ -4,7 +4,7 @@
 }
 
 canvas {
-    border: solid 5px #cc20ef;
+    /* border: solid 5px #cc20ef; */
     border-radius: 1%;
     position: relative;
 	display: inline;
@@ -12,4 +12,21 @@ canvas {
 
 #score {
 	text-align: center;
+}
+
+@font-face {
+    /*  Creation d'un font externe */
+    font-family: 'Namaku';
+    src: url(../fonts/Namaku.ttf);
+}
+
+#replay-button {
+	display: block;
+	text-align: center;
+	height: 60%;
+	color: white;
+	cursor: pointer;
+	font-family: 'Namaku';
+	font-size: 25px;
+	
 }
