@@ -37,10 +37,10 @@ function drawInnerRectangle(color) {
 
 function update() {
 
-	drawOuterRectangle("#cc20ef");
-	drawInnerRectangle("black");
+	drawOuterRectangle("#ED4EB0");
+	drawInnerRectangle("#23232e");
 
-    context.fillStyle = '#cc20ef';
+    context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
     console.log('Creating player...');
@@ -76,14 +76,15 @@ function updatePlayers(player1Coords, player2Coords) {
     }
 }
 
-function drawPlayer(player1Coords, player2Coords) {
+function drawPlayer(player1Coords, player2Coords, color) {
 	
 	updatePlayers(player1Coords, player2Coords);
-
-    context.fillStyle = '#cc20ef';
-    context.fillRect(player1Coords.x1, player1Coords.y1, 5, 80);
-    context.fillStyle = '#cc20ef';
-    context.fillRect(player2Coords.x1, player2Coords.y1, 5, 80);
+	context.fillStyle = color;
+	context.beginPath();
+	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
+	context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+	context.fill();
+	context.closePath();
 }
 
 function createBall() {
@@ -93,10 +94,10 @@ function createBall() {
 				radius : 13};
 
     // Initials points player 1
-	var player1Coords = {x1 : 100, y1 : (table.height / 2) - 40, x2 : 105, y2 : (table.height / 2) + 40, vy : 12};
+	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, vy : 12};
 
     // Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 95, y2 : (table.height / 2) + 40, vy : 12, y3 : 0};
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, vy : 12, y3 : 0};
 	launchAnim(ball, player1Coords, player2Coords);
 }
 
@@ -108,7 +109,7 @@ function launchAnim(ball, player1Coords, player2Coords) {
 			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
-        drawPlayer(player1Coords, player2Coords);
+        drawPlayer(player1Coords, player2Coords, "#ED4EB0");
         moveBall(ball, player1Coords, player2Coords);
         launchAnim(ball, player1Coords, player2Coords);
     });
@@ -140,7 +141,7 @@ function drawBall(ball) {
     context.closePath();
 	
 	context.beginPath();
-	context.fillStyle = "black";
+	context.fillStyle = "#23232e";
     context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
     context.fill();
     context.stroke();
@@ -187,31 +188,29 @@ function moveBall(ball, player1Coords, player2Coords) {
 }
 
 function winnerWindow(player) {
-	drawInnerRectangle("#2A0C32");
+	
+	context.clearRect(0, 0, table.width, table.height);
+	drawInnerRectangle("#23232e");
 
-    context.clearRect(0, 0, table.width, table.height);
-
-	drawOuterRectangle("black");
-    if (player == 1)
-        drawInnerRectangle("blue");
-    else
-		drawInnerRectangle("red");
-
-    const text = "Player " + player + " wins !";
-    context.font = "bold 40px 'Namaku'";
-    context.fillStyle = "white";
-    context.textAlign = "center";    
-    context.fillText(text, table.width /2, table.height /2);
-
-    replay();
+	const winner1Text = document.getElementById("wrapper-player1");
+	const winner2Text = document.getElementById("wrapper-player2");
+	if (player == 1)
+		winner1Text.style.display = "block";
+	else
+		winner2Text.style.display = "block";
+    replay(player);
 }
 
-function replay() {
+function replay(player) {
     const button = document.getElementById("replay-button");
-    button.style.display = "block";  
+    button.style.display = "block";
 
-    button.addEventListener("click", () => {
-        window.location.reload();
+	if (player == 1)
+		button.style.color = "#c15050";
+	else
+		button.style.color = "#365FA0";
+	button.addEventListener("click", () => {
+		window.location.reload();
     });
-
+	
 }

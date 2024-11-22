@@ -3,7 +3,7 @@
     
     font-size: 16px;                    /* Taille de police de base */
     font-family: 'Open Sans';               /*  Police de caractère par défaut */
-    --text-primary: #b6b6b6;          /* Couleur primaire du texte */
+    --text-primary: #C2C2C2;          /* Couleur primaire du texte */
     --text-secondary: #ececec;        /* Couleur secondaire du texte */
     --bg-primary: #23232e;            /* Couleur de fond primaire */
     --bg-secondary: #141418;          /* Couleur de fond secondaire */
@@ -22,8 +22,8 @@ body {
 main {
     /* Styles pour la section principale du contenu */
 
-    margin-left: 8rem;                  /* Espace à gauche pour décaler le contenu */
-    margin-right: 8rem;                  /* Espace à gauche pour décaler le contenu */
+    margin-left: 6rem;                  /* Espace à gauche pour décaler le contenu */
+    margin-right: 6rem;                  /* Espace à gauche pour décaler le contenu */
     padding: 1rem;                      /* Remplissage intérieur */
     transition: margin-left 400ms ease;
 }
@@ -125,7 +125,8 @@ main {
     height: 24px;                       /* Hauteur fixe */
     min-width: 2rem;                    /* Largeur minimale */
     margin: 0 1.5rem;                   /* Espace à gauche et à droite */
-    --lord-icon-primary: #b6b6b6;     /* Couleur primaire de l'icône */
+    --lord-icon-primary: #C2C2C2;     /* Couleur primaire de l'icône */
+    --lord-icon-secondary: #C2C2C2;     /* Couleur secondaire de l'icône */
 
     /* Transition douce pour les changements */
 
@@ -137,7 +138,8 @@ main {
 
     width: 48px;                        /* Double la largeur */
     height: 48px;                       /* Double la hauteur */
-    --lord-icon-primary: #cc20ef;     /* Change la couleur primaire au survol */
+    --lord-icon-primary: #ED4EB0;     /* Change la couleur primaire au survol */
+    --lord-icon-secondary: #ED4EB0;     /* Change la couleur secondaire au survol */
 }
 
 .nav-icon:hover {
@@ -194,7 +196,7 @@ main {
     /* Styles pour le SVG du logo lors du survol de la barre de navigation */
 
     margin-left: 12rem;
-    fill: #cc20ef;                    /* Change la couleur de remplissage au survol */
+    fill: #ED4EB0;                    /* Change la couleur de remplissage au survol */
     transform: rotate(-180deg);         /* Fait pivoter le logo au survol */
 }
 

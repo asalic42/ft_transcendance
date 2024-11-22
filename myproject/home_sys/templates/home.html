@@ -4,7 +4,9 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/home-style.css' %}">
+{% comment %} <link rel="stylesheet" href="{% static 'css/home-style.css' %}"> {% endcomment %}
+<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+
 <h1>Bienvenue à toi fils !</h1>
 <p>Tu fais maintenant parti de la guild, voici tous les membres :</p>
 <ul>
@@ -13,18 +15,6 @@
     {% empty %}
         <li>Le Monastère vient d'ouvrir, il n'y a encore aucun fidèle...</li>
     {% endfor %}
-
 </ul>
-
-<h3 id="score">Score : 0</h3>
-
-<div class="canvas-container">
-	<canvas width="1600" height="700" id="game"></canvas>
-	<div id="button-container">
-		<button id="replay-button" style="display: none;">Play again !</button>
-	</div>
-</div>
-
-<script src="{% static 'js/game.js' %}"></script>
 
 {% endblock %}

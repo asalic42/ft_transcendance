@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+
+<h3 id="score">Score : 0</h3>
+
+<div class="canvas-container">
+	<canvas width="1920" height="950" id="game"></canvas>
+	<div id="button-container">
+		<button id="replay-button" style="display: none;">Play again !</button>
+	</div>
+	<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+		<svg width="1100" height="150">
+			<text x="50%" y="50%" dy=".35em" text-anchor="middle">
+				Player 1 Wins !
+			</text>
+		</svg>
+	</div>
+	<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+		<svg width="1100" height="150" id="svg-wrapper-player2">
+			<text x="50%" y="50%" dy=".35em" text-anchor="middle">
+				Player 2 Wins !
+			</text>
+		</svg>
+	</div>
+</div>
+
+
+
+<script src="{% static 'js/game.js' %}"></script>
+
+{% endblock %}

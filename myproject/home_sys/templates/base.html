@@ -28,7 +28,7 @@
                 </a>
             </li>
 
-        <!--- HOME --->
+        <!-- HOME -->
             <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-icon">
                     <lord-icon
@@ -40,7 +40,20 @@
                 </a>
             </li>
 
-        <!--- PROFILE --->
+		<!-- GAME -->
+		
+			<li class="nav-item">
+				<a href="{% url 'game' %}" class="nav-icon">
+					<lord-icon
+						src="https://cdn.lordicon.com/caxgkjgi.json"
+						trigger="hover"
+                        target=".nav-item">
+					</lord-icon>
+					<span class="link-text">Game</span>
+				</a>
+			</li>
+
+        <!-- PROFILE -->
             <li class="nav-item">
                 <a href="{% url 'profile' %}" class="nav-icon">
                     <lord-icon
@@ -52,7 +65,7 @@
                 </a>
             </li>
 
-        <!--- CALENDAR --->
+        <!-- CALENDAR -->
             <li class="nav-item">
                 <a href="{% url 'unavailable' %}" class="nav-icon">
                     <lord-icon
@@ -64,7 +77,7 @@
                 </a>
             </li>
 
-        <!--- CHATROOM --->
+        <!-- CHATROOM -->
             <li class="nav-item">
                 <a href="{% url 'unavailable' %}" class="nav-icon">
                     <lord-icon
@@ -76,7 +89,7 @@
                 </a>
             </li>
 
-        <!--- STATISTICS --->
+        <!--- STATISTICS -->
             <li class="nav-item">
                 <a href="{% url 'unavailable' %}" class="nav-icon">
                     <lord-icon
@@ -88,7 +101,7 @@
                 </a>
             </li>
 
-        <!--- SETTINGS --->
+        <!-- SETTINGS -->
             <li class="nav-item">
                 <a href="{% url 'unavailable' %}" class="nav-icon">
                     <lord-icon
@@ -102,6 +115,8 @@
             </li>
         </ul>
     </nav>
+
+
 
     <main class="main-content">
         {% block content %}

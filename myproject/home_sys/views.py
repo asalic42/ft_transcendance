@@ -79,3 +79,7 @@ def profile_page(request):
 @login_required
 def service_unavailable(request):
     return (render(request, 'service_unavailable.html'))
+
+@login_required
+def game_page(request):
+    return (render(request, 'game.html'))

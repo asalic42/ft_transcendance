@@ -1,0 +1,104 @@
+body{
+    background-color: #F2F4F3 ;
+}
+
+#game {
+	width: 100%;
+	text-align:center;
+}
+
+.canvas-container {
+    /* border: solid 5px #ED4EB0; */
+    border-radius: 1%;
+    position: relative;
+	display: inline;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* border: 5px solid; */
+	/* border-color: #ED4EB0; */
+}
+
+#score {
+	text-align: center;
+}
+
+@font-face {
+    /*  Creation d'un font externe */
+    font-family: 'Namaku';
+    src: url(../fonts/Namaku.ttf);
+}
+
+@font-face {
+    /*  Creation d'un font externe */
+    font-family: 'BungeeShade-Regular';
+    src: url(../fonts/BungeeShade-Regular.ttf);
+}
+
+#button-container {
+	position: absolute;
+	margin-top: 200px; 
+}
+
+#replay-button {
+	display: block;
+	text-align: center;
+	background-color: #2B2B3B;
+	cursor: pointer;
+	font-family: 'Namaku';
+	font-size: 25px;
+	margin: 0%;
+}
+
+/*
+Ici on va venir definir les deux animations (deux couleurs differentes, texte qui change légerement.)
+On refait tous les keyframe pour ne pas se casser la tête
+*/
+svg {
+	font-family: "BungeeShade-Regular", sans-serif;
+	width: 100%; height: 100%;
+}
+
+svg text {
+	animation: stroke 2s alternate;
+	width: 1920; height: 1080;
+	stroke-width: 2;
+	stroke: #365FA0;
+	font-size: 100px;
+}
+
+#svg-wrapper-player2 text {
+	animation: stroke2 2s alternate;
+	stroke: rgb(193, 80, 80);
+}
+
+@keyframes stroke {
+	0%   {
+		fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1);
+		stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2;
+	}
+	70%  {fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1); }
+	80%  {fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1); stroke-width: 3; }
+	100% {
+		fill: rgba(72,138,204,1); stroke: rgba(54,95,160,0);
+		stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0;
+	}
+}
+
+@keyframes stroke2 {
+	0%   {
+		fill: rgba(72,138,204,0); stroke: rgb(193, 80, 80);
+		stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2;
+	}
+	70%  {fill: rgba(72,138,204,0); stroke: rgb(193, 80, 80); }
+	80%  {fill: rgba(72,138,204,0); stroke: rgb(193, 80, 80); stroke-width: 3; }
+	100% {
+		fill: rgb(193, 80, 80); stroke: rgba(54,95,160,0);
+		stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0;
+	}
+}
+
+.wrapper {
+	display: block;
+	position: absolute;
+};
