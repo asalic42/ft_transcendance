@@ -75,15 +75,15 @@ function drawPlayer(player1Coords, player2Coords) {
 
 function createBall() {
     // Balls coords
-	var o_coords = {x : table.width / 2, y : table.height / 2};
-	var o_vector = {vx : Math.floor(getRandomArbitrary(-7, 7)), vy : Math.floor(getRandomArbitrary(-7, 7))};
-	var ball = {coords : o_coords, vector : o_vector, radius : 13};
+	var ball = {coords : {x : table.width / 2, y : table.height / 2},
+				vector : {vx : Math.floor(getRandomArbitrary(-7, 7)), vy : Math.floor(getRandomArbitrary(-7, 7))},
+				radius : 13};
 
     // Initials points player 1
 	var player1Coords = {x1 : 100, y1 : (table.height / 2) - 40, x2 : 105, y2 : (table.height / 2) + 40, vy : 12};
 
     // Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 95, y2 : (table.height / 2) + 40, vy : 12};
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 95, y2 : (table.height / 2) + 40, vy : 12, y3 : 0};
 	launchAnim(ball, player1Coords, player2Coords);
 }
 
