@@ -19,13 +19,26 @@ window.onload = function() {
 	createBall();
 }
 
+function drawOuterRectangle(color) {
+    context.fillStyle = color;
+	context.beginPath();
+	context.roundRect(0, 0, table.width, table.height, 10);
+	context.fill();
+	context.closePath();
+}
+
+function drawInnerRectangle(color) {
+	context.fillStyle = color;
+	context.beginPath();
+	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
+	context.fill();
+    context.closePath();
+}
+
 function update() {
 
-    context.fillStyle = '#cc20ef';
-    context.fillRect(0, 0, table.width, table.height);
-
-    context.fillStyle = "black";
-    context.fillRect(+5, +5, table.width -10, table.height-10);
+	drawOuterRectangle("#cc20ef");
+	drawInnerRectangle("black");
 
     context.fillStyle = '#cc20ef';
     context.fillRect(table.width / 2, 0, 5, table.height);
@@ -119,6 +132,21 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 	return false;
 }
 
+function drawBall(ball) {
+	context.beginPath();
+    context.fillStyle = 'white';
+    context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
+    context.fill();
+    context.closePath();
+	
+	context.beginPath();
+	context.fillStyle = "black";
+    context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
+    context.fill();
+    context.stroke();
+    context.closePath();
+}
+
 function moveBall(ball, player1Coords, player2Coords) {
 
 	// Conditions so that the ball bounces
@@ -155,25 +183,19 @@ function moveBall(ball, player1Coords, player2Coords) {
     ball.coords.x += ball.vector.vx;	
 	ball.coords.y += ball.vector.vy;
 
-	context.beginPath();
-    context.strokeStyle = 'white';
-    context.arc(ball.coords.x, ball.coords.y, ball.radius + 1, Math.PI * 2, false);
-    context.fillStyle = "black";
-    context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-    context.fill();
-    context.stroke();
-    context.closePath();
+	drawBall(ball);
 }
 
 function winnerWindow(player) {
+	drawInnerRectangle("#2A0C32");
+
     context.clearRect(0, 0, table.width, table.height);
-    context.fillStyle = "black";
-    context.fillRect(0, 0, table.width, table.height);
+
+	drawOuterRectangle("black");
     if (player == 1)
-        context.fillStyle = "blue";
+        drawInnerRectangle("blue");
     else
-        context.fillStyle = "red";
-    context.fillRect(5, 5, table.width -10, table.height -10);
+		drawInnerRectangle("red");
 
     const text = "Player " + player + " wins !";
     context.font = "bold 40px 'Namaku'";

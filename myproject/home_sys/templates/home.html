@@ -17,8 +17,14 @@
 </ul>
 
 <h3 id="score">Score : 0</h3>
-<canvas width="1600" height="700" id="game"></canvas>
-<button id="replay-button" style="display: none;">Play again !</button>
+
+<div class="canvas-container">
+	<canvas width="1600" height="700" id="game"></canvas>
+	<div id="button-container">
+		<button id="replay-button" style="display: none;">Play again !</button>
+	</div>
+</div>
+
 <script src="{% static 'js/game.js' %}"></script>
 
 {% endblock %}

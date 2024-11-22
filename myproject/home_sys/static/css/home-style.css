@@ -3,11 +3,16 @@
 	text-align:center;
 }
 
-canvas {
+.canvas-container {
     /* border: solid 5px #cc20ef; */
     border-radius: 1%;
     position: relative;
 	display: inline;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* border: 5px solid; */
+	/* border-color: #cc20ef; */
 }
 
 #score {
@@ -20,13 +25,16 @@ canvas {
     src: url(../fonts/Namaku.ttf);
 }
 
+#button-container {
+	position: absolute;
+	margin-top: 100px; 
+}
+
 #replay-button {
 	display: block;
 	text-align: center;
-	height: 60%;
 	color: white;
 	cursor: pointer;
 	font-family: 'Namaku';
 	font-size: 25px;
-	
 }
