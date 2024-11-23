@@ -206,7 +206,7 @@ function replay(player) {
     button.style.display = "block";
 
 	if (player == 1)
-		button.style.color = "#c15050";
+		button.style.color = "#C42021";
 	else
 		button.style.color = "#365FA0";
 	button.addEventListener("click", () => {

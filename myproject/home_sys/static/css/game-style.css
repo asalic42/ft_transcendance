@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   game-style.css                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zbp15 <zbp15@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/23 23:40:26 by zbp15             #+#    #+#             */
+/*   Updated: 2024/11/24 00:28:17 by zbp15            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 body{
     background-color: #F2F4F3 ;
 }
@@ -35,6 +47,12 @@ body{
     src: url(../fonts/BungeeShade-Regular.ttf);
 }
 
+@font-face {
+    /*  Creation d'un font externe */
+    font-family: 'coolvetica-condensed-rg';
+    src: url(../fonts/coolvetica-condensed-rg.ttf);
+}
+
 #button-container {
 	position: absolute;
 	margin-top: 200px; 
@@ -45,8 +63,8 @@ body{
 	text-align: center;
 	background-color: #2B2B3B;
 	cursor: pointer;
-	font-family: 'Namaku';
-	font-size: 25px;
+	font-family: 'coolvetica-condensed-rg';
+	font-size: 30px;
 	margin: 0%;
 }
 
@@ -60,43 +78,54 @@ svg {
 }
 
 svg text {
+	fill: #121217; /* Pas de remplissage par défaut */
 	animation: stroke 2s alternate;
 	width: 1920; height: 1080;
-	stroke-width: 2;
+	stroke-width: 3;
 	stroke: #365FA0;
 	font-size: 100px;
 }
 
+
 #svg-wrapper-player2 text {
 	animation: stroke2 2s alternate;
-	stroke: rgb(193, 80, 80);
+	stroke: #C42021;
 }
 
 @keyframes stroke {
-	0%   {
-		fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1);
-		stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2;
+	0% {
+		fill: none !important;
+		stroke: #365fa0;
+		stroke-dashoffset: 25%;
+		stroke-dasharray: 0 50%;
+		stroke-width: 3;
 	}
-	70%  {fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1); }
-	80%  {fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1); stroke-width: 3; }
-	100% {
-		fill: rgba(72,138,204,1); stroke: rgba(54,95,160,0);
-		stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0;
-	}
+	70%		{fill: none !important; stroke: #365fa0;}
+	82%		{fill: none !important; stroke: #668DCC; stroke-dasharray: 50% 0;}
+	91%		{fill: none !important; stroke: #365fa0;}
+	92%		{fill: none !important; stroke: #668DCC; stroke-dasharray: 50% 0;}
+	94%		{fill: none !important; stroke: #365fa0;}
+	96%		{fill: none !important; stroke: #668DCC; stroke-dasharray: 50% 0;}
+	100%	{fill: none !important; stroke: #365fa0;}
 }
 
 @keyframes stroke2 {
-	0%   {
-		fill: rgba(72,138,204,0); stroke: rgb(193, 80, 80);
-		stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2;
+	0% {	
+		fill: none !important;
+		stroke: #C42021;
+		stroke-dashoffset: 25%;
+		stroke-dasharray: 0 50%;
+		stroke-width: 3;
 	}
-	70%  {fill: rgba(72,138,204,0); stroke: rgb(193, 80, 80); }
-	80%  {fill: rgba(72,138,204,0); stroke: rgb(193, 80, 80); stroke-width: 3; }
-	100% {
-		fill: rgb(193, 80, 80); stroke: rgba(54,95,160,0);
-		stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0;
-	}
+	70%		{fill: none !important; stroke: #C42021;}
+	82%		{fill: none !important; stroke: #E56161; stroke-dasharray: 50% 0;}
+	91%		{fill: none !important; stroke: #C42021;}
+	92%		{fill: none !important; stroke: #E56161; stroke-dasharray: 50% 0;}
+	94%		{fill: none !important; stroke: #C42021;}
+	96%		{fill: none !important; stroke: #E56161; stroke-dasharray: 50% 0;}
+	100%	{fill: none !important; stroke: #C42021;}
 }
+
 
 .wrapper {
 	display: block;
