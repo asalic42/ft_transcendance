@@ -67,7 +67,7 @@ if [ "$1" == "b" ]; then
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR http://127.0.0.1:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log.sh l OR http://127.0.0.1:8000 "
 fi
 
 # FULL REMOVE
