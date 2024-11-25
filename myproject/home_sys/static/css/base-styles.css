@@ -42,11 +42,12 @@ main {
      /* Transition douce lors du changement de largeur */
 
     transition: width 400ms ease;
+    border-right: 1px solid var(--bg-secondary);
 }
 
 .navbar-nav {
     /* Styles pour la liste de navigation */
-
+    
     list-style: none;                   /* Supprime les puces de la liste */
     padding: 0;                         /* Supprime le remplissage */
     margin: 0;                          /* Supprime la marge */

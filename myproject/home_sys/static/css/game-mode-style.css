@@ -3,7 +3,55 @@
     src: url("../fonts/Namaku.ttf");
 }
 
-.local-text {
+body {
+    background-color: #23232e;
+}
+
+.page {
     font-family: 'Namaku';
-    
+    text-align: center;
+    position: relative;
+    box-sizing: border-box;
+    top: 250px;
+}
+
+.title {
+    color: white;
+}
+
+.rectangle {
+    border: 10px solid #141418;
+    border-radius: 10%;
+    position: absolute;
+    z-index: -1;                /* Positionner le rectangle en arriere-plan */
+    margin-left: 14%;
+    height: 300px;
+    width: 70%;
+    top: -50%;
+}
+
+.mode-choices {
+    margin: 50px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    gap: 100px;                  /* Espace entre les deux liens */
+}
+
+.game-mode {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    text-decoration:none;
+    width: 200px;
+    height: 60px;
+    border: 2px solid ;
+    border-radius: 5%;
+    font-size: 20px;
+    background-color: #23232e;
+    color: #ED4EB0;
+}
+
+.game-mode:hover {
+    background-color: #3e3e44;
 }
