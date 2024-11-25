@@ -83,3 +83,11 @@ def service_unavailable(request):
 @login_required
 def game_page(request):
     return (render(request, 'game.html'))
+
+@login_required
+def game_mode_page(request):
+    return (render(request, 'game_mode.html'))
+
+@login_required
+def game_bot_page(request):
+    return (render(request, 'game_bot.html'))

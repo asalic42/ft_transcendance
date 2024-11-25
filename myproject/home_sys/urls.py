@@ -8,5 +8,7 @@ urlpatterns = [
     path('deleteSuccess/', delete_success, name='delete_success'),
     path('unavailable/', service_unavailable, name='unavailable'),
     path('profile/', profile_page, name='profile'),
+    path('game-mode/', game_mode_page, name='game-mode'),
     path('game/', game_page, name='game'),
+    path('game-bot/', game_bot_page, name='game-bot'),
 ]

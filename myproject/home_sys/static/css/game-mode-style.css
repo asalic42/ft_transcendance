@@ -1,0 +1,9 @@
+@font-face {
+    font-family: Namaku;
+    src: url("../fonts/Namaku.ttf");
+}
+
+.local-text {
+    font-family: 'Namaku';
+    
+}
