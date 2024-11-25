@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
+
+<h1>Choix du mode de jeu</h1>
+
+<div class="mode-choices">
+    <a href="{% url 'game.html' %}" class="game">
+        <span class="local-text">1v1 local</span>
+    </a>
+
+    <a href="{% url 'game-bot.html' %}" class="game-bot">
+        <span class="solo-text">Solo</span>
+    </a>
+</div>
+
+
+{% endblock %}
