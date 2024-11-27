@@ -51,7 +51,8 @@ function createBall() {
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
 				vector : {vx : Math.floor(getRandomArbitrary(-7, 7)), vy : Math.floor(getRandomArbitrary(-7, 7))},
 				radius : 13,
-				colision : {when : 0, y : 0}};
+				hit_vertical : 0,
+				hit_player : 0};
 
     // Initials points player 1
 	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, vy : 12};
@@ -107,27 +108,35 @@ function launchAnim(ball, player1Coords, player2Coords) {
 			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
-        moveBall(ball, player1Coords, player2Coords);
         drawPlayer(player1Coords, player2Coords, "#ED4EB0", ball);
+        moveBall(ball, player1Coords, player2Coords);
         launchAnim(ball, player1Coords, player2Coords);
     });
 }
 
 function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 
+	if (ball.hit_player > 0 && ball.hit_player < 2) {// pendant les deux prochaines frames impossible de rebondir sur les murs.
+		ball.hit_player++;
+		return false;
+	}
+	if (ball.hit_player >= 2)
+		ball.hit_player = 0;
+
     if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 0.8) &&
 			ball.coords.y - ball.radius <= player1Coords.y2 + ball.radius / 2 &&
-			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2)
-			
-		return true;
+			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2) {
+				ball.hit_player = 1
+				return true;
+			}
 
 	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 0.8) && ball.coords.x + ball.radius <= player2Coords.x2 &&
 			ball.coords.y - ball.radius <= player2Coords.y2 + ball.radius / 2 &&
 			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2) {
-			
-				ball.colision.when = 0;
+				ball.hit_player = 1
 				return true;
 			}
+	
 	return false;
 }
 
@@ -175,9 +184,14 @@ function moveBall(ball, player1Coords, player2Coords) {
         stop = 1;
         return;
     }
-	// ball is hitting an edge.
-    if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height)
+	else if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
+		ball.hit_vertical = 1
         ball.vector.vy = -ball.vector.vy;
+	}
+	if (ball.hit_vertical) // pendant les deux prochaines frames impossible de rebondir sur les murs.
+		ball.hit_vertical++;
+	if (ball.hit_vertical > 3)
+		ball.hit_vertical = 0;
 
     ball.coords.x += ball.vector.vx;	
 	ball.coords.y += ball.vector.vy;
