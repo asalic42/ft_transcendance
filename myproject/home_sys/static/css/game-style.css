@@ -1,28 +1,4 @@
-body{
-    background-color: #F2F4F3 ;
-}
-
-#game {
-	width: 100%;
-	text-align:center;
-}
-
-.canvas-container {
-    /* border: solid 5px #ED4EB0; */
-    border-radius: 1%;
-    position: relative;
-	display: inline;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	/* border: 5px solid; */
-	/* border-color: #ED4EB0; */
-}
-
-#score {
-	text-align: center;
-}
-
+/* Creation de polices */
 @font-face {
     /*  Creation d'un font externe */
     font-family: 'Namaku';
@@ -41,6 +17,41 @@ body{
     src: url(../fonts/coolvetica-condensed-rg.ttf);
 }
 
+/* Stylisation du jeu */
+body{
+    background-color: #2B2B3B ;
+}
+
+#game {
+	width: 100%;
+	text-align:center;
+}
+
+.canvas-container {
+    border-radius: 1%;
+    position: relative;
+	display: inline;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Style des scores au top */
+.scores {
+	font-family: 'Namaku';
+	gap: 50px;
+	justify-content: center;
+    align-items: center;
+    display: flex;
+	color: white;
+	text-align: center;
+}
+
+#title {
+	width: 100%;
+}
+
+/* Style du du bouton REPLAY */
 #button-container {
 	position: absolute;
 	margin-top: 200px; 
