@@ -25,6 +25,7 @@ main {
     margin-left: 6rem;                  /* Espace à gauche pour décaler le contenu */
     margin-right: 6rem;                  /* Espace à gauche pour décaler le contenu */
     padding: 1rem;                      /* Remplissage intérieur */
+	padding-top: 0;
     transition: margin-left 400ms ease;
 }
 

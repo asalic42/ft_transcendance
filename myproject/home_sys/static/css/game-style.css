@@ -33,6 +33,7 @@ body{
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	width: 99%
 }
 
 h3 {
@@ -132,3 +133,7 @@ svg text {
 	display: block;
 	position: absolute;
 };
+
+body {
+	margin: 0;
+}
