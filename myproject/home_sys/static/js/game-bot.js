@@ -43,7 +43,7 @@ function createBall() {
 
 //! Players related stuff
 
-function updatePlayers(player1Coords, player2Coords) {
+function updatePlayers(player1Coords) {
 
 	if (keys["z"] && player1Coords.y1 > 0) {
 		player1Coords.y1 -= player1Coords.vy;
@@ -68,7 +68,7 @@ function move_bot(player2Coords) {
 	}
 }
 
-function drawPlayer(player1Coords, player2Coords, color, ball) {
+function drawPlayer(player1Coords, player2Coords, color) {
 	
 	updatePlayers(player1Coords, player2Coords);
 	move_bot(player2Coords);
@@ -200,7 +200,7 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 
 //! Fps related stuff
 
-function timeRelatedStuff(ball, player1Coords, player2Coords, start) {
+function timeRelatedStuff(ball, player2Coords, start) {
 	end = Date.now();
 	let elapsedTime = end - start; // Temps réel pris par la frame
 	frameTime.counter++;
