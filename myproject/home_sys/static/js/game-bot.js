@@ -1,9 +1,13 @@
 // Variables
 var table;
 var context;
-var score = document.getElementById("score");
+var score_p1 = document.getElementById("scoreP1");
+var score_p2 = document.getElementById("scoreP2");
 var game = document.getElementById("game");
-var count = 0;
+var count_p1 = 0;
+var count_p2 = 0;
+let stop = 0;						// Endgame
+const keys = {};					// Player bars
 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
@@ -16,7 +20,7 @@ window.onload = function() {
     table = document.getElementById("game");
     context = table.getContext("2d");
 
-	createBall();
+	createBall(Math.floor(getRandomArbitrary(-7, 7)));
 }
 
 function drawOuterRectangle(color) {
@@ -43,13 +47,13 @@ function update() {
     context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
+    console.log('Creating player...');
 }
 
-
-function createBall() {
+function createBall(vx) {
     // Balls coords
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				vector : {vx : Math.floor(getRandomArbitrary(-7, 7)), vy : Math.floor(getRandomArbitrary(-7, 7))},
+				vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-7, 7))},
 				radius : 13,
 				colision : {when : 0, y : 0}};
 
@@ -61,9 +65,6 @@ function createBall() {
 	launchAnim(ball, player1Coords, player2Coords);
 }
 
-/* Players bars */
-const keys = {};
-
 window.addEventListener("keydown", (event) => {
     keys[event.key] = true;
 });
@@ -72,7 +73,7 @@ window.addEventListener("keyup", (event) => {
     keys[event.key] = false;
 });
 
-function updatePlayers(player1Coords, player2Coords) {
+function movePlayer(player1Coords, player2Coords) {
     if (keys["z"] && player1Coords.y1 > 0) {
         player1Coords.y1 -= player1Coords.vy;
         player1Coords.y2 -= player1Coords.vy;
@@ -83,14 +84,14 @@ function updatePlayers(player1Coords, player2Coords) {
     }
 }
 
-function move_bot(player1Coords, player2Coords, ball) {
+function moveBot(player1Coords, player2Coords, ball) {
  	
 }
 
 function drawPlayer(player1Coords, player2Coords, color, ball) {
 	
-	updatePlayers(player1Coords, player2Coords);
-	move_bot(player1Coords, player2Coords, ball);
+	movePlayer(player1Coords, player2Coords);
+	moveBot(player1Coords, player2Coords, ball);
 	context.fillStyle = color;
 	context.beginPath();
 	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
@@ -99,7 +100,22 @@ function drawPlayer(player1Coords, player2Coords, color, ball) {
 	context.closePath();
 }
 
-let stop = 0;
+/* Function that detects whether a player has won a point or not */
+function isPointWin(ball) {
+    if (ball.radius + ball.coords.x >= table.width) {
+        count_p1++;
+        score_p1.innerText = count_p1;
+        createBall(Math.floor(getRandomArbitrary(-7, 0)));
+        return true;
+    }
+    else if (ball.coords.x - ball.radius <= 0) {
+        count_p2++;
+        score_p2.innerText = count_p2;
+        createBall(Math.floor(getRandomArbitrary(0, 7)));
+        return true;
+    }
+    return false;
+}
 
 function launchAnim(ball, player1Coords, player2Coords) {
     requestAnimationFrame(function () {
@@ -107,10 +123,14 @@ function launchAnim(ball, player1Coords, player2Coords) {
 			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
+		if (isPointWin(ball))
+            return ;
         moveBall(ball, player1Coords, player2Coords);
         drawPlayer(player1Coords, player2Coords, "#ED4EB0", ball);
         launchAnim(ball, player1Coords, player2Coords);
     });
+	if (stop)
+        moveBall(ball, player1Coords, player2Coords);
 }
 
 function isBallHittingPlayer(ball, player1Coords, player2Coords) {
@@ -152,8 +172,6 @@ function moveBall(ball, player1Coords, player2Coords) {
 
     if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
 		console.log(ball.vector.vx);
-		count++;
-		score.innerText = "Score : " + count;
 		ball.vector.vx = -(ball.vector.vx);
 		if (ball.vector.vx < 0 && ball.vector.vx > -30)
 			ball.vector.vx -= 1;
@@ -161,20 +179,20 @@ function moveBall(ball, player1Coords, player2Coords) {
 			ball.vector.vx += 1;
 	}
 
-    else if (ball.radius + ball.coords.x >= table.width)
-    {
-        console.log("player 1 wins when ball was at y = " + ball.coords.y);
-        winnerWindow(1);
+	 // Winning condition
+	 else if (count_p1 == 5 || count_p2 == 5) {
         stop = 1;
+        if (count_p1 == 5) {
+            console.log("player 1 wins");
+            winnerWindow(1);
+        }
+        else {
+            console.log("bot wins");
+            winnerWindow(2);
+        }   
         return;
     }
-    else if (ball.coords.x - ball.radius <= 0)
-    {
-        console.log("player 2 wins");
-        winnerWindow(2);
-        stop = 1;
-        return;
-    }
+    
 	// ball is hitting an edge.
     if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height)
         ball.vector.vy = -ball.vector.vy;
@@ -188,18 +206,22 @@ function moveBall(ball, player1Coords, player2Coords) {
 function winnerWindow(player) {
 	
 	context.clearRect(0, 0, table.width, table.height);
-	drawInnerRectangle("#23232e");
-
+	
 	const winner1Text = document.getElementById("wrapper-player1");
 	const winner2Text = document.getElementById("wrapper-player2");
-	if (player == 1)
-		winner1Text.style.display = "block";
-	else
+	if (player == 1) {
+		drawOuterRectangle("#365fa0");
+		winner1Text.style.display = "block"; 
+	}
+	else {
+		drawOuterRectangle("#C42021");
 		winner2Text.style.display = "block";
-    replay(player);
+	}
+	drawInnerRectangle("#23232e");
+    newGame(player);
 }
 
-function replay(player) {
+function newGame(player) {
     const button = document.getElementById("replay-button");
     button.style.display = "block";
 

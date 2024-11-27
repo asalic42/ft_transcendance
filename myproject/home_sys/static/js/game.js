@@ -143,12 +143,15 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
     if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 0.8) &&
 			ball.coords.y - ball.radius <= player1Coords.y2 + ball.radius / 2 &&
 			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2)
+
 		return true;
 
 	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 0.8) && ball.coords.x + ball.radius <= player2Coords.x2 &&
 			ball.coords.y - ball.radius <= player2Coords.y2 + ball.radius / 2 &&
 			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2)
+
 		return true;
+
 	return false;
 }
 
@@ -195,7 +198,7 @@ function moveBall(ball, player1Coords, player2Coords) {
     }
 
     // Bounce on the top and bottom
-    else if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) {
+    if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) {
         ball.vector.vy = -ball.vector.vy;
     }
 

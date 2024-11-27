@@ -11,6 +11,11 @@
     src: url(../fonts/coolvetica-condensed-rg.otf);
 }
 
+@font-face {
+    font-family: Namaku;
+    src: url("../fonts/Namaku.ttf");
+}
+
 /* Stylisation du jeu */
 body{
     background-color: #2B2B3B ;
