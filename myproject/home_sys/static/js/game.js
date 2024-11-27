@@ -109,6 +109,7 @@ function createBall() {
 
 let stop = 0;
 var frameTime = {counter : 0, time : 0};
+var totalframeTime = {counter : 0, time : 0};
 
 function launchAnim(ball, player1Coords, player2Coords, start) {
     end = Date.now();
@@ -116,7 +117,9 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 	frameTime.counter++;
 	frameTime.time += elapsedTime;
 	if (frameTime.time > 250) {
-		fps.innerText = "Fps : " + (frameTime.counter * 4);
+		totalframeTime.counter += frameTime.counter;
+		totalframeTime.time += 250
+		fps.innerText = "Fps : " + (frameTime.counter * 4) + " | Avg Fps : " + (totalframeTime.counter * (1000 / totalframeTime.time)).toPrecision(5);
 		frameTime.counter = 0;
 		frameTime.time = 0;
 	}
