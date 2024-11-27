@@ -2,12 +2,13 @@
 var table;
 var context;
 var score = document.getElementById("score");
+var fps = document.getElementById("fps");
 var game = document.getElementById("game");
 var count = 0;
 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
-	if (result >= -4 && result <= 4)
+	if (result >= -10 && result <= 10)
 		return getRandomArbitrary(min, max);
 	return result;
 }
@@ -90,30 +91,50 @@ function drawPlayer(player1Coords, player2Coords, color) {
 function createBall() {
     // Balls coords
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				vector : {vx : Math.floor(getRandomArbitrary(-7, 7)), vy : Math.floor(getRandomArbitrary(-7, 7))},
+				const_vector : {vx : Math.floor(getRandomArbitrary(-14, 14)), vy : Math.floor(getRandomArbitrary(-14, 14))},
+				vector : {},
 				radius : 13,
 				hit_vertical : 0,
 				hit_player : 0};
 
+	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy };
+
     // Initials points player 1
-	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, vy : 12};
+	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
 
     // Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, vy : 12, y3 : 0};
-	launchAnim(ball, player1Coords, player2Coords);
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
+	launchAnim(ball, player1Coords, player2Coords, Date.now());
 }
 
 let stop = 0;
+var frameTime = {counter : 0, time : 0};
 
-function launchAnim(ball, player1Coords, player2Coords) {
-    requestAnimationFrame(function () {
+function launchAnim(ball, player1Coords, player2Coords, start) {
+    end = Date.now();
+	let elapsedTime = end - start; // Temps réel pris par la frame
+	frameTime.counter++;
+	frameTime.time += elapsedTime;
+	if (frameTime.time > 250) {
+		fps.innerText = "Fps : " + (frameTime.counter * 4);
+		frameTime.counter = 0;
+		frameTime.time = 0;
+	}
+
+	let percentage = (elapsedTime / 16.66).toPrecision(5);
+	ball.vector.vx = ball.const_vector.vx * percentage;
+	ball.vector.vy = ball.const_vector.vy *percentage;
+	player1Coords.vy = player1Coords.const_vy * percentage;
+	player2Coords.vy = player2Coords.const_vy * percentage;
+	start = Date.now();
+	requestAnimationFrame(function () {
 		if (stop)
 			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
         drawPlayer(player1Coords, player2Coords, "#ED4EB0");
         moveBall(ball, player1Coords, player2Coords);
-        launchAnim(ball, player1Coords, player2Coords);
+        launchAnim(ball, player1Coords, player2Coords, start);
     });
     
 }
@@ -168,11 +189,18 @@ function moveBall(ball, player1Coords, player2Coords) {
 		console.log(ball.vector.vx);
 		count++;
 		score.innerText = "Score : " + count;
-		ball.vector.vx = -(ball.vector.vx);
-		if (ball.vector.vx < 0 && ball.vector.vx > -30)
+		ball.const_vector.vx = -(ball.const_vector.vx);
+		ball.vector.vx = -ball.vector.vx;
+		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30) {
 			ball.vector.vx -= 1;
-		else if (ball.vector.vx < 30)
+			ball.const_vector.vx -= 1;
+
+		}
+		else if (ball.const_vector.vx < 30) {
 			ball.vector.vx += 1;
+			ball.const_vector.vx += 1;
+
+		}
 	}
 
     else if (ball.radius + ball.coords.x >= table.width)
@@ -189,14 +217,16 @@ function moveBall(ball, player1Coords, player2Coords) {
         stop = 1;
         return;
     }
-    else if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
+	else if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
 		ball.hit_vertical = 1
         ball.vector.vy = -ball.vector.vy;
+		ball.const_vector.vy = -ball.const_vector.vy;
 	}
 	if (ball.hit_vertical) // pendant les deux prochaines frames impossible de rebondir sur les murs.
 		ball.hit_vertical++;
 	if (ball.hit_vertical > 3)
 		ball.hit_vertical = 0;
+
     ball.coords.x += ball.vector.vx;	
 	ball.coords.y += ball.vector.vy;
 
