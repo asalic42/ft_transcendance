@@ -1,12 +1,6 @@
 /* Creation de polices */
 @font-face {
     /*  Creation d'un font externe */
-    font-family: 'Namaku';
-    src: url(../fonts/Namaku.ttf);
-}
-
-@font-face {
-    /*  Creation d'un font externe */
     font-family: 'BungeeShade-Regular';
     src: url(../fonts/BungeeShade-Regular.ttf);
 }
@@ -14,7 +8,7 @@
 @font-face {
     /*  Creation d'un font externe */
     font-family: 'coolvetica-condensed-rg';
-    src: url(../fonts/coolvetica-condensed-rg.ttf);
+    src: url(../fonts/coolvetica-condensed-rg.otf);
 }
 
 /* Stylisation du jeu */
