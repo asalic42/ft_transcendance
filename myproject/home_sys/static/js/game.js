@@ -144,11 +144,11 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 
 function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 
-	if (ball.hit_player > 0 && ball.hit_player < 2) {// pendant les deux prochaines frames impossible de rebondir sur les murs.
+	if (ball.hit_player > 0 && ball.hit_player < 5) {// pendant les deux prochaines frames impossible de rebondir sur les murs.
 		ball.hit_player++;
 		return false;
 	}
-	if (ball.hit_player >= 2)
+	if (ball.hit_player >= 5)
 		ball.hit_player = 0;
 
     if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 0.8) &&
@@ -221,13 +221,13 @@ function moveBall(ball, player1Coords, player2Coords) {
         return;
     }
 	else if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
-		ball.hit_vertical = 1
+		ball.hit_vertical = 1;
         ball.vector.vy = -ball.vector.vy;
 		ball.const_vector.vy = -ball.const_vector.vy;
 	}
 	if (ball.hit_vertical) // pendant les deux prochaines frames impossible de rebondir sur les murs.
 		ball.hit_vertical++;
-	if (ball.hit_vertical > 3)
+	if (ball.hit_vertical >= 5)
 		ball.hit_vertical = 0;
 
     ball.coords.x += ball.vector.vx;	
