@@ -3,6 +3,7 @@ var table;
 var context;
 var score_p1 = document.getElementById("scoreP1");
 var score_p2 = document.getElementById("scoreP2");
+var fps = document.getElementById("fps");
 var game = document.getElementById("game");
 var count_p1 = 0;
 var count_p2 = 0;
@@ -11,7 +12,7 @@ const keys = {};                        // Players bars
 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
-	if (result >= -4 && result <= 4)
+	if (result >= -10 && result <= 10)
 		return getRandomArbitrary(min, max);
 	return result;
 }
@@ -20,7 +21,7 @@ window.onload = function() {
     table = document.getElementById("game");
     context = table.getContext("2d");
 
-	createBall(Math.floor(getRandomArbitrary(-7, 7)));
+	createBall(Math.floor(getRandomArbitrary(-14, 14)), Math.floor(getRandomArbitrary(-14, 14)));
 }
 
 function drawOuterRectangle(color) {
@@ -88,41 +89,65 @@ function drawPlayer(player1Coords, player2Coords, color) {
 	context.closePath();
 }
 
-function createBall(vx) {
+function createBall(vx, vy) {
     // Balls coords
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-7, 7))},
-				radius : 13};
+				const_vector : {vx : vx, vy : vy},
+				vector : {},
+				radius : 13,
+				hit_vertical : 0,
+				hit_player : 0};
 
-    // Initials player 1 coords
-	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, vy : 12};
+	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy };
 
-    // Initials player 2 coords
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, vy : 12, y3 : 0};
-	launchAnim(ball, player1Coords, player2Coords);
+    // Initials points player 1
+	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
+
+    // Initials points player 2
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
+	launchAnim(ball, player1Coords, player2Coords, Date.now());
 }
 
+var frameTime = {counter : 0, time : 0};
+var totalframeTime = {counter : 0, time : 0};
 
 /* Function that detects whether a player has won a point or not */
 function isPointWin(ball) {
     if (ball.radius + ball.coords.x >= table.width) {
         count_p1++;
         score_p1.innerText = count_p1;
-        createBall(Math.floor(getRandomArbitrary(-7, 0)));
+        createBall(Math.floor(getRandomArbitrary(-14, 0)));
         return true;
     }
     else if (ball.coords.x - ball.radius <= 0) {
         count_p2++;
         score_p2.innerText = count_p2;
-        createBall(Math.floor(getRandomArbitrary(0, 7)));
+        createBall(Math.floor(getRandomArbitrary(0, 14)));
         return true;
     }
     return false;
 }
 
-/* Animation function that run the game */
-function launchAnim(ball, player1Coords, player2Coords) {
-    requestAnimationFrame(function () {
+function launchAnim(ball, player1Coords, player2Coords, start) {
+    end = Date.now();
+	let elapsedTime = end - start; // Temps réel pris par la frame
+	frameTime.counter++;
+	frameTime.time += elapsedTime;
+	if (frameTime.time > 250) {
+		totalframeTime.counter += frameTime.counter;
+		totalframeTime.time += 250
+		fps.innerText = "Fps : " + (frameTime.counter * 4) + " | Avg Fps : " + (totalframeTime.counter * (1000 / totalframeTime.time)).toPrecision(5);
+		frameTime.counter = 0;
+		frameTime.time = 0;
+	}
+
+	let percentage = (elapsedTime / 16.66).toPrecision(5);
+	ball.vector.vx = ball.const_vector.vx * percentage;
+	ball.vector.vy = ball.const_vector.vy *percentage;
+	player1Coords.vy = player1Coords.const_vy * percentage;
+	player2Coords.vy = player2Coords.const_vy * percentage;
+	start = Date.now();
+	requestAnimationFrame(function () {
 		if (stop)
 			return;
         context.clearRect(0, 0, table.width, table.height);
@@ -131,26 +156,34 @@ function launchAnim(ball, player1Coords, player2Coords) {
         if (isPointWin(ball))
             return ;
         moveBall(ball, player1Coords, player2Coords);
-        launchAnim(ball, player1Coords, player2Coords);
+        launchAnim(ball, player1Coords, player2Coords, start);
     });
-    if (stop)
-        moveBall(ball, player1Coords, player2Coords);
+    
 }
 
 /* Check if the ball touch a player */
 function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 
+	if (ball.hit_player > 0 && ball.hit_player < 5) {// pendant les deux prochaines frames impossible de rebondir sur les murs.
+		ball.hit_player++;
+		return false;
+	}
+	if (ball.hit_player >= 5)
+		ball.hit_player = 0;
+
     if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 0.8) &&
 			ball.coords.y - ball.radius <= player1Coords.y2 + ball.radius / 2 &&
-			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2)
-
-		return true;
+			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2) {
+				ball.hit_player = 1
+				return true;
+			}
 
 	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 0.8) && ball.coords.x + ball.radius <= player2Coords.x2 &&
 			ball.coords.y - ball.radius <= player2Coords.y2 + ball.radius / 2 &&
-			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2)
-
-		return true;
+			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2) {
+				ball.hit_player = 1
+				return true;
+			}
 
 	return false;
 }
@@ -176,13 +209,20 @@ function moveBall(ball, player1Coords, player2Coords) {
 
     if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
 		console.log(ball.vector.vx);
-		ball.vector.vx = -(ball.vector.vx);
-		if (ball.vector.vx < 0 && ball.vector.vx > -30)
+		ball.const_vector.vx = -(ball.const_vector.vx);
+		ball.vector.vx = -ball.vector.vx;
+		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30) {
 			ball.vector.vx -= 1;
-		else if (ball.vector.vx < 30)
+			ball.const_vector.vx -= 1;
+
+		}
+		else if (ball.const_vector.vx < 30) {
 			ball.vector.vx += 1;
-    }
- 
+			ball.const_vector.vx += 1;
+
+		}
+	}
+
     // Winning condition
     else if (count_p1 == 5 || count_p2 == 5) {
         stop = 1;
@@ -196,11 +236,16 @@ function moveBall(ball, player1Coords, player2Coords) {
         }   
         return;
     }
-
-    // Bounce on the top and bottom
-    if (ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) {
+	
+	else if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
+		ball.hit_vertical = 1;
         ball.vector.vy = -ball.vector.vy;
-    }
+		ball.const_vector.vy = -ball.const_vector.vy;
+	}
+	if (ball.hit_vertical) // pendant les deux prochaines frames impossible de rebondir sur les murs.
+		ball.hit_vertical++;
+	if (ball.hit_vertical >= 5)
+		ball.hit_vertical = 0;
 
     ball.coords.x += ball.vector.vx;	
 	ball.coords.y += ball.vector.vy;
