@@ -60,19 +60,19 @@ window.addEventListener("keyup", (event) => {
 });
 
 function movePlayer(player1Coords, player2Coords) {
-    if (keys["z"] && player1Coords.y1 > 0) {
+    if (keys["z"] && player1Coords.y1 - player1Coords.vy > 0) {
         player1Coords.y1 -= player1Coords.vy;
         player1Coords.y2 -= player1Coords.vy;
     }
-    if (keys["s"] && player1Coords.y2 < table.height) {
+    if (keys["s"] && player1Coords.y2 + player1Coords.vy < table.height) {
         player1Coords.y1 += player1Coords.vy;
         player1Coords.y2 += player1Coords.vy;
     }
-    if (keys["ArrowUp"] && player2Coords.y1 > 0) {
+    if (keys["ArrowUp"] && player2Coords.y1 - player1Coords.vy > 0) {
         player2Coords.y1 -= player2Coords.vy;
         player2Coords.y2 -= player2Coords.vy;
     }
-    if (keys["ArrowDown"] && player2Coords.y2 < table.height) {
+    if (keys["ArrowDown"] && player2Coords.y2 + player1Coords.vy < table.height) {
         player2Coords.y1 += player2Coords.vy;
         player2Coords.y2 += player2Coords.vy;
     }
