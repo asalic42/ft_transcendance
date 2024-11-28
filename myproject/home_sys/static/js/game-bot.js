@@ -70,7 +70,7 @@ function move_bot(player2Coords) {
 
 function drawPlayer(player1Coords, player2Coords, color) {
 	
-	updatePlayers(player1Coords, player2Coords);
+	updatePlayers(player1Coords);
 	move_bot(player2Coords);
 	context.fillStyle = color;
 	context.beginPath();
@@ -186,14 +186,14 @@ function moveBall(ball, player1Coords, player2Coords) {
 
 function launchAnim(ball, player1Coords, player2Coords, start) {
 
-	timeRelatedStuff(ball, player1Coords, player2Coords, start);
+	timeRelatedStuff(ball, player1Coords, start);
 	adaptVectorsToFps(ball, player1Coords, player2Coords);
 	start = Date.now();
 	if (stop)
 		return;
 	context.clearRect(0, 0, table.width, table.height);
 	update();
-	drawPlayer(player1Coords, player2Coords, "#ED4EB0", ball);
+	drawPlayer(player1Coords, player2Coords, "#ED4EB0");
 	moveBall(ball, player1Coords, player2Coords);
 	requestAnimationFrame(function () {launchAnim(ball, player1Coords, player2Coords, start);});
 }
