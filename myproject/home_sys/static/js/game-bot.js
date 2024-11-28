@@ -186,7 +186,7 @@ function moveBall(ball, player1Coords, player2Coords) {
 
 function launchAnim(ball, player1Coords, player2Coords, start) {
 
-	timeRelatedStuff(ball, player1Coords, start);
+	timeRelatedStuff(ball, player2Coords, start);
 	adaptVectorsToFps(ball, player1Coords, player2Coords);
 	start = Date.now();
 	if (stop)
