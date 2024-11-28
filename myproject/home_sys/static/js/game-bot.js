@@ -4,7 +4,8 @@ var context;
 var score_p1 = document.getElementById("scoreP1");
 var score_p2 = document.getElementById("scoreP2");
 var game = document.getElementById("game");
-var count = 0;
+var count_p1 = 0;
+var count_p2 = 0;
 let stop = 0;
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
@@ -16,13 +17,13 @@ window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
 
-	createBall();
+	createBall(Math.floor(getRandomArbitrary(-10, 10)));
 }
 
-function createBall() {
+function createBall(vx) {
 	// Balls coords
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				const_vector : {vx : Math.floor(getRandomArbitrary(-14, 14)), vy : Math.floor(getRandomArbitrary(-14, 14))},
+				const_vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-10, 10))},
 				vector : {},
 				radius : 13,
 				hit_vertical : 0,
@@ -31,10 +32,10 @@ function createBall() {
 	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy };
 
 	// Initials points player 1
-	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
+	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
 
 	// Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25,
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20,
 						ball_predicted_hit : {y : 0, when : 0, divider : 0}
 	};
 
@@ -43,7 +44,7 @@ function createBall() {
 
 //! Players related stuff
 
-function updatePlayers(player1Coords) {
+function movePlayer(player1Coords) {
 
 	if (keys["z"] && player1Coords.y1 > 0) {
 		player1Coords.y1 -= player1Coords.vy;
@@ -55,7 +56,7 @@ function updatePlayers(player1Coords) {
 	}
 }
 
-function move_bot(player2Coords) {
+function moveBot(player2Coords) {
 	if (player2Coords.ball_predicted_hit.when > 0 &&
 		player2Coords.ball_predicted_hit.when < player2Coords.ball_predicted_hit.divider &&
 		player2Coords.y1 + player2Coords.vy > 0 && player2Coords.y2 + player2Coords.vy < table.height) {
@@ -70,8 +71,8 @@ function move_bot(player2Coords) {
 
 function drawPlayer(player1Coords, player2Coords, color) {
 	
-	updatePlayers(player1Coords);
-	move_bot(player2Coords);
+	movePlayer(player1Coords);
+	moveBot(player2Coords);
 	context.fillStyle = color;
 	context.beginPath();
 	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
@@ -109,7 +110,7 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 
 //! Ball
 
-function calculate_ball(ball, player2Coords) {	
+function calculateBall(ball, player2Coords) {	
 	if (ball.const_vector.vx > 0)	 {
 		cpy_x = ball.coords.x;
 		cpy_y = ball.coords.y;
@@ -163,7 +164,6 @@ function moveBall(ball, player1Coords, player2Coords) {
 	// Ball is hiting a player.
 	if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
 		console.log(ball.vector.vx);
-		count++;
 		ball.const_vector.vx = -(ball.const_vector.vx);
 		ball.vector.vx = -ball.vector.vx;
 		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30)
@@ -182,6 +182,23 @@ function moveBall(ball, player1Coords, player2Coords) {
 	drawBall(ball);
 }
 
+/* Function that detects whether a player has won a point or not */
+function isPointWin(ball) {
+    if (ball.radius + ball.coords.x >= table.width) {
+        count_p1++;
+        score_p1.innerText = count_p1;
+        createBall(Math.floor(getRandomArbitrary(-10, 0)));
+        return true;
+    }
+    else if (ball.coords.x - ball.radius <= 0) {
+        count_p2++;
+        score_p2.innerText = count_p2;
+        createBall(Math.floor(getRandomArbitrary(0, 10)));
+        return true;
+    }
+    return false;
+}
+
 //! Loop func
 
 function launchAnim(ball, player1Coords, player2Coords, start) {
@@ -194,6 +211,8 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 	context.clearRect(0, 0, table.width, table.height);
 	update();
 	drawPlayer(player1Coords, player2Coords, "#ED4EB0");
+	if (isPointWin(ball))
+		return ;
 	moveBall(ball, player1Coords, player2Coords);
 	requestAnimationFrame(function () {launchAnim(ball, player1Coords, player2Coords, start);});
 }
@@ -210,7 +229,7 @@ function timeRelatedStuff(ball, player2Coords, start) {
 		(frameTime.time > 115 && frameTime.time > 135 ) ||
 		(frameTime.time > 178 && frameTime.time > 298 ) ||
 		frameTime.time > 240)
-		calculate_ball(ball, player2Coords);
+		calculateBall(ball, player2Coords);
 
 	if (frameTime.time > 250) {
 		totalframeTime.counter += frameTime.counter;
@@ -230,20 +249,18 @@ function adaptVectorsToFps(ball, player1Coords, player2Coords) {
 }
 
 function isGameOver(ball) {
-	if (ball.radius + ball.coords.x >= table.width)
-	{
-		console.log("player 1 wins when ball was at y = " + ball.coords.y);
-		winnerWindow(1);
-		stop = 1;
-		return true;
-	}
-	else if (ball.coords.x - ball.radius <= 0)
-	{
-		console.log("player 2 wins");
-		winnerWindow(2);
-		stop = 1;
-		return true;
-	}
+	if (count_p1 == 5 || count_p2 == 5) {
+        stop = 1;
+        if (count_p1 == 5) {
+            console.log("player 1 wins");
+            winnerWindow(1);
+        }
+        else {
+            console.log("player 2 wins");
+            winnerWindow(2);
+        }   
+        return true;
+    }
 	return false
 }
 
@@ -282,7 +299,7 @@ function replay(player) {
 //! Tools
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
-	if (result >= -10 && result <= 10)
+	if (result >= -9 && result <= 9)
 		return getRandomArbitrary(min, max);
 	return result;
 }

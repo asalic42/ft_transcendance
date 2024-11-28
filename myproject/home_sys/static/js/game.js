@@ -12,7 +12,7 @@ const keys = {};                        // Players bars
 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
-	if (result >= -10 && result <= 10)
+	if (result >= -9 && result <= 9)
 		return getRandomArbitrary(min, max);
 	return result;
 }
@@ -21,7 +21,7 @@ window.onload = function() {
     table = document.getElementById("game");
     context = table.getContext("2d");
 
-	createBall(Math.floor(getRandomArbitrary(-14, 14)), Math.floor(getRandomArbitrary(-14, 14)));
+	createBall(Math.floor(getRandomArbitrary(-10, 10)));
 }
 
 function drawOuterRectangle(color) {
@@ -60,7 +60,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 function movePlayer(player1Coords, player2Coords) {
-    if (keys["z"] && player1Coords.y1 > 0) {
+    if (keys["w"] && player1Coords.y1 > 0) {
         player1Coords.y1 -= player1Coords.vy;
         player1Coords.y2 -= player1Coords.vy;
     }
@@ -89,10 +89,10 @@ function drawPlayer(player1Coords, player2Coords, color) {
 	context.closePath();
 }
 
-function createBall(vx, vy) {
+function createBall(vx) {
     // Balls coords
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				const_vector : {vx : vx, vy : vy},
+				const_vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-10, 10))},
 				vector : {},
 				radius : 13,
 				hit_vertical : 0,
@@ -101,10 +101,10 @@ function createBall(vx, vy) {
 	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy };
 
     // Initials points player 1
-	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
+	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
 
     // Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 25, vy : 25};
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
 	launchAnim(ball, player1Coords, player2Coords, Date.now());
 }
 
@@ -116,20 +116,20 @@ function isPointWin(ball) {
     if (ball.radius + ball.coords.x >= table.width) {
         count_p1++;
         score_p1.innerText = count_p1;
-        createBall(Math.floor(getRandomArbitrary(-14, 0)));
+        createBall(Math.floor(getRandomArbitrary(-10, 0)));
         return true;
     }
     else if (ball.coords.x - ball.radius <= 0) {
         count_p2++;
         score_p2.innerText = count_p2;
-        createBall(Math.floor(getRandomArbitrary(0, 14)));
+        createBall(Math.floor(getRandomArbitrary(0, 10)));
         return true;
     }
     return false;
 }
 
 function launchAnim(ball, player1Coords, player2Coords, start) {
-    end = Date.now();
+	end = Date.now();
 	let elapsedTime = end - start; // Temps réel pris par la frame
 	frameTime.counter++;
 	frameTime.time += elapsedTime;
