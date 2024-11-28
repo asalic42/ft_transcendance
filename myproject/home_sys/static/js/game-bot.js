@@ -17,13 +17,13 @@ window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
 
-	createBall(Math.floor(getRandomArbitrary(-10, 10)));
+	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 }
 
 function createBall(vx) {
 	// Balls coords
 	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				const_vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-10, 10))},
+				const_vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-11, 11))},
 				vector : {},
 				radius : 13,
 				hit_vertical : 0,
@@ -46,11 +46,11 @@ function createBall(vx) {
 
 function movePlayer(player1Coords) {
 
-	if (keys["z"] && player1Coords.y1 > 0) {
+	if (keys["z"] && player1Coords.y1 - player1Coords.vy > 0) {
 		player1Coords.y1 -= player1Coords.vy;
 		player1Coords.y2 -= player1Coords.vy;
 	}
-	if (keys["s"] && player1Coords.y2 < table.height) {
+	if (keys["s"] && player1Coords.y2 + player1Coords.vy < table.height) {
 		player1Coords.y1 += player1Coords.vy;
 		player1Coords.y2 += player1Coords.vy;
 	}
@@ -108,9 +108,18 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 	return false;
 }
 
+var user_option = 2;
+function rangeSlide(value) {
+	document.getElementById('rangeValue').innerHTML = value;
+	user_option = value;
+}
+
 //! Ball
 
+
 function calculateBall(ball, player2Coords) {	
+	var pg_option = 5 - user_option;
+	console.log(pg_option);
 	if (ball.const_vector.vx > 0)	 {
 		cpy_x = ball.coords.x;
 		cpy_y = ball.coords.y;
@@ -120,7 +129,7 @@ function calculateBall(ball, player2Coords) {
 			cpy_y += ball.const_vector.vy;
 			player2Coords.ball_predicted_hit.when++;
 		}
-		var diff = cpy_y - (player2Coords.y1 + 20);
+		var diff = cpy_y - ((player2Coords.y1 + 40) + Math.floor(bot_getRandomArbitrary(pg_option * -10, pg_option * 10)));
 		if ((diff < 0 && player2Coords.const_vy > 0) || (diff > 0 && player2Coords.const_vy < 0))
 			player2Coords.const_vy = -player2Coords.const_vy ;
 		player2Coords.ball_predicted_hit.divider = Math.abs(diff / player2Coords.const_vy) ;
@@ -225,10 +234,8 @@ function timeRelatedStuff(ball, player2Coords, start) {
 	frameTime.counter++;
 	frameTime.time += elapsedTime;
 	
-	if ((frameTime.time > 52 && frameTime.time > 72 ) || // faire que le bot s'actualise de cette manière va rendre son comportement hasardeux, donc humain.
-		(frameTime.time > 115 && frameTime.time > 135 ) ||
-		(frameTime.time > 178 && frameTime.time > 298 ) ||
-		frameTime.time > 240)
+	if ((frameTime.time > 52 && frameTime.time > 72 ) || // faire que le bot s'actualise de cette manière va rendre son comportement hasardeux, donc humain.|
+		(frameTime.time > 178 && frameTime.time > 198 ))
 		calculateBall(ball, player2Coords);
 
 	if (frameTime.time > 250) {
@@ -297,6 +304,11 @@ function replay(player) {
 }
 
 //! Tools
+function bot_getRandomArbitrary(min, max) {
+	var result = Math.random() * (max - min) + min;
+	return result;
+}
+
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
 	if (result >= -9 && result <= 9)

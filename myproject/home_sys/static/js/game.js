@@ -60,7 +60,7 @@ window.addEventListener("keyup", (event) => {
 });
 
 function movePlayer(player1Coords, player2Coords) {
-    if (keys["w"] && player1Coords.y1 > 0) {
+    if (keys["z"] && player1Coords.y1 > 0) {
         player1Coords.y1 -= player1Coords.vy;
         player1Coords.y2 -= player1Coords.vy;
     }

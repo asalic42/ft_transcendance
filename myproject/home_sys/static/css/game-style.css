@@ -1,24 +1,24 @@
 /* Creation de polices */
 @font-face {
-    /*  Creation d'un font externe */
-    font-family: 'BungeeShade-Regular';
-    src: url(../fonts/BungeeShade-Regular.ttf);
+	/*  Creation d'un font externe */
+	font-family: 'BungeeShade-Regular';
+	src: url(../fonts/BungeeShade-Regular.ttf);
 }
 
 @font-face {
-    /*  Creation d'un font externe */
-    font-family: 'coolvetica-condensed-rg';
-    src: url(../fonts/coolvetica-condensed-rg.otf);
+	/*  Creation d'un font externe */
+	font-family: 'coolvetica-condensed-rg';
+	src: url(../fonts/coolvetica-condensed-rg.otf);
 }
 
 @font-face {
-    font-family: Namaku;
-    src: url("../fonts/Namaku.ttf");
+	font-family: Namaku;
+	src: url("../fonts/Namaku.ttf");
 }
 
 /* Stylisation du jeu */
 body{
-    background-color: #2B2B3B ;
+	background-color: #2B2B3B ;
 }
 
 #game {
@@ -27,8 +27,8 @@ body{
 }
 
 .canvas-container {
-    border-radius: 1%;
-    position: relative;
+	border-radius: 1%;
+	position: relative;
 	display: inline;
 	display: flex;
 	align-items: center;
@@ -44,8 +44,8 @@ h3 {
 	font-family: 'Namaku';
 	gap: 50px;
 	justify-content: center;
-    align-items: center;
-    display: flex;
+	align-items: center;
+	display: flex;
 	color: white;
 	text-align: center;
 }
@@ -68,6 +68,51 @@ h3 {
 	font-family: 'coolvetica-condensed-rg';
 	font-size: 30px;
 	margin: 0%;
+}
+
+
+.sliderDiv {
+	display: flex;
+	flex-direction: column;
+	/* justify-content: center; */
+	align-items: center;
+}
+
+.sliderDiv > span {
+	font-family: "Poppins", sans-serif;
+	font-size: 2em;
+	color: #999;
+	font-weight: 400;
+	width: 100%;
+	text-align: center;
+}
+
+.sliderDiv > input {
+	width: 80%;
+	height: 15px;
+	background: #111;
+	outline: 1px solid #ED4EB0;
+	border-radius: 10px;
+	overflow: hidden;
+	margin-top: 20px;
+}
+
+#range::-webkit-slider-thumb {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: #ED4EB0;
+	cursor: pointer;
+	border: 2px solid #333;
+}
+
+#range::-moz-range-thumb {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: #ED4EB0;
+	cursor: pointer;
+	border: 2px solid #333;
 }
 
 /*
@@ -133,7 +178,3 @@ svg text {
 	display: block;
 	position: absolute;
 };
-
-body {
-	margin: 0;
-}
