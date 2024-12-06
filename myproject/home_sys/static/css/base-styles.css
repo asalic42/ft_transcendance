@@ -8,6 +8,7 @@
     --bg-primary: #23232e;            /* Couleur de fond primaire */
     --bg-secondary: #141418;          /* Couleur de fond secondaire */
     --transition-time: 400ms            /* Pour le temps de transitions */
+    /* top: 0px; */
 }
 
 body {
@@ -25,7 +26,6 @@ main {
     margin-left: 6rem;                  /* Espace à gauche pour décaler le contenu */
     margin-right: 6rem;                  /* Espace à gauche pour décaler le contenu */
     padding: 1rem;                      /* Remplissage intérieur */
-	padding-top: 0;
     transition: margin-left 400ms ease;
 }
 
@@ -43,7 +43,7 @@ main {
      /* Transition douce lors du changement de largeur */
 
     transition: width 400ms ease;
-    border-right: 1px solid var(--bg-secondary);
+    border-right: 5px solid var(--bg-secondary);
 }
 
 .navbar-nav {

@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # On copie tout le reste du code
 COPY . .
 
-# On expose le port de l'appli
+# On expose le port de l'appli (django)
 EXPOSE 8000
 
 # Et ici on renseigne les commandes par défauts pour lancer notre petit serveur Django

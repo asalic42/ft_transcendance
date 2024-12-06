@@ -70,15 +70,17 @@ def delete_success(request):
         return (redirect('home'))
     return (render(request, 'delete_success.html'))
 
-
 @login_required
 def profile_page(request):
     return (render(request, 'profile.html'))
 
-
 @login_required
 def service_unavailable(request):
     return (render(request, 'service_unavailable.html'))
+
+@login_required
+def channels_page(request):
+    return (render(request, 'channels.html'))
 
 @login_required
 def game_page(request):
