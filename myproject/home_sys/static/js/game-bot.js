@@ -113,12 +113,13 @@ function rangeSlide(value) {
 
 function calculateBall(ball, player2Coords) {	
 	var pg_option = 5 - user_option;
+	var count = 0;
+
 	cpy_x = ball.coords.x;
 	cpy_y = ball.coords.y;
 	cpy_vx = ball.const_vector.vx;
 	cpy_vy = ball.const_vector.vy;
-	while (cpy_x <= player2Coords.x1) {
-		// console.log("predicted hit x="+ cpy_x + " y =" + cpy_y);
+	while (cpy_x <= player2Coords.x1 && ++count < 2000) {
 		if (cpy_y > 1080 - ball.radius || cpy_y < 0 + ball.radius)
 			cpy_vy = -cpy_vy;
 		if (cpy_x < 100 + ball.radius)
@@ -164,7 +165,6 @@ function moveBall(ball, player1Coords, player2Coords) {
 
 	// Ball is hiting a player.
 	if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
-		console.log(ball.vector.vx);
 		ball.const_vector.vx = -(ball.const_vector.vx);
 		ball.vector.vx = -ball.vector.vx;
 		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30)
@@ -173,7 +173,7 @@ function moveBall(ball, player1Coords, player2Coords) {
 			ball.const_vector.vx += 1;
 	}
 
-	else if (isGameOver(ball))
+	else if (isGameOver())
 		return true;
 
 	isBallHittingWall(ball);
@@ -231,7 +231,6 @@ function timeRelatedStuff(ball, player2Coords, start) {
 		bot_time = Date.now()	
 		calculateBall(ball, player2Coords);
 	}
-	// console.log((totalframeTime.time + frameTime.time) % 1000);
 
 	if (frameTime.time > 250) {
 		totalframeTime.counter += frameTime.counter;
@@ -240,7 +239,7 @@ function timeRelatedStuff(ball, player2Coords, start) {
 		frameTime.counter = 0;
 		frameTime.time = 0;
 	}
-	percentage = (elapsedTime / 16.66).toPrecision(5);
+	percentage = (elapsedTime / 16.66).toPrecision(5); // Percentage of the time the frame took to render, based of the time it SHOULD have taken to render
 }
 
 function adaptVectorsToFps(ball, player1Coords, player2Coords) {
@@ -250,7 +249,7 @@ function adaptVectorsToFps(ball, player1Coords, player2Coords) {
 	player2Coords.vy = player2Coords.const_vy * percentage;
 }
 
-function isGameOver(ball) {
+function isGameOver() {
 	if (count_p1 == 5 || count_p2 == 5) {
         stop = 1;
         if (count_p1 == 5) {
