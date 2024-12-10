@@ -1,0 +1,48 @@
+body{
+	background-color: #2B2B3B ;
+}
+
+#game {
+	width: 50%;
+	text-align:center;
+}
+
+.canvas-container {
+	border-radius: 1%;
+	position: relative;
+	display: inline;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+h3 {
+	text-align: center;
+}
+/* Style des scores au top */
+.scores {
+	font-family: 'Namaku';
+	gap: 50px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	color: white;
+	text-align: center;
+}
+
+@font-face {
+	/*  Creation d'un font externe */
+	font-family: 'BungeeShade-Regular';
+	src: url(../fonts/BungeeShade-Regular.ttf);
+}
+
+@font-face {
+	/*  Creation d'un font externe */
+	font-family: 'coolvetica-condensed-rg';
+	src: url(../fonts/coolvetica-condensed-rg.otf);
+}
+
+@font-face {
+	font-family: Namaku;
+	src: url("../fonts/Namaku.ttf");
+}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
+
+<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
+
+<div class="canvas-container">
+	<canvas width="1000" height="1000" id="game"></canvas>
+</div>
+
+<script src="{% static 'js/other_game.js' %}"></script>
+
+{% endblock %}

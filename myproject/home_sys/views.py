@@ -91,3 +91,7 @@ def game_mode_page(request):
 @login_required
 def game_bot_page(request):
     return (render(request, 'game-bot.html'))
+
+@login_required
+def other_game(request):
+    return (render(request, 'other_game.html'))
