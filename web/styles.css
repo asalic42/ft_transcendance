@@ -1,10 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
 
+
+/*
+    [================ SOMMAIRE PRINCIPAL ==================]
+    [                                                      ]
+    [                 I.   FORM INPUT                      ]
+    [                 II.  FORM SPAN                       ]
+    [                 III. FORM BUTTON                     ]
+    [                                                      ]
+    [======================================================]
+*/
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
+/*
+    [==============================]
+    [                              ]
+    [            Body              ]
+    [                              ]
+    [==============================]
+*/
 
 body {
   display: flex;              /* Utilisation de Flexbox pour centrer le contenu */
@@ -17,6 +36,14 @@ body {
   overflow: hidden;
 }
 
+
+/*
+    [==============================]
+    [                              ]
+    [         Background           ]
+    [                              ]
+    [==============================]
+*/
 
 .background-container {
   position: absolute;
@@ -39,6 +66,15 @@ body {
   }
 }
 
+/*
+    [==============================]
+    [                              ]
+    [          Lottie file         ]
+    [          + animation         ]
+    [                              ]
+    [==============================]
+*/
+
 .lottie-container {
   position: absolute;         /* Position absolue pour qu'il soit en arrière-plan */
   transform: scale(1.3);
@@ -59,6 +95,17 @@ body {
   }
 }
 
+/*
+    [==============================]
+    [                              ]
+    [       Form container         ]
+    [       + form animations      ]
+    [                              ]
+    [==============================]
+*/
+
+/*  0. Form container   */
+
 .form-container {
   position: relative;         /* Position relative pour pouvoir utiliser le z-index */
   display: flex;
@@ -74,6 +121,13 @@ body {
   animation: anim-form-appear 0.5s ease-in-out forwards;
 }
 
+/*  0.A.1 Form container animation */
+
+/* 
+  Description animation : 
+  -  Animation pour l'apparition du formulaire sur la page
+*/
+
 @keyframes anim-form-appear {
   0% {
     transform: scale(0.4);
@@ -86,6 +140,7 @@ body {
   }
 }
 
+/*    1. form base area    */
 
 .form {
   position: relative;
@@ -93,239 +148,410 @@ body {
   height: 300px;
 }
 
-.form h2 {
-  text-align: center;
-  letter-spacing: 0.2em;
-  margin-bottom: 20px;
-  font-size: 2em;
-  background-color: rgb(24, 23, 23);
-  color: #ccc;
-}
+/*   2. form title     */
 
-.form input {
-  width: 80%;
-  padding: 10px;
-  margin-left: 10%;
-  margin-bottom: 15px;
-  border: 2px solid rgb(165, 182, 182);
-  background-color: rgb(58, 68, 68);
-  color: #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-  outline: none;
-}
-
-.form .inputbox span {
-  position: absolute;
-  left: 0;
-  margin-left: 10%;
-  padding: 10px;
-  color: #ccc;
-  pointer-events: none;
-  font-size: 1em;
-  transition: 0.3s;
-}
-
-.form .span-b.is-required {
-  position: absolute;
-  width: 60%;
-  height: 10%;
-  font-family:'Courier New', Courier, monospace;
-  letter-spacing: normal;
-  color: #ffffff;
-  opacity: 1;
-  z-index: 1;
-  transition: all 0.5s ease;
-  animation: anim-fly 5s infinite ease-in-out;
-  margin-top: 10%;
-  margin-left: 25%;
-  user-select: none;
-}
-
-.form .span-b.is-required::before {
-  content: "";
-  display: inline-flex;
-  width: 140px;  
-  height: 100px;
-  margin-left: -40%;
-  scale: 0.6;
-  background-image: url('images/EZpepeFlip.png');
-  background-size: cover;
-  border-radius: 20%;
-  position: absolute;
-  pointer-events: none;
-  user-select: none;
-  opacity: 0;
-  transition: 1s;
-  margin-top: -30%;
-}
-
-.form .span-b.is-required:hover {
-  margin-left: 40%;
-}
-
-.form .span-b.is-required:hover::before {
-  animation: anim-pepe 1.4s ease-out forwards;
-  margin-left: -70%;
-  
-}
-
-
-@keyframes anim-pepe {
-  0% {
-    transform: rotate(360deg);
-    opacity: 0;
+  .form h2 {
+    text-align: center;
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    font-size: 2em;
+    background-color: rgb(24, 23, 23);
+    color: #ccc;
   }
 
-  10% {
-    opacity: 0;
+/******************** I. FORM INPUT ***********************/
+/*                                                        */
+/*  ┌───┐                                                 */
+/*  │ 1 │ form input                                      */
+/*  │ 2 │ form input's span                               */
+/*  │ 3 │ Input focus & valid status                      */
+/*  │ 4 │ Input's span changes when focus & valid status  */
+/*  │ 5 │ Input email type invalid                        */
+/*  │ 6 │ Input's span email type invalid                 */
+/*                                                        */
+/**********************************************************/
+
+/*  ┌───┬─────────────┐                  
+    │ 1 │ form input  │
+    └───┴─────────────┘
+*/
+
+  .form input {
+    width: 80%;
+    padding: 10px;
+    margin-left: 10%;
+    margin-bottom: 15px;
+    border: 2px solid rgb(165, 182, 182);
+    background-color: rgb(58, 68, 68);
+    color: #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
   }
 
-  50% {
-    opacity: 0.4;
-    transform: rotate(-1090deg);
+/*  ┌───┬───────────────────┐
+    │ 2 │ form input's span │
+    └───┴───────────────────┘
+*/
+
+  .form .inputbox span {
+    position: absolute;
+    left: 0;
+    margin-left: 10%;
+    padding: 10px;
+    color: #ccc;
+    pointer-events: none;
+    font-size: 1em;
+    transition: 0.3s;
   }
 
-  100% {
-    opacity: 1;
-    transform: rotate(-1080deg);
+/*  ┌───┬────────────────────────────┐
+    │ 3 │ Input focus & valid status │
+    └───┴────────────────────────────┘
+*/
+
+  .inputbox input:valid,
+  .inputbox input:focus {
+    border: 2px solid rgb(31, 181, 31);
   }
-}
 
-@keyframes anim-fly {
+/*  ┌───┬────────────────────────────────────────────────┐
+    │ 4 │ Input's span changes when focus & valid status │ 
+    └───┴────────────────────────────────────────────────┘
+*/
 
-  0% {
-    transform: translateY(5px);
+  .inputbox input:valid ~ span,
+  .inputbox input:focus ~ span {
+    padding: 0 5px;
+    font-size: 80%;
+    transform: translateX(5px) translateY(-5px);
+    background-color: rgb(31, 181, 31);
+    color: black;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
   }
   
-  50% {
-    transform: translateY(-5px);
+/*  ┌───┬──────────────────────────┐
+    │ 5 │ Input email type invalid │
+    └───┴──────────────────────────┘
+*/
+  input[type="email"].invalid {
+    border-color: rgb(194, 4, 4);
   }
+  
 
-  100% {
-    transform: translateY(5px);
+/*  ┌───┬─────────────────────────────────┐
+    │ 6 │ Input's span email type invalid │
+    └───┴─────────────────────────────────┘
+*/
+  .inputbox input[type="email"].invalid ~ span {
+    padding: 0 5px;
+    font-size: 80%;
+    transform: translateX(5px) translateY(-5px);
+    background-color: red;
+    color: black;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
   }
-}
+  
 
-.form button {
-  font-family: "Lilita One", sans-serif;
-  display: block;
-  margin: 0 auto;
-  width: 175px;                           /* Largeur initiale du bouton */
-  height: 50px;                           /* Hauteur initiale du bouton */
-  background-color: rgb(24, 23, 23);    /* Couleur de fond initiale */
-  color: rgb(24, 23, 23);               /* Couleur du texte */
-  border: 2px solid rgb(24, 23, 23);    /* Bordure initiale */
-  border-radius: 4px;                     /* Coins arrondis */
-  font-size: 16px;                        /* Taille de la police */
-  /* pointer-events: none; */
-  user-select: none;
-  opacity: 0.5;
-  transition: all 0.3s ease;              /* Transition fluide de toutes les propriétés sur 0.3s */
-}
+/********************* II. FORM SPAN *************************/
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │ 1.│ span-b input's fields unfill                    */
+/*     │ 2 │  hover : 1                                      */
+/*     │ 3 │ span-b input's fields unfill pepe image         */
+/*     │ 4.│  hover : 3                                      */
+/*     │ 5 │ span-b input's unfill underline                 */
+/*     │ 6 │  hover : 5                                      */
+/*                                                           */
+/* --------------------- ANIMATIONS -----------------------  */
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │1.a│ Fly                                             */
+/*     │4.a│ Pepe image                                      */
+/*                                                           */
+/*************************************************************/
 
-.form button:enabled {
-  font-family: "Lilita One", sans-serif;
-  pointer-events: all;
-  cursor: pointer;
-  opacity: 1;
-  background-color: #020203;
-  border-color: #000000;
-  color: #ccc;
-  animation: anim-vibrate 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
 
-@keyframes anim-vibrate {
-  0% {
-    transform: scale(1) rotate(0deg) translateX(0);
-  }
-  15% {
-    transform: scale(1.1) rotate(-3deg) translateX(-5px);
-  }
-  30% {
-    transform: scale(1.15) rotate(3deg) translateX(5px);
-  }
-  45% {
-    transform: scale(1.2) rotate(-5deg) translateX(-10px);
-  }
-  50% {
-    transform: scale(1.2) rotate(5deg) translateX(10px);
-  }
-  60% {
-    transform: scale(1.15) rotate(-3deg) translateX(-5px);
-  }
-  75% {
-    transform: scale(1.1) rotate(0deg) translateX(0);
-  }
-  100% {
-    transform: scale(1) rotate(0deg) translateX(0);
-  }
-}
+/*  ┌───┬──────────────────────────────┐
+    │ 1 │ span-b input's fields unfill │
+    └───┴──────────────────────────────┘
+*/
 
-.form button:enabled:hover {
-  width: 200px;
-  padding-right: 20px;
-  background-color: rgb(31, 181, 31);
-  border-color: rgb(31, 181, 31);
-  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
-}
-
-.form button::after {
-  content: "😎​";                    /* L'emoji à ajouter */
-  position: absolute;
-  left: 80%;                        /* Déplacer l'emoji en dehors du bouton au départ */
-  transform: translateY(-50%);      /* Centrer exactement au milieu */
-  opacity: 0;                       /* L'emoji est caché au départ */
-  transition: all 0.3s ease;        /* Transition douce pour l'emoji */
-}
-
-@keyframes anim-right-appear {
-  0% {
-    transform: translateX(0) rotate(0) scale(0);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(-40px) rotate(-360deg) scale(1.1);
+  .form .span-b.is-required {
+    position: absolute;
+    width: 60%;
+    height: 10%;
+    font-family:'Courier New', Courier, monospace;
+    letter-spacing: normal;
+    color: #ffffff;
     opacity: 1;
+    z-index: 1;
+    transition: all 0.4s ease-out;
+    animation: anim-fly 5s infinite ease-in-out;
+    margin-top: 10%;
+    margin-left: 25%;
+    user-select: none;
   }
-}
 
-/* Animation lorsque la souris survole le bouton */
-.form button:enabled:hover::after {
-  animation: anim-right-appear 0.5s ease forwards;
-  left: 80%; /* Déplacer l'emoji au-delà du bouton lors du survol */
-  opacity: 1; /* Rendre l'emoji visible */
-  transform: scale(1.2); /* Glissement et léger agrandissement */
-}
+/*  ┌───┬────────────────────────────────────────┐
+    │ 2 │ hover : (block 1) span-b inputs unfill │
+    └───┴────────────────────────────────────────┘
+*/
 
-.inputbox input:valid,
-.inputbox input:focus {
-  border: 2px solid rgb(31, 181, 31);
-}
+  .form .span-b.is-required:hover {
+    margin-left: 40%;
+  }
 
-input[type="email"].invalid {
-  border-color: rgb(194, 4, 4);
-}
 
-.inputbox input:valid ~ span,
-.inputbox input:focus ~ span {
-  padding: 0 5px;
-  font-size: 80%;
-  transform: translateX(5px) translateY(-5px);
-  background-color: rgb(31, 181, 31);
-  color: black;
-  letter-spacing: 0.1em;
-  border-radius: 2px;
-}
+/*  ┌───┬─────────────────────────────────────────┐
+    │ 3 │ span-b input's fields unfill pepe image │
+    └───┴─────────────────────────────────────────┘
+*/
 
-.inputbox input[type="email"].invalid ~ span {
-  padding: 0 5px;
-  font-size: 80%;
-  transform: translateX(5px) translateY(-5px);
-  background-color: red;
-  color: black;
-  letter-spacing: 0.1em;
-  border-radius: 2px;
-}
+  .form .span-b.is-required::before {
+    content: "";
+    display: inline-flex;
+    width: 140px;  
+    height: 100px;
+    margin-left: -40%;
+    scale: 0.6;
+    background-image: url('images/EZpepeFlip.png');
+    background-size: cover;
+    border-radius: 20%;
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: 1s;
+    margin-top: -30%;
+  }
 
+
+/*  ┌───┬───────────────────────────────────────────────────┐
+    │ 4 │ hover : (block 2) span-b inputs unfill pepe image │
+    └───┴───────────────────────────────────────────────────┘
+*/
+
+  .form .span-b.is-required:hover::before {
+    animation: anim-pepe 1.4s ease-out forwards;
+    margin-left: -70%;
+  }
+
+/*  ┌───┬─────────────────────────────────┐
+    │ 5 │ span-b input's unfill underline │
+    └───┴─────────────────────────────────┘
+*/
+
+  .form .span-b.is-required:after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 0;
+    width: 81%;
+    height: 2px;
+    background-color: rgb(60, 214, 21); /* Couleur du soulignement */
+    transform: scaleX(1);                 /* Largeur initiale de la ligne */
+    transform-origin: left;               /* L'animation commence à droite */
+    transition: transform 0.3s ease;      /* Transition pour l'animation */
+  }
+
+/*  ┌───┬──────────────────────────────────────────────────┐
+    │ 6 │ hover : (block 3) span-b inputs unfill underline │
+    └───┴──────────────────────────────────────────────────┘
+*/
+
+  .form .span-b.is-required:hover::after {
+    transform: scaleX(0); /* Réduit la ligne à zéro à l'hover */
+  }
+
+
+/*  ┌─────┬──────────────────────┐
+    │ 4.a │ Pepe image animation │
+    └─────┴──────────────────────┘
+*/
+
+  @keyframes anim-pepe {
+    0% {
+      transform: rotate(360deg);
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 0;
+    }
+
+    50% {
+      opacity: 0.4;
+      transform: rotate(-1090deg);
+    }
+
+    100% {
+      opacity: 1;
+      transform: rotate(-1080deg);
+    }
+  }
+
+/*  ┌─────┬──────┐
+    │ 1.a │ Fly  │
+    └─────┴──────┘
+*/
+
+  @keyframes anim-fly {
+
+    0% {
+      transform: translateY(5px);
+    }
+    
+    50% {
+      transform: translateY(-5px);
+    }
+
+    100% {
+      transform: translateY(5px);
+    }
+  }
+
+/********************* III. FORM BUTTON **********************/
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │ 1 │ button                                          */
+/*     │ 2.│ button enabled                                  */
+/*     │ 3 │  hover : 2                                      */
+/*     │ 4 │ button after                                    */
+/*     │ 5.│  hover : 4                                      */
+/*                                                           */
+/* ---------------------- ANIMATIONS ----------------------- */
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │2.a│ vibration                                       */
+/*     │5.a│ right side appear                               */
+/*                                                           */
+/*************************************************************/
+
+/*  ┌───┬────────┐
+    │ 1 │ button │
+    └───┴────────┘
+*/
+
+  .form button {
+    font-family: "Lilita One", sans-serif;
+    display: block;
+    margin: 0 auto;
+    width: 175px;                           /* Largeur initiale du bouton */
+    height: 50px;                           /* Hauteur initiale du bouton */
+    background-color: rgb(24, 23, 23);    /* Couleur de fond initiale */
+    color: rgb(24, 23, 23);               /* Couleur du texte */
+    border: 2px solid rgb(24, 23, 23);    /* Bordure initiale */
+    border-radius: 4px;                     /* Coins arrondis */
+    font-size: 16px;                        /* Taille de la police */
+    user-select: none;
+    opacity: 0.5;
+    transition: all 0.3s ease;              /* Transition fluide de toutes les propriétés sur 0.3s */
+  }
+
+/*  ┌───┬────────────────┐
+    │ 2 │ button enabled │
+    └───┴────────────────┘
+*/
+
+  .form button:enabled {
+    font-family: "Lilita One", sans-serif;
+    pointer-events: all;
+    cursor: pointer;
+    opacity: 1;
+    background-color: #020203;
+    border-color: #000000;
+    color: #ccc;
+    animation: anim-vibrate 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+/*  ┌───┬──────────────────────────────────┐
+    │ 3 │ hover : (block 2) button enabled │
+    └───┴──────────────────────────────────┘
+*/
+
+  .form button:enabled:hover {
+    width: 200px;
+    padding-right: 20px;
+    background-color: rgb(31, 181, 31);
+    border-color: rgb(31, 181, 31);
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+  }
+
+
+/*  ┌───┬──────────────┐
+    │ 4 │ button after │
+    └───┴──────────────┘
+*/
+
+  .form button::after {
+    content: "😎​";                    /* L'emoji à ajouter */
+    position: absolute;
+    left: 80%;                        /* Déplacer l'emoji en dehors du bouton au départ */
+    transform: translateY(-50%);      /* Centrer exactement au milieu */
+    opacity: 0;                       /* L'emoji est caché au départ */
+    transition: all 0.3s ease;        /* Transition douce pour l'emoji */
+  }
+
+/*  ┌───┬────────────────────────────────────────┐
+    │ 5 │ hover : (block 4 ) button enable after │
+    └───┴────────────────────────────────────────┘
+*/
+
+  .form button:enabled:hover::after {
+    animation: anim-right-appear 0.5s ease forwards;
+    left: 80%;
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+/*  ┌─────┬───────────┐
+    │ 2.a │ vibration │
+    └─────┴───────────┘
+*/
+
+  @keyframes anim-vibrate {
+    0% {
+      transform: scale(1) rotate(0deg) translateX(0);
+    }
+    15% {
+      transform: scale(1.1) rotate(-3deg) translateX(-5px);
+    }
+    30% {
+      transform: scale(1.15) rotate(3deg) translateX(5px);
+    }
+    45% {
+      transform: scale(1.2) rotate(-5deg) translateX(-10px);
+    }
+    50% {
+      transform: scale(1.2) rotate(5deg) translateX(10px);
+    }
+    60% {
+      transform: scale(1.15) rotate(-3deg) translateX(-5px);
+    }
+    75% {
+      transform: scale(1.1) rotate(0deg) translateX(0);
+    }
+    100% {
+      transform: scale(1) rotate(0deg) translateX(0);
+    }
+  }
+
+/*  ┌─────┬───────────────────┐
+    │ 5.a │ right side appear │
+    └─────┴───────────────────┘
+*/
+
+  @keyframes anim-right-appear {
+    0% {
+      transform: translateX(0) rotate(0) scale(0);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateX(-40px) rotate(-360deg) scale(1.1);
+      opacity: 1;
+    }
+  }

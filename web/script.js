@@ -31,11 +31,11 @@ function checkFormValidity() {
     if (submitButton.disabled) {
         spanBeforeButton.style.opacity = 1;
         spanBeforeButton.style.fontSize = "12px";
-        spanBeforeButton.style.transitionDuration = '0.3s';
+        spanBeforeButton.style.transitionDuration = '0.4s';
         spanBeforeButton.classList.add('is-required');
     } else {
         spanBeforeButton.style.opacity = 0;
-        spanBeforeButton.style.fontSize = "0px";
+        spanBeforeButton.style.fontSize = "9px";
         spanBeforeButton.style.transitionDuration = '0s';
         spanBeforeButton.classList.remove('is-required');
     }
