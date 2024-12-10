@@ -2,13 +2,16 @@
 
 
 /*
-    [================ SOMMAIRE PRINCIPAL ==================]
-    [                                                      ]
-    [                 I.   FORM INPUT                      ]
-    [                 II.  FORM SPAN                       ]
-    [                 III. FORM BUTTON                     ]
-    [                                                      ]
-    [======================================================]
+                [================= SOMMAIRE PRINCIPAL =================]
+                [                                                      ]
+                [                 I.   BACKGROUND                      ]
+                [                 II.  LOTTIE FILE                     ]
+                [                 III. FORM CONTAINER                  ]
+                [                 IV.  FORM INPUT                      ]
+                [                 V.   FORM SPAN                       ]
+                [                 VI.  FORM BUTTON                     ]
+                [                                                      ]
+                [======================================================]
 */
 
 * {
@@ -16,14 +19,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-
-/*
-    [==============================]
-    [                              ]
-    [            Body              ]
-    [                              ]
-    [==============================]
-*/
 
 body {
   display: flex;              /* Utilisation de Flexbox pour centrer le contenu */
@@ -37,118 +32,139 @@ body {
 }
 
 
-/*
-    [==============================]
-    [                              ]
-    [         Background           ]
-    [                              ]
-    [==============================]
+/********************* I. BACKGROUND *************************/
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │ 1.│ background container                            */
+/*                                                           */
+/* --------------------- ANIMATIONS -----------------------  */
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │1.a│ background appear transition                    */
+/*                                                           */
+/*************************************************************/
+
+/*  ┌───┬───────────────────────┐
+    │ 1 │ background container  │
+    └───┴───────────────────────┘
 */
 
-.background-container {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
-  animation: anim-test2 2s ease-in-out forwards;
-  animation-delay: 0.1s;
-}
+  .background-container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    animation: background-appear 2s ease-in-out forwards;
+    animation-delay: 0.1s;
+  }
 
+/*  ┌─────┬──────────────────────────────┐
+    │ 1.a │ background appear transition │
+    └─────┴──────────────────────────────┘
+*/
 
-@keyframes anim-test2 {
-  0% {
-    background-color: #ffffff;
+  @keyframes background-appear {
+    0% {
+      background-color: #ffffff;
+      opacity: 0;
+    }
+
+    100% {
+      background-color: rgb(61, 57, 57);;
+      opacity: 1;
+    }
+  }
+
+/********************* II. LOTTIE FILE ***********************/
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │ 1.│ lottie file container                           */
+/*                                                           */
+/* --------------------- ANIMATIONS -----------------------  */
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │1.a│ lottie file appear transition                   */
+/*                                                           */
+/*************************************************************/
+
+/*  ┌───┬────────────────────────┐
+    │ 1 │ lottie file container  │
+    └───┴────────────────────────┘
+*/
+
+  .lottie-container {
+    position: absolute;         /* Position absolue pour qu'il soit en arrière-plan */
+    transform: scale(1.3);
+    object-fit: cover;
+    top: -10%;
+    right: -10%;
     opacity: 0;
+    animation: lottie-smooth-appear 2s ease-in-out forwards;
+    animation-delay: 0.2s;
   }
 
-  100% {
-    background-color: rgb(61, 57, 57);;
-    opacity: 1;
-  }
-}
-
-/*
-    [==============================]
-    [                              ]
-    [          Lottie file         ]
-    [          + animation         ]
-    [                              ]
-    [==============================]
+/*  ┌─────┬───────────────────────────────┐
+    │ 1.a │ lottie file appear transition │
+    └─────┴───────────────────────────────┘
 */
 
-.lottie-container {
-  position: absolute;         /* Position absolue pour qu'il soit en arrière-plan */
-  transform: scale(1.3);
-  object-fit: cover;
-  top: -10%;
-  right: -10%;
-  opacity: 0;
-  animation: anim-cassecouille 2s ease-in-out forwards;
-  animation-delay: 0.2s;
-}
-
-@keyframes anim-cassecouille {
-  0% {
-    opacity: 0;
+  @keyframes lottie-smooth-appear {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
-  100% {
-    opacity: 1;
-  }
-}
 
-/*
-    [==============================]
-    [                              ]
-    [       Form container         ]
-    [       + form animations      ]
-    [                              ]
-    [==============================]
+/******************* III. FORM CONTAINER *********************/
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │ 1.│ form container                                  */
+/*     │ 2 │ form basics param                               */
+/*     │ 3 │ form title                                      */
+/*                                                           */
+/* --------------------- ANIMATIONS -----------------------  */
+/*                                                           */
+/*     ┌───┐                                                 */
+/*     │4.a│ form appear transition                          */
+/*                                                           */
+/*************************************************************/
+
+/*  ┌───┬─────────────────┐
+    │ 1 │ form container  │
+    └───┴─────────────────┘
 */
 
-/*  0. Form container   */
+  .form-container {
+    position: relative;         /* Position relative pour pouvoir utiliser le z-index */
+    display: flex;
+    flex-direction: column;
+    align-items: center;        /* Centre le formulaire horizontalement */
+    padding: 20px;
+    border: 5px solid rgb(24, 23, 23);
+    background-color: rgb(24, 23, 23);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    width: 300px;
+    z-index: 2;                 /* Assure que le formulaire est au-dessus du Lottie */
+    animation: anim-form-appear 0.5s ease-in-out forwards;
+  }
 
-.form-container {
-  position: relative;         /* Position relative pour pouvoir utiliser le z-index */
-  display: flex;
-  flex-direction: column;
-  align-items: center;        /* Centre le formulaire horizontalement */
-  padding: 20px;
-  border: 5px solid rgb(24, 23, 23);
-  background-color: rgb(24, 23, 23);
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
-  border-radius: 10px;
-  width: 300px;
-  z-index: 2;                 /* Assure que le formulaire est au-dessus du Lottie */
-  animation: anim-form-appear 0.5s ease-in-out forwards;
-}
-
-/*  0.A.1 Form container animation */
-
-/* 
-  Description animation : 
-  -  Animation pour l'apparition du formulaire sur la page
+/*  ┌───┬───────────────────┐
+    │ 2 │ form basics param │
+    └───┴───────────────────┘
 */
 
-@keyframes anim-form-appear {
-  0% {
-    transform: scale(0.4);
-    opacity: 0;
+  .form {
+    position: relative;
+    width: 280px;
+    height: 300px;
   }
 
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/*    1. form base area    */
-
-.form {
-  position: relative;
-  width: 280px;
-  height: 300px;
-}
-
-/*   2. form title     */
+/*  ┌───┬────────────┐
+    │ 3 │ form title │
+    └───┴────────────┘
+*/
 
   .form h2 {
     text-align: center;
@@ -159,7 +175,24 @@ body {
     color: #ccc;
   }
 
-/******************** I. FORM INPUT ***********************/
+/*  ┌─────┬────────────────────────┐
+    │ 1.a │ form appear transition │
+    └─────┴────────────────────────┘
+*/
+
+  @keyframes anim-form-appear {
+    0% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+/******************** IV. FORM INPUT **********************/
 /*                                                        */
 /*  ┌───┐                                                 */
 /*  │ 1 │ form input                                      */
@@ -171,7 +204,7 @@ body {
 /*                                                        */
 /**********************************************************/
 
-/*  ┌───┬─────────────┐                  
+/*  ┌───┬─────────────┐
     │ 1 │ form input  │
     └───┴─────────────┘
 */
@@ -255,7 +288,7 @@ body {
   }
   
 
-/********************* II. FORM SPAN *************************/
+/********************** V. FORM SPAN *************************/
 /*                                                           */
 /*     ┌───┐                                                 */
 /*     │ 1.│ span-b input's fields unfill                    */
@@ -413,7 +446,7 @@ body {
     }
   }
 
-/********************* III. FORM BUTTON **********************/
+/********************* VI. FORM BUTTON ***********************/
 /*                                                           */
 /*     ┌───┐                                                 */
 /*     │ 1 │ button                                          */
