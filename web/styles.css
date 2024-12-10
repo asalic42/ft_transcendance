@@ -1,0 +1,331 @@
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;              /* Utilisation de Flexbox pour centrer le contenu */
+  justify-content: center;    /* Centre horizontalement */
+  align-items: center;        /* Centre verticalement */
+  height: 100vh;              /* Prend toute la hauteur de la fenêtre */
+  letter-spacing: 0.1em;
+  font-family: "Lilita One", sans-serif;
+  position: relative;         /* Permet de positionner les éléments à l'intérieur */
+  overflow: hidden;
+}
+
+
+.background-container {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  animation: anim-test2 2s ease-in-out forwards;
+  animation-delay: 0.1s;
+}
+
+
+@keyframes anim-test2 {
+  0% {
+    background-color: #ffffff;
+    opacity: 0;
+  }
+
+  100% {
+    background-color: rgb(61, 57, 57);;
+    opacity: 1;
+  }
+}
+
+.lottie-container {
+  position: absolute;         /* Position absolue pour qu'il soit en arrière-plan */
+  transform: scale(1.3);
+  object-fit: cover;
+  top: -10%;
+  right: -10%;
+  opacity: 0;
+  animation: anim-cassecouille 2s ease-in-out forwards;
+  animation-delay: 0.2s;
+}
+
+@keyframes anim-cassecouille {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.form-container {
+  position: relative;         /* Position relative pour pouvoir utiliser le z-index */
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* Centre le formulaire horizontalement */
+  padding: 20px;
+  border: 5px solid rgb(24, 23, 23);
+  background-color: rgb(24, 23, 23);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  width: 300px;
+  z-index: 2;                 /* Assure que le formulaire est au-dessus du Lottie */
+  animation: anim-form-appear 0.5s ease-in-out forwards;
+}
+
+@keyframes anim-form-appear {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+.form {
+  position: relative;
+  width: 280px;
+  height: 300px;
+}
+
+.form h2 {
+  text-align: center;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
+  font-size: 2em;
+  background-color: rgb(24, 23, 23);
+  color: #ccc;
+}
+
+.form input {
+  width: 80%;
+  padding: 10px;
+  margin-left: 10%;
+  margin-bottom: 15px;
+  border: 2px solid rgb(165, 182, 182);
+  background-color: rgb(58, 68, 68);
+  color: #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.form .inputbox span {
+  position: absolute;
+  left: 0;
+  margin-left: 10%;
+  padding: 10px;
+  color: #ccc;
+  pointer-events: none;
+  font-size: 1em;
+  transition: 0.3s;
+}
+
+.form .span-b.is-required {
+  position: absolute;
+  width: 60%;
+  height: 10%;
+  font-family:'Courier New', Courier, monospace;
+  letter-spacing: normal;
+  color: #ffffff;
+  opacity: 1;
+  z-index: 1;
+  transition: all 0.5s ease;
+  animation: anim-fly 5s infinite ease-in-out;
+  margin-top: 10%;
+  margin-left: 25%;
+  user-select: none;
+}
+
+.form .span-b.is-required::before {
+  content: "";
+  display: inline-flex;
+  width: 140px;  
+  height: 100px;
+  margin-left: -40%;
+  scale: 0.6;
+  background-image: url('images/EZpepeFlip.png');
+  background-size: cover;
+  border-radius: 20%;
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transition: 1s;
+  margin-top: -30%;
+}
+
+.form .span-b.is-required:hover {
+  margin-left: 40%;
+}
+
+.form .span-b.is-required:hover::before {
+  animation: anim-pepe 1.4s ease-out forwards;
+  margin-left: -70%;
+  
+}
+
+
+@keyframes anim-pepe {
+  0% {
+    transform: rotate(360deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: rotate(-1090deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: rotate(-1080deg);
+  }
+}
+
+@keyframes anim-fly {
+
+  0% {
+    transform: translateY(5px);
+  }
+  
+  50% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    transform: translateY(5px);
+  }
+}
+
+.form button {
+  font-family: "Lilita One", sans-serif;
+  display: block;
+  margin: 0 auto;
+  width: 175px;                           /* Largeur initiale du bouton */
+  height: 50px;                           /* Hauteur initiale du bouton */
+  background-color: rgb(24, 23, 23);    /* Couleur de fond initiale */
+  color: rgb(24, 23, 23);               /* Couleur du texte */
+  border: 2px solid rgb(24, 23, 23);    /* Bordure initiale */
+  border-radius: 4px;                     /* Coins arrondis */
+  font-size: 16px;                        /* Taille de la police */
+  /* pointer-events: none; */
+  user-select: none;
+  opacity: 0.5;
+  transition: all 0.3s ease;              /* Transition fluide de toutes les propriétés sur 0.3s */
+}
+
+.form button:enabled {
+  font-family: "Lilita One", sans-serif;
+  pointer-events: all;
+  cursor: pointer;
+  opacity: 1;
+  background-color: #020203;
+  border-color: #000000;
+  color: #ccc;
+  animation: anim-vibrate 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes anim-vibrate {
+  0% {
+    transform: scale(1) rotate(0deg) translateX(0);
+  }
+  15% {
+    transform: scale(1.1) rotate(-3deg) translateX(-5px);
+  }
+  30% {
+    transform: scale(1.15) rotate(3deg) translateX(5px);
+  }
+  45% {
+    transform: scale(1.2) rotate(-5deg) translateX(-10px);
+  }
+  50% {
+    transform: scale(1.2) rotate(5deg) translateX(10px);
+  }
+  60% {
+    transform: scale(1.15) rotate(-3deg) translateX(-5px);
+  }
+  75% {
+    transform: scale(1.1) rotate(0deg) translateX(0);
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translateX(0);
+  }
+}
+
+.form button:enabled:hover {
+  width: 200px;
+  padding-right: 20px;
+  background-color: rgb(31, 181, 31);
+  border-color: rgb(31, 181, 31);
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+.form button::after {
+  content: "😎​";                    /* L'emoji à ajouter */
+  position: absolute;
+  left: 80%;                        /* Déplacer l'emoji en dehors du bouton au départ */
+  transform: translateY(-50%);      /* Centrer exactement au milieu */
+  opacity: 0;                       /* L'emoji est caché au départ */
+  transition: all 0.3s ease;        /* Transition douce pour l'emoji */
+}
+
+@keyframes anim-right-appear {
+  0% {
+    transform: translateX(0) rotate(0) scale(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(-40px) rotate(-360deg) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Animation lorsque la souris survole le bouton */
+.form button:enabled:hover::after {
+  animation: anim-right-appear 0.5s ease forwards;
+  left: 80%; /* Déplacer l'emoji au-delà du bouton lors du survol */
+  opacity: 1; /* Rendre l'emoji visible */
+  transform: scale(1.2); /* Glissement et léger agrandissement */
+}
+
+.inputbox input:valid,
+.inputbox input:focus {
+  border: 2px solid rgb(31, 181, 31);
+}
+
+input[type="email"].invalid {
+  border-color: rgb(194, 4, 4);
+}
+
+.inputbox input:valid ~ span,
+.inputbox input:focus ~ span {
+  padding: 0 5px;
+  font-size: 80%;
+  transform: translateX(5px) translateY(-5px);
+  background-color: rgb(31, 181, 31);
+  color: black;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+}
+
+.inputbox input[type="email"].invalid ~ span {
+  padding: 0 5px;
+  font-size: 80%;
+  transform: translateX(5px) translateY(-5px);
+  background-color: red;
+  color: black;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+}
+
