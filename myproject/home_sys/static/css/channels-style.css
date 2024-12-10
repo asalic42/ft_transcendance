@@ -13,7 +13,7 @@ body {
     text-align: center;
     box-sizing: border-box;
     width: 100%;
-    height: 600px;
+    height: 100%;
 }
 
 h1 {
@@ -27,6 +27,14 @@ h1 {
     margin-bottom: 35px;
 }
 
+#chat {
+    border: 3px solid #ED4EB0;
+    border-radius: 2%;
+    width: 100%;
+    height: 600px;
+}
+
+ /* Actual chan here + scrollbar */
 .actual-chan h2 {
     border: 3px solid #ED4EB0;
     border-radius: 2%;
@@ -37,20 +45,29 @@ h1 {
     border: 3px solid #ED4EB0;
     border-radius: 2%;
     width: 100%;
-    height: 100%;
+    height: 600px;
     margin-bottom: 10px;
     flex-grow: 1;
-    overflow: hidden;
-    overflow-y: auto;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
 }
 
-#chat {
-    border: 3px solid #ED4EB0;
-    border-radius: 2%;
-    width: 100%;
-    height: 100%;
+.chat-page::-webkit-scrollbar {
+    border-radius: 50%;
+    width: 10px;
 }
 
+.chat-page::-webkit-scrollbar-track {
+    border-radius: 10%;
+    background: var(--bg-primary);
+}
+.chat-page::-webkit-scrollbar-thumb {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    height: calc(100% - 50px);
+}
+
+/* Message input + button */
 .input-container {
     width: 100%;
     display: flex;

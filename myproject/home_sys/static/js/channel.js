@@ -1,5 +1,7 @@
+let socket;
+
 document.addEventListener("DOMContentLoaded", function() {
-  const socket = io('http://localhost:3000');
+  socket = io('http://localhost:3000');
 
   console.log("Connection etablie");
 
@@ -10,17 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('chat-page').innerHTML += `<p>${msg}</p>`; 
   });
 });
-  
-function addMessage(mess) {
-  const chatPage = document.getElementById('chat-page');
-
-  const message = document.createElement('div');
-  message.classList.add('message');
-  message.textContent = mess;
-
-  chatPage.appendChild(message);
-  chatPage.scrollTop = chatPage.scrollHeight;
-}
 
 // Envoyer un message au serveur
 document.getElementById('send-button').addEventListener('click', () => {
@@ -29,10 +20,10 @@ document.getElementById('send-button').addEventListener('click', () => {
   if (msg != "") {
     addMessage(msg);
     document.getElementById('message-input').value = '';  // Vide le champ de saisie
+    socket.emit('message', msg);  // Envoyer le message au serveur
+    console.log("MESSAGE ENVOYE !");  
   }
 
-  socket.emit('message', msg);  // Envoyer le message au serveur
-  console.log("MESSAGE ENVOYE !");
 });
 
 document.getElementById('message-input').addEventListener('keydown', (event) => {
@@ -42,3 +33,15 @@ document.getElementById('message-input').addEventListener('keydown', (event) => 
     document.getElementById('send-button').click();
   }
 });
+
+function addMessage(mess) {
+  const chatPage = document.getElementById('chat-page')
+
+  const message = document.createElement('div');
+  message.classList.add('message');
+  message.textContent = mess;
+
+  chatPage.appendChild(message);
+  chatPage.scrollTop = chatPage.scrollHeight;
+
+}

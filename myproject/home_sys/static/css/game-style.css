@@ -135,7 +135,7 @@ svg text {
 
 
 #svg-wrapper-player2 text {
-	animation: stroke2 2s alternate;
+	/* animation: stroke2 2s alternate; */
 	stroke: #C42021;
 }
 

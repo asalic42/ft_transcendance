@@ -35,9 +35,7 @@ function createBall(vx) {
 	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
 
 	// Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20,
-						ball_predicted_hit : {y : 0, when : 0, divider : 0}
-	};
+	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20, ball_predicted_hit : 0};
 
 	launchAnim(ball, player1Coords, player2Coords, Date.now());
 }
@@ -57,15 +55,11 @@ function movePlayer(player1Coords) {
 }
 
 function moveBot(player2Coords) {
-	if (player2Coords.ball_predicted_hit.when > 0 &&
-		player2Coords.ball_predicted_hit.when < player2Coords.ball_predicted_hit.divider &&
+	if ((player2Coords.ball_predicted_hit > 10 || player2Coords.ball_predicted_hit < -10) &&
 		player2Coords.y1 + player2Coords.vy > 0 && player2Coords.y2 + player2Coords.vy < table.height) {
 		player2Coords.y1 += player2Coords.vy;
 		player2Coords.y2 += player2Coords.vy;
-		player2Coords.ball_predicted_hit.when--;
-	}
-	else if (player2Coords.ball_predicted_hit.when > 0) {
-		player2Coords.ball_predicted_hit.when--;
+		player2Coords.ball_predicted_hit -= player2Coords.vy;
 	}
 }
 
@@ -91,14 +85,14 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 	if (ball.hit_player >= 5)
 		ball.hit_player = 0;
 
-	if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 1.2) &&
+	if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 1) &&
 			ball.coords.y - ball.radius <= player1Coords.y2 + ball.radius / 2 &&
 			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2) {
 				ball.hit_player = 1
 				return true;
 			}
 
-	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 1.2) && ball.coords.x + ball.radius <= player2Coords.x2 &&
+	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 1) && ball.coords.x + ball.radius <= player2Coords.x2 &&
 			ball.coords.y - ball.radius <= player2Coords.y2 + ball.radius / 2 &&
 			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2) {
 				ball.hit_player = 1
@@ -119,25 +113,23 @@ function rangeSlide(value) {
 
 function calculateBall(ball, player2Coords) {	
 	var pg_option = 5 - user_option;
-	console.log(pg_option);
-	if (ball.const_vector.vx > 0)	 {
-		cpy_x = ball.coords.x;
-		cpy_y = ball.coords.y;
-		player2Coords.ball_predicted_hit.when = 0;
-		while (cpy_x <= player2Coords.x1 && cpy_y < 1080 && cpy_y > 0 && player2Coords.ball_predicted_hit.when < 1000) {
-			cpy_x += ball.const_vector.vx;
-			cpy_y += ball.const_vector.vy;
-			player2Coords.ball_predicted_hit.when++;
-		}
-		var diff = cpy_y - ((player2Coords.y1 + 40) + Math.floor(bot_getRandomArbitrary(pg_option * -10, pg_option * 10)));
-		if ((diff < 0 && player2Coords.const_vy > 0) || (diff > 0 && player2Coords.const_vy < 0))
-			player2Coords.const_vy = -player2Coords.const_vy ;
-		player2Coords.ball_predicted_hit.divider = Math.abs(diff / player2Coords.const_vy) ;
-		
-		//console.log("diff = " + diff + " and const_vy = " + player2Coords.const_vy);
-		//console.log("player2Coords.ball_predicted_hit.divider = " + player2Coords.ball_predicted_hit.divider);
-		//console.log("ball will hit in " + player2Coords.ball_predicted_hit.when + " frames, at y = " + cpy_y);
+	cpy_x = ball.coords.x;
+	cpy_y = ball.coords.y;
+	cpy_vx = ball.const_vector.vx;
+	cpy_vy = ball.const_vector.vy;
+	while (cpy_x <= player2Coords.x1) {
+		// console.log("predicted hit x="+ cpy_x + " y =" + cpy_y);
+		if (cpy_y > 1080 - ball.radius || cpy_y < 0 + ball.radius)
+			cpy_vy = -cpy_vy;
+		if (cpy_x < 100 + ball.radius)
+			cpy_vx = -cpy_vx;
+		cpy_x += cpy_vx;
+		cpy_y += cpy_vy;
+		player2Coords.ball_predicted_hit.when++;
 	}
+	player2Coords.ball_predicted_hit = cpy_y - ((player2Coords.y1 + 40) + Math.floor(bot_getRandomArbitrary(pg_option * -10, pg_option * 10)));
+	if ((player2Coords.ball_predicted_hit < 0 && player2Coords.const_vy > 0) || (player2Coords.ball_predicted_hit > 0 && player2Coords.const_vy < 0))
+		player2Coords.const_vy = -player2Coords.const_vy ;
 }
 
 function drawBall(ball) {
@@ -228,15 +220,18 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 
 //! Fps related stuff
 
+bot_time = -1;
 function timeRelatedStuff(ball, player2Coords, start) {
 	end = Date.now();
 	let elapsedTime = end - start; // Temps réel pris par la frame
 	frameTime.counter++;
 	frameTime.time += elapsedTime;
 	
-	if ((frameTime.time > 52 && frameTime.time > 72 ) || // faire que le bot s'actualise de cette manière va rendre son comportement hasardeux, donc humain.|
-		(frameTime.time > 178 && frameTime.time > 198 ))
+	if (bot_time < 0 || end - bot_time >= 1000) {
+		bot_time = Date.now()	
 		calculateBall(ball, player2Coords);
+	}
+	// console.log((totalframeTime.time + frameTime.time) % 1000);
 
 	if (frameTime.time > 250) {
 		totalframeTime.counter += frameTime.counter;
