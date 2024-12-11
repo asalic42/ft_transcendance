@@ -182,7 +182,7 @@ body {
 
   @keyframes anim-form-appear {
     0% {
-      transform: scale(0.4);
+      transform: scale(0.2);
       opacity: 0;
     }
 
@@ -291,55 +291,68 @@ body {
 /********************** V. FORM SPAN *************************/
 /*                                                           */
 /*     ┌───┐                                                 */
-/*     │ 1.│ span-b input's fields unfill                    */
-/*     │ 2 │  hover : 1                                      */
-/*     │ 3 │ span-b input's fields unfill pepe image         */
-/*     │ 4.│  hover : 3                                      */
-/*     │ 5 │ span-b input's unfill underline                 */
-/*     │ 6 │  hover : 5                                      */
+/*     │ 1 │ span-b container                                */
+/*     │ 2.│ span-b input's fields unfill                    */
+/*     │ 3 │  hover : 1                                      */
+/*     │ 4 │ span-b input's fields unfill pepe image         */
+/*     │ 5.│  hover : 3                                      */
+/*     │ 6 │ span-b input's unfill underline                 */
+/*     │ 7 │  hover : 5                                      */
 /*                                                           */
 /* --------------------- ANIMATIONS -----------------------  */
 /*                                                           */
 /*     ┌───┐                                                 */
-/*     │1.a│ Fly                                             */
-/*     │4.a│ Pepe image                                      */
+/*     │2.a│ Fly                                             */
+/*     │5.a│ Pepe image                                      */
 /*                                                           */
 /*************************************************************/
 
+/*  ┌───┬──────────────────┐
+    │ 1 │ span-b container │
+    └───┴──────────────────┘
+*/
+
+  .form .span-b-container {
+    position: relative;
+    width: auto;
+    height: auto;
+    margin-top: 10%;
+    margin-left: 26%;
+  }
 
 /*  ┌───┬──────────────────────────────┐
-    │ 1 │ span-b input's fields unfill │
+    │ 2 │ span-b input's fields unfill │
     └───┴──────────────────────────────┘
 */
 
   .form .span-b.is-required {
     position: absolute;
-    width: 60%;
-    height: 10%;
+    width: auto;
+    height: auto;
+    margin-top: 5%;
     font-family:'Courier New', Courier, monospace;
     letter-spacing: normal;
     color: #ffffff;
     opacity: 1;
     z-index: 1;
-    transition: all 0.4s ease-out;
+    transition: opacity 0.8s ease-out, margin-left 0.3s ease-in-out;
     animation: anim-fly 5s infinite ease-in-out;
-    margin-top: 10%;
-    margin-left: 25%;
     user-select: none;
   }
 
 /*  ┌───┬────────────────────────────────────────┐
-    │ 2 │ hover : (block 1) span-b inputs unfill │
+    │ 3 │ hover : (block 1) span-b inputs unfill │
     └───┴────────────────────────────────────────┘
 */
 
   .form .span-b.is-required:hover {
-    margin-left: 40%;
+    margin-left: 20%;
+    transition: margin-left 0.5s ease-in-out;
   }
 
 
 /*  ┌───┬─────────────────────────────────────────┐
-    │ 3 │ span-b input's fields unfill pepe image │
+    │ 4 │ span-b input's fields unfill pepe image │
     └───┴─────────────────────────────────────────┘
 */
 
@@ -358,22 +371,22 @@ body {
     user-select: none;
     opacity: 0;
     transition: 1s;
-    margin-top: -30%;
+    margin-top: -40%;
   }
 
 
 /*  ┌───┬───────────────────────────────────────────────────┐
-    │ 4 │ hover : (block 2) span-b inputs unfill pepe image │
+    │ 5 │ hover : (block 2) span-b inputs unfill pepe image │
     └───┴───────────────────────────────────────────────────┘
 */
 
   .form .span-b.is-required:hover::before {
     animation: anim-pepe 1.4s ease-out forwards;
-    margin-left: -70%;
+    margin-left: -90%;
   }
 
 /*  ┌───┬─────────────────────────────────┐
-    │ 5 │ span-b input's unfill underline │
+    │ 6 │ span-b input's unfill underline │
     └───┴─────────────────────────────────┘
 */
 
@@ -382,7 +395,7 @@ body {
     position: absolute;
     top: 14px;
     left: 0;
-    width: 81%;
+    width: 100%;
     height: 2px;
     background-color: rgb(60, 214, 21); /* Couleur du soulignement */
     transform: scaleX(1);                 /* Largeur initiale de la ligne */
@@ -391,7 +404,7 @@ body {
   }
 
 /*  ┌───┬──────────────────────────────────────────────────┐
-    │ 6 │ hover : (block 3) span-b inputs unfill underline │
+    │ 7 │ hover : (block 3) span-b inputs unfill underline │
     └───┴──────────────────────────────────────────────────┘
 */
 
@@ -401,7 +414,7 @@ body {
 
 
 /*  ┌─────┬──────────────────────┐
-    │ 4.a │ Pepe image animation │
+    │ 5.a │ Pepe image animation │
     └─────┴──────────────────────┘
 */
 
@@ -427,7 +440,7 @@ body {
   }
 
 /*  ┌─────┬──────┐
-    │ 1.a │ Fly  │
+    │ 2.a │ Fly  │
     └─────┴──────┘
 */
 
@@ -481,7 +494,8 @@ body {
     font-size: 16px;                        /* Taille de la police */
     user-select: none;
     opacity: 0.5;
-    transition: all 0.3s ease;              /* Transition fluide de toutes les propriétés sur 0.3s */
+    scale: 0;
+    /* transition: all 0.3s ease; */              /* Transition fluide de toutes les propriétés sur 0.3s */
   }
 
 /*  ┌───┬────────────────┐
@@ -490,6 +504,8 @@ body {
 */
 
   .form button:enabled {
+    scale: 1;
+    margin-top: 10%;
     font-family: "Lilita One", sans-serif;
     pointer-events: all;
     cursor: pointer;
@@ -498,6 +514,7 @@ body {
     border-color: #000000;
     color: #ccc;
     animation: anim-vibrate 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s ease;
   }
 
 /*  ┌───┬──────────────────────────────────┐
@@ -522,8 +539,6 @@ body {
   .form button::after {
     content: "😎​";                    /* L'emoji à ajouter */
     position: absolute;
-    left: 80%;                        /* Déplacer l'emoji en dehors du bouton au départ */
-    transform: translateY(-50%);      /* Centrer exactement au milieu */
     opacity: 0;                       /* L'emoji est caché au départ */
     transition: all 0.3s ease;        /* Transition douce pour l'emoji */
   }
@@ -535,7 +550,7 @@ body {
 
   .form button:enabled:hover::after {
     animation: anim-right-appear 0.5s ease forwards;
-    left: 80%;
+    left: 90%;
     opacity: 1;
     transform: scale(1.2);
   }

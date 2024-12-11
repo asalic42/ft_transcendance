@@ -2,6 +2,7 @@ const form = document.getElementById('myForm');
 const submitButton = document.getElementById('submitButton');
 const inputs = form.querySelectorAll('input[required]');
 const spanBeforeButton = document.getElementsByClassName('span-b')[0];
+const spanBeforeButtonContainer = document.getElementsByClassName('span-b-container')[0];
 
 // Fonction pour valider l'email avec une expression régulière
 function validateEmail(email) {
@@ -29,14 +30,14 @@ function checkFormValidity() {
     }
 
     if (submitButton.disabled) {
+        spanBeforeButtonContainer.style.marginTop = "8%";
         spanBeforeButton.style.opacity = 1;
         spanBeforeButton.style.fontSize = "12px";
-        spanBeforeButton.style.transitionDuration = '0.4s';
         spanBeforeButton.classList.add('is-required');
     } else {
+        spanBeforeButtonContainer.style.marginTop = "-10%";
         spanBeforeButton.style.opacity = 0;
         spanBeforeButton.style.fontSize = "9px";
-        spanBeforeButton.style.transitionDuration = '0s';
         spanBeforeButton.classList.remove('is-required');
     }
 
