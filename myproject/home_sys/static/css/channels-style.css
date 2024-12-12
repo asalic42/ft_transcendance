@@ -7,13 +7,13 @@ body {
     position: relative;
     color: white;
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
     justify-content: center;
     text-align: center;
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
+    transition: grid-template-columns 1s ease;
 }
 
 h1 {
@@ -21,13 +21,7 @@ h1 {
     text-align: center;
 }
 
-.list h2 {
-    border: 3px solid #ED4EB0;
-    border-radius: 2%;
-    margin-bottom: 35px;
-}
-
-#chat {
+#friends, #channels {
     border: 3px solid #ED4EB0;
     border-radius: 2%;
     width: 100%;
@@ -35,7 +29,28 @@ h1 {
 }
 
  /* Actual chan here + scrollbar */
-.actual-chan h2 {
+.column {
+    height: 100%;
+    transition: 1s ease, opacity 1s ease;
+}
+
+.column h2 {
+    border: 3px solid #ED4EB0;
+    border-radius: 2%;
+    margin-bottom: 35px;
+}
+
+.friends, .channels {
+    transition: transform 1s ease;
+}
+
+.center {
+    display: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.center h2 {
     border: 3px solid #ED4EB0;
     border-radius: 2%;
     margin-bottom: 35px;
@@ -70,24 +85,35 @@ h1 {
     height: calc(100% - 50px);
 }
 
+/* Create a new chan */
+#new-chan {
+    font-size: 15px;
+    padding: 5px 10px;
+    color:#ED4EB0;
+    background-color: var(--bg-primary);
+    border-radius: 5px;
+    cursor: pointer;
+    justify-self: start;
+}
+
+/* Message input + button + message prints */
 .message {
     position: relative;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    display: inline-block;
+    width: fit-content;
+    align-self: flex-end;
     margin: 10px;
     padding: 10px;
     background-color: #ED4EB0;
     color: black;
     border-radius: 10px;
-    word-wrap: break-word;
-    display: inline-block;
     margin-bottom: 5px;
-    width: fit-content;
-    align-self: flex-end;
     max-width: calc(100% - 20px);
-    box-sizing: border-box;
-    overflow-wrap: break-word;
 }
 
-/* Message input + button */
 .input-container {
     width: 100%;
     display: flex;

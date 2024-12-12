@@ -10,29 +10,31 @@
 <h1>Chatroom</h1>
 <div class="page">
 
-    <div class="list">
+    <div class="column friends">
         <h2>Friends</h2>
-        <canvas id="chat"></canvas>
+        <canvas id="friends"></canvas>
     </div>
-
-    <div class="actual-chan">
+    <!-- <div class="column center" display="none"></div> -->
+    <!-- <div class="column center">
         <h2>Actual Chan</h2>
-        <div class="chat-page" id="chat-page"></div>
-        <!-- <canvas></canvas> -->
+        
+        <div class="chat-page" id="chat-page">
+        </div>
+        
         <div class="input-container">
             <input id="message-input" type="text" placeholder="Message...">
             <button id="send-button">Envoyer</button>
-            <!-- <script src="http://localhost:3000/socket.io/socket.io.js"></script> -->
-            <script src="{% static 'js/channel.js' %}"></script> 
         </div>
         
-    </div>
+    </div> -->
     
-    <div class="list">
+    <div class="column channels">
         <h2>Channels</h2>
-        <canvas id="chat"></canvas>
-        
+        <canvas id="channels"></canvas>
+        <button id="new-chan">+</button>
     </div>
+
+    <script src="{% static 'js/channel.js' %}"></script> 
 </div>
 
 {% endblock %}

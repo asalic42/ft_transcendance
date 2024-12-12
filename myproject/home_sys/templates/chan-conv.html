@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/channels-style.css' %}">
+<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+<h2>Actual Chan</h2>
+<div class="chat-page" id="chat-page">
+
+<div class="input-container">
+    <input id="message-input" type="text" placeholder="Message...">
+    <button id="send-button">Envoyer</button>
+    <script src="{% static 'js/channel.js' %}"></script> 
+</div>
+
+{% endblock %}
