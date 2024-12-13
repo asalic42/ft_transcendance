@@ -18,12 +18,12 @@
         <!--                     loop autoplay> -->
         <!-- </dotlottie-player> -->
 
-        <dotlottie-player src="https://lottie.host/ac6db4ac-19a0-4d8b-9cfd-ec79639ef516/F9H6BFx6dt.lottie"
+        <!-- <dotlottie-player src="https://lottie.host/ac6db4ac-19a0-4d8b-9cfd-ec79639ef516/F9H6BFx6dt.lottie"
                             background="transparent"
                             speed="1"
                             style="width: 100vw; height: 100vh;"
                             loop autoplay>
-        </dotlottie-player>
+        </dotlottie-player> -->
 
         <!-- <dotlottie-player src="https://lottie.host/6cb7130c-22c8-47af-8e73-f99d1b6e5a56/XPCaK7h10B.lottie" -->
         <!--                     background="transparent" -->
@@ -33,11 +33,11 @@
         <!-- </dotlottie-player> -->
     </div>
     
-    <div class="form-container">
-        <form class="form" id="myForm">
-            
-            <h2>SIGNIN</h2>
-            
+    <div class="signin-container">
+        <form class="form1" id="id-signin-form">
+
+            <h2>SIGN IN</h2>
+
             <div class="inputbox">
                 <input type="text" id="username" required="required">
                 <span>Username</span>
@@ -56,12 +56,50 @@
             <div class="span-b-container">
                 <span class="span-b">champs obligatoires</span>
             </div>
+
+            <button type="submit" id="submitButton1" disabled>Je suis prêt</button>
+
+            <div class="next-sign-form-signin">
+                <span class="span-nfin">No account ? <a class="trigger-nfin" href="#">Sign up</a> </span>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="signup-container">
+        <form class="form2" id="id-signup-form">
             
-            <button type="submit" id="submitButton" disabled>Je suis prêt</button>
+            <h2>SIGN UP</h2>
+            
+            <div class="inputbox">
+                <input type="text" id="username" required="required">
+                <span>Username</span>
+            </div>
+
+            <div class="inputbox">
+                <input type="email" id="email2" required="required">
+                <span>Email</span>
+            </div>
+
+            <div class="inputbox">
+                <input type="password" id="password" required="required">
+                <span>Password</span>
+            </div>
+            
+            <div class="inputbox">
+                <input type="password" id="confirm-password" required="required">
+                <span>Confirm password</span>
+            </div>
+            
+            <button type="submit" id="submitButton2" disabled>S'inscrire</button>
+
+            <div class="next-sign-form-signup">
+                <span class="span-nfup">Already member ? <a class="trigger-nfup" href="#">Signin</a> </span>
+            </div>
+
         </form>
     </div>
     
-
   <script src="script.js"></script>
   <!-- <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script> -->
   <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>

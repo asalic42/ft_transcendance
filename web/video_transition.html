@@ -24,6 +24,14 @@
             height: 100%;
             object-fit: cover; /* Ajuste la vidéo pour couvrir toute la fenêtre sans déformation */
             object-position: center; /* Centrer la vidéo */
+            animation: anim-video-appear 1s ease forwards;
+        }
+
+        @keyframes anim-video-appear {
+            0% {
+                opacity: 0;}
+            100% {
+                opacity: 100;}
         }
     </style>
 

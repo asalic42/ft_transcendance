@@ -20,6 +20,10 @@
   box-sizing: border-box;
 }
 
+:root {
+  --theme-color: rgb(212, 78, 212);
+}
+
 body {
   display: flex;              /* Utilisation de Flexbox pour centrer le contenu */
   justify-content: center;    /* Centre horizontalement */
@@ -93,7 +97,7 @@ body {
 
   .lottie-container {
     position: absolute;         /* Position absolue pour qu'il soit en arrière-plan */
-    transform: scale(1.3);
+    transform: scale(1.5);
     object-fit: cover;
     top: -10%;
     right: -10%;
@@ -135,8 +139,8 @@ body {
     └───┴─────────────────┘
 */
 
-  .form-container {
-    position: relative;         /* Position relative pour pouvoir utiliser le z-index */
+  .signin-container {
+    position: absolute;         /* Position relative pour pouvoir utiliser le z-index */
     display: flex;
     flex-direction: column;
     align-items: center;        /* Centre le formulaire horizontalement */
@@ -146,16 +150,29 @@ body {
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
     border-radius: 10px;
     width: 300px;
-    z-index: 2;                 /* Assure que le formulaire est au-dessus du Lottie */
-    animation: anim-form-appear 0.5s ease-in-out forwards;
+    height: 380px;
+    z-index: 2;
+    transition: all 0.3s ease;
+    animation: anim-form-appear 0.5s ease;
   }
+
+  .signin-container.show {
+    margin-left: -700px;
+    rotate: 20deg;
+  }
+
+/*========================================================*/
+
+
+/*========================================================*/
 
 /*  ┌───┬───────────────────┐
     │ 2 │ form basics param │
     └───┴───────────────────┘
 */
 
-  .form {
+  .form1,
+  .form2 {
     position: relative;
     width: 280px;
     height: 300px;
@@ -166,11 +183,11 @@ body {
     └───┴────────────┘
 */
 
-  .form h2 {
+  h2 {
     text-align: center;
     letter-spacing: 0.2em;
     margin-bottom: 20px;
-    font-size: 2em;
+    font-size: 20px;
     background-color: rgb(24, 23, 23);
     color: #ccc;
   }
@@ -209,7 +226,7 @@ body {
     └───┴─────────────┘
 */
 
-  .form input {
+  input {
     width: 80%;
     padding: 10px;
     margin-left: 10%;
@@ -227,7 +244,7 @@ body {
     └───┴───────────────────┘
 */
 
-  .form .inputbox span {
+  .inputbox span {
     position: absolute;
     left: 0;
     margin-left: 10%;
@@ -245,7 +262,7 @@ body {
 
   .inputbox input:valid,
   .inputbox input:focus {
-    border: 2px solid rgb(31, 181, 31);
+    border: 2px solid var(--theme-color);
   }
 
 /*  ┌───┬────────────────────────────────────────────────┐
@@ -258,7 +275,7 @@ body {
     padding: 0 5px;
     font-size: 80%;
     transform: translateX(5px) translateY(-5px);
-    background-color: rgb(31, 181, 31);
+    background-color: var(--theme-color);
     color: black;
     letter-spacing: 0.1em;
     border-radius: 2px;
@@ -268,7 +285,7 @@ body {
     │ 5 │ Input email type invalid │
     └───┴──────────────────────────┘
 */
-  input[type="email"].invalid {
+  .inputbox input[type="email"].invalid {
     border-color: rgb(194, 4, 4);
   }
   
@@ -312,7 +329,8 @@ body {
     └───┴──────────────────┘
 */
 
-  .form .span-b-container {
+  .form1 .span-b-container,
+  .form2 .span-b-container {
     position: relative;
     width: auto;
     height: auto;
@@ -325,16 +343,18 @@ body {
     └───┴──────────────────────────────┘
 */
 
-  .form .span-b.is-required {
+  .form1 .span-b.is-required,
+  .form2 .span-b.is-required {
     position: absolute;
     width: auto;
     height: auto;
-    margin-top: 5%;
+    margin-top: 0%;
     font-family:'Courier New', Courier, monospace;
     letter-spacing: normal;
     color: #ffffff;
     opacity: 1;
     z-index: 1;
+    padding-block: 10px;
     transition: opacity 0.8s ease-out, margin-left 0.3s ease-in-out;
     animation: anim-fly 5s infinite ease-in-out;
     user-select: none;
@@ -345,7 +365,8 @@ body {
     └───┴────────────────────────────────────────┘
 */
 
-  .form .span-b.is-required:hover {
+  .form1 .span-b.is-required:hover,
+  .form2 .span-b.is-required:hover {
     margin-left: 20%;
     transition: margin-left 0.5s ease-in-out;
   }
@@ -356,7 +377,8 @@ body {
     └───┴─────────────────────────────────────────┘
 */
 
-  .form .span-b.is-required::before {
+  .form1 .span-b.is-required::before,
+  .form2 .span-b.is-required::before {
     content: "";
     display: inline-flex;
     width: 140px;  
@@ -380,7 +402,8 @@ body {
     └───┴───────────────────────────────────────────────────┘
 */
 
-  .form .span-b.is-required:hover::before {
+  .form1 .span-b.is-required:hover::before,
+  .form2 .span-b.is-required:hover::before {
     animation: anim-pepe 1.4s ease-out forwards;
     margin-left: -90%;
   }
@@ -390,14 +413,15 @@ body {
     └───┴─────────────────────────────────┘
 */
 
-  .form .span-b.is-required:after {
+  .form1 .span-b.is-required:after,
+  .form2 .span-b.is-required:after {
     content: '';
     position: absolute;
-    top: 14px;
+    bottom: 25%;
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: rgb(60, 214, 21); /* Couleur du soulignement */
+    background-color: var(--theme-color); /* Couleur du soulignement */
     transform: scaleX(1);                 /* Largeur initiale de la ligne */
     transform-origin: left;               /* L'animation commence à droite */
     transition: transform 0.3s ease;      /* Transition pour l'animation */
@@ -408,7 +432,8 @@ body {
     └───┴──────────────────────────────────────────────────┘
 */
 
-  .form .span-b.is-required:hover::after {
+  .form1 .span-b.is-required:hover::after,
+  .form2 .span-b.is-required:hover::after {
     transform: scaleX(0); /* Réduit la ligne à zéro à l'hover */
   }
 
@@ -447,15 +472,15 @@ body {
   @keyframes anim-fly {
 
     0% {
-      transform: translateY(5px);
+      transform: translateY(2px);
     }
     
     50% {
-      transform: translateY(-5px);
+      transform: translateY(-2px);
     }
 
     100% {
-      transform: translateY(5px);
+      transform: translateY(2px);
     }
   }
 
@@ -481,7 +506,7 @@ body {
     └───┴────────┘
 */
 
-  .form button {
+  .form1 button {
     font-family: "Lilita One", sans-serif;
     display: block;
     margin: 0 auto;
@@ -498,12 +523,29 @@ body {
     /* transition: all 0.3s ease; */              /* Transition fluide de toutes les propriétés sur 0.3s */
   }
 
+  .form2 button {
+    font-family: "Lilita One", sans-serif;
+    display: block;
+    margin: 0 auto;
+    width: 175px;                           /* Largeur initiale du bouton */
+    height: 50px;                           /* Hauteur initiale du bouton */
+    background-color: rgb(24, 23, 23);    /* Couleur de fond initiale */
+    color: rgb(24, 23, 23);               /* Couleur du texte */
+    border: 2px solid rgb(24, 23, 23);    /* Bordure initiale */
+    border-radius: 4px;                     /* Coins arrondis */
+    font-size: 16px;                        /* Taille de la police */
+    user-select: none;
+    opacity: 1;
+    scale: 0;
+    /* transition: all 0.3s ease; */              /* Transition fluide de toutes les propriétés sur 0.3s */
+  }
+
 /*  ┌───┬────────────────┐
     │ 2 │ button enabled │
     └───┴────────────────┘
 */
 
-  .form button:enabled {
+  .form1 button:enabled {
     scale: 1;
     margin-top: 10%;
     font-family: "Lilita One", sans-serif;
@@ -517,16 +559,32 @@ body {
     transition: all 0.3s ease;
   }
 
+  .form2 button:enabled {
+    scale: 1;
+    margin-top: 0%;
+    font-family: "Lilita One", sans-serif;
+    pointer-events: all;
+    cursor: pointer;
+    opacity: 1;
+    background-color: #020203;
+    border-color: #000000;
+    color: #ccc;
+    animation: anim-vibrate 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.3s ease;
+  }
+
+
 /*  ┌───┬──────────────────────────────────┐
     │ 3 │ hover : (block 2) button enabled │
     └───┴──────────────────────────────────┘
 */
 
-  .form button:enabled:hover {
+  .form1 button:enabled:hover,
+  .form2 button:enabled:hover {
     width: 200px;
     padding-right: 20px;
-    background-color: rgb(31, 181, 31);
-    border-color: rgb(31, 181, 31);
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
     box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
   }
 
@@ -536,19 +594,28 @@ body {
     └───┴──────────────┘
 */
 
-  .form button::after {
+  .form1 button::after {
     content: "😎​";                    /* L'emoji à ajouter */
     position: absolute;
     opacity: 0;                       /* L'emoji est caché au départ */
     transition: all 0.3s ease;        /* Transition douce pour l'emoji */
   }
 
+  .form2 button::after {
+    content: "📋​";                    /* L'emoji à ajouter */
+    position: absolute;
+    opacity: 0;                       /* L'emoji est caché au départ */
+    transition: all 0.3s ease;        /* Transition douce pour l'emoji */
+  }
+
+
 /*  ┌───┬────────────────────────────────────────┐
     │ 5 │ hover : (block 4 ) button enable after │
     └───┴────────────────────────────────────────┘
 */
 
-  .form button:enabled:hover::after {
+  .form1 button:enabled:hover::after,
+  .form2 button:enabled:hover::after {
     animation: anim-right-appear 0.5s ease forwards;
     left: 90%;
     opacity: 1;
@@ -603,3 +670,55 @@ body {
       opacity: 1;
     }
   }
+
+/*========================================================*/
+
+.next-sign-form-signin {
+  position: relative;
+  width: auto;
+  height: auto;
+  margin-top: 5%;
+  margin-left: 28%;
+}
+
+.next-sign-form-signup {
+  position: relative;
+  width: auto;
+  height: auto;
+  margin-top: -20px;
+  margin-left: 24%;
+  transition: all 0.3s ease;
+}
+
+.show-animation {
+    margin-top: 20px;
+}
+
+.next-sign-form-signin span,
+.next-sign-form-signup span {
+  position: absolute;
+  color: #ccc;
+  font-size: 10px;
+}
+
+.signup-container {
+  opacity: 0;
+  position: absolute;         /* Position relative pour pouvoir utiliser le z-index */
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* Centre le formulaire horizontalement */
+  padding: 20px;
+  border: 5px solid rgb(24, 23, 23);
+  background-color: rgb(24, 23, 23);
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  width: 300px;
+  height: 380px;
+  z-index: 0;
+  transition: all 0.3s ease;
+}
+
+.signup-container.show {
+  margin-left: 700px;
+  rotate: -20deg;
+}
