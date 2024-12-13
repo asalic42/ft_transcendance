@@ -6,6 +6,8 @@ let stop = 0;
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
+var score = document.getElementById("title");
+var count = 0;
 
 class block {
 	x1; y1; width; height; state;
@@ -29,7 +31,7 @@ function createBlocks() {
 	var height = start_y;
 	for (var i = 0; i < 5; i++) {
 		for (var j = 0; j < 8; j++) {
-			block_arr.push(new block(x, y + start_y + start_y, width - 5, height - 5, 3))
+			block_arr.push(new block(x, y + start_y + start_y, width, height, 3))
 			y += start_y;
 		}
 		x += start_x;
@@ -46,12 +48,13 @@ window.onload = function() {
 
 function createBall(vy) {
 	// Balls coords
-	var ball = {coords : {x : table.width / 2, y : table.height / 2},
+	var ball = {coords : {x : (table.height / 2), y : table.height - 70},
 				const_vector : {vy : vy, vx : Math.floor(getRandomArbitrary(-11, 11))},
 				vector : {},
 				radius : 13,
 				hit_horizontal : 0,
 				hit_vertical : 0,
+				hit_block : 0,
 				hit_player : 0};
 
 	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy, total : ball.const_vector.vy + ball.const_vector.vx};
@@ -89,12 +92,12 @@ function drawPlayer(player1Coords, color) {
 
 function isBallHittingPlayer(ball, player1Coords) {
 
-	if (ball.hit_player > 0 && ball.hit_player < 5) {// pendant les cinq prochaines frames impossible de rebondir sur les murs.
+	if (ball.hit_player > 0 && ball.hit_player < 15) {// pendant les cinq prochaines frames impossible de rebondir sur les murs.
 		ball.hit_player++;
 		return false;
 	}
 
-	if (ball.hit_player >= 5)
+	if (ball.hit_player >= 15)
 		ball.hit_player = 0;
 
 	if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 &&
@@ -163,7 +166,11 @@ function moveBall(ball, player1Coords) {
 		var intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
 		if (intersection > 0 && intersection < 0.25)
 			intersection = 0.25;
-		if (intersection < 0 && intersection > -0.25)
+		else if (intersection > 1)
+			intersection = 1;
+		else if (intersection < -1)
+			intersection = -1;
+		else if (intersection < 0 && intersection > -0.25)
 			intersection = -0.25;
 		console.log(intersection);
 		intersection *= Math.abs(ball.const_vector.vy);
@@ -186,6 +193,10 @@ function moveBall(ball, player1Coords) {
 }
 
 function isBallHittingblock(ball) {
+	// if (ball.hit_block) {
+		// ball.hit_block--;
+		// return
+	// }
 	for (let k = 0; k < block_arr.length; k++) {
 		if (!block_arr[k].state)
 			continue;
@@ -195,18 +206,20 @@ function isBallHittingblock(ball) {
 			ballFutureX - ball.radius <= block_arr[k].x1 + block_arr[k].width &&
 			ballFutureY - ball.radius >= block_arr[k].y1 &&
 			ballFutureY + ball.radius <= block_arr[k].y1 + block_arr[k].height) {
+				count += Math.abs(4 - block_arr[k].state);
 				block_arr[k].state-- ;
 				console.log(ball.coords.y + " " + block_arr[k].y1 + " " + (block_arr[k].y1 + block_arr[k].height));
-				if (ball.coords.x > block_arr[k].x1 && ball.coords.x < block_arr[k].x1 + block_arr[k].width) {
+				if (ball.coords.x + ball.radius > block_arr[k].x1 && ball.coords.x - ball.radius < block_arr[k].x1 + block_arr[k].width) {
 					ball.const_vector.vy = -ball.const_vector.vy;
 					ball.vector.vy = ball.const_vector.vy;
 				}
-				else {
+				else if (ball.coords.y + ball.radius > block_arr[k].y1 && ball.coords.y - ball.radius < block_arr[k].y1 + block_arr[k].height){
 					
 					ball.const_vector.vx = -(ball.const_vector.vx);
 					ball.vector.vx = -ball.vector.vx;
 				}
-
+				ball.hit_block = 2;
+				break;
 			}
 	}
 }
@@ -237,11 +250,8 @@ function launchAnim(ball, player1Coords, start) {
 	if (isPointWin(ball))
 		return ;
 	moveBall(ball, player1Coords);
-	context.beginPath();
-	context.fillStyle = "#white";
-	context.fill();
-	context.closePath();
 	drawBlocks();
+	score.innerText = "Score : " + count;
 	requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
 }
 
@@ -342,9 +352,8 @@ function drawBlocks() {
 					context.fillStyle = "red";
 					break;
 			}
-			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width, block_arr[k].height, 10);
+			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width - 5, block_arr[k].height - 5, 10);
 			context.fill();
-
 		}
 	}
 }

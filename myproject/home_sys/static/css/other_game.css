@@ -20,7 +20,7 @@ h3 {
 	text-align: center;
 }
 /* Style des scores au top */
-.scores {
+.fps {
 	font-family: 'Namaku';
 	gap: 50px;
 	justify-content: center;
@@ -29,6 +29,21 @@ h3 {
 	color: white;
 	text-align: center;
 }
+
+.scores {
+    font-family: 'Namaku'; /* Police demandée */
+    position: absolute; /* Permet un positionnement précis */
+    top: 10%; /* Position verticale dans le tiers supérieur (ajustez selon vos préférences) */
+    left: 13%; /* Position horizontale pour se placer entre la barre des tâches et le jeu */
+    /* transform: translateX(-10%); Ajuste légèrement la position horizontale pour le centrer davantage */
+    color: white; /* Couleur du texte */
+    text-align: center; /* Centre le texte dans la div */
+    width: auto; /* La largeur s'adapte au contenu */
+    height: auto; /* La hauteur s'adapte au contenu */
+    z-index: 10; /* S'assure que la div est au-dessus des autres éléments */
+}
+
+
 
 @font-face {
 	/*  Creation d'un font externe */
