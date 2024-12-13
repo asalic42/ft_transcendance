@@ -174,9 +174,7 @@ function moveBall(ball, player1Coords) {
 			intersection = -1;
 		else if (intersection < 0 && intersection > -0.25)
 			intersection = -0.25;
-		console.log(intersection);
 		intersection *= Math.abs(ball.const_vector.vy);
-		console.log(intersection);
 		ball.const_vector.vx = intersection;
 		ball.vector.vx = ball.const_vector.vx;
 		ball.const_vector.vy = -(ball.const_vector.vy);
@@ -194,10 +192,6 @@ function moveBall(ball, player1Coords) {
 }
 
 function isBallHittingblock(ball) {
-	// if (ball.hit_block) {
-		// ball.hit_block--;
-		// return
-	// }
 	for (let k = 0; k < block_arr.length; k++) {
 		if (!block_arr[k].state)
 			continue;
@@ -228,7 +222,6 @@ function isBallHittingblock(ball) {
 
 function isGameOver() {
 	if (health <= 0) { //! Change back to <= 0
-		console.log("No more health");
 		winnerWindow();
 		return true;
 	}
@@ -298,7 +291,6 @@ function winnerWindow() {
 	gameOver.style.display = "flex";
 	drawOuterRectangle("#C42021");
 	drawInnerRectangle("#23232e");
-	console.log("je suis passé chez sosh");
 	replay();
 }
 
