@@ -7,7 +7,9 @@ var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
 var score = document.getElementById("title");
+var gameOver = document.getElementById("gameOver");
 var count = 0;
+var health = 3;
 
 class block {
 	x1; y1; width; height; state;
@@ -180,7 +182,6 @@ function moveBall(ball, player1Coords) {
 		ball.const_vector.vy = -(ball.const_vector.vy);
 		ball.vector.vy = -ball.vector.vy;
 	}
-
 	else if (isGameOver())
 		return true;
 
@@ -224,13 +225,22 @@ function isBallHittingblock(ball) {
 	}
 }
 
-/* Function that detects whether a player has won a point or not */
-function isPointWin(ball) {
+
+function isGameOver() {
+	if (health <= 0) { //! Change back to <= 0
+		console.log("No more health");
+		winnerWindow();
+		return true;
+	}
+	return false;
+}
+
+
+function isEnd(ball) {
 	if (ball.coords.y + ball.radius >= table.height) {
-        //count_p2++;
-        //score_p2.innerText = count_p2;
-        createBall(Math.floor(getRandomArbitrary(0, 10)));
-        return true;
+        health--;
+		createBall(Math.floor(getRandomArbitrary(0, 10)));
+		return true;
     }
     return false;
 }
@@ -247,10 +257,10 @@ function launchAnim(ball, player1Coords, start) {
 	context.clearRect(0, 0, table.width, table.height);
 	update();
 	drawPlayer(player1Coords, "#ED4EB0");
-	if (isPointWin(ball))
-		return ;
-	moveBall(ball, player1Coords);
+	if (isEnd(ball))
+		return;
 	drawBlocks();
+	moveBall(ball, player1Coords);
 	score.innerText = "Score : " + count;
 	requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
 }
@@ -281,48 +291,22 @@ function adaptVectorsToFps(ball, player1Coords) {
 	player1Coords.vx = player1Coords.const_vx * percentage;
 }
 
-function isGameOver() {
-	//if (count_p1 == 5 || count_p2 == 5) {
-    //    stop = 1;
-    //    if (count_p1 == 5) {
-    //        console.log("player 1 wins");
-    //        winnerWindow(1);
-    //    }
-    //    else {
-    //        console.log("player 2 wins");
-    //        winnerWindow(2);
-    //    }   
-    //    return true;
-    //}
-	return false
-}
-
-function winnerWindow(player) {
+function winnerWindow() {
 	
 	context.clearRect(0, 0, table.width, table.height);
 	
-	const winner1Text = document.getElementById("wrapper-player1");
-	const winner2Text = document.getElementById("wrapper-player2");
-	if (player == 1) {
-		drawOuterRectangle("#365fa0");
-		winner1Text.style.display = "block"; 
-	}
-	else {
-		drawOuterRectangle("#C42021");
-		winner2Text.style.display = "block";
-	}
+	gameOver.style.display = "flex";
+	drawOuterRectangle("#C42021");
 	drawInnerRectangle("#23232e");
-	replay(player);
+	console.log("je suis passé chez sosh");
+	replay();
 }
 
-function replay(player) {
+function replay() {
 	const button = document.getElementById("replay-button");
-	button.style.display = "block";
+	button.style.display = "flex";
 
-	if (player == 1)
-		button.style.color = "#C42021";
-	else
-		button.style.color = "#365FA0";
+	button.style.color = "#C42021";
 	button.addEventListener("click", () => {
 		window.location.reload();
 	});
