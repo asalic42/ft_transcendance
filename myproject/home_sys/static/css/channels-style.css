@@ -31,7 +31,7 @@ h1 {
  /* Actual chan here + scrollbar */
 .column {
     height: 100%;
-    transition: 1s ease, opacity 1s ease;
+    transition: transform 1s ease;
 }
 
 .column h2 {
@@ -45,9 +45,10 @@ h1 {
 }
 
 .center {
-    display: none;
     opacity: 0;
-    transition: opacity 1s ease;
+    visibility: hidden;
+    transform: scaleX(0) translateX(-50%);
+    transition: transform 0.2s ease;
 }
 
 .center h2 {
@@ -98,20 +99,20 @@ h1 {
 
 /* Message input + button + message prints */
 .message {
-    position: relative;
-    box-sizing: border-box;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    display: inline-block;
-    width: fit-content;
-    align-self: flex-end;
     margin: 10px;
     padding: 10px;
     background-color: #ED4EB0;
     color: black;
     border-radius: 10px;
     margin-bottom: 5px;
+    width: fit-content;
     max-width: calc(100% - 20px);
+    align-self: flex-end;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    display: inline-block;
+    position: relative;
+    white-space: normal;
 }
 
 .input-container {
