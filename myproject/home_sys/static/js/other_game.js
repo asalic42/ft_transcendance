@@ -45,13 +45,13 @@ window.onload = function() {
 	context = table.getContext("2d");
 
 	createBlocks();
-	createBall(Math.floor(getRandomArbitrary(-11, 11)));
+	createBall(Math.floor(getRandomArbitrary(0, 11)));
 }
 
 function createBall(vy) {
 	// Balls coords
 	var ball = {coords : {x : (table.height / 2), y : table.height - 70},
-				const_vector : {vy : vy, vx : Math.floor(getRandomArbitrary(-11, 11))},
+				const_vector : {vy : vy, vx : 50},
 				vector : {},
 				radius : 13,
 				hit_horizontal : 0,
@@ -195,15 +195,16 @@ function isBallHittingblock(ball) {
 	for (let k = 0; k < block_arr.length; k++) {
 		if (!block_arr[k].state)
 			continue;
-		var ballFutureX = ball.coords.x + ball.const_vector.vx;
-		var ballFutureY = ball.coords.y + ball.const_vector.vy;
-		if (ballFutureX + ball.radius >= block_arr[k].x1 &&
-			ballFutureX - ball.radius <= block_arr[k].x1 + block_arr[k].width &&
-			ballFutureY - ball.radius >= block_arr[k].y1 &&
-			ballFutureY + ball.radius <= block_arr[k].y1 + block_arr[k].height) {
-				count += Math.abs(4 - block_arr[k].state);
-				block_arr[k].state-- ;
-				console.log(ball.coords.y + " " + block_arr[k].y1 + " " + (block_arr[k].y1 + block_arr[k].height));
+		var ballFutureX = ball.coords.x + ball.vector.vx;
+		var ballFutureY = ball.coords.y + ball.vector.vy;
+		if (((ballFutureX + ball.radius >= block_arr[k].x1 && ballFutureX + ball.radius <= block_arr[k].x1 + block_arr[k].width ) || (ballFutureX - ball.radius >= block_arr[k].x1 && ballFutureX - ball.radius <= block_arr[k].x1 + block_arr[k].width ))
+			&&
+			((ballFutureY + ball.radius >= block_arr[k].y1 && ballFutureY + ball.radius <= block_arr[k].y1 + block_arr[k].height) || (ballFutureY - ball.radius >= block_arr[k].y1 && ballFutureY - ball.radius<= block_arr[k].y1 + block_arr[k].height)))
+			{
+				// console.log(ball.coords.y + " " + block_arr[k].y1 + " " + (block_arr[k].y1 + block_arr[k].height));
+				if (ball.hit_block)
+					break;
+				//* Determines how ball is going to bounce
 				if (ball.coords.x + ball.radius > block_arr[k].x1 && ball.coords.x - ball.radius < block_arr[k].x1 + block_arr[k].width) {
 					ball.const_vector.vy = -ball.const_vector.vy;
 					ball.vector.vy = ball.const_vector.vy;
@@ -214,14 +215,18 @@ function isBallHittingblock(ball) {
 					ball.vector.vx = -ball.vector.vx;
 				}
 				ball.hit_block = 2;
+				count += Math.abs(4 - block_arr[k].state); //* Add score 
+				block_arr[k].state-- ; //* Change block color
 				break;
 			}
 	}
+	if (ball.hit_block > 0)
+		ball.hit_block--;
 }
 
 
 function isGameOver() {
-	if (health <= 0) { //! Change back to <= 0
+	if (health <= 0) {
 		winnerWindow();
 		return true;
 	}
