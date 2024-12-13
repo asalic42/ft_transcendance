@@ -8,31 +8,27 @@
 <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 
 <h1>Chatroom</h1>
-<div class="page">
+<div class="page" id="page">
 
     <div class="column friends">
         <h2>Friends</h2>
         <canvas id="friends"></canvas>
     </div>
-    <!-- <div class="column center" display="none"></div> -->
-    <!-- <div class="column center">
-        <h2>Actual Chan</h2>
-        
-        <div class="chat-page" id="chat-page">
-        </div>
-        
-        <div class="input-container">
-            <input id="message-input" type="text" placeholder="Message...">
-            <button id="send-button">Envoyer</button>
-        </div>
-        
-    </div> -->
     
     <div class="column channels">
         <h2>Channels</h2>
         <canvas id="channels"></canvas>
         <button id="new-chan">+</button>
     </div>
+
+    <!-- Formulaire pour definir un nom de channel -->
+    
+    <div id="input-channel" class="hidden-form">
+        <h2>New channel name</h2>
+        <input type="text" id="channel-name">
+    </div>
+
+    <div id="overlay" class="overlay"></div>
 
     <script src="{% static 'js/channel.js' %}"></script> 
 </div>

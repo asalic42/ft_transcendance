@@ -8,34 +8,37 @@ document.addEventListener("DOMContentLoaded", function() {
   // Écouter les messages du serveur
   socket.on('message', (msg) => {
     console.log('Message reçu:', msg);
-    // document.getElementById('chat-page').innerHTML += `<p>${msg}</p>`; 
   });
 
   const newChan = document.getElementById('new-chan');
   let chatVisible = false;
   newChan.addEventListener('click', () => {
+
+    // Disparition du chat en cours
     if (chatVisible) {
       reversePopCenterChat();
       newChan.textContent = '+';
     }
     else {
-      popCenterChat();
-      newChan.textContent = '➙';
+      // Creation de chan + ouverture
+      setChannelName(function(nameChan) {
+        popCenterChat(nameChan);
+        newChan.textContent = '➙';
+      });
     }
     chatVisible = !chatVisible;
   });
 });
 
 // Main monitor for the center column and message listener
-function popCenterChat() {
+function popCenterChat(nameChan) {
   const page = document.querySelector('.page');
-  const friends = document.querySelector('.friends');
   const channels = document.querySelector('.channels');
 
   page.style.gridTemplateColumns = '1fr 3fr 1fr';
 
   if (!document.querySelector('.center')) {
-    const center = createChatPage();
+    const center = createChatPage(nameChan);
     page.insertBefore(center, channels);
 
     addMessageListener();
@@ -48,6 +51,37 @@ function popCenterChat() {
   }
 }
 
+// Set un nom de channel a sa creation
+function setChannelName(callback) {
+  const inputContainer = document.getElementById('input-channel');
+  const inputChannel = document.getElementById('channel-name');
+  const overlay = document.getElementById('overlay');
+
+  overlay.style.display = 'block';
+  inputContainer.classList.add('show');
+
+  function handleInputName(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const name = inputChannel.value.trim();
+
+      if (name !== '') {
+        alert(`Channel "${name}" created !`);
+        overlay.style.display = 'none';
+        inputContainer.classList.remove('show');
+        document.getElementById('channel-name').value = '';
+        callback(name);
+        inputChannel.removeEventListener('keydown', handleInputName);
+      }
+      else {
+        alert(`Enter a name !`);
+      }
+    }
+  }
+  inputChannel.addEventListener('keydown', handleInputName);
+}
+
+// Inverser la transition pour faire disparaitre le chat en cours
 function reversePopCenterChat() {
   const page = document.querySelector('.page');
   const center = document.querySelector('.center');
@@ -63,12 +97,12 @@ function reversePopCenterChat() {
 }
 
 // Create the center column for the chat conv
-function createChatPage() {
+function createChatPage(nameChan) {
   const center = document.createElement('div');
   center.classList.add('center');
 
   center.innerHTML = `
-    <h2>Actual Chan</h2>
+    <h2 id="chat-name">${nameChan}</h2>
     <div class="chat-page" id="chat-page"></div>
     <div class="input-container">
       <input id="message-input" type="text" placeholder="Message...">

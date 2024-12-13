@@ -1,8 +1,16 @@
+@font-face {
+    font-family: Thunder;
+    src: url("../fonts/Thunder-VF.ttf");
+}
+
 body {
     background-color: var(--bg-primary);
 }
 
 .page {
+    font-family: 'Thunder';
+    font-size: 20px;
+
     margin: 0;
     position: relative;
     color: white;
@@ -17,13 +25,16 @@ body {
 }
 
 h1 {
+    font-family: 'Thunder';
+    font-size: 40px;
+
     color: white;
     text-align: center;
 }
 
 #friends, #channels {
-    border: 3px solid #ED4EB0;
-    border-radius: 2%;
+    border: 4px solid #ED4EB0;
+    border-radius: 10px;
     width: 100%;
     height: 600px;
 }
@@ -35,8 +46,9 @@ h1 {
 }
 
 .column h2 {
-    border: 3px solid #ED4EB0;
-    border-radius: 2%;
+    padding: 5px;
+    border: 4px solid #ED4EB0;
+    border-radius: 5px;
     margin-bottom: 35px;
 }
 
@@ -52,15 +64,16 @@ h1 {
 }
 
 .center h2 {
-    border: 3px solid #ED4EB0;
-    border-radius: 2%;
+    padding: 5px;
+    border: 4px solid #ED4EB0;
+    border-radius: 5px;
     margin-bottom: 35px;
 }
 
 .chat-page {
     position: relative;
-    border: 3px solid #ED4EB0;
-    border-radius: 2%;
+    border: 4px solid #ED4EB0;
+    border-radius: 10px;
     width: 100%;
     height: 600px;
     margin-bottom: 10px;
@@ -96,6 +109,54 @@ h1 {
     cursor: pointer;
     justify-self: start;
 }
+
+/* Formular channel name */
+.hidden-form {
+    display: none;
+}
+
+.hidden-form.show {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background-color: var(--bg-primary);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgb(0, 0, 0);
+    z-index: 10;
+    
+    /* centrer les elements dans le form */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    input {
+        padding: 5px;
+        font-size: 15px;
+    }
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 0, 0, 0.5);
+    z-index: 9;
+    transition: opacity 0.3s ease;
+}
+
+/* .page.shadowing {
+    filter: brightness(0.7);
+    transition: filter 0.3 ease;
+} */
+
 
 /* Message input + button + message prints */
 .message {
