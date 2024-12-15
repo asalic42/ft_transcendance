@@ -20,42 +20,31 @@ function validateEmail(email) {
 
 // Fonction pour vérifier la validité des champs et activer/désactiver le bouton
 function checkFormValidity(form, formInput, formButton) {
-    
-    console.log('form : ', form);
-    console.log('formInputs : ', formInput);
-    console.log('formButton : ', formButton);
 
     const allFilled = Array.from(formInput).every(input => input.value.trim() !== '');
     
-    console.log('# allFilled # : ', allFilled);
-
-    // Active ou désactive le bouton en fonction de la validité des champs
     formButton.disabled = !allFilled;
-
-    // Sélectionne tous les inputs de type email
 
     const emailInputs = form.querySelectorAll('input[type="email"]');
     console.log(emailInputs);
 
-    // Parcourt chaque input email pour vérifier sa validité
     emailInputs.forEach(emailInput => {
-        // Vérifie si l'input n'est pas vide
         if (emailInput.value.trim() !== '') {
             if (validateEmail(emailInput.value.trim())) {
-                emailInput.classList.remove('invalid');  // Enlève la classe 'invalid' si l'email est valide
+                emailInput.classList.remove('invalid');
             } else {
-                emailInput.classList.add('invalid');  // Ajoute la classe 'invalid' si l'email est invalide
-                formButton.disabled = true; // Désactive le bouton de soumission si un email est invalide
+                emailInput.classList.add('invalid');
+                formButton.disabled = true;
             }
         } else {
-            emailInput.classList.remove('invalid'); // Si l'input est vide, retire la classe 'invalid'
+            emailInput.classList.remove('invalid');
         }
     });
 
     if (signupSubmitButton.disabled === false) {
-        nextSignFormSignupLink.classList.add('show-animation');  // Ajoute une classe d'animation
+        nextSignFormSignupLink.classList.add('show-animation');
     } else {
-        nextSignFormSignupLink.classList.remove('show-animation');  // Retire la classe d'animation si désactivé
+        nextSignFormSignupLink.classList.remove('show-animation');
     }
 
     if (signinSubmitButton.disabled) {

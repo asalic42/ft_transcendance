@@ -691,7 +691,7 @@ body {
 }
 
 .show-animation {
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .next-sign-form-signin span,
@@ -703,10 +703,10 @@ body {
 
 .signup-container {
   opacity: 0;
-  position: absolute;         /* Position relative pour pouvoir utiliser le z-index */
+  position: absolute;
   display: flex;
   flex-direction: column;
-  align-items: center;        /* Centre le formulaire horizontalement */
+  align-items: center;
   padding: 20px;
   border: 5px solid rgb(24, 23, 23);
   background-color: rgb(24, 23, 23);
