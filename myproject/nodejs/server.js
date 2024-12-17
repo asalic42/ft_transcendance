@@ -5,9 +5,11 @@ const socketIo = require('socket.io');
 const { start } = require('repl');
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
+let client;
+
 
 function connectToDb(retries = 5, delay = 3000) {
-  const client = new Client({
+  client = new Client({
     connectionString: process.env.DATABASE_URL,
   });
 
@@ -35,6 +37,14 @@ function connectToDb(retries = 5, delay = 3000) {
 
 // Creer une table pour sauvegarder les messages de chaque channel
 async function  createChatTable(client) {
+  // const chanQuery = `
+  //   CREATE TABLE IF NOT EXISTS channels (
+  //     id SERIAL PRIMARY KEY,
+  //     name VARCHAR(255) NOT NULL UNIQUE,
+  //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  //   );
+  // `;
+
   const tableQuery = `
     CREATE TABLE IF NOT EXISTS messages (
       id SERIAL PRIMARY KEY,
@@ -45,8 +55,9 @@ async function  createChatTable(client) {
     );
   `;
   try {
+    // await client.query(chanQuery);
     await client.query(tableQuery);
-    console.log('Table "messages" creee avec succes !');
+    console.log('Table "messages" et "channels"creees avec succes !');
   } catch (error) {
     console.error('Erreur lors de la creation de la table "messages": ', error);
     throw error;
@@ -137,6 +148,11 @@ function startServer() {
           'SELECT * FROM messages WHERE channel_name = $1 ORDER BY created_at ASC',
           [channelName]
         );
+
+        if (result.rows.lenght === 0) {
+          console.log('Aucun message trouve');
+        }
+
         socket.emit('channel-messages', result.rows);
       } catch (error) {
         console.log('Erreur lors de la recuperation des messages du channel: ', error);
@@ -147,10 +163,14 @@ function startServer() {
     socket.on('load-channels', async () => {
       try {
         const result = await client.query('SELECT name FROM channels');
-        socket.emit('all-channels', result.row.map(row => row.name));
-      }
-      catch (error) {
+        if (result.rows && Array.isArray(result.rows)) {
+          socket.emit('all-channels', result.row.map(channel => channel.name));
+        } else {
+          socket.emit('all-channels', []);
+        }
+      } catch (error) {
         console.error('Erreur lors du chargement des canaux: ', error);
+        socket.emit('all-channels', []);
       }
     });
 

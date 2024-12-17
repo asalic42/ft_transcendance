@@ -19,8 +19,17 @@ let chatVisible = false;
     })
 
     // Écouter les messages du serveur
-    socket.on('message', (msg) => {
-      console.log('Message reçu:', msg);
+    // socket.on('message', (msg) => {
+    //   console.log('Message reçu:', msg);
+    // });
+
+    socket.on('channel-messages', (messages) => {
+      const chatContainer = document.getElementById('chat-page');
+      chatContainer.innerHTML = '';
+      
+      console.log("Je tente de recup les messages !");
+
+      messages.forEach(message => addMessage(message));
     });
 
     const newChan = document.getElementById('new-chan');
@@ -69,7 +78,6 @@ let chatVisible = false;
       clickToChannel(chanItem, nameChan);
 
       chanList.appendChild(chanItem);
-
       saveChannel();
     }
   }
@@ -81,17 +89,11 @@ let chatVisible = false;
       document.getElementById('new-chan').textContent = '➙';
       chatVisible = !chatVisible;
 
+      console.log("j'emets vers get-messages :)");
       socket.emit('get-messages', nameChan);
 
       alert(`Vous avez sélectionné le canal: ${nameChan}`);
     });
-
-    socket.on('channel-messages', (messages) => {
-      const chatContainer = document.getElementById('chat-page');
-      chatContainer.innerHTML = '';
-  
-      messages.forEach(message => addMessage(message));
-    })
   }
 
   // Save new channel
@@ -106,7 +108,7 @@ let chatVisible = false;
     const savedChannels = JSON.parse(localStorage.getItem('channels')) || [];
     savedChannels.forEach(nameChan => {
       addChannelToList(nameChan);
-    })
+    });
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -228,5 +230,4 @@ let chatVisible = false;
 
     chatPage.appendChild(message);
     chatPage.scrollTop = chatPage.scrollHeight;
-
   }
