@@ -385,7 +385,7 @@ body {
     height: 100px;
     margin-left: -40%;
     scale: 0.6;
-    background-image: url('images/EZpepeFlip.png');
+    background-image: url('/static/images/EZpepeFlip.png');
     background-size: cover;
     border-radius: 20%;
     position: absolute;

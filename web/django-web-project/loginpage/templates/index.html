@@ -1,0 +1,90 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swipe Images in Circle</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+    <div class="background-container"></div>
+
+    <div class="lottie-container">
+        <!-- Lottie animations or other effects here -->
+    </div>
+    
+    <div class="signin-container">
+        <form class="form1" id="id-signin-form" action="{% url 'sign_in' %}" method="POST"> <!-- action="url 'sign_in'" -->
+            {% csrf_token %}
+            <h2>SIGN IN</h2>
+
+            <div class="inputbox">
+                <input type="text" id="username" name="username" required="required">
+                <span>Username</span>
+            </div>
+
+            <!-- <div class="inputbox">
+                <input type="email" id="email" name="email" required="required">
+                <span>Email</span>
+            </div> -->
+
+            <div class="inputbox">
+                <input type="password" id="password" name="password" required="required">
+                <span>Password</span>
+            </div>
+
+            <div class="span-b-container">
+                <span class="span-b">champs obligatoires</span>
+            </div>
+
+            <button type="submit" id="submitButton1" disabled>Je suis prêt</button>
+
+            <div class="next-sign-form-signin">
+                <span class="span-nfin">No account? <a class="trigger-nfin" href="#">Sign up</a> </span>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="signup-container">
+        <form class="form2" id="id-signup-form" action="{% url 'sign_up' %}" method="POST">
+            {% csrf_token %}
+            
+            <h2>SIGN UP</h2>
+            
+            <div class="inputbox">
+                <input type="text" id="username" name="username" required="required">
+                <span>Username</span>
+            </div>
+
+            <div class="inputbox">
+                <input type="email" id="email2" name="email" required="required">
+                <span>Email</span>
+            </div>
+
+            <div class="inputbox">
+                <input type="password" id="password" name="password" required="required">
+                <span>Password</span>
+            </div>
+            
+            <div class="inputbox">
+                <input type="password" id="confirm-password" name="confirm-password" required="required">
+                <span>Confirm password</span>
+            </div>
+            
+            <button type="submit" id="submitButton2" disabled>S'inscrire</button>
+
+            <div class="next-sign-form-signup">
+                <span class="span-nfup">Already member? <a class="trigger-nfup" href="#">Signin</a> </span>
+            </div>
+
+        </form>
+    </div>
+    
+  <script src="{% static 'js/script.js' %}"></script>
+
+</body>
+</html>
