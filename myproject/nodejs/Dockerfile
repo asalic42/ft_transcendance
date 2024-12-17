@@ -20,10 +20,12 @@ RUN node -v && npm -v
 
 WORKDIR /app/www
 
-COPY . /app/www
+COPY ./package*.json /app/www/
 
 RUN npm install
 
-EXPOSE 8000
+COPY . /app/www/
 
-CMD ["npm", "start"]
+EXPOSE 3000
+
+CMD ["node", "/app/www/server.js"]

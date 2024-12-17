@@ -1,21 +1,14 @@
 
 services:
 
-  node:
-    build: ./nodejs
-    volumes:
-      - ./app:/www
-    ports:
-      - "3000:3000"
-    networks:
-      - appnet
-
   db:
     image: postgres:13
     environment:
       POSTGRES_DB: mysqldb
       POSTGRES_USER: user
       POSTGRES_PASSWORD: admin@123
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,6 +19,20 @@ services:
     networks:
       - appnet
 
+  node:
+    build: ./nodejs
+    volumes:
+      - ./nodejs:/app/www
+    environment:
+      DATABASE_URL: postgres://user:admin%40123@db:5432/mysqldb
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - appnet
+
   web:
     build: .
     ports:
@@ -33,12 +40,14 @@ services:
     volumes:
       - .:/app
     environment:
-      - DATABASE_URL=postgres://user:admin@123@db:5432/mysqldb
+      - DATABASE_URL=postgres://user:admin%40123@db:5432/mysqldb
     depends_on:
       db:
         condition: service_healthy
     networks:
       - appnet
+
+  
 
 volumes:
   postgres_data:

@@ -95,5 +95,5 @@ def game_bot_page(request):
     return (render(request, 'game-bot.html'))
 
 @login_required
-def chan_conv_page(request):
-    return (render(request, 'chan-conv.html'))
+def other_game(request):
+    return (render(request, 'other_game.html'))

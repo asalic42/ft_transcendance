@@ -17,6 +17,11 @@ NC='\033[0m'
 # HELP
 if [ $# -ne 1 ]; then
     echo -e "${BLUE}[ COMMANDES ]${NC}"
+    echo -e "\n├ ${PURPLE_N}REMOVE + BUILD + LAUNCH${NC}"
+
+    echo -e "│\t> ${YELLOW_N}ev${NC}          ${PURPLE}|${NC} Déconstruction, construction et lancement :"
+    echo -e "│\t\t\tÉquivalent au combo de commandes :  r-all + b-all + l"
+    
     echo -e "\n├ ${PURPLE_N}BUILD${NC}"
 
     echo -e "│\t> ${YELLOW_N}b-all${NC}       ${PURPLE}|${NC} Construction complète :"
@@ -44,6 +49,13 @@ if [ $# -ne 1 ]; then
 fi
 
 
+# FULL REMOVE + BUILD + LAUNCH
+if [ "$1" == "ev" ];then
+    ./log.sh r-all
+    ./log.sh b-all
+    ./log.sh l
+fi
+
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
 
@@ -67,7 +79,7 @@ if [ "$1" == "b" ]; then
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log.sh l OR http://127.0.0.1:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR http://127.0.0.1:8000 "
 fi
 
 # FULL REMOVE
@@ -106,4 +118,3 @@ if [ "$1" == "l" ]; then
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
     open http://127.0.0.1:8000
 fi
-

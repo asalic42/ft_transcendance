@@ -87,7 +87,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgres://user:admin@123@localhost/mysqldb')
+        default=os.getenv('DATABASE_URL', 'postgres://user:admin%40123@db:5432/mysqldb')
     )
 }
 
