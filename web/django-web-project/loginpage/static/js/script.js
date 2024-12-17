@@ -26,7 +26,6 @@ function checkFormValidity(form, formInput, formButton) {
     formButton.disabled = !allFilled;
 
     const emailInputs = form.querySelectorAll('input[type="email"]');
-    console.log(emailInputs);
 
     emailInputs.forEach(emailInput => {
         if (emailInput.value.trim() !== '') {
@@ -40,6 +39,28 @@ function checkFormValidity(form, formInput, formButton) {
             emailInput.classList.remove('invalid');
         }
     });
+
+    // Vérification de la correspondance entre le mot de passe et la confirmation du mot de passe
+    const passwordInput = form.querySelector('input[name="password"]');
+    const confirmPasswordInput = form.querySelector('input[name="confirm_password"]');
+    const mismatchMessage = document.getElementById('password-mismatch-message');
+
+    console.log(passwordInput);
+    console.log(confirmPasswordInput);
+
+    if (passwordInput && confirmPasswordInput) {
+
+        if (passwordInput.value === confirmPasswordInput.value) {
+            mismatchMessage.classList.remove('show');
+            mismatchMessage.style.transition = "all 0.2s ease";
+            console.log("same1");  // Affiche "same" si les mots de passe sont identiques
+        } else {
+            mismatchMessage.classList.add('show');
+            mismatchMessage.style.transition = "all 0.5s ease";
+            signupSubmitButton.disabled = true;
+            console.log("dismatch1");  // Affiche "dismatch" si les mots de passe ne correspondent pas
+        }
+    }
 
     if (signupSubmitButton.disabled === false) {
         nextSignFormSignupLink.classList.add('show-animation');
@@ -138,6 +159,7 @@ signupInputs.forEach(input => {
         checkFormValidity(signupForm, signupInputs, signupSubmitButton);
     });
 });
+
 
 // Vérifie dès le départ si le formulaire est valide au chargement de la page
 checkFormValidity(signinForm, signinInputs, signinSubmitButton);

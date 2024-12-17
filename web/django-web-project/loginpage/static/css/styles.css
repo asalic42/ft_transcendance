@@ -232,7 +232,7 @@ body {
     margin-left: 10%;
     margin-bottom: 15px;
     border: 2px solid rgb(165, 182, 182);
-    background-color: rgb(58, 68, 68);
+    background-color: #3a4444;
     color: #ccc;
     border-radius: 4px;
     font-size: 14px;
@@ -721,4 +721,29 @@ body {
 .signup-container.show {
   margin-left: 700px;
   rotate: -20deg;
+}
+
+
+.test {
+  position: absolute;
+  font-size: 12px;
+  color: #ccc;
+  margin-top: 130px;
+  text-align: center;
+}
+
+
+.error-message {
+  position: absolute;
+  font-size: 12px;
+  margin-left: 30px;
+  color: white;
+  transition: all 1s ease;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.error-message.show {
+  visibility: visible;
+  opacity: 1;
 }
