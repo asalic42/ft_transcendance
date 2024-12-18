@@ -37,13 +37,13 @@ function connectToDb(retries = 5, delay = 3000) {
 
 // Creer une table pour sauvegarder les messages de chaque channel
 async function  createChatTable(client) {
-  // const chanQuery = `
-  //   CREATE TABLE IF NOT EXISTS channels (
-  //     id SERIAL PRIMARY KEY,
-  //     name VARCHAR(255) NOT NULL UNIQUE,
-  //     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  //   );
-  // `;
+  const chanQuery = `
+    CREATE TABLE IF NOT EXISTS channels (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL UNIQUE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
 
   const tableQuery = `
     CREATE TABLE IF NOT EXISTS messages (
@@ -55,7 +55,7 @@ async function  createChatTable(client) {
     );
   `;
   try {
-    // await client.query(chanQuery);
+    await client.query(chanQuery);
     await client.query(tableQuery);
     console.log('Table "messages" et "channels"creees avec succes !');
   } catch (error) {
@@ -79,35 +79,6 @@ function startServer() {
     }
   });
 
-  app.use(express.json());
-
-  // Charge les messages d'un cannal specifique
-  app.get('/messages/:channelName', async (req, res) => {
-    const channelName = req.params.channelName;
-    try {
-      const result = await client.query('SELECT * FROM messages WHERE channel_name = $1 ORDER BY created_at ASC', [channelName]);
-      res.json(result.rows); // Return messages under JSON
-    } catch (error) {
-      console.error('Erreur lors du chargement des messages: ', error);
-      res.status(500).json({ error: 'Erreur interne du serveur' });
-    }
-  });
-
-  // Enregistre un nouveau message dans la bdd
-  app.post('/messages', async (req, res) => {
-    const { channelName, sender, message } = req.body;
-    try {
-      const result = await client.query(
-        'INSERT INTO messages (channel_name, sender, message) VALUES (1$, 2$, 3$) RETURNING *',
-        [channelName, sender, message]
-      );
-      res.json(result.rows[0]); //Return saved message
-    } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du message: ', error);
-      res.status(500).json({ error: 'Erreur interne du serveur' });
-    }
-  });
-
   io.on('connection', (socket) => {
     console.log('Un utilisateur est connecté');
 
@@ -120,10 +91,12 @@ function startServer() {
           const checkQuery = 'SELECT * FROM channels WHERE name = $1';
           const checkResult = await client.query(checkQuery, [channelName]);
 
-          if (checkResult.rows.lenght === 0) {
+          if (checkResult.rows.length === 0) {
             const insertQuery = 'INSERT INTO channels(name) VALUES($1) RETURNING *'
             const insertResult = await client.query(insertQuery, [channelName]);
             
+            console.log('Canal cree avec succes: ', insertResult.rows[0]);
+
             io.emit('new-channel', channelName);
             console.log(`Nouveau canal cree: ${channelName}`);
           }
@@ -149,14 +122,31 @@ function startServer() {
           [channelName]
         );
 
-        if (result.rows.lenght === 0) {
+        if (result.rows.length === 0) {
           console.log('Aucun message trouve');
         }
 
+        console.log('Messages récupérés:', result.rows);
         socket.emit('channel-messages', result.rows);
       } catch (error) {
         console.log('Erreur lors de la recuperation des messages du channel: ', error);
       }
+    });
+
+    // Save les nouveaux messages entrants
+    socket.on('new-message', async (data) => {
+        const { channelName, sender, message } = data;
+        console.log("Try to save the message");
+        try {
+          const result = await client.query(
+            'INSERT INTO messages (channel_name, sender, message) VALUES ($1, $2, $3) RETURNING *',
+            [channelName, sender, message]
+          );
+          io.emit('new-message', result.rows[0].message); //Return saved message
+        } catch (error) {
+          console.error('Erreur lors de l\'enregistrement du message: ', error);
+          socket.emit('error', 'Erreur interne du serveur');
+        }
     });
 
     // Charge les channels
@@ -164,7 +154,7 @@ function startServer() {
       try {
         const result = await client.query('SELECT name FROM channels');
         if (result.rows && Array.isArray(result.rows)) {
-          socket.emit('all-channels', result.row.map(channel => channel.name));
+          socket.emit('all-channels', result.rows.map(channel => channel.name));
         } else {
           socket.emit('all-channels', []);
         }
@@ -175,8 +165,15 @@ function startServer() {
     });
 
     // Deconnexion d'un user
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log('Utilisateur déconnecté');
+      try {
+        await client.query('DELETE FROM channels');
+        await client.query ('DELETE FROM messages');
+        console.log('tous les channels et messages ont ete supprimes');
+      } catch (error) {
+        console.error('Erreur lors de la suppresions des channels et des messages', error);
+      }
     });
   });
 

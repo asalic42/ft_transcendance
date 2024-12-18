@@ -7,6 +7,8 @@
 
 let socket;
 let chatVisible = false;
+let currentChan;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
@@ -18,18 +20,13 @@ let chatVisible = false;
       console.log("Connection etablie");
     })
 
-    // Écouter les messages du serveur
-    // socket.on('message', (msg) => {
-    //   console.log('Message reçu:', msg);
-    // });
-
     socket.on('channel-messages', (messages) => {
       const chatContainer = document.getElementById('chat-page');
       chatContainer.innerHTML = '';
       
       console.log("Je tente de recup les messages !");
 
-      messages.forEach(message => addMessage(message));
+      messages.forEach(message => addMessage(message.message));
     });
 
     const newChan = document.getElementById('new-chan');
@@ -38,19 +35,21 @@ let chatVisible = false;
       // Disparition du chat en cours
       if (chatVisible) {
         reversePopCenterChat();
+        currentChan = null;
         newChan.textContent = '+';
+        chatVisible = !chatVisible;
       }
       else {
         // Creation de chan + ouverture
         setChannelName(function(nameChan) {
           popCenterChat(nameChan);
           newChan.textContent = '➙';
-
+          chatVisible = !chatVisible;
+          currentChan = nameChan;
           socket.emit('create-channel', nameChan);
           addChannelToList(nameChan);
         });
       }
-      chatVisible = !chatVisible;
     });
 
     loadChannels();
@@ -87,10 +86,12 @@ let chatVisible = false;
     chanItem.addEventListener('click', () => {
       popCenterChat(nameChan);
       document.getElementById('new-chan').textContent = '➙';
-      chatVisible = !chatVisible;
+      if (!chatVisible)
+        chatVisible = !chatVisible;
+      currentChan = nameChan;
 
-      console.log("j'emets vers get-messages :)");
-      socket.emit('get-messages', nameChan);
+      console.log('Ca a clique !!!');
+      socket.emit('get-messages', currentChan);
 
       alert(`Vous avez sélectionné le canal: ${nameChan}`);
     });
@@ -203,9 +204,14 @@ let chatVisible = false;
 
       const msg = document.getElementById('message-input').value;
       if (msg != "") {
+        console.log({
+          channelName: currentChan, sender: 'client', message: msg
+        });
+    
+        socket.emit('new-message', {channelName: currentChan, sender: 'client', message: msg});
+    
         addMessage(msg);
         document.getElementById('message-input').value = '';  // Vide le champ de saisie
-        socket.emit('message', msg);  // Envoyer le message au serveur
         console.log("MESSAGE ENVOYE !");  
       }
     });
