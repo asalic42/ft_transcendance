@@ -2,11 +2,11 @@ const { Client } = require('pg');
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { start } = require('repl');
+
+let users = {};
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
 let client;
-
 
 function connectToDb(retries = 5, delay = 3000) {
   client = new Client({
@@ -64,7 +64,6 @@ async function  createChatTable(client) {
   }
 }
 
-
 // Creer le serveur pour gerer les channels
 function startServer() {
 
@@ -81,6 +80,11 @@ function startServer() {
 
   io.on('connection', (socket) => {
     console.log('Un utilisateur est connecté');
+
+    socket.on('set-username', (username) => {
+      users[socket.id] = username;
+      console.log(`Utilisateur ${username} est maintenant connecte`);
+    });
 
     // Creation d'un channel dans la bdd
     socket.on('create-channel', async (channelName) => {
@@ -143,6 +147,11 @@ function startServer() {
             [channelName, sender, message]
           );
           io.emit('new-message', result.rows[0].message); //Return saved message
+          // Test recup user
+          const userId = getUserIdFromToken()
+
+
+
         } catch (error) {
           console.error('Erreur lors de l\'enregistrement du message: ', error);
           socket.emit('error', 'Erreur interne du serveur');

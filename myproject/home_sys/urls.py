@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import home, signout, delete_account, delete_success, service_unavailable, profile_page, game_page, game_mode_page, game_bot_page, channels_page, other_game
+# from .views import UserList
 
 urlpatterns = [
     path('', home, name="home"),
@@ -13,4 +14,5 @@ urlpatterns = [
     path('game/', game_page, name='game'),
     path('game-bot/', game_bot_page, name='game-bot'),
     path('other_game/', other_game, name='other_game'),
+    # path('api/get-username/', GetUserName.as_view(), name='get_username'),
 ]

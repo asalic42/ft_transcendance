@@ -6,6 +6,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 
+# Creer une API django avec DRF (Django REST Framework)
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework.views import IsAuthenthticated
+
+
 """
 |
 |    Pour la page home,
@@ -97,3 +103,12 @@ def game_bot_page(request):
 @login_required
 def other_game(request):
     return (render(request, 'other_game.html'))
+
+
+# class GetUserName(APIView):
+#     permission_classes = [IsAuthenthticated]
+
+#     # Renvoie le user authentifie
+#     def get(self, request):
+#         usernames = request.user.username
+#         return Response({'username': usernames})

@@ -4,16 +4,20 @@
 - socket.emit = fonction qui communique avec celle du cote client
 */
 
-
 let socket;
 let chatVisible = false;
 let currentChan;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
     socket = io('http://localhost:3000');
+
+    // socket.emit('set')
+
+   
+    // Appeler la fonction pour récupérer le nom d'utilisateur
+    // fetchUsername();
 
 
     socket.on('connect', () => {
@@ -60,6 +64,38 @@ let currentChan;
       });
     });
   });
+
+  // Fonction pour récupérer le nom d'utilisateur depuis l'API Django
+  // function fetchUsername() {
+  //   const token = localStorage.getItem('jwtToken');  // Récupérer le token JWT du localStorage
+  
+  //   if (!token) {
+  //       console.error("Aucun token JWT trouvé.");
+  //       return;
+  //   }
+  
+  //   // Faire une requête à l'API Django pour obtenir le nom de l'utilisateur
+  //   fetch('http://127.0.0.1:8000/api/get-username/', {
+  //       method: 'GET',
+  //       headers: {
+  //           'Authorization': 'Bearer ' + token  // Passer le token dans l'en-tête Authorization
+  //       }
+  //   })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //       if (data.username) {
+  //           console.log('Nom d\'utilisateur récupéré :', data.username);
+  //           // Vous pouvez maintenant utiliser ce nom d'utilisateur dans votre logique
+  //           socket.emit('set-username', data.username);
+  //       } else {
+  //           console.error('Erreur :', data.error || 'Nom d\'utilisateur non trouvé');
+  //       }
+  //   })
+  //   .catch(error => {
+  //       console.error('Erreur lors de la récupération du nom d\'utilisateur :', error);
+  //   });
+  // }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* RIGHT CHANNELS PART */
