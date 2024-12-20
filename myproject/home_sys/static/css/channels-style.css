@@ -154,19 +154,12 @@ h1 {
 
 /* Message input + button + message prints */
 .message {
-    margin: 10px;
-    padding: 10px;
-    background-color: #ED4EB0;
-    color: black;
-    border-radius: 10px;
-    margin-bottom: 5px;
-    width: fit-content;
-    max-width: calc(100% - 20px);
+    top: 10px;
     align-self: flex-end;
+    position: relative;
     overflow-wrap: break-word;
     word-wrap: break-word;
     display: inline-block;
-    position: relative;
     white-space: normal;
 }
 
@@ -189,4 +182,23 @@ h1 {
     padding: 5px;
     font-size: 16px;
     width: 100%;
+}
+
+.message .username {
+    position: absolute;
+    right: 10px;
+    color: rgb(57, 117, 247);
+    font-weight: bold;
+}
+
+.message p {
+    margin: 10px;
+    padding: 10px;
+    margin-bottom: 5px;
+    color: white;
+    background-color: black;
+    max-width: calc(100% - 20px);
+    border-radius: 10px;
+    width: fit-content;
+    white-space: normal
 }

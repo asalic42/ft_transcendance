@@ -8,6 +8,11 @@ let socket;
 let chatVisible = false;
 let currentChan;
 
+// Recup l'user courant
+const userElement = document.getElementById('current-username');
+const username = userElement.getAttribute('data-username');
+console.log(`Current username is ${username}`);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
@@ -16,11 +21,6 @@ let currentChan;
     socket.on('connect', () => {
       console.log("Connection etablie");
     })
-    
-    // Recup l'user courant
-    const userElement = document.getElementById('current-username');
-    const username = userElement.getAttribute('data-username');
-    console.log(`Current username is ${username}`);
 
     socket.on('channel-messages', (messages) => {
       const chatContainer = document.getElementById('chat-page');
@@ -47,8 +47,8 @@ let currentChan;
           newChan.textContent = '➙';
           chatVisible = !chatVisible;
           currentChan = nameChan;
-          socket.emit('create-channel', nameChan);
-          addChannelToList(nameChan);
+          socket.emit('create-channel', currentChan);
+          addChannelToList(currentChan);
         });
       }
     });
@@ -56,8 +56,8 @@ let currentChan;
     loadChannels();
     socket.emit('load-channels');
     socket.on('all-channels', (channels) => {
-      channels.forEach(nameChan => {
-        addChannelToList(nameChan);
+      channels.forEach(currentChan => {
+        addChannelToList(currentChan);
       });
     });
   });
@@ -90,11 +90,14 @@ let currentChan;
       if (!chatVisible)
         chatVisible = !chatVisible;
       currentChan = nameChan;
+      
+      const center = document.querySelector('.center');
+      const h2content = document.getElementById('chat-name');
+      h2content.textContent = currentChan;
 
-      console.log('Ca a clique !!!');
       socket.emit('get-messages', currentChan);
 
-      alert(`Vous avez sélectionné le canal: ${nameChan}`);
+      alert(`Vous avez sélectionné le canal: ${currentChan}`);
     });
   }
 
@@ -149,7 +152,6 @@ let currentChan;
         <button id="send-button">Envoyer</button>
       </div>
     `;
-
     return center;
   }
 
@@ -165,15 +167,17 @@ let currentChan;
     function handleInputName(event) {
       if (event.key === 'Enter') {
         event.preventDefault();
-        const name = inputChannel.value.trim();
+        const name = inputChannel.value;
+
+
 
         if (name !== '') {
           alert(`Channel "${name}" created !`);
           overlay.style.display = 'none';
           inputContainer.classList.remove('show');
           document.getElementById('channel-name').value = '';
-          callback(name);
           inputChannel.removeEventListener('keydown', handleInputName);
+          callback(name);
         }
         else {
           alert(`Enter a name !`);
@@ -206,10 +210,10 @@ let currentChan;
       const msg = document.getElementById('message-input').value;
       if (msg != "") {
         console.log({
-          channelName: currentChan, message: msg
+          channelName: currentChan, sender: username, message: msg
         });
     
-        socket.emit('new-message', {channelName: currentChan, message: msg});
+        socket.emit('new-message', {channelName: currentChan, sender: username, message: msg});
     
         addMessage(msg);
         document.getElementById('message-input').value = '';  // Vide le champ de saisie
@@ -233,7 +237,16 @@ let currentChan;
 
     const message = document.createElement('div');
     message.classList.add('message');
-    message.textContent = mess;
+
+    const usernameElement = document.createElement('span');
+    usernameElement.classList.add('username');
+    usernameElement.textContent = username;
+
+    const messElement = document.createElement('p');
+    messElement.textContent = mess;
+
+    message.appendChild(usernameElement);
+    message.appendChild(messElement);
 
     chatPage.appendChild(message);
     chatPage.scrollTop = chatPage.scrollHeight;
