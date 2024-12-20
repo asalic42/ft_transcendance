@@ -13,23 +13,20 @@ let currentChan;
   document.addEventListener("DOMContentLoaded", function() {
     socket = io('http://localhost:3000');
 
-    // socket.emit('set')
-
-   
-    // Appeler la fonction pour récupérer le nom d'utilisateur
-    // fetchUsername();
-
-
     socket.on('connect', () => {
       console.log("Connection etablie");
     })
+    
+    // Recup l'user courant
+    const userElement = document.getElementById('current-username');
+    const username = userElement.getAttribute('data-username');
+    console.log(`Current username is ${username}`);
 
     socket.on('channel-messages', (messages) => {
       const chatContainer = document.getElementById('chat-page');
       chatContainer.innerHTML = '';
       
       console.log("Je tente de recup les messages !");
-
       messages.forEach(message => addMessage(message.message));
     });
 
@@ -64,38 +61,6 @@ let currentChan;
       });
     });
   });
-
-  // Fonction pour récupérer le nom d'utilisateur depuis l'API Django
-  // function fetchUsername() {
-  //   const token = localStorage.getItem('jwtToken');  // Récupérer le token JWT du localStorage
-  
-  //   if (!token) {
-  //       console.error("Aucun token JWT trouvé.");
-  //       return;
-  //   }
-  
-  //   // Faire une requête à l'API Django pour obtenir le nom de l'utilisateur
-  //   fetch('http://127.0.0.1:8000/api/get-username/', {
-  //       method: 'GET',
-  //       headers: {
-  //           'Authorization': 'Bearer ' + token  // Passer le token dans l'en-tête Authorization
-  //       }
-  //   })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //       if (data.username) {
-  //           console.log('Nom d\'utilisateur récupéré :', data.username);
-  //           // Vous pouvez maintenant utiliser ce nom d'utilisateur dans votre logique
-  //           socket.emit('set-username', data.username);
-  //       } else {
-  //           console.error('Erreur :', data.error || 'Nom d\'utilisateur non trouvé');
-  //       }
-  //   })
-  //   .catch(error => {
-  //       console.error('Erreur lors de la récupération du nom d\'utilisateur :', error);
-  //   });
-  // }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* RIGHT CHANNELS PART */
@@ -241,10 +206,10 @@ let currentChan;
       const msg = document.getElementById('message-input').value;
       if (msg != "") {
         console.log({
-          channelName: currentChan, sender: 'client', message: msg
+          channelName: currentChan, message: msg
         });
     
-        socket.emit('new-message', {channelName: currentChan, sender: 'client', message: msg});
+        socket.emit('new-message', {channelName: currentChan, message: msg});
     
         addMessage(msg);
         document.getElementById('message-input').value = '';  // Vide le champ de saisie

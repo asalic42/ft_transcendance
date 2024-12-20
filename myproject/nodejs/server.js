@@ -2,13 +2,14 @@ const { Client } = require('pg');
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const jwt = require('jsonwebtoken');
 
 let users = {};
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
 let client;
 
-function connectToDb(retries = 5, delay = 3000) {
+async function connectToDb(retries = 5, delay = 3000) {
   client = new Client({
     connectionString: process.env.DATABASE_URL,
   });
@@ -33,6 +34,37 @@ function connectToDb(retries = 5, delay = 3000) {
         });
     }
   });
+}
+
+function verifyToken(socket, next) {
+  // Envoie du Token comme requete
+  const token = socket.handshake.query.token;
+  if (!token) {
+    return next(new Error('Token manquant'));
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.log('Erreur de verif token');
+      return next(new Error('Token invalide'));
+    }
+    // Decode et ajout de l'ID utilisateur
+    socket.userId = decoded.id;
+    console.log('ID utilisateur TROUVE !');
+    
+    next();
+  });
+}
+
+async function getUsernameById(userId) {
+  const client = await connectToDb();
+  try {
+    const result = await client.query('SELECT username FROM users WHERE id = $1', [userId]);
+    return result.rows[0]?.username;
+  } catch (error) {
+    console.error('Erreur lors de la recup du username', error);
+    return null;
+  }
 }
 
 // Creer une table pour sauvegarder les messages de chaque channel
@@ -67,6 +99,7 @@ async function  createChatTable(client) {
 // Creer le serveur pour gerer les channels
 function startServer() {
 
+  // Creation du server HTTP
   const app = express();
   const server = http.createServer(app);
 
@@ -78,13 +111,18 @@ function startServer() {
     }
   });
 
-  io.on('connection', (socket) => {
-    console.log('Un utilisateur est connecté');
+  // Verif Token en utilisant le middleware sur chaque connexion
+  // io.use(verifyToken);
+  // console.log("coucou je suis la bitch");
 
-    socket.on('set-username', (username) => {
-      users[socket.id] = username;
-      console.log(`Utilisateur ${username} est maintenant connecte`);
-    });
+  // Connexion au Socket du serveur
+  io.on('connection', (socket) => {
+    console.log('Un utilisateur est connecté avec l\'ID: ', socket.userId);
+
+    // socket.on('set-username', (username) => {
+      // users[socket.id] = username;
+      // console.log(`Utilisateur ${username} est maintenant connecte`);
+    // });
 
     // Creation d'un channel dans la bdd
     socket.on('create-channel', async (channelName) => {
@@ -119,6 +157,7 @@ function startServer() {
       }
     });
 
+    // Recupere tous les messages d'une conv
     socket.on('get-messages', async (channelName) => {
       try {
         const result = await client.query(
@@ -139,23 +178,28 @@ function startServer() {
 
     // Save les nouveaux messages entrants
     socket.on('new-message', async (data) => {
-        const { channelName, sender, message } = data;
-        console.log("Try to save the message");
-        try {
-          const result = await client.query(
-            'INSERT INTO messages (channel_name, sender, message) VALUES ($1, $2, $3) RETURNING *',
-            [channelName, sender, message]
-          );
-          io.emit('new-message', result.rows[0].message); //Return saved message
-          // Test recup user
-          const userId = getUserIdFromToken()
+      // const username = await getUsernameById(socket.userId)
+      // if (!username) {
+        // console.log('Nom d\'utilisateur introuvable...');
+        // return ;
+      // }
+      // console.log(`${username} a envoye un message !`);
 
-
-
-        } catch (error) {
-          console.error('Erreur lors de l\'enregistrement du message: ', error);
-          socket.emit('error', 'Erreur interne du serveur');
-        }
+      const username= "Michel";
+      const { channelName, message } = data;
+      console.log("Try to save the message");
+      try {
+        const result = await client.query(
+          'INSERT INTO messages (channel_name, sender, message) VALUES ($1, $2, $3) RETURNING *',
+          [channelName, username, message]
+        );
+        io.emit('new-message', result.rows[0].message); //Return saved message
+        // Test recup user
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement du message: ', error);
+        socket.emit('error', 'Erreur interne du serveur');
+      }
     });
 
     // Charge les channels
@@ -190,6 +234,9 @@ function startServer() {
     console.log('Serveur en cours d\'exécution sur http://localhost:8000');
   });
 }
+
+
+
 
 console.log('Tentative de connexion à la base de données...');
 connectToDb();
