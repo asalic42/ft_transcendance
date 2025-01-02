@@ -94,6 +94,10 @@ def game_page(request):
     return (render(request, 'game.html'))
 
 @login_required
+def game_choice_page(request):
+    return (render(request, 'game-choice.html'))
+
+@login_required
 def game_mode_page(request):
     return (render(request, 'game-mode.html'))
 
@@ -105,11 +109,6 @@ def game_bot_page(request):
 def other_game(request):
     return (render(request, 'other_game.html'))
 
-
-# class GetUserName(APIView):
-#     permission_classes = [IsAuthenthticated]
-
-#     # Renvoie le user authentifie
-#     def get(self, request):
-#         usernames = request.user.username
-#         return Response({'username': usernames})
+@login_required
+def tournament_page(request):
+    return (render(request, 'tournament.html'))

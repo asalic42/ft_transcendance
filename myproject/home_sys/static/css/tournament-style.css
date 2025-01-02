@@ -1,0 +1,28 @@
+@font-face {
+    font-family: Namaku;
+    src: url("../fonts/Namaku.ttf");
+}
+
+body {
+    background-color: #23232e;
+    font-family: 'Namaku';
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.square {
+    width: 90%;
+    height: 90%;
+    background-color: #13131a;
+    border-radius: 3%;
+}
+
+.square h3 {
+    color: white;
+    text-align: center;
+    padding-top: 15px;
+}

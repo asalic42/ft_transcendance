@@ -10,17 +10,13 @@
     <div class="rectangle"></div>
     <h1 class="title">Choix du mode de jeu</h1>
     <div class="mode-choices">
-        <a href="{% url 'game' %}" class="game">
-            <span class="game-mode">1v1 local</span>
+        <a href="{% url 'game-mode' %}" class="game-mode">
+            <span class="game-mode">Pong</span>
         </a>
-        <a href="{% url 'game-bot' %}" class="game-bot">
-            <span class="game-mode">Solo</span>
-        </a>
-		<a href="{% url 'tournament' %}" class="tournament">
-            <span class="game-mode">Tournois</span>
+		<a href="{% url 'other_game' %}" class="bricks">
+            <span class="game-mode">Casse Briques</span>
         </a>
     </div>
 </div>
-
 
 {% endblock %}
