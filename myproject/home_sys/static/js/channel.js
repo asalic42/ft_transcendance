@@ -22,6 +22,13 @@ console.log(`Current username is ${username}`);
       console.log("Connection etablie");
     })
 
+    loadChannels();
+    socket.emit('load-channels');
+    socket.on('all-channels', (channels) => {
+      channels.forEach(currentChan => {
+        addChannelToList(currentChan);
+      });
+    });
     socket.on('channel-messages', (messages) => {
       const chatContainer = document.getElementById('chat-page');
       chatContainer.innerHTML = '';
@@ -53,13 +60,13 @@ console.log(`Current username is ${username}`);
       }
     });
 
-    loadChannels();
-    socket.emit('load-channels');
-    socket.on('all-channels', (channels) => {
-      channels.forEach(currentChan => {
-        addChannelToList(currentChan);
-      });
-    });
+    // loadChannels();
+    // socket.emit('load-channels');
+    // socket.on('all-channels', (channels) => {
+    //   channels.forEach(currentChan => {
+    //     addChannelToList(currentChan);
+    //   });
+    // });
   });
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +98,7 @@ console.log(`Current username is ${username}`);
         chatVisible = !chatVisible;
       currentChan = nameChan;
       
-      const center = document.querySelector('.center');
+      // const center = document.querySelector('.center');
       const h2content = document.getElementById('chat-name');
       h2content.textContent = currentChan;
 
@@ -169,8 +176,6 @@ console.log(`Current username is ${username}`);
         event.preventDefault();
         const name = inputChannel.value;
 
-
-
         if (name !== '') {
           alert(`Channel "${name}" created !`);
           overlay.style.display = 'none';
@@ -208,11 +213,7 @@ console.log(`Current username is ${username}`);
     sendButton.addEventListener('click', () => {
 
       const msg = document.getElementById('message-input').value;
-      if (msg != "") {
-        console.log({
-          channelName: currentChan, sender: username, message: msg
-        });
-    
+      if (msg != "") {    
         socket.emit('new-message', {channelName: currentChan, sender: username, message: msg});
     
         addMessage(msg);
@@ -249,5 +250,8 @@ console.log(`Current username is ${username}`);
     message.appendChild(messElement);
 
     chatPage.appendChild(message);
+
+    // socket.emit('send-message', currentChan, message);
+
     chatPage.scrollTop = chatPage.scrollHeight;
   }

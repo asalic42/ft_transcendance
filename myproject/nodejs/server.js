@@ -2,6 +2,7 @@ const { Client } = require('pg');
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const { channel } = require('diagnostics_channel');
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
 let client;
@@ -41,7 +42,15 @@ async function  createChatTable(client) {
       name VARCHAR(255) NOT NULL UNIQUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-  `;
+  `; 
+
+  // const usersChannelsQuery = `
+  //   CREATE TABLE IF NOT EXISTS user_channels (
+  //     user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  //     channel_id INT REFERENCES channels(id) ON DELETE CASCADE,
+  //     PRIMARY KEY (user_id, channels_id)
+  //   );
+  // `;
 
   const tableQuery = `
     CREATE TABLE IF NOT EXISTS messages (
@@ -55,7 +64,8 @@ async function  createChatTable(client) {
   try {
     await client.query(chanQuery);
     await client.query(tableQuery);
-    console.log('Table "messages" et "channels"creees avec succes !');
+    // await client.query(usersChannelsQuery);
+    console.log('Table "messages", "user_channels" et "channels"creees avec succes !');
   } catch (error) {
     console.error('Erreur lors de la creation de la table "messages": ', error);
     throw error;
@@ -79,7 +89,7 @@ function startServer() {
 
   // Connexion au Socket du serveur
   io.on('connection', (socket) => {
-    console.log('Un utilisateur est connecté avec l\'ID: ', socket.userId);
+    console.log('Un utilisateur est connecté avec l\'ID: ', socket.id);
 
     // Creation d'un channel dans la bdd
     socket.on('create-channel', async (channelName) => {
@@ -133,18 +143,26 @@ function startServer() {
       }
     });
 
-    // Save les nouveaux messages entrants
+    // Save les nouveaux messages entrants (dans la bdd)
     socket.on('new-message', async (data) => {
 
       const { channelName, sender, message } = data;
       console.log("Try to save the message");
+
       try {
         const result = await client.query(
           'INSERT INTO messages (channel_name, sender, message) VALUES ($1, $2, $3) RETURNING *',
           [channelName, sender, message]
         );
-        io.emit('new-message', result.rows[0].message); //Return saved message
+
+
+        io.to(channelName).emit('new-message', {
+          message: result.row[0].message,
+          sender: result.rows[0].sender,
+        }); //Return saved message
         
+        console.log('Message envoye au canal ', channelName);
+
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement du message: ', error);
         socket.emit('error', 'Erreur interne du serveur');
@@ -170,9 +188,9 @@ function startServer() {
     socket.on('disconnect', async () => {
       console.log('Utilisateur déconnecté');
       try {
-        await client.query('DELETE FROM channels');
-        await client.query ('DELETE FROM messages');
-        console.log('tous les channels et messages ont ete supprimes');
+        // await client.query('DELETE FROM channels');
+        // await client.query ('DELETE FROM messages');
+        // console.log('tous les channels et messages ont ete supprimes');
       } catch (error) {
         console.error('Erreur lors de la suppresions des channels et des messages', error);
       }
@@ -183,9 +201,6 @@ function startServer() {
     console.log('Serveur en cours d\'exécution sur http://localhost:8000');
   });
 }
-
-
-
 
 console.log('Tentative de connexion à la base de données...');
 connectToDb();
