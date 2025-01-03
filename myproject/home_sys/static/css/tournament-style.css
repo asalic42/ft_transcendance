@@ -1,3 +1,5 @@
+/* color pink: #ED4EB0 */
+
 @font-face {
     font-family: Namaku;
     src: url("../fonts/Namaku.ttf");
@@ -5,24 +7,91 @@
 
 body {
     background-color: #23232e;
-    font-family: 'Namaku';
 }
 
 .container {
     display: flex;
     justify-content: center;
-    height: 100vh;
+    height: 90vh;
+    font-family: 'Namaku';
 }
 
 .square {
     width: 90%;
-    height: 90%;
+    height: auto;
+    max-height: 100vh;
     background-color: #13131a;
     border-radius: 3%;
+    color: white;
 }
 
-.square h3 {
-    color: white;
+.square h2 {
     text-align: center;
     padding-top: 15px;
+}
+
+/* Ajustemnent du nombre de joueurs */
+.input-number {
+    position: relative;
+    margin: 0 10px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+}
+
+.input-number #title {
+    color: white;
+    margin-right: 10px;
+}
+
+.players-number {
+    color: black;
+    width: 40px;
+    height: 20px;
+    text-align: center;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 10%;
+    background-color: white;
+}
+
+.arrows {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+button.arrow {
+    font-size: 10px;
+    cursor: pointer;
+    display: block;
+    height: 20px;
+}
+
+button.arrow:focus {
+    outline: none;
+}
+
+button.arrow:hover {
+    background-color: #23232e;
+}
+
+/* Formulaires joueurs */
+.forms {
+    margin-top: 50px;
+    margin-left: 10px;
+
+}
+
+.form-player h4 {
+    margin-bottom: 5px;
+    color: #ED4EB0;
+}
+
+.form-player input {
+    height: 30px;
+    font-family: 'Namaku';
+    margin-left: 50px;
+    font-size: 18px;
+    border: 2px solid #ED4EB0;
 }

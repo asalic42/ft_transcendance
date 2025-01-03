@@ -9,9 +9,34 @@
 <div class="container">
 
     <div class="square">
-        <h3>Bienvenue dans le systeme de tournois</h3>
+        <h2>Bienvenue dans le systeme de tournois</h3>
+
+        <div class="input-number">
+            <h4 id="title">Number of players:</h4>
+            <span class="players-number" id="numberInput">3</span>
+            <div class="arrows">
+                <button class="arrow" id="increase">▲</button>
+                <button class="arrow" id="decrease">▼</button>
+            </div>
+        </div>
+
+        <div class="forms">
+            <div class="form-player">
+                <h4 id="player">Player 1:</h4>
+                <input class="input-alias" title="Alias">
+            </div>
+            <div class="form-player">
+                <h4 id="player">Player 2:</h4>
+                <input class="input-alias" title="Alias">
+            </div>
+            <div class="form-player">
+                <h4 id="player">Player 3:</h4>
+                <input class="input-alias" title="Alias">
+            </div>
+        </div>
     </div>
     
+    <script src="{% static 'js/tournament.js' %}"></script>
 </div>
 
 {% endblock %}
