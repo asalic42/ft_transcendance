@@ -16,19 +16,14 @@ console.log(`Current username is ${username}`);
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
-    socket = io('http://localhost:3000');
+    socket = io('http://0.0.0.0:3000');
 
     socket.on('connect', () => {
       console.log("Connection etablie");
     })
 
     loadChannels();
-    socket.emit('load-channels');
-    socket.on('all-channels', (channels) => {
-      channels.forEach(currentChan => {
-        addChannelToList(currentChan);
-      });
-    });
+
     socket.on('channel-messages', (messages) => {
       const chatContainer = document.getElementById('chat-page');
       chatContainer.innerHTML = '';
@@ -60,13 +55,6 @@ console.log(`Current username is ${username}`);
       }
     });
 
-    // loadChannels();
-    // socket.emit('load-channels');
-    // socket.on('all-channels', (channels) => {
-    //   channels.forEach(currentChan => {
-    //     addChannelToList(currentChan);
-    //   });
-    // });
   });
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,8 +91,6 @@ console.log(`Current username is ${username}`);
       h2content.textContent = currentChan;
 
       socket.emit('get-messages', currentChan);
-
-      alert(`Vous avez sélectionné le canal: ${currentChan}`);
     });
   }
 
@@ -120,6 +106,13 @@ console.log(`Current username is ${username}`);
     const savedChannels = JSON.parse(localStorage.getItem('channels')) || [];
     savedChannels.forEach(nameChan => {
       addChannelToList(nameChan);
+    });
+
+    socket.emit('load-channels');
+    socket.on('all-channels', (channels) => {
+      channels.forEach(currentChan => {
+        addChannelToList(currentChan);
+      });
     });
   }
 
@@ -177,7 +170,6 @@ console.log(`Current username is ${username}`);
         const name = inputChannel.value;
 
         if (name !== '') {
-          alert(`Channel "${name}" created !`);
           overlay.style.display = 'none';
           inputContainer.classList.remove('show');
           document.getElementById('channel-name').value = '';

@@ -42,15 +42,7 @@ async function  createChatTable(client) {
       name VARCHAR(255) NOT NULL UNIQUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-  `; 
-
-  // const usersChannelsQuery = `
-  //   CREATE TABLE IF NOT EXISTS user_channels (
-  //     user_id INT REFERENCES users(id) ON DELETE CASCADE,
-  //     channel_id INT REFERENCES channels(id) ON DELETE CASCADE,
-  //     PRIMARY KEY (user_id, channels_id)
-  //   );
-  // `;
+  `;
 
   const tableQuery = `
     CREATE TABLE IF NOT EXISTS messages (
@@ -82,7 +74,7 @@ function startServer() {
   // Systeme CORS
   const io = socketIo(server, {
     cors: {
-      origin: "http://127.0.0.1:8000",  // Autoriser l'origine spécifique
+      origin: "http://0.0.0.0:8000",  // Autoriser l'origine spécifique
       methods: ["GET", "POST"],
     }
   });
@@ -90,6 +82,11 @@ function startServer() {
   // Connexion au Socket du serveur
   io.on('connection', (socket) => {
     console.log('Un utilisateur est connecté avec l\'ID: ', socket.id);
+
+    socket.on('join-channel', (chan) => {
+      socket.join(chan);
+      console.log(`Utilisateur rejoint le canal: ${chan}`);
+    });
 
     // Creation d'un channel dans la bdd
     socket.on('create-channel', async (channelName) => {
@@ -155,12 +152,11 @@ function startServer() {
           [channelName, sender, message]
         );
 
-
+        // Envoie dans le canal
         io.to(channelName).emit('new-message', {
           message: result.row[0].message,
           sender: result.rows[0].sender,
-        }); //Return saved message
-        
+        });
         console.log('Message envoye au canal ', channelName);
 
       } catch (error) {
@@ -198,7 +194,7 @@ function startServer() {
   });
 
   server.listen(3000, () => {
-    console.log('Serveur en cours d\'exécution sur http://localhost:8000');
+    console.log('Serveur en cours d\'exécution sur http://0.0.0.0:8000');
   });
 }
 

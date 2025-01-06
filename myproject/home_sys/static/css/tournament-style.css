@@ -23,6 +23,7 @@ body {
     background-color: #13131a;
     border-radius: 3%;
     color: white;
+    font-family: 'Namaku';
 }
 
 .square h2 {
@@ -40,7 +41,7 @@ body {
 }
 
 .input-number #title {
-    color: white;
+    color: #ED4EB0;
     margin-right: 10px;
 }
 
@@ -78,20 +79,44 @@ button.arrow:hover {
 
 /* Formulaires joueurs */
 .forms {
-    margin-top: 50px;
-    margin-left: 10px;
-
+    padding: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+    justify-items: center;
+    grid-auto-flow: dense;
 }
 
-.form-player h4 {
+.form-player {
+    display: flex;
+    flex-direction: column;
+}
+
+.forms h4 {
     margin-bottom: 5px;
     color: #ED4EB0;
 }
 
-.form-player input {
+.forms input {
     height: 30px;
     font-family: 'Namaku';
-    margin-left: 50px;
+    margin-left: 30px;
     font-size: 18px;
     border: 2px solid #ED4EB0;
+    width: 90%;
+}
+
+.button-play {
+    margin-left: 35%;
+    color: #ED4EB0;
+    font-family: 'Namaku';
+    font-size: 20px;
+    padding: 18px;
+    border-radius: 3%;
+    width: 200px;
+    background-color: #23232e;
+}
+
+.button-play:hover {
+    background-color: #38384b;
 }
