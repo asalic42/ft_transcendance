@@ -69,7 +69,7 @@ if [ "$1" == "b-all" ]; then
 
     sudo docker-compose run web python3 manage.py migrate
 
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR http://127.0.0.1:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR http://0.0.0.0:8000 "
 
 fi
 
@@ -79,7 +79,7 @@ if [ "$1" == "b" ]; then
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR http://127.0.0.1:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR http://0.0.0.0:8000 "
 fi
 
 # FULL REMOVE
