@@ -161,6 +161,32 @@ signupInputs.forEach(input => {
 });
 
 
+
+document.addEventListener('DOMContentLoaded', function() {
+    const imageContainers = document.querySelectorAll('.image-container');
+
+    imageContainers.forEach(container => {
+        const image = container.querySelector('.hover-image');
+        const line = container.querySelector('.line');
+        const textContainer = container.querySelector('.text-container p');
+        const text = container.getAttribute('data-text');
+
+        textContainer.textContent = text;
+
+        image.addEventListener('mouseenter', function() {
+            line.style.width = '60px'; // Ajustez cette valeur selon la longueur souhaitée
+            textContainer.style.opacity = '1';
+        });
+
+        image.addEventListener('mouseleave', function() {
+            line.style.width = '0';
+            textContainer.style.opacity = '0';
+        });
+    });
+});
+
+
+
 // Vérifie dès le départ si le formulaire est valide au chargement de la page
 checkFormValidity(signinForm, signinInputs, signinSubmitButton);
 checkFormValidity(signupForm, signupInputs, signupSubmitButton);

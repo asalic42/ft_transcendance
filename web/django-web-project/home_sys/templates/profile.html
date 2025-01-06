@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
+                
+    <p>C'est l'heure de la prière ? Vite il ne faut pas la louper ! <a href="{% url 'signout' %}">Quitter le monastère</a></p>
+
+</div>
+
+<!------------------------------------------->
+
+<div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
+    
+    <li>Marre de ces conneries ? <a href="{% url 'delete_account' %}">Dire que t'es Athé</a></li>
+
+</div>
+
+{% endblock %}
