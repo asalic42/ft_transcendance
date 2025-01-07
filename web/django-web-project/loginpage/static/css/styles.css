@@ -69,28 +69,26 @@ body {
   position: absolute;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(to bottom right, #5da4b3, #36738f, #49599e, rgb(81, 63, 131), rgb(70, 41, 107), rgb(18, 2, 44));
+  background-image: linear-gradient(to bottom right, #ee4ad8, #ad4da1, #8c368f, rgb(131, 63, 131), rgb(70, 54, 143), rgb(18, 2, 44));
+  background-size: 500%;
   opacity: 0;
-  animation: background-appear 5s ease-in-out forwards; /* Augmenter la durée de l'animation */
+  background-position: right;
+  animation: background-appear 5s ease-in-out forwards, background-moving 14s infinite alternate;
 }
-
-/*  ┌─────┬──────────────────────────────┐
-  │ 1.a │ background appear transition │
-  └─────┴──────────────────────────────┘
-*/
 
 @keyframes background-appear {
-  0% {
-
-      opacity: 0;
-  }
-
-  100% {
-      
-      opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
+@keyframes background-moving {
+  0% {
+    background-position: right;
+  }
+  100% {
+    background-position: left;
+  }
+}
 
 
 /********************* II. LOTTIE FILE ***********************/
