@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.128', '0.0.0.0', '[::1]']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -87,7 +87,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgres://user:admin%40123@db:5432/mysqldb')
+        default=os.getenv('DATABASE_URL', 'postgres://user:admin%40123@localhost:5432/mysqldb')
     )
 }
 
