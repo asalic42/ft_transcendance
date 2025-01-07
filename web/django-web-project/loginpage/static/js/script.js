@@ -18,25 +18,50 @@ function validateEmail(email) {
     return emailPattern.test(email);
 }
 
+let is_username_taken = {value: false};
+let is_email_taken = {value: false};
+let is_password_strong_enough = {value: false};
+let is_form_valid = {value: 0};
+let emailFormatIsValid = {value: false};
+
 // Fonction pour vérifier la validité des champs et activer/désactiver le bouton
 function checkFormValidity(form, formInput, formButton) {
 
     const allFilled = Array.from(formInput).every(input => input.value.trim() !== '');
-    
-    formButton.disabled = !allFilled;
+
+    const SigninAllFilled = Array.from(signinInputs).every(input => input.value.trim() !== '');
+
+    signinSubmitButton.disabled = !SigninAllFilled;
+
+    is_form_valid.value = 0;
+
+    if (!allFilled)
+        is_form_valid.value = -1;
 
     const emailInputs = form.querySelectorAll('input[type="email"]');
 
     emailInputs.forEach(emailInput => {
         if (emailInput.value.trim() !== '') {
             if (validateEmail(emailInput.value.trim())) {
-                emailInput.classList.remove('invalid');
+                
+                if (emailInput.id === "email2")
+                {
+                    is_form_valid.value++;
+                    emailFormatIsValid.value = true;
+                }
+                else
+                {
+                    emailInput.classList.remove('invalid');
+                }
             } else {
                 emailInput.classList.add('invalid');
                 formButton.disabled = true;
+                if (emailInput.id === "email2")
+                    emailFormatIsValid.value = false;
             }
         } else {
             emailInput.classList.remove('invalid');
+            is_form_valid.value = 0;
         }
     });
 
@@ -45,27 +70,18 @@ function checkFormValidity(form, formInput, formButton) {
     const confirmPasswordInput = form.querySelector('input[name="confirm_password"]');
     const mismatchMessage = document.getElementById('password-mismatch-message');
 
-    console.log(passwordInput);
-    console.log(confirmPasswordInput);
 
     if (passwordInput && confirmPasswordInput) {
 
         if (passwordInput.value === confirmPasswordInput.value) {
             mismatchMessage.classList.remove('show');
             mismatchMessage.style.transition = "all 0.2s ease";
-            console.log("same1");  // Affiche "same" si les mots de passe sont identiques
+            is_form_valid.value++;
         } else {
             mismatchMessage.classList.add('show');
             mismatchMessage.style.transition = "all 0.5s ease";
             signupSubmitButton.disabled = true;
-            console.log("dismatch1");  // Affiche "dismatch" si les mots de passe ne correspondent pas
         }
-    }
-
-    if (signupSubmitButton.disabled === false) {
-        nextSignFormSignupLink.classList.add('show-animation');
-    } else {
-        nextSignFormSignupLink.classList.remove('show-animation');
     }
 
     if (signinSubmitButton.disabled) {
@@ -80,6 +96,25 @@ function checkFormValidity(form, formInput, formButton) {
         spanBeforeButton.classList.remove('is-required');
     }
 }
+
+function signup_button_condition() {
+
+    if (is_username_taken.value === true || is_email_taken.value === true)
+        signupSubmitButton.disabled = true;
+
+    else if (is_form_valid.value === 2) {
+        signupSubmitButton.disabled = false;
+    }
+
+    if (signupSubmitButton.disabled === false) {
+        nextSignFormSignupLink.classList.add('show-animation');
+    } else {
+        nextSignFormSignupLink.classList.remove('show-animation');
+    }
+
+}
+
+setInterval(signup_button_condition, 1);
 
 // Fonction d'animation de transition
 function test(eventType, element, container, deg) {
@@ -186,7 +221,108 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
 // Vérifie dès le départ si le formulaire est valide au chargement de la page
 checkFormValidity(signinForm, signinInputs, signinSubmitButton);
 checkFormValidity(signupForm, signupInputs, signupSubmitButton);
+
+
+// Fonction générique pour gérer la vérification du pseudo
+function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, baliseInputSpan) {
+    const baliseContent = baliseInput.value.trim();
+
+    if (baliseContent.length > 0) {
+        // Effectuer la requête AJAX pour vérifier si le pseudo est disponible
+        fetch(`${chemin_fetch}=${baliseContent}`)
+            .then(response => response.json())
+            .then(data => {
+                // Mise à jour de l'interface utilisateur selon la disponibilité
+                if (data.is_taken) {
+                    baliseInput.classList.add("invalid");
+                    baliseInputSpan.classList.add("invalid");
+                    taken_bool.value = true;
+                } else {
+                    baliseInput.classList.remove("invalid");
+                    baliseInputSpan.classList.remove("invalid");
+                    taken_bool.value = false;
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la vérification du pseudo:', error);
+            });
+    } else {
+        baliseInput.classList.remove("invalid");
+        baliseInputSpan.classList.remove("invalid");
+    }
+}
+
+// Attacher l'événement keyup
+const UsernameInput = document.getElementById("username2");
+
+UsernameInput.addEventListener('keyup', function() {
+    const UsernameInputSpan = UsernameInput.nextElementSibling;
+
+    verifierDisponibilitePseudo(UsernameInput, '/check_username/?username', is_username_taken, UsernameInputSpan);
+});
+
+
+const emailSignup = document.getElementById("email2");
+
+emailSignup.addEventListener('keyup', function() {
+    if (emailFormatIsValid.value === true)
+    {
+        const emailSignupSpan = emailSignup.nextElementSibling;
+        verifierDisponibilitePseudo(emailSignup, '/check_email/?email', is_email_taken, emailSignupSpan);
+    }
+});
+
+
+
+
+function verif_password_solidity(baliseInput, chemin_fetch, taken_bool) {
+    const baliseContent = baliseInput.value.trim();
+
+    if (baliseContent.length > 0) {
+        // Effectuer la requête AJAX pour vérifier si le pseudo est disponible
+        fetch(`${chemin_fetch}=${baliseContent}`)
+            .then(response => response.json())
+            .then(data => {
+
+                baliseInput.classList.remove(...baliseInput.classList);
+                switch (data.data)
+                {
+                    case 0:
+                        baliseInput.classList.add("s0");
+                        is_password_strong_enough = false;
+                        break;
+                    case 1:
+                        baliseInput.classList.add("s1");
+                        is_password_strong_enough = false;
+                        break;
+                    case 2:
+                        baliseInput.classList.add("s2");
+                        is_password_strong_enough = false;
+                        break;
+                    case 3:
+                        baliseInput.classList.add("s3");
+                        is_password_strong_enough = false;
+                        break;
+                    case 4:
+                        baliseInput.classList.add("s4");
+                        is_password_strong_enough = true;
+                        break;
+                }
+            })
+    }
+    else
+    {
+        baliseInput.classList.remove(...baliseInput.classList);
+    }
+}
+
+
+const PasswordSingup = document.getElementById("password2");
+
+PasswordSingup.addEventListener('keyup', function() {
+
+    verif_password_solidity(PasswordSingup, '/check_password_solidity/?password', is_password_strong_enough);
+});

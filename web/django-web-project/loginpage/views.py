@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 
+
 # Page d'accueil
 def index(request):
     return render(request, 'index.html')
@@ -53,3 +54,28 @@ def signin(request):
 def signout(request):
     logout(request)
     return HttpResponse("Déconnexion réussie.")
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from zxcvbn import zxcvbn as passwordscore
+
+@require_GET
+def check_username(request):
+    username = request.GET.get('username', '')
+    if (User.objects.filter(username=username).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+
+@require_GET
+def check_email(request):
+    email = request.GET.get('email', '')
+    if (User.objects.filter(email=email).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_password_solidity(request):
+    password = request.GET.get('password', '')
+    return (JsonResponse({'data' : passwordscore(password)['score']}))
