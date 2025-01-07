@@ -63,7 +63,7 @@ if [ "$1" == "b-all" ]; then
     sudo docker compose build
 
     echo -e "${PURPLE}> Launching services...${NC}"
-    sudo docker compose up -d # démarre en arrière-plan
+    sudo docker compose up # démarre en arrière-plan
 
     echo -e "${YELLOW}> Making Django migrations...${NC}"
 

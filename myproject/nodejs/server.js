@@ -74,7 +74,7 @@ function startServer() {
   // Systeme CORS
   const io = socketIo(server, {
     cors: {
-      origin: "http://0.0.0.0:8000",  // Autoriser l'origine spécifique
+      origin: "*",  // Autoriser l'origine spécifique
       methods: ["GET", "POST"],
     }
   });
@@ -194,7 +194,7 @@ function startServer() {
   });
 
   server.listen(3000, () => {
-    console.log('Serveur en cours d\'exécution sur http://0.0.0.0:8000');
+    console.log('Serveur en cours d\'exécution sur http://localhost:3000');
   });
 }
 

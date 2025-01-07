@@ -24,6 +24,13 @@ console.log(`Current username is ${username}`);
 
     loadChannels();
 
+    socket.emit('load-channels');
+    socket.on('all-channels', (channels) => {
+      channels.forEach(currentChan => {
+        addChannelToList(currentChan);
+      });
+    });
+
     socket.on('channel-messages', (messages) => {
       const chatContainer = document.getElementById('chat-page');
       chatContainer.innerHTML = '';
@@ -107,13 +114,6 @@ console.log(`Current username is ${username}`);
     const savedChannels = JSON.parse(localStorage.getItem('channels')) || [];
     savedChannels.forEach(nameChan => {
       addChannelToList(nameChan);
-    });
-
-    socket.emit('load-channels');
-    socket.on('all-channels', (channels) => {
-      channels.forEach(currentChan => {
-        addChannelToList(currentChan);
-      });
     });
   }
 
