@@ -123,6 +123,22 @@
         </form>
     </div>
     
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var loginForm = document.querySelector('.signin-container');
+                loginForm.classList.add('shake');
+            });
+        </script>
+    {% else %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var loginForm = document.querySelector('.signin-container');
+                loginForm.classList.remove('shake');
+            });
+        </script>
+    {% endif %}
+
     <script src="{% static 'js/script.js' %}"></script>
 
 </body>

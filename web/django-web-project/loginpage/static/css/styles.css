@@ -57,38 +57,38 @@ body {
     position: absolute;
     width: 100vw;
     height: 100vh;
-    animation: background-appear 2s ease-in-out forwards;
+    background-image: linear-gradient(to bottom right, #ee4ad8, #ad4da1, #8c368f, rgb(131, 63, 131), rgb(70, 54, 143), rgb(18, 2, 44));
+    background-size: 500%;
+    opacity: 1;
+    background-position: right;
+    animation: background-moving 14s infinite alternate;
   }
+
+  .background-container.animate {
+    animation: background-appear 5s ease-in-out forwards, background-moving 14s infinite alternate;
+  }
+  
+
 
 /*  ┌─────┬──────────────────────────────┐
     │ 1.a │ background appear transition │
     └─────┴──────────────────────────────┘
 */
 
-.background-container {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
-  background-image: linear-gradient(to bottom right, #ee4ad8, #ad4da1, #8c368f, rgb(131, 63, 131), rgb(70, 54, 143), rgb(18, 2, 44));
-  background-size: 500%;
-  opacity: 0;
-  background-position: right;
-  animation: background-appear 5s ease-in-out forwards, background-moving 14s infinite alternate;
-}
 
-@keyframes background-appear {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
+  @keyframes background-appear {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
 
-@keyframes background-moving {
-  0% {
-    background-position: right;
+  @keyframes background-moving {
+    0% {
+      background-position: right;
+    }
+    100% {
+      background-position: left;
+    }
   }
-  100% {
-    background-position: left;
-  }
-}
 
 
 /********************* II. LOTTIE FILE ***********************/
@@ -166,18 +166,28 @@ body {
     height: 380px;
     z-index: 2;
     transition: all 0.3s ease;
-    animation: anim-form-appear 0.5s ease;
+  }
+
+  .signin-container.shake {
+    animation: shake 0.2s ease-out;
+  }
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
+}
+
+  .signin-container.animate {
+    animation: anim-form-appear 0.5s ease
   }
 
   .signin-container.show {
     margin-left: -700px;
     rotate: 20deg;
   }
-
-/*========================================================*/
-
-
-/*========================================================*/
 
 /*  ┌───┬───────────────────┐
     │ 2 │ form basics param │
@@ -221,6 +231,7 @@ body {
       opacity: 1;
     }
   }
+  
 
 /******************** IV. FORM INPUT **********************/
 /*                                                        */

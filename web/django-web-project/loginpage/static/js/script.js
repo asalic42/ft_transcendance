@@ -99,7 +99,7 @@ function checkFormValidity(form, formInput, formButton) {
 
 function signup_button_condition() {
 
-    if (is_username_taken.value === true || is_email_taken.value === true)
+    if (is_username_taken.value === true || is_email_taken.value === true || is_password_strong_enough === false)
         signupSubmitButton.disabled = true;
 
     else if (is_form_valid.value === 2) {
@@ -325,4 +325,22 @@ const PasswordSingup = document.getElementById("password2");
 PasswordSingup.addEventListener('keyup', function() {
 
     verif_password_solidity(PasswordSingup, '/check_password_solidity/?password', is_password_strong_enough);
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const backgroundContainer = document.querySelector('.background-container');
+    const signinContainer = document.querySelector('.signin-container');
+    
+
+    // Vérifie si l'utilisateur a déjà visité le site
+    if (!localStorage.getItem('visited')) {
+
+        // Si c'est la première visite, applique l'animation
+        backgroundContainer.classList.add('animate');
+        signinContainer.classList.add('animate');
+
+        // Marque l'utilisateur comme ayant visité le site
+        localStorage.setItem('visited', 'true');
+    }
 });

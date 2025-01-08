@@ -4,13 +4,19 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
+from django.contrib import messages
 
 
 # Page d'accueil
+@never_cache
 def index(request):
+    storage = messages.get_messages(request)
+    storage.used = True
     return render(request, 'index.html')
 
+
 # Inscription d'un utilisateur
+@never_cache
 def signup(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -27,9 +33,11 @@ def signup(request):
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
 
-        return HttpResponse("Utilisateur enregistré avec succès !")
+        userauth = authenticate(request, username=username, password=password)
+        login(request, userauth)
+        return (redirect('home'))
     
-    return render(request, 'signup.html')
+    return redirect('index')
 
 # Connexion d'un utilisateur
 @never_cache
@@ -46,9 +54,10 @@ def signin(request):
             login(request, user)
             return redirect('home')
         else:
+            messages.error(request, 'Login failed')
             return redirect('index')
-    
-    return render(request, 'index.html')
+
+    return redirect('index')
 
 # Déconnexion de l'utilisateur
 def signout(request):

@@ -100,7 +100,8 @@ if [ "$1" == "r" ]; then
 fi
 
 # LAUNCH
-if [ "$1" == "l" ]; then
+
+setup_before_launch() {
 
     echo -e ">> Checking if we have already start docker's services..."
     if [ "$(sudo docker-compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
@@ -115,8 +116,49 @@ if [ "$1" == "l" ]; then
         printf '.'
         sleep 1
     done
+}
 
+# LAUNCH IN SIMPLE WINDOW
+if [ "$1" == "l" ]; then
+    setup_before_launch
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
     open http://127.0.0.1:8080
 fi
 
+# Fonction pour vérifier et ouvrir le navigateur
+open_browser() {
+    local url=$1
+
+    # Liste des navigateurs à vérifier avec leurs options pour le mode incognito
+    local browsers=(
+        "brave-browser --incognito"
+        "brave-browser-stable --incognito"
+        "google-chrome --incognito"
+        "firefox --private-window"
+        "chromium-browser --incognito"
+        "microsoft-edge --inprivate"
+    )
+
+    for browser_command in "${browsers[@]}"; do
+
+        # Là on extrait le nom du navigateur
+        local browser=$(echo "$browser_command" | cut -d' ' -f1)
+        
+        if command -v "$browser" &> /dev/null; then
+            echo -e "${GREEN}> Service is up! Opening $browser in incognito mode...${NC}"
+            
+            # Utilisation de "eval" pour lancer la commande en entier depuis la chaine de cara
+            eval "$browser_command $url &"
+            return 0
+        fi
+    done
+
+    echo -e "${RED}> No suitable browser found. Please install one of the following: ${browsers[*]}${NC}"
+    return 1
+}
+
+# LAUNCH IN PRIVATE WINDOW
+if [ "$1" == "lp" ]; then
+    setup_before_launch
+    open_browser "http://127.0.0.1:8080"
+fi
