@@ -40,6 +40,7 @@ function createBlocks() {
 		y = start_y;
 	}
 }
+
 window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");

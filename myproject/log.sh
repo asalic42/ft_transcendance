@@ -70,7 +70,6 @@ if [ "$1" == "b-all" ]; then
     sudo docker-compose run web python3 manage.py migrate
 
     echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR http://0.0.0.0:8000 "
-
 fi
 
 # SIMPLE BUILD

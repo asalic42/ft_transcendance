@@ -80,7 +80,7 @@ function startServer() {
   });
 
   // Connexion au Socket du serveur
-  io.on('connection', (socket) => {
+  io.on('connection', (socket)  => {
     console.log('Un utilisateur est connecté avec l\'ID: ', socket.id);
 
     socket.on('join-channel', (chan) => {
