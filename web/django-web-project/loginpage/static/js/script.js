@@ -328,18 +328,59 @@ PasswordSingup.addEventListener('keyup', function() {
 });
 
 
+let is_video_has_been_watched = {value : false};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const videoContainer = document.querySelector('.video-container');
+    const myVideo = document.getElementById('videoIntroTransition');
+
+    // Vérifiez si la vidéo a déjà été jouée
+    if (localStorage.getItem('videoPlayed') === 'true') {
+        // Si oui, cacher la vidéo
+        videoContainer.style.opacity = 0;
+        videoContainer.style.display = 'none';
+        is_video_has_been_watched.value = true;
+    } else {
+        // Si non, afficher et jouer la vidéo
+        videoContainer.style.display = 'block';
+        myVideo.play();
+
+        // Ajouter un écouteur d'événement pour la fin de la vidéo
+        myVideo.addEventListener('ended', function() {
+            if (videoContainer) {
+                videoContainer.parentNode.removeChild(videoContainer);
+            }
+
+            // Marquer la vidéo comme jouée
+            localStorage.setItem('videoPlayed', 'true');
+        });
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const backgroundContainer = document.querySelector('.background-container');
     const signinContainer = document.querySelector('.signin-container');
     
-
     // Vérifie si l'utilisateur a déjà visité le site
-    if (!localStorage.getItem('visited')) {
+    if (is_video_has_been_watched.value === false)
+    {
+        if (!localStorage.getItem('visited')) {
 
-        // Si c'est la première visite, applique l'animation
-        backgroundContainer.classList.add('animate');
-        signinContainer.classList.add('animate');
+            signinContainer.style.opacity = 0;
 
+            // Si c'est la première visite, applique l'animation
+            backgroundContainer.style.animationDelay = '5s';
+            signinContainer.style.animationDelay = '6s';
+
+            backgroundContainer.classList.add('animate');
+            signinContainer.classList.add('animate');
+
+            setTimeout(function() {
+                signinContainer.style.opacity = 1;
+            }, 6500);
+        }
+    }
+    else {
         // Marque l'utilisateur comme ayant visité le site
         localStorage.setItem('visited', 'true');
     }
