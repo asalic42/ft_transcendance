@@ -15,14 +15,14 @@ sudo systemctl enable docker
 
 # Installer Docker Compose
 echo "Installation de Docker Compose..."
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo apt-get install docker-compose-plugin
-sudo chmod +x /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker compose
+sudo apt-get install docker compose-plugin
+sudo chmod +x /usr/local/bin/docker compose
 
 # Vérifier l'installation
 echo "Vérification de l'installation de Docker..."
 docker --version
 echo "Vérification de l'installation de Docker Compose..."
-docker-compose --version
+docker compose --version
 
 echo "Installation terminée !"

@@ -22,7 +22,7 @@ WORKDIR /app/www
 
 COPY ./package*.json /app/www/
 
-RUN npm install
+RUN npm install 
 
 COPY . /app/www/
 
