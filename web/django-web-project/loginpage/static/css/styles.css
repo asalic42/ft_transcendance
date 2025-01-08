@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Lilita+One&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&family=Press+Start+2P&display=swap');
 
 /*
                 [================= SOMMAIRE PRINCIPAL =================]
@@ -238,10 +238,11 @@ body {
 */
 
   h2 {
+    font-family: "Press Start 2P", serif;
     text-align: center;
     letter-spacing: 0.2em;
-    margin-bottom: 20px;
-    font-size: 20px;
+    margin-bottom: 38px;
+    font-size: 18px;
     background-color: rgb(24, 23, 23);
     color: #ccc;
   }
@@ -918,9 +919,9 @@ body {
 }
 
 .text-container p {
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Jersey 10", serif;
   margin: 0;
-  font-size: 12px;
+  font-size: 15px;
   padding: 5px 5px;
   color: black;
   background-color: rgb(255, 255, 255);
@@ -941,4 +942,27 @@ body {
 
 .hover-image:hover + .line-container .text-container {
   opacity: 1;
+}
+
+
+/* ------------------------------ 42 BUTTON ------------------------------ */
+
+.button42 {
+  font-family: "Jersey 10", serif;
+  font-style: normal;
+  border-radius: 100%;
+  border-color: transparent;
+  font-size: 35px;
+  width: 50px; /* Ajustez cette valeur pour changer la taille */
+  height: 50px; /* Ajustez cette valeur pour changer la taille */
+  display: flex; /* Utilisez Flexbox pour centrer le contenu */
+  justify-content: center; /* Centre horizontalement */
+  align-items: center; /* Centre verticalement */
+  transition: all 0.5s ease;
+  box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.8);
+}
+
+.button42:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 0px 20px 2px rgb(230, 8, 181);
 }
