@@ -9,7 +9,6 @@ var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
 var count = 0;
 var health = 3;
-let socket;
 
 class block {
 	x1; y1; width; height; state;
@@ -91,11 +90,6 @@ window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
 
-	socket = io('http://localhost:3000');
-	socket.on('connect', () => {
-		console.log("Connection etablie");
-	})
-	socket.on('error', (error) => { console.error(error); })
 	createBlocks();
 	createBall(Math.floor(getRandomArbitrary(0, 11)));
 }
