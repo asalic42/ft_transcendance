@@ -24,21 +24,21 @@ class block {
 let cachedUserId = null;
 
 async function getCurrentPlayerId() {
-    console.log(cachedUserId);
+	console.log(cachedUserId);
 	if (cachedUserId !== null) {
-        return cachedUserId;
-    }
-    try {
-        const response = await fetch('/account/api/current-user/', {
-            credentials: 'same-origin'
-        });
-        const data = await response.json();
-        cachedUserId = data.userId;
-        return cachedUserId;
-    } catch (error) {
-        console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
-        return null;
-    }
+		return cachedUserId;
+	}
+	try {
+		const response = await fetch('/account/api/current-user/', {
+			credentials: 'same-origin'
+		});
+		const data = await response.json();
+		cachedUserId = data.userId;
+		return cachedUserId;
+	} catch (error) {
+		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		return null;
+	}
 }
 
 async function addNewGame(id_player, id_map, score) {
@@ -69,6 +69,25 @@ async function addNewGame(id_player, id_map, score) {
 
 var block_arr = []
 //! Init
+function fetchMatp() {
+	fetch('/account/map/')
+		.then(response => response.text())
+		.then(mapData => {
+			// Diviser le texte en lignes
+			const mapLines = mapData.split('\n');
+		
+			// Convertir chaque ligne en un tableau de caractères (ou un autre format si nécessaire)
+			// let mapArray = mapLines.map(line => line.split(' '));  // Par exemple, diviser par espaces
+		
+			console.log(mapLines);  // Affiche la carte sous forme de tableau 2D
+		
+   		})
+	.catch(error => {
+		console.error('Erreur lors de la récupération des données de la carte:', error);
+	});
+
+}
+
 function createBlocks() {
 	var start_x = table.width / 7;
 	var start_y = table.height / 20;
@@ -89,7 +108,8 @@ function createBlocks() {
 window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
-
+	
+	fetchMatp();
 	createBlocks();
 	createBall(Math.floor(getRandomArbitrary(0, 11)));
 }
@@ -332,41 +352,41 @@ function adaptVectorsToFps(ball, player1Coords) {
 }
 
 async function winnerWindow() {
-    context.clearRect(0, 0, table.width, table.height);
-    gameOver.style.display = "flex";
-    drawOuterRectangle("#C42021");
-    drawInnerRectangle("#23232e");
+	context.clearRect(0, 0, table.width, table.height);
+	gameOver.style.display = "flex";
+	drawOuterRectangle("#C42021");
+	drawInnerRectangle("#23232e");
 
-    cancelAnimationFrame(id);
-    console.log("tourne en boucle");
-    try {
-        const playerId = await getCurrentPlayerId();
-        if (!playerId) {
-            console.error('Impossible de sauvegarder le score : utilisateur non connecté');
-            showReplayButton();  // Au lieu de replay() directement
-            return;
-        }
-        
-        var mapId = 1;
-        console.log(playerId, count, mapId);
+	cancelAnimationFrame(id);
+	console.log("tourne en boucle");
+	try {
+		const playerId = await getCurrentPlayerId();
+		if (!playerId) {
+			console.error('Impossible de sauvegarder le score : utilisateur non connecté');
+			showReplayButton();  // Au lieu de replay() directement
+			return;
+		}
+		
+		var mapId = 1;
+		console.log(playerId, count, mapId);
 
-        // Attendre que l'ajout du score soit terminé
-        await addNewGame(playerId, mapId, count);
-        
-        // Seulement après que le score est sauvegardé
-        showReplayButton();
-        
-    } catch (error) {
-        console.error('Erreur lors de la sauvegarde du score:', error);
-        showReplayButton();
-    }
+		// Attendre que l'ajout du score soit terminé
+		await addNewGame(playerId, mapId, count);
+		
+		// Seulement après que le score est sauvegardé
+		showReplayButton();
+		
+	} catch (error) {
+		console.error('Erreur lors de la sauvegarde du score:', error);
+		showReplayButton();
+	}
 }
 
 // Séparer l'affichage du bouton replay de son action
 function showReplayButton() {
-    const button = document.getElementById("replay-button");
-    button.style.display = "flex";
-    button.style.color = "#C42021";
+	const button = document.getElementById("replay-button");
+	button.style.display = "flex";
+	button.style.color = "#C42021";
 	button.addEventListener("click", () => {
 		window.location.reload();
 	});

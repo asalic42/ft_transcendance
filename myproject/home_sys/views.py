@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
@@ -5,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 import json
@@ -162,3 +163,17 @@ def add_solo_casse_brique(request):
 	else:
 		# Si la requête n'est pas de type POST, retourner une erreur 405 (Méthode non autorisée)
 		return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+	
+def map_view(request):
+    # Spécifiez le chemin de votre fichier .txt
+    map_file_path = os.path.join('home_sys/static/maps', 'map.txt')
+
+    # Lire le fichier .txt
+    try:
+        with open(map_file_path, 'r') as file:
+            map_data = file.read()
+    except FileNotFoundError:
+        return HttpResponse("Carte non trouvée", status=404)
+
+    # Retourner le contenu du fichier en tant que réponse HTTP
+    return HttpResponse(map_data, content_type="text/plain")

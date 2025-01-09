@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     home, signout, delete_account, delete_success, service_unavailable,
     profile_page, game_page, game_choice_page, game_mode_page, game_bot_page,
-    channels_page, other_game, tournament_page, get_current_user_id, add_solo_casse_brique
+    channels_page, other_game, tournament_page, get_current_user_id, add_solo_casse_brique, map_view
 )
 
 urlpatterns = [
@@ -20,5 +20,6 @@ urlpatterns = [
     path('other_game/', other_game, name='other_game'),
     path('tournament/', tournament_page, name='tournament'),
 	path('api/current-user/', get_current_user_id, name='current_user_id'),
-	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),  # URL pour ajouter un nouveau jeu
+	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
+	path('map/', map_view, name="map_view")
 ]
