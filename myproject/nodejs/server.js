@@ -191,6 +191,13 @@ function startServer() {
         console.error('Erreur lors de la suppresions des channels et des messages', error);
       }
     });
+
+	app.use((req, res, next) => {
+		res.header('Access-Control-Allow-Origin', 'http://localhost:8000/account');
+		res.header('Access-Control-Allow-Methods', 'GET, POST');
+		res.header('Access-Control-Allow-Headers', 'Content-Type');
+		next();
+	});
   });
 
   server.listen(3000, () => {

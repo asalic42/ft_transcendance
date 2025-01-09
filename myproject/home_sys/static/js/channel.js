@@ -16,51 +16,51 @@ console.log(`Current username is ${username}`);
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
-    socket = io('http://localhost:3000');
+	socket = io('http://localhost:3000');
 
-    socket.on('connect', () => {
-      console.log("Connection etablie");
-    })
+	socket.on('connect', () => {
+	  console.log("Connection etablie");
+	})
 
-    loadChannels();
+	loadChannels();
 
-    socket.emit('load-channels');
-    socket.on('all-channels', (channels) => {
-      channels.forEach(currentChan => {
-        addChannelToList(currentChan);
-      });
-    });
+	socket.emit('load-channels');
+	socket.on('all-channels', (channels) => {
+	  channels.forEach(currentChan => {
+		addChannelToList(currentChan);
+	  });
+	});
 
-    socket.on('channel-messages', (messages) => {
-      const chatContainer = document.getElementById('chat-page');
-      chatContainer.innerHTML = '';
-      
-      console.log("Je tente de recup les messages !");
-      messages.forEach(message => addMessage(message.message));
-    });
+	socket.on('channel-messages', (messages) => {
+	  const chatContainer = document.getElementById('chat-page');
+	  chatContainer.innerHTML = '';
+	  
+	  console.log("Je tente de recup les messages !");
+	  messages.forEach(message => addMessage(message.message));
+	});
 
-    const newChan = document.getElementById('new-chan');
-    newChan.addEventListener('click', () => {
+	const newChan = document.getElementById('new-chan');
+	newChan.addEventListener('click', () => {
 
-      // Disparition du chat en cours
-      if (chatVisible) {
-        reversePopCenterChat();
-        currentChan = null;
-        newChan.textContent = '+';
-        chatVisible = !chatVisible;
-      }
-      else {
-        // Creation de chan + ouverture
-        setChannelName(function(nameChan) {
-          popCenterChat(nameChan);
-          newChan.textContent = '➙';
-          chatVisible = !chatVisible;
-          currentChan = nameChan;
-          socket.emit('create-channel', currentChan);
-          addChannelToList(currentChan);
-        });
-      }
-    });
+	  // Disparition du chat en cours
+	  if (chatVisible) {
+		reversePopCenterChat();
+		currentChan = null;
+		newChan.textContent = '+';
+		chatVisible = !chatVisible;
+	  }
+	  else {
+		// Creation de chan + ouverture
+		setChannelName(function(nameChan) {
+		  popCenterChat(nameChan);
+		  newChan.textContent = '➙';
+		  chatVisible = !chatVisible;
+		  currentChan = nameChan;
+		  socket.emit('create-channel', currentChan);
+		  addChannelToList(currentChan);
+		});
+	  }
+	});
 
   });
 
@@ -69,182 +69,182 @@ console.log(`Current username is ${username}`);
   // Add channel to the right channel's list
   function  addChannelToList(nameChan)
   {
-    const chanList = document.getElementById('channels-list');
+	const chanList = document.getElementById('channels-list');
 
-    if (!chanList.querySelector(`#channel-${nameChan}`)) {
-      const chanItem = document.createElement('div');
-      chanItem.id = `#channel-${nameChan}`;
-      chanItem.textContent = nameChan;
-      chanItem.classList.add('chan-item');
+	if (!chanList.querySelector(`#channel-${nameChan}`)) {
+	  const chanItem = document.createElement('div');
+	  chanItem.id = `#channel-${nameChan}`;
+	  chanItem.textContent = nameChan;
+	  chanItem.classList.add('chan-item');
 
-      clickToChannel(chanItem, nameChan);
+	  clickToChannel(chanItem, nameChan);
 
-      chanList.appendChild(chanItem);
-      saveChannel();
-    }
+	  chanList.appendChild(chanItem);
+	  saveChannel();
+	}
   }
 
   // Cliquer sur un channel deja creer
   function  clickToChannel(chanItem, nameChan) {
-    chanItem.addEventListener('click', () => {
-      popCenterChat(nameChan);
-      document.getElementById('new-chan').textContent = '➙';
-      if (!chatVisible)
-        chatVisible = !chatVisible;
-      currentChan = nameChan;
-      
-      // const center = document.querySelector('.center');
-      const h2content = document.getElementById('chat-name');
-      h2content.textContent = currentChan;
+	chanItem.addEventListener('click', () => {
+	  popCenterChat(nameChan);
+	  document.getElementById('new-chan').textContent = '➙';
+	  if (!chatVisible)
+		chatVisible = !chatVisible;
+	  currentChan = nameChan;
+	  
+	  // const center = document.querySelector('.center');
+	  const h2content = document.getElementById('chat-name');
+	  h2content.textContent = currentChan;
 
-      socket.emit('get-messages', currentChan);
+	  socket.emit('get-messages', currentChan);
 
-    });
+	});
   }
 
   // Save new channel
   function  saveChannel() {
-    const channelList = document.querySelectorAll('.channel-item');
-    const channelArray = Array.from(channelList).map(channel => channel.textContent);
-    localStorage.setItem('channels', JSON.stringify(channelArray));
+	const channelList = document.querySelectorAll('.channel-item');
+	const channelArray = Array.from(channelList).map(channel => channel.textContent);
+	localStorage.setItem('channels', JSON.stringify(channelArray));
   }
 
   // Load channel that already exists and get them from db
   function  loadChannels() {
-    const savedChannels = JSON.parse(localStorage.getItem('channels')) || [];
-    savedChannels.forEach(nameChan => {
-      addChannelToList(nameChan);
-    });
+	const savedChannels = JSON.parse(localStorage.getItem('channels')) || [];
+	savedChannels.forEach(nameChan => {
+	  addChannelToList(nameChan);
+	});
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* CENTER CHANNELS PART */
   // Main monitor for the center column and message listener
   function  popCenterChat(nameChan) {
-    const page = document.querySelector('.page');
-    const channels = document.querySelector('.channels');
+	const page = document.querySelector('.page');
+	const channels = document.querySelector('.channels');
 
-    page.style.gridTemplateColumns = '1fr 3fr 1fr';
+	page.style.gridTemplateColumns = '1fr 3fr 1fr';
 
-    if (!document.querySelector('.center')) {
-      const center = createChatPage(nameChan);
-      page.insertBefore(center, channels);
+	if (!document.querySelector('.center')) {
+	  const center = createChatPage(nameChan);
+	  page.insertBefore(center, channels);
 
-      addMessageListener();
+	  addMessageListener();
 
-      setTimeout(() => {
-        center.style.visibility = 'visible';
-        center.style.opacity = '1';
-        center.style.transform = 'scaleX(1)';
-      }, 0);
-    }
+	  setTimeout(() => {
+		center.style.visibility = 'visible';
+		center.style.opacity = '1';
+		center.style.transform = 'scaleX(1)';
+	  }, 0);
+	}
   }
 
   // Create the center column for the chat conv
   function createChatPage(nameChan) {
-    const center = document.createElement('div');
-    center.classList.add('center');
+	const center = document.createElement('div');
+	center.classList.add('center');
 
-    center.innerHTML = `
-      <h2 id="chat-name">${nameChan}</h2>
-      <div class="chat-page" id="chat-page"></div>
-      <div class="input-container">
-        <input id="message-input" type="text" placeholder="Message...">
-        <button id="send-button">Envoyer</button>
-      </div>
-    `;
-    return center;
+	center.innerHTML = `
+	  <h2 id="chat-name">${nameChan}</h2>
+	  <div class="chat-page" id="chat-page"></div>
+	  <div class="input-container">
+		<input id="message-input" type="text" placeholder="Message...">
+		<button id="send-button">Envoyer</button>
+	  </div>
+	`;
+	return center;
   }
 
   // Set un nom de channel a sa creation
   function setChannelName(callback) {
-    const inputContainer = document.getElementById('input-channel');
-    const inputChannel = document.getElementById('channel-name');
-    const overlay = document.getElementById('overlay');
+	const inputContainer = document.getElementById('input-channel');
+	const inputChannel = document.getElementById('channel-name');
+	const overlay = document.getElementById('overlay');
 
-    overlay.style.display = 'block';
-    inputContainer.classList.add('show');
+	overlay.style.display = 'block';
+	inputContainer.classList.add('show');
 
-    function handleInputName(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        const name = inputChannel.value;
+	function handleInputName(event) {
+	  if (event.key === 'Enter') {
+		event.preventDefault();
+		const name = inputChannel.value;
 
-        if (name !== '') {
-          overlay.style.display = 'none';
-          inputContainer.classList.remove('show');
-          document.getElementById('channel-name').value = '';
-          inputChannel.removeEventListener('keydown', handleInputName);
-          callback(name);
-        }
-        else {
-          alert(`Enter a name !`);
-        }
-      }
-    }
-    inputChannel.addEventListener('keydown', handleInputName);
+		if (name !== '') {
+		  overlay.style.display = 'none';
+		  inputContainer.classList.remove('show');
+		  document.getElementById('channel-name').value = '';
+		  inputChannel.removeEventListener('keydown', handleInputName);
+		  callback(name);
+		}
+		else {
+		  alert(`Enter a name !`);
+		}
+	  }
+	}
+	inputChannel.addEventListener('keydown', handleInputName);
   }
 
   // Inverser la transition pour faire disparaitre le chat en cours
   function reversePopCenterChat() {
-    const page = document.querySelector('.page');
-    const center = document.querySelector('.center');
+	const page = document.querySelector('.page');
+	const center = document.querySelector('.center');
 
-    page.style.gridTemplateColumns = '1fr 1fr';
+	page.style.gridTemplateColumns = '1fr 1fr';
 
-    if (center) {
-      center.style.transform = 'translateX(-50%) scaleX(0)';
-      center.style.visibility = 'hidden';
-      center.style.opacity = '0';
-      center.remove();
-    }
+	if (center) {
+	  center.style.transform = 'translateX(-50%) scaleX(0)';
+	  center.style.visibility = 'hidden';
+	  center.style.opacity = '0';
+	  center.remove();
+	}
   }
 
   // Check if a message is send by a click or an ENTER, and send it
   function addMessageListener() {
-    const sendButton = document.getElementById('send-button');
-    sendButton.addEventListener('click', () => {
+	const sendButton = document.getElementById('send-button');
+	sendButton.addEventListener('click', () => {
 
-      const msg = document.getElementById('message-input').value;
-      if (msg != "") {    
-        socket.emit('new-message', {channelName: currentChan, sender: username, message: msg});
-    
-        addMessage(msg);
-        document.getElementById('message-input').value = '';  // Vide le champ de saisie
-        console.log("MESSAGE ENVOYE !");  
-      }
-    });
+	  const msg = document.getElementById('message-input').value;
+	  if (msg != "") {	
+		socket.emit('new-message', {channelName: currentChan, sender: username, message: msg});
+		
+		addMessage(msg);
+		document.getElementById('message-input').value = '';  // Vide le champ de saisie
+		console.log("MESSAGE ENVOYE !");  
+	  }
+	});
 
-    const messageInput = document.getElementById('message-input');
-    messageInput.addEventListener('keydown', (event) => {
+	const messageInput = document.getElementById('message-input');
+	messageInput.addEventListener('keydown', (event) => {
 
-      if (event.key === 'Enter') {
-        event.preventDefault();  //Empeche le retour a la ligne !
-        sendButton.click();
-      }
-    });
+	  if (event.key === 'Enter') {
+		event.preventDefault();  //Empeche le retour a la ligne !
+		sendButton.click();
+	  }
+	});
   }
 
   // Add the message on the chat conv
   function addMessage(mess) {
-    const chatPage = document.getElementById('chat-page')
+	const chatPage = document.getElementById('chat-page')
 
-    const message = document.createElement('div');
-    message.classList.add('message');
+	const message = document.createElement('div');
+	message.classList.add('message');
 
-    const usernameElement = document.createElement('span');
-    usernameElement.classList.add('username');
-    usernameElement.textContent = username;
+	const usernameElement = document.createElement('span');
+	usernameElement.classList.add('username');
+	usernameElement.textContent = username;
 
-    const messElement = document.createElement('p');
-    messElement.textContent = mess;
+	const messElement = document.createElement('p');
+	messElement.textContent = mess;
 
-    message.appendChild(usernameElement);
-    message.appendChild(messElement);
+	message.appendChild(usernameElement);
+	message.appendChild(messElement);
 
-    chatPage.appendChild(message);
+	chatPage.appendChild(message);
 
-    // socket.emit('send-message', currentChan, message);
+	// socket.emit('send-message', currentChan, message);
 
-    chatPage.scrollTop = chatPage.scrollHeight;
+	chatPage.scrollTop = chatPage.scrollHeight;
   }

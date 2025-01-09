@@ -2,7 +2,6 @@
 var table;
 var context;
 var game = document.getElementById("game");
-let stop = 0;
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
@@ -10,6 +9,7 @@ var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
 var count = 0;
 var health = 3;
+let socket;
 
 class block {
 	x1; y1; width; height; state;
@@ -19,6 +19,52 @@ class block {
 		this.width = width;
 		this.height = height;
 		this.state = state;
+	}
+}
+
+let cachedUserId = null;
+
+async function getCurrentPlayerId() {
+    console.log(cachedUserId);
+	if (cachedUserId !== null) {
+        return cachedUserId;
+    }
+    try {
+        const response = await fetch('/account/api/current-user/', {
+            credentials: 'same-origin'
+        });
+        const data = await response.json();
+        cachedUserId = data.userId;
+        return cachedUserId;
+    } catch (error) {
+        console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+        return null;
+    }
+}
+
+async function addNewGame(id_player, id_map, score) {
+	console.log("Appel de addnewgame");
+	try {
+		const response = await fetch('/account/api/add_solo_casse_brique/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({  // Convertit les données en JSON
+				id_player: id_player,
+				id_map: id_map,
+				score: score
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout du jeu');
+		}
+
+		const result = await response.json();
+		console.log('Nouveau jeu ajouté:', result);
+	} catch (error) {
+		console.error('Erreur:', error);
 	}
 }
 
@@ -45,6 +91,11 @@ window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
 
+	socket = io('http://localhost:3000');
+	socket.on('connect', () => {
+		console.log("Connection etablie");
+	})
+	socket.on('error', (error) => { console.error(error); })
 	createBlocks();
 	createBall(Math.floor(getRandomArbitrary(0, 11)));
 }
@@ -66,6 +117,8 @@ function createBall(vy) {
 	var player1Coords = {y1 : table.height - 50, x1 : (table.height / 2) - 60, y2 : table.height - 35, x2 : (table.height / 2) + 60, const_vx : 20, vx : 20};
 
 	launchAnim(ball, player1Coords, Date.now());
+	if (isGameOver())
+		winnerWindow();
 }
 
 //! Players related stuff
@@ -165,7 +218,7 @@ function isBallHittingWall(ball) {
 function moveBall(ball, player1Coords) {
 
 	// Ball is hiting a player.
-	if (!stop && isBallHittingPlayer(ball, player1Coords)) {
+	if (isBallHittingPlayer(ball, player1Coords)) {
 		var intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
 		if (intersection > 0 && intersection < 0.25)
 			intersection = 0.25;
@@ -181,9 +234,6 @@ function moveBall(ball, player1Coords) {
 		ball.const_vector.vy = -(ball.const_vector.vy);
 		ball.vector.vy = -ball.vector.vy;
 	}
-	else if (isGameOver())
-		return true;
-
 	isBallHittingWall(ball);
 	isBallHittingblock(ball);
 	ball.coords.x += ball.vector.vx;
@@ -228,7 +278,6 @@ function isBallHittingblock(ball) {
 
 function isGameOver() {
 	if (health <= 0) {
-		winnerWindow();
 		return true;
 	}
 	return false;
@@ -237,22 +286,20 @@ function isGameOver() {
 
 function isEnd(ball) {
 	if (ball.coords.y + ball.radius >= table.height) {
-        health--;
+		health--;
 		createBall(Math.floor(getRandomArbitrary(0, 10)));
 		return true;
-    }
-    return false;
+	}
+	return false;
 }
 
 //! Loop func
-
+let id=0;
 function launchAnim(ball, player1Coords, start) {
 
 	timeRelatedStuff(ball, start);
 	adaptVectorsToFps(ball, player1Coords);
 	start = Date.now();
-	if (stop)
-		return;
 	context.clearRect(0, 0, table.width, table.height);
 	update();
 	drawPlayer(player1Coords, "#ED4EB0");
@@ -261,7 +308,7 @@ function launchAnim(ball, player1Coords, start) {
 	drawBlocks();
 	moveBall(ball, player1Coords);
 	score.innerText = "Score : " + count;
-	requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
+	id = requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
 }
 
 //! Fps related stuff
@@ -290,25 +337,45 @@ function adaptVectorsToFps(ball, player1Coords) {
 	player1Coords.vx = player1Coords.const_vx * percentage;
 }
 
-function winnerWindow() {
-	
-	context.clearRect(0, 0, table.width, table.height);
-	
-	gameOver.style.display = "flex";
-	drawOuterRectangle("#C42021");
-	drawInnerRectangle("#23232e");
-	replay();
+async function winnerWindow() {
+    context.clearRect(0, 0, table.width, table.height);
+    gameOver.style.display = "flex";
+    drawOuterRectangle("#C42021");
+    drawInnerRectangle("#23232e");
+
+    cancelAnimationFrame(id);
+    console.log("tourne en boucle");
+    try {
+        const playerId = await getCurrentPlayerId();
+        if (!playerId) {
+            console.error('Impossible de sauvegarder le score : utilisateur non connecté');
+            showReplayButton();  // Au lieu de replay() directement
+            return;
+        }
+        
+        var mapId = 1;
+        console.log(playerId, count, mapId);
+
+        // Attendre que l'ajout du score soit terminé
+        await addNewGame(playerId, mapId, count);
+        
+        // Seulement après que le score est sauvegardé
+        showReplayButton();
+        
+    } catch (error) {
+        console.error('Erreur lors de la sauvegarde du score:', error);
+        showReplayButton();
+    }
 }
 
-function replay() {
-	const button = document.getElementById("replay-button");
-	button.style.display = "flex";
-
-	button.style.color = "#C42021";
+// Séparer l'affichage du bouton replay de son action
+function showReplayButton() {
+    const button = document.getElementById("replay-button");
+    button.style.display = "flex";
+    button.style.color = "#C42021";
 	button.addEventListener("click", () => {
 		window.location.reload();
 	});
-	
 }
 
 //! Tools
