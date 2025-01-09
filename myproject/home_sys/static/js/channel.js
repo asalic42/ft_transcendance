@@ -40,6 +40,7 @@ console.log(`Current username is ${username}`);
     });
 
     const newChan = document.getElementById('new-chan');
+    const addFriendChan = document.getElementById('add-friend-chan');
     newChan.addEventListener('click', () => {
 
       // Disparition du chat en cours
@@ -47,6 +48,7 @@ console.log(`Current username is ${username}`);
         reversePopCenterChat();
         currentChan = null;
         newChan.textContent = '+';
+        addFriendChan.style.display = "none";
         chatVisible = !chatVisible;
       }
       else {
@@ -54,6 +56,7 @@ console.log(`Current username is ${username}`);
         setChannelName(function(nameChan) {
           popCenterChat(nameChan);
           newChan.textContent = '➙';
+          addFriendChan.style.display = "block";
           chatVisible = !chatVisible;
           currentChan = nameChan;
           socket.emit('create-channel', currentChan);
@@ -89,16 +92,15 @@ console.log(`Current username is ${username}`);
     chanItem.addEventListener('click', () => {
       popCenterChat(nameChan);
       document.getElementById('new-chan').textContent = '➙';
+      document.getElementById('add-friend-chan').style.display = "inline";
       if (!chatVisible)
         chatVisible = !chatVisible;
       currentChan = nameChan;
       
-      // const center = document.querySelector('.center');
       const h2content = document.getElementById('chat-name');
       h2content.textContent = currentChan;
 
       socket.emit('get-messages', currentChan);
-
     });
   }
 
@@ -169,8 +171,9 @@ console.log(`Current username is ${username}`);
       if (event.key === 'Enter') {
         event.preventDefault();
         const name = inputChannel.value;
+        const pattern = /^[a-zA-Z0-9_-]+$/;
 
-        if (name !== '') {
+        if (name !== '' && pattern.test(name)) {
           overlay.style.display = 'none';
           inputContainer.classList.remove('show');
           document.getElementById('channel-name').value = '';
@@ -229,6 +232,7 @@ console.log(`Current username is ${username}`);
   function addMessage(mess) {
     const chatPage = document.getElementById('chat-page')
 
+    console.log("message is ", mess);
     const message = document.createElement('div');
     message.classList.add('message');
 

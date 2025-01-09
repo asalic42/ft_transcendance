@@ -19,14 +19,20 @@
     <div class="column channels">
         <h2>Channels</h2>
         <div id="channels-list"></div>
-        <button id="new-chan">+</button>
+        <button class="button-chat" id="add-friend-chan">👥+</button>
+        <button class="button-chat" id="new-chan">+</button>
     </div>
 
     <!-- Formulaire pour definir un nom de channel -->
     
     <div id="input-channel" class="hidden-form">
         <h2>New channel name</h2>
-        <input type="text" id="channel-name">
+        <input type="text" id="channel-name" pattern="^[a-zA-Z0-9_-]+$">
+    </div>
+
+    <div id="input-chat-add" class="hidden-form">
+        <h2>Add a friend to chan</h2>
+        <input type="text" id="input-add-friend-chan">
     </div>
 
     <div id="overlay" class="overlay"></div>

@@ -123,6 +123,7 @@ function startServer() {
 
     // Recupere tous les messages d'une conv
     socket.on('get-messages', async (channelName) => {
+
       try {
         const result = await client.query(
           'SELECT * FROM messages WHERE channel_name = $1 ORDER BY created_at ASC',
@@ -136,8 +137,8 @@ function startServer() {
         console.log('Messages récupérés:', result.rows);
         socket.emit('channel-messages', result.rows);
       } catch (error) {
-        console.log('Erreur lors de la recuperation des messages du channel: ', error);
-      }
+          console.log('Erreur lors de la recuperation des messages du channel: ', error);
+        }
     });
 
     // Save les nouveaux messages entrants (dans la bdd)
@@ -154,7 +155,7 @@ function startServer() {
 
         // Envoie dans le canal
         io.to(channelName).emit('new-message', {
-          message: result.row[0].message,
+          message: result.rows[0].message,
           sender: result.rows[0].sender,
         });
         console.log('Message envoye au canal ', channelName);
