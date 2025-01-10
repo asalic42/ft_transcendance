@@ -21,5 +21,5 @@ urlpatterns = [
     path('tournament/', tournament_page, name='tournament'),
 	path('api/current-user/', get_current_user_id, name='current_user_id'),
 	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
-	path('map/', map_view, name="map_view")
+	path('api/map/<int:map_id>/', map_view, name="map_view")
 ]

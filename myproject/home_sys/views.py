@@ -10,6 +10,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 import json
+from django.shortcuts import get_object_or_404
+
 # Creer une API django avec DRF (Django REST Framework)
 # from rest_framework.views import APIView
 # from rest_framework.response import Response
@@ -164,16 +166,19 @@ def add_solo_casse_brique(request):
 		# Si la requête n'est pas de type POST, retourner une erreur 405 (Méthode non autorisée)
 		return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 	
-def map_view(request):
-    # Spécifiez le chemin de votre fichier .txt
-    map_file_path = os.path.join('home_sys/static/maps', 'map.txt')
+def map_view(request, map_id):
+	# Spécifiez le chemin de votre fichier .txt
+	selected_map = get_object_or_404(Maps, id=map_id)
+	# Lire le fichier .txt
 
-    # Lire le fichier .txt
-    try:
-        with open(map_file_path, 'r') as file:
-            map_data = file.read()
-    except FileNotFoundError:
-        return HttpResponse("Carte non trouvée", status=404)
+	try:
+		with open(selected_map.LinkMaps, 'r') as file:
+			map_data = file.read()
+	except FileNotFoundError:
+		return HttpResponse("Carte non trouvée", status=404)
 
-    # Retourner le contenu du fichier en tant que réponse HTTP
-    return HttpResponse(map_data, content_type="text/plain")
+	# Retourner le contenu du fichier en tant que réponse HTTP
+	return HttpResponse(map_data, content_type="text/plain")
+
+
+

@@ -1,3 +1,5 @@
+#models.py home_sys
+
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -67,7 +69,7 @@ class soloCasseBrique(models.Model):
 	date = models.DateTimeField(auto_now_add = True)
 
 class Maps(models.Model):
-	idMaps = models.IntegerField()
+	id = models.AutoField(primary_key=True)
 	LinkMaps = models.CharField()
 
 class MultiCasseBrique(models.Model):
