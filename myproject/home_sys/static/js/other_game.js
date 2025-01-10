@@ -1,4 +1,5 @@
 // Variables
+let mapTab = [];
 var table;
 var context;
 var game = document.getElementById("game");
@@ -67,18 +68,13 @@ async function addNewGame(id_player, id_map, score) {
 	}
 }
 
-var block_arr = []
 //! Init
-function fetchMatp() {
-	fetch('/account/map/')
+function fetchMatp(mapId) {
+	return fetch(`/account/api/map/${mapId}/`)
 		.then(response => response.text())
 		.then(mapData => {
-			// Diviser le texte en lignes
 			const mapLines = mapData.split('\n');
-		
-			// Convertir chaque ligne en un tableau de caractères (ou un autre format si nécessaire)
-			// let mapArray = mapLines.map(line => line.split(' '));  // Par exemple, diviser par espaces
-		
+			mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
 			console.log(mapLines);  // Affiche la carte sous forme de tableau 2D
 		
    		})
@@ -88,16 +84,21 @@ function fetchMatp() {
 
 }
 
+let block_arr = [];
+
 function createBlocks() {
-	var start_x = table.width / 7;
-	var start_y = table.height / 20;
+	var start_x = table.width / 8;
+	var start_y = table.height / 24;
 	var x = start_x
 	var y = start_y;
 	var width = start_x;
 	var height = start_y;
-	for (var i = 0; i < 5; i++) {
-		for (var j = 0; j < 8; j++) {
-			block_arr.push(new block(x, y + start_y + start_y, width, height, 3))
+
+	console.log("maptab");
+	console.log(mapTab);
+	for (var i = 0; i < 6; i++) {
+		for (var j = 0; j < 12; j++) {
+			block_arr.push(new block(x, y + start_y + start_y, width, height, mapTab[j][i]))
 			y += start_y;
 		}
 		x += start_x;
@@ -105,11 +106,11 @@ function createBlocks() {
 	}
 }
 
-window.onload = function() {
+window.onload = async function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
 	
-	fetchMatp();
+	await fetchMatp(2);
 	createBlocks();
 	createBall(Math.floor(getRandomArbitrary(0, 11)));
 }
@@ -405,14 +406,20 @@ function drawBlocks() {
 		if (block_arr[k].state) {
 			context.beginPath();
 			switch (block_arr[k].state) {
-				case 3:
+				case 5:
 					context.fillStyle = "green";
 					break;
-				case 2:
+				case 4:
+					context.fillStyle = "yellow";
+					break;
+				case 3:
 					context.fillStyle = "orange";
 					break;
-				case 1:
+				case 2:
 					context.fillStyle = "red";
+					break;
+				case 1:
+					context.fillStyle = "darkred";
 					break;
 			}
 			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width - 5, block_arr[k].height - 5, 10);
