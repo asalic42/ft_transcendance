@@ -1,61 +1,65 @@
 @font-face {
-    font-family: Namaku;
-    src: url("../fonts/Namaku.ttf");
+	font-family: Thunder-VF;
+	src: url("../fonts/Thunder-VF.ttf");
+}
+
+@font-face {
+	font-family: Thunder-SemiBold;
+	src: url("../fonts/Thunder-SemiBoldLC.otf");
 }
 
 body {
-    background-color: #23232e;
+	background-color: var(--bg-site);
 }
 
 .page {
-    font-family: 'Namaku';
-    text-align: center;
-    position: relative;
-    box-sizing: border-box;
-    top: 250px;
+	font-family: 'Thunder-VF';
+	text-align: center;
+	position: relative;	
+	box-sizing: border-box;
+	top: 250px;
+	border: 3px solid #ED4EB0;
+	border-radius: 50px;
+	width: 70%;
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+	background-color: #23232e;
 }
 
 .title {
-    color: white;
-}
-
-.rectangle {
-    border: 10px solid #141418;
-    border-radius: 10%;
-    position: absolute;
-    z-index: -1;                /* Positionner le rectangle en arriere-plan */
-    margin-left: 14%;
-    height: 300px;
-    width: 70%;
-    top: -50%;
+	color: var(--font-color);
+	font-size: 	70px;
 }
 
 .mode-choices {
-    margin: 50px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    gap: 100px;                  /* Espace entre les deux liens */
+	margin: 50px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	gap: 100px;				  /* Espace entre les deux liens */
 }
 
 .game-mode {
-    justify-content: center;
-    align-items: center;
-    display: flex;
-    text-decoration: none;
-    width: 200px;
-    height: 60px;
-    border: 2px solid;
-    border-radius: 5%;
-    font-size: 20px;
-    background-color: #23232e;
-    color: #ED4EB0;
+	font-family: 'Thunder-SemiBold';
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	text-decoration: none;
+	width: 200px;
+	height: 60px;
+    border-radius: 10px;
+    outline: 3px solid #ED4EB0;
+    outline-offset: -1px;
+	font-size: 32px;
+	background-color: #141418;
+    color: rgba(237, 78, 176, 0.9);
 }
 
 a {
-    text-decoration: none;
+	text-decoration: none;
 }
 
 .game-mode:hover {
-    background-color: #3e3e44;
+	background-color: #3e3e44;
 }

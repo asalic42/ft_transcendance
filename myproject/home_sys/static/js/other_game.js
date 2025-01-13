@@ -9,7 +9,7 @@ let percentage = 0;
 var score = document.getElementById("title");
 var fps = document.getElementById("fps");
 var gameOver = document.getElementById("gameOver");
-const gameSelection = document.querySelector('.game-selection');
+const mapSelection = document.querySelector('.mapSelection');
 const game = document.querySelector('.game');
 var count = 0;
 var health = 3;
@@ -30,7 +30,7 @@ let cachedUserId = null;
 //! Init
 
 
-gameSelection.addEventListener('click', (event) => {
+mapSelection.addEventListener('click', (event) => {
 	if (event.target.tagName === 'BUTTON') {
 	  const selectedMap = event.target.dataset.map;
 	  console.log(selectedMap)
@@ -46,9 +46,9 @@ async function launch (idMap) {
 	fps.style.display = 'flex';
 	title.style.display = 'flex';
 	canvasContainer.style.display = 'flex';
-	gameSelection.style.display ='none';
+	mapSelection.style.display ='none';
 	createBlocks();
-	createBall(Math.floor(getRandomArbitrary(0, 11)));
+	createBall(Math.floor(getRandomArbitrary(-11, 0)));
 }
 let block_arr = [];
 
@@ -76,12 +76,11 @@ function createBlocks() {
 function createBall(vy) {
 	// Balls coords
 	var ball = {coords : {x : (table.height / 2), y : table.height - 70},
-				const_vector : {vy : vy, vx : 50},
+				const_vector : {vy : vy, vx : vy},
 				vector : {},
 				radius : 13,
 				hit_horizontal : 0,
 				hit_vertical : 0,
-				hit_block : 0,
 				hit_player : 0};
 
 	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy, total : ball.const_vector.vy + ball.const_vector.vx};
@@ -231,11 +230,19 @@ function isBallHittingblock(ball) {
 				//* Determines how ball is going to bounce
 				if (ball.coords.x + ball.radius > block_arr[k].x1 && ball.coords.x - ball.radius < block_arr[k].x1 + block_arr[k].width) {
 					ball.const_vector.vy = -ball.const_vector.vy;
+					if (ball.const_vector.vy < 0 && ball.const_vector.vy > -15)
+						ball.const_vector.vy -= 0.25;
+					else if (ball.const_vector.vy < 15)
+						ball.const_vector.vy += 0.25;
 					ball.vector.vy = ball.const_vector.vy;
 				}
 				else if (ball.coords.y + ball.radius > block_arr[k].y1 && ball.coords.y - ball.radius < block_arr[k].y1 + block_arr[k].height){
 					
 					ball.const_vector.vx = -(ball.const_vector.vx);
+					if (ball.const_vector.vx < 0 && ball.const_vector.vx > -15)
+						ball.const_vector.vx -= 0.25;
+					else if (ball.const_vector.vx < 15)
+						ball.const_vector.vx += 0.25;
 					ball.vector.vx = -ball.vector.vx;
 				}
 				ball.hit_block = 2;
@@ -260,7 +267,7 @@ function isGameOver() {
 function isEnd(ball) {
 	if (ball.coords.y + ball.radius >= table.height) {
 		health--;
-		createBall(Math.floor(getRandomArbitrary(0, 10)));
+		createBall(Math.floor(getRandomArbitrary(-11, 0)));
 		return true;
 	}
 	return false;
@@ -420,7 +427,6 @@ function update() {
 //! API STUFF
 
 async function getCurrentPlayerId() {
-	console.log(cachedUserId);
 	if (cachedUserId !== null) {
 		return cachedUserId;
 	}

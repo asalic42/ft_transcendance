@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'django.db.migrations.migration',
     'login_sys',
     'home_sys',
 ]
@@ -88,7 +87,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL', 'postgres://user:admin%40123@localhost:5432/mysqldb')
+        default=os.getenv('DATABASE_URL', 'postgres://user:admin%40123@db:5432/mysqldb')
     )
 }
 
