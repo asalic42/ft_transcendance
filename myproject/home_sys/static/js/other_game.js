@@ -1,13 +1,16 @@
 // Variables
+let mapTab = [];
 var table;
 var context;
-var game = document.getElementById("game");
-let stop = 0;
+var canvasContainer = document.getElementById("canvas-container");
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
 var score = document.getElementById("title");
+var fps = document.getElementById("fps");
 var gameOver = document.getElementById("gameOver");
+const gameSelection = document.querySelector('.game-selection');
+const game = document.querySelector('.game');
 var count = 0;
 var health = 3;
 
@@ -22,31 +25,53 @@ class block {
 	}
 }
 
-var block_arr = []
+let cachedUserId = null;
+
 //! Init
+
+
+gameSelection.addEventListener('click', (event) => {
+	if (event.target.tagName === 'BUTTON') {
+	  const selectedMap = event.target.dataset.map;
+	  console.log(selectedMap)
+	  launch(selectedMap);
+	}
+});
+
+async function launch (idMap) {
+	table = document.getElementById("game");
+	context = table.getContext("2d");
+	
+	await fetchMatp(idMap);
+	fps.style.display = 'flex';
+	title.style.display = 'flex';
+	canvasContainer.style.display = 'flex';
+	gameSelection.style.display ='none';
+	createBlocks();
+	createBall(Math.floor(getRandomArbitrary(0, 11)));
+}
+let block_arr = [];
+
 function createBlocks() {
-	var start_x = table.width / 7;
-	var start_y = table.height / 20;
+	var start_x = table.width / 8;
+	var start_y = table.height / 24;
 	var x = start_x
 	var y = start_y;
 	var width = start_x;
 	var height = start_y;
-	for (var i = 0; i < 5; i++) {
-		for (var j = 0; j < 8; j++) {
-			block_arr.push(new block(x, y + start_y + start_y, width, height, 3))
+
+	console.log("maptab");
+	console.log(mapTab);
+	for (var i = 0; i < 6; i++) {
+		for (var j = 0; j < 12; j++) {
+			block_arr.push(new block(x, y + start_y + start_y, width, height, mapTab[j][i]))
 			y += start_y;
 		}
 		x += start_x;
 		y = start_y;
 	}
 }
-window.onload = function() {
-	table = document.getElementById("game");
-	context = table.getContext("2d");
 
-	createBlocks();
-	createBall(Math.floor(getRandomArbitrary(0, 11)));
-}
 
 function createBall(vy) {
 	// Balls coords
@@ -65,6 +90,8 @@ function createBall(vy) {
 	var player1Coords = {y1 : table.height - 50, x1 : (table.height / 2) - 60, y2 : table.height - 35, x2 : (table.height / 2) + 60, const_vx : 20, vx : 20};
 
 	launchAnim(ball, player1Coords, Date.now());
+	if (isGameOver())
+		winnerWindow();
 }
 
 //! Players related stuff
@@ -164,7 +191,7 @@ function isBallHittingWall(ball) {
 function moveBall(ball, player1Coords) {
 
 	// Ball is hiting a player.
-	if (!stop && isBallHittingPlayer(ball, player1Coords)) {
+	if (isBallHittingPlayer(ball, player1Coords)) {
 		var intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
 		if (intersection > 0 && intersection < 0.25)
 			intersection = 0.25;
@@ -180,9 +207,6 @@ function moveBall(ball, player1Coords) {
 		ball.const_vector.vy = -(ball.const_vector.vy);
 		ball.vector.vy = -ball.vector.vy;
 	}
-	else if (isGameOver())
-		return true;
-
 	isBallHittingWall(ball);
 	isBallHittingblock(ball);
 	ball.coords.x += ball.vector.vx;
@@ -227,7 +251,6 @@ function isBallHittingblock(ball) {
 
 function isGameOver() {
 	if (health <= 0) {
-		winnerWindow();
 		return true;
 	}
 	return false;
@@ -236,22 +259,20 @@ function isGameOver() {
 
 function isEnd(ball) {
 	if (ball.coords.y + ball.radius >= table.height) {
-        health--;
+		health--;
 		createBall(Math.floor(getRandomArbitrary(0, 10)));
 		return true;
-    }
-    return false;
+	}
+	return false;
 }
 
 //! Loop func
-
+let id=0;
 function launchAnim(ball, player1Coords, start) {
 
 	timeRelatedStuff(ball, start);
 	adaptVectorsToFps(ball, player1Coords);
 	start = Date.now();
-	if (stop)
-		return;
 	context.clearRect(0, 0, table.width, table.height);
 	update();
 	drawPlayer(player1Coords, "#ED4EB0");
@@ -260,7 +281,7 @@ function launchAnim(ball, player1Coords, start) {
 	drawBlocks();
 	moveBall(ball, player1Coords);
 	score.innerText = "Score : " + count;
-	requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
+	id = requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
 }
 
 //! Fps related stuff
@@ -289,25 +310,45 @@ function adaptVectorsToFps(ball, player1Coords) {
 	player1Coords.vx = player1Coords.const_vx * percentage;
 }
 
-function winnerWindow() {
-	
+async function winnerWindow() {
 	context.clearRect(0, 0, table.width, table.height);
-	
 	gameOver.style.display = "flex";
 	drawOuterRectangle("#C42021");
 	drawInnerRectangle("#23232e");
-	replay();
+
+	cancelAnimationFrame(id);
+	console.log("tourne en boucle");
+	try {
+		const playerId = await getCurrentPlayerId();
+		if (!playerId) {
+			console.error('Impossible de sauvegarder le score : utilisateur non connecté');
+			showReplayButton();  // Au lieu de replay() directement
+			return;
+		}
+		
+		var mapId = 1;
+		console.log(playerId, count, mapId);
+
+		// Attendre que l'ajout du score soit terminé
+		await addNewGame(playerId, mapId, count);
+		
+		// Seulement après que le score est sauvegardé
+		showReplayButton();
+		
+	} catch (error) {
+		console.error('Erreur lors de la sauvegarde du score:', error);
+		showReplayButton();
+	}
 }
 
-function replay() {
+// Séparer l'affichage du bouton replay de son action
+function showReplayButton() {
 	const button = document.getElementById("replay-button");
 	button.style.display = "flex";
-
 	button.style.color = "#C42021";
 	button.addEventListener("click", () => {
 		window.location.reload();
 	});
-	
 }
 
 //! Tools
@@ -323,14 +364,20 @@ function drawBlocks() {
 		if (block_arr[k].state) {
 			context.beginPath();
 			switch (block_arr[k].state) {
-				case 3:
+				case 5:
 					context.fillStyle = "green";
 					break;
-				case 2:
+				case 4:
+					context.fillStyle = "yellow";
+					break;
+				case 3:
 					context.fillStyle = "orange";
 					break;
-				case 1:
+				case 2:
 					context.fillStyle = "red";
+					break;
+				case 1:
+					context.fillStyle = "darkred";
 					break;
 			}
 			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width - 5, block_arr[k].height - 5, 10);
@@ -368,4 +415,65 @@ window.addEventListener("keyup", (event) => {
 function update() {
 	drawOuterRectangle("#ED4EB0");
 	drawInnerRectangle("#23232e");
+}
+
+//! API STUFF
+
+async function getCurrentPlayerId() {
+	console.log(cachedUserId);
+	if (cachedUserId !== null) {
+		return cachedUserId;
+	}
+	try {
+		const response = await fetch('/account/api/current-user/', {
+			credentials: 'same-origin'
+		});
+		const data = await response.json();
+		cachedUserId = data.userId;
+		return cachedUserId;
+	} catch (error) {
+		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		return null;
+	}
+}
+
+async function addNewGame(id_player, id_map, score) {
+	console.log("Appel de addnewgame");
+	try {
+		const response = await fetch('/account/api/addSoloCasseBrique/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({  // Convertit les données en JSON
+				id_player: id_player,
+				id_map: id_map,
+				score: score
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout du jeu');
+		}
+
+		const result = await response.json();
+		console.log('Nouveau jeu ajouté:', result);
+	} catch (error) {
+		console.error('Erreur:', error);
+	}
+}
+
+function fetchMatp(mapId) {
+	return fetch(`/account/api/map/${mapId}/`)
+	.then(response => response.text())
+	.then(mapData => {
+		const mapLines = mapData.split('\n');
+		mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
+		console.log(mapLines);  // Affiche la carte sous forme de tableau 2D
+		
+	})
+	.catch(error => {
+		console.error('Erreur lors de la récupération des données de la carte:', error);
+	});
+	
 }

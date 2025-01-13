@@ -16,4 +16,7 @@ urlpatterns = [
     path('other_game/', other_game, name='other_game'),
     path('tournament/', tournament_page, name='tournament'),
     path('api/button-test/', button_test_page, name="button_test_page"),
+	path('api/current-user/', get_current_user_id, name='current_user_id'),
+	path('api/addSoloCasseBrique/', addSoloCasseBrique, name='addSoloCasseBrique'),
+	path('api/map/<int:map_id>/', map_view, name="map_view")
 ]

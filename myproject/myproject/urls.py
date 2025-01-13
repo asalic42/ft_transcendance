@@ -29,4 +29,7 @@ urlpatterns = [
 
     path('account/', include('home_sys.urls')),     
     # Inclut toutes les URLs relatives aux fonctionnalités du compte (comme la gestion du profil) dans l'application home_sys
+
+    path('admin/', admin.site.urls),
+
 ]
