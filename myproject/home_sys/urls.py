@@ -1,9 +1,5 @@
 from django.urls import path
-from .views import (
-    home, signout, delete_account, delete_success, service_unavailable,
-    profile_page, game_page, game_choice_page, game_mode_page, game_bot_page,
-    channels_page, other_game, tournament_page
-)
+from .views import *
 
 urlpatterns = [
     path('', home, name="home"),
@@ -19,4 +15,5 @@ urlpatterns = [
     path('game-bot/', game_bot_page, name='game-bot'),
     path('other_game/', other_game, name='other_game'),
     path('tournament/', tournament_page, name='tournament'),
+    path('api/button-test/', button_test_page, name="button_test_page"),
 ]

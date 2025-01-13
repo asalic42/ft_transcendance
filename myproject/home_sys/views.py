@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
+from django.json import JsonResponse
 
 # Creer une API django avec DRF (Django REST Framework)
 # from rest_framework.views import APIView
@@ -113,3 +114,8 @@ def other_game(request):
 @login_required
 def tournament_page(request):
     return (render(request, 'tournament.html'))
+
+@login_required
+def button_test_page():
+    users_list = User.objects.all()
+    return JsonResponse({'users_list': users_list})

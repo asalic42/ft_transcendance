@@ -40,30 +40,38 @@ console.log(`Current username is ${username}`);
     });
 
     const newChan = document.getElementById('new-chan');
-    const inviteButton = document.getElementById('add-friend-chan');
-    newChan.addEventListener('click', () => {
+    // const inviteButton = document.getElementById('add-friend-chan');
 
-      // Disparition du chat en cours
-      if (chatVisible) {
-        reversePopCenterChat();
-        currentChan = null;
-        newChan.textContent = '+';
-        inviteButton.style.display = "none";
-        chatVisible = !chatVisible;
-      }
-      else {
-        // Creation de chan + ouverture
-        setChannelName(function(nameChan) {
-          popCenterChat(nameChan);
-          newChan.textContent = '➙';
-          chatVisible = !chatVisible;
-          currentChan = nameChan;
-          socket.emit('create-channel', currentChan);
-          addChannelToList(currentChan);
-          inviteFriendInChan(inviteButton);
-        });
-      }
+    newChan.addEventListener('click', () => {
+      
+
+
     });
+
+
+    // newChan.addEventListener('click', () => {
+
+    //   // Disparition du chat en cours
+    //   if (chatVisible) {
+    //     reversePopCenterChat();
+    //     currentChan = null;
+    //     newChan.textContent = '+';
+    //     inviteButton.style.display = "none";
+    //     chatVisible = !chatVisible;
+    //   }
+    //   else {
+    //     // Creation de chan + ouverture
+    //     setChannelName(function(nameChan) {
+    //       popCenterChat(nameChan);
+    //       newChan.textContent = '➙';
+    //       chatVisible = !chatVisible;
+    //       currentChan = nameChan;
+    //       socket.emit('create-channel', currentChan);
+    //       addChannelToList(currentChan);
+    //       inviteFriendInChan(inviteButton);
+    //     });
+    //   }
+    // });
 
   });
 
