@@ -2,12 +2,15 @@
 let mapTab = [];
 var table;
 var context;
-var game = document.getElementById("game");
+var canvasContainer = document.getElementById("canvas-container");
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
 var score = document.getElementById("title");
+var fps = document.getElementById("fps");
 var gameOver = document.getElementById("gameOver");
+const gameSelection = document.querySelector('.game-selection');
+const game = document.querySelector('.game');
 var count = 0;
 var health = 3;
 
@@ -24,66 +27,29 @@ class block {
 
 let cachedUserId = null;
 
-async function getCurrentPlayerId() {
-	console.log(cachedUserId);
-	if (cachedUserId !== null) {
-		return cachedUserId;
-	}
-	try {
-		const response = await fetch('/account/api/current-user/', {
-			credentials: 'same-origin'
-		});
-		const data = await response.json();
-		cachedUserId = data.userId;
-		return cachedUserId;
-	} catch (error) {
-		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
-		return null;
-	}
-}
-
-async function addNewGame(id_player, id_map, score) {
-	console.log("Appel de addnewgame");
-	try {
-		const response = await fetch('/account/api/add_solo_casse_brique/', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({  // Convertit les données en JSON
-				id_player: id_player,
-				id_map: id_map,
-				score: score
-			})
-		});
-
-		if (!response.ok) {
-			throw new Error('Erreur lors de l\'ajout du jeu');
-		}
-
-		const result = await response.json();
-		console.log('Nouveau jeu ajouté:', result);
-	} catch (error) {
-		console.error('Erreur:', error);
-	}
-}
-
 //! Init
-function fetchMatp(mapId) {
-	return fetch(`/account/api/map/${mapId}/`)
-		.then(response => response.text())
-		.then(mapData => {
-			const mapLines = mapData.split('\n');
-			mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
-			console.log(mapLines);  // Affiche la carte sous forme de tableau 2D
-		
-   		})
-	.catch(error => {
-		console.error('Erreur lors de la récupération des données de la carte:', error);
-	});
 
+
+gameSelection.addEventListener('click', (event) => {
+	if (event.target.tagName === 'BUTTON') {
+	  const selectedMap = event.target.dataset.map;
+	  console.log(selectedMap)
+	  launch(selectedMap);
+	}
+});
+
+async function launch (idMap) {
+	table = document.getElementById("game");
+	context = table.getContext("2d");
+	
+	await fetchMatp(idMap);
+	fps.style.display = 'flex';
+	title.style.display = 'flex';
+	canvasContainer.style.display = 'flex';
+	gameSelection.style.display ='none';
+	createBlocks();
+	createBall(Math.floor(getRandomArbitrary(0, 11)));
 }
-
 let block_arr = [];
 
 function createBlocks() {
@@ -106,14 +72,6 @@ function createBlocks() {
 	}
 }
 
-window.onload = async function() {
-	table = document.getElementById("game");
-	context = table.getContext("2d");
-	
-	await fetchMatp(2);
-	createBlocks();
-	createBall(Math.floor(getRandomArbitrary(0, 11)));
-}
 
 function createBall(vy) {
 	// Balls coords
@@ -457,4 +415,65 @@ window.addEventListener("keyup", (event) => {
 function update() {
 	drawOuterRectangle("#ED4EB0");
 	drawInnerRectangle("#23232e");
+}
+
+//! API STUFF
+
+async function getCurrentPlayerId() {
+	console.log(cachedUserId);
+	if (cachedUserId !== null) {
+		return cachedUserId;
+	}
+	try {
+		const response = await fetch('/account/api/current-user/', {
+			credentials: 'same-origin'
+		});
+		const data = await response.json();
+		cachedUserId = data.userId;
+		return cachedUserId;
+	} catch (error) {
+		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		return null;
+	}
+}
+
+async function addNewGame(id_player, id_map, score) {
+	console.log("Appel de addnewgame");
+	try {
+		const response = await fetch('/account/api/add_solo_casse_brique/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({  // Convertit les données en JSON
+				id_player: id_player,
+				id_map: id_map,
+				score: score
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout du jeu');
+		}
+
+		const result = await response.json();
+		console.log('Nouveau jeu ajouté:', result);
+	} catch (error) {
+		console.error('Erreur:', error);
+	}
+}
+
+function fetchMatp(mapId) {
+	return fetch(`/account/api/map/${mapId}/`)
+	.then(response => response.text())
+	.then(mapData => {
+		const mapLines = mapData.split('\n');
+		mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
+		console.log(mapLines);  // Affiche la carte sous forme de tableau 2D
+		
+	})
+	.catch(error => {
+		console.error('Erreur lors de la récupération des données de la carte:', error);
+	});
+	
 }

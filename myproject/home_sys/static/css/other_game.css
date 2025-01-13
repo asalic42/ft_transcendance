@@ -2,16 +2,19 @@ body{
 	background-color: #2B2B3B ;
 }
 
+.game {
+	display: none;
+}
+
 #game {
 	width: 50%;
 	text-align:center;
 }
 
-.canvas-container {
+#canvas-container {
 	border-radius: 1%;
 	position: relative;
-	display: inline;
-	display: flex;
+	/* display: flex; */
 	align-items: center;
 	justify-content: center;
 }
@@ -20,17 +23,16 @@ h3 {
 	text-align: center;
 }
 
-.fps {
+#fps {
 	font-family: 'Namaku';
 	gap: 50px;
 	justify-content: center;
 	align-items: center;
-	display: flex;
 	color: white;
 	text-align: center;
 }
 
-.scores {
+#title {
     font-family: 'Namaku'; /* Police demandée */
     position: absolute; /* Permet un positionnement précis */
     top: 10%; /* Position verticale dans le tiers supérieur (ajustez selon vos préférences) */

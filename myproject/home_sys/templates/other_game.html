@@ -6,13 +6,17 @@
 
 <link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
-<h3 class="fps" id="fps">Fps : 0 | Avg Fps : </h3>
-
-<div class="scores">
-	<h3 id="title">Score : 0 </h3>
+<div class="game-selection">
+	<button data-map="1">Map 1</button>
+	<button data-map="2">Map 2</button>
+	<button data-map="3">Map 3</button>
 </div>
 
-<div class="canvas-container">
+<h3 class="game" id="fps">Fps : 0 | Avg Fps : </h3>
+
+<h3 class="game" id="title">Score : 0 </h3>
+
+<div class="game" id="canvas-container">
 	<canvas width="1000" height="1000" id="game"></canvas>
 	<div id="button-container">
 		<button id="replay-button" style="display: none;">Play again !</button>
