@@ -35,7 +35,7 @@ services:
 
   web:
     build: .
-    # container_name: django
+    container_name: django
     ports:
       - "8000:8000"
     volumes:
@@ -48,21 +48,21 @@ services:
     networks:
       - appnet
 
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nginx
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-  #     - ./nginx/ssl/:/etc/nginx/ssl/
-  #   depends_on:
-  #     - web
-  #     - node
-  #     - db
-  #   networks:
-  #     - appnet
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl/:/etc/nginx/ssl/
+    depends_on:
+      - web
+      - node
+      - db
+    networks:
+      - appnet
 
 volumes:
   postgres_data:

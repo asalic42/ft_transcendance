@@ -16,7 +16,7 @@ console.log(`Current username is ${username}`);
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
-    socket = io('http://localhost:3000');
+    socket = io('https://localhost:3000');
 
     socket.on('connect', () => {
       console.log("Connection etablie");
