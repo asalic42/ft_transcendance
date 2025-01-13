@@ -61,7 +61,8 @@
 
         </form>
 
-        <button class="button42" type="button" id="button42-id">42</button>
+        <button class="button42" type="button" id="button42-id" onclick="redirectTo42Login()">42</button>
+    
     </div>
 
     <div class="signup-container">
@@ -101,7 +102,7 @@
                 <span>Email</span>
             </div>
 
-            <div class="image-container" data-text="Solidity : [🔴​🟠​🟡​🟢​🔵​], Blue is required.">
+            <div class="image-container" data-text="Solidity : [🔴​🟠​🟡​🟢...​​], Dark Green is required.">
                 <img src="{% static 'images/icon-info.png' %}" alt="Image 2" class="hover-image">
                 <div class="line-container">
                     <div class="line"></div>
@@ -149,6 +150,12 @@
     {% endif %}
 
     <script src="{% static 'js/script.js' %}"></script>
+
+    <script>
+        function redirectTo42Login() {
+            window.location.href = "{% url 'social:begin' '42' %}";
+        }
+    </script>
 
 </body>
 </html>

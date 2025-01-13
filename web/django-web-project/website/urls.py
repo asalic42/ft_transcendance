@@ -19,7 +19,10 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+
+    path('oauth/callback/', include('social_django.urls', namespace='social')),
+    
     path('admin/', admin.site.urls),
     path('', include('loginpage.urls')),  # Include the loginpage URLs
-    path('account/', include('home_sys.urls')),
+    path('accounts/', include('home_sys.urls')),
 ]

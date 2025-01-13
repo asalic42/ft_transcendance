@@ -75,6 +75,7 @@ function checkFormValidity(form, formInput, formButton) {
 
         if (passwordInput.value === confirmPasswordInput.value) {
             mismatchMessage.classList.remove('show');
+            
             mismatchMessage.style.transition = "all 0.2s ease";
             is_form_valid.value++;
         } else {
@@ -278,7 +279,7 @@ emailSignup.addEventListener('keyup', function() {
 
 
 
-function verif_password_solidity(baliseInput, chemin_fetch, taken_bool) {
+function verif_password_solidity(baliseInput, chemin_fetch) {
     const baliseContent = baliseInput.value.trim();
 
     if (baliseContent.length > 0) {

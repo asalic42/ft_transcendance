@@ -7,3 +7,7 @@ python-dotenv==1.0.1
 sqlparse==0.5.1
 typing_extensions==4.12.2
 zxcvbn==4.4.28
+social-auth-app-django
+social-auth-core
+requests
+django-environ
