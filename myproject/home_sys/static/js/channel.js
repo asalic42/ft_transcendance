@@ -40,7 +40,7 @@ console.log(`Current username is ${username}`);
     });
 
     const newChan = document.getElementById('new-chan');
-    const addFriendChan = document.getElementById('add-friend-chan');
+    const inviteButton = document.getElementById('add-friend-chan');
     newChan.addEventListener('click', () => {
 
       // Disparition du chat en cours
@@ -48,7 +48,7 @@ console.log(`Current username is ${username}`);
         reversePopCenterChat();
         currentChan = null;
         newChan.textContent = '+';
-        addFriendChan.style.display = "none";
+        inviteButton.style.display = "none";
         chatVisible = !chatVisible;
       }
       else {
@@ -56,11 +56,11 @@ console.log(`Current username is ${username}`);
         setChannelName(function(nameChan) {
           popCenterChat(nameChan);
           newChan.textContent = '➙';
-          addFriendChan.style.display = "block";
           chatVisible = !chatVisible;
           currentChan = nameChan;
           socket.emit('create-channel', currentChan);
           addChannelToList(currentChan);
+          inviteFriendInChan(inviteButton);
         });
       }
     });
@@ -92,7 +92,7 @@ console.log(`Current username is ${username}`);
     chanItem.addEventListener('click', () => {
       popCenterChat(nameChan);
       document.getElementById('new-chan').textContent = '➙';
-      document.getElementById('add-friend-chan').style.display = "inline";
+      inviteFriendInChan(document.getElementById('add-friend-chan'));
       if (!chatVisible)
         chatVisible = !chatVisible;
       currentChan = nameChan;
@@ -186,6 +186,31 @@ console.log(`Current username is ${username}`);
       }
     }
     inputChannel.addEventListener('keydown', handleInputName);
+  }
+
+  function inviteFriendInChan(inviteButton)
+  {
+    console.log("JE SUIS LAAAA");
+
+    inviteButton.style.display = "inline";
+    inviteButton.addEventListener('click', () => {
+      const inputContainer = document.getElementById('input-chat-add');
+      const inputFriend = document.getElementById('input-add-friend-chan');
+      const overlay = document.getElementById('overlay');
+
+      overlay.style.display = 'block';
+      inputContainer.classList.add('show');
+
+      inputFriend.addEventListener('input', function() {
+          const userList = document.getElementById('users-list').getAttribute('data-users').split(', ');
+          if (!userList.includes(this.value)) {
+            alert(`User doesn't exist`);
+          }
+          else {
+            alert(`Invitation envoyee :)`);
+          }
+      });
+    });
   }
 
   // Inverser la transition pour faire disparaitre le chat en cours

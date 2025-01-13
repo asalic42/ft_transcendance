@@ -87,7 +87,8 @@ def service_unavailable(request):
 @login_required
 def channels_page(request):
     curr_user = request.user
-    return (render(request, 'channels.html', {'current_user': curr_user}))
+    users = User.objects.all()
+    return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
 
 @login_required
 def game_page(request):
