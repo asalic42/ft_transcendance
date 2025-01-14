@@ -4,7 +4,9 @@
 - socket.emit = fonction qui communique avec celle du cote client
 */
 
-let socket;
+// const { response } = require("express");
+
+// let socket;
 let chatVisible = false;
 let currentChan;
 
@@ -16,62 +18,49 @@ console.log(`Current username is ${username}`);
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
-	socket = io('http://localhost:3000');
+	// socket = io('http://localhost:3000');
 
-	socket.on('connect', () => {
-	  console.log("Connection etablie");
-	})
+	// socket.on('connect', () => {
+	//   console.log("Connection etablie");
+	// })
 
 	loadChannels();
 
-	socket.emit('load-channels');
-	socket.on('all-channels', (channels) => {
-	  channels.forEach(currentChan => {
-		addChannelToList(currentChan);
-	  });
-	});
-
-	socket.on('channel-messages', (messages) => {
-	  const chatContainer = document.getElementById('chat-page');
-	  chatContainer.innerHTML = '';
+	// socket.on('channel-messages', (messages) => {
+	//   const chatContainer = document.getElementById('chat-page');
+	//   chatContainer.innerHTML = '';
 	  
-	  console.log("Je tente de recup les messages !");
-	  messages.forEach(message => addMessage(message.message));
-	});
+	//   console.log("Je tente de recup les messages !");
+	//   messages.forEach(message => addMessage(message.message));
+	// });
 
     const newChan = document.getElementById('new-chan');
     // const inviteButton = document.getElementById('add-friend-chan');
 
+
     newChan.addEventListener('click', () => {
-      
 
+      // Disparition du chat en cours
+      if (chatVisible) {
+        reversePopCenterChat();
+        currentChan = null;
+        newChan.textContent = '+';
+        inviteButton.style.display = "none";
+        chatVisible = !chatVisible;
+      }
+      else {
+        // Creation de chan + ouverture
+        setChannelName(function(nameChan) {
+          popCenterChat(nameChan);
+          newChan.textContent = '➙';
+          chatVisible = !chatVisible;
+          currentChan = nameChan;
 
+          addChannelToDb(currentChan);
+          inviteFriendInChan(inviteButton);
+        });
+      }
     });
-
-
-    // newChan.addEventListener('click', () => {
-
-    //   // Disparition du chat en cours
-    //   if (chatVisible) {
-    //     reversePopCenterChat();
-    //     currentChan = null;
-    //     newChan.textContent = '+';
-    //     inviteButton.style.display = "none";
-    //     chatVisible = !chatVisible;
-    //   }
-    //   else {
-    //     // Creation de chan + ouverture
-    //     setChannelName(function(nameChan) {
-    //       popCenterChat(nameChan);
-    //       newChan.textContent = '➙';
-    //       chatVisible = !chatVisible;
-    //       currentChan = nameChan;
-    //       socket.emit('create-channel', currentChan);
-    //       addChannelToList(currentChan);
-    //       inviteFriendInChan(inviteButton);
-    //     });
-    //   }
-    // });
 
   });
 
@@ -80,19 +69,20 @@ console.log(`Current username is ${username}`);
   // Add channel to the right channel's list
   function  addChannelToList(nameChan)
   {
-	const chanList = document.getElementById('channels-list');
+    console.log("Name chan: ", nameChan);
+	  const chanList = document.getElementById('channels-list');
 
-	if (!chanList.querySelector(`#channel-${nameChan}`)) {
-	  const chanItem = document.createElement('div');
-	  chanItem.id = `#channel-${nameChan}`;
-	  chanItem.textContent = nameChan;
-	  chanItem.classList.add('chan-item');
+	  if (!chanList.querySelector(`#channel-${nameChan}`)) {
+	    const chanItem = document.createElement('div');
+	    chanItem.id = `#channel-${nameChan}`;
+	    chanItem.textContent = nameChan;
+	    chanItem.classList.add('chan-item');
 
-	  clickToChannel(chanItem, nameChan);
+	    clickToChannel(chanItem, nameChan);
 
-	  chanList.appendChild(chanItem);
-	  saveChannel();
-	}
+	    chanList.appendChild(chanItem);
+	    saveChannel();
+	  }
   }
 
   // Cliquer sur un channel deja creer
@@ -108,7 +98,7 @@ console.log(`Current username is ${username}`);
       const h2content = document.getElementById('chat-name');
       h2content.textContent = currentChan;
 
-      socket.emit('get-messages', currentChan);
+      getMessages(currentChan);
     });
   }
 
@@ -119,13 +109,7 @@ console.log(`Current username is ${username}`);
 	localStorage.setItem('channels', JSON.stringify(channelArray));
   }
 
-  // Load channel that already exists and get them from db
-  function  loadChannels() {
-	const savedChannels = JSON.parse(localStorage.getItem('channels')) || [];
-	savedChannels.forEach(nameChan => {
-	  addChannelToList(nameChan);
-	});
-  }
+ 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* CENTER CHANNELS PART */
@@ -242,12 +226,10 @@ console.log(`Current username is ${username}`);
 	sendButton.addEventListener('click', () => {
 
 	  const msg = document.getElementById('message-input').value;
-	  if (msg != "") {	
-		socket.emit('new-message', {channelName: currentChan, sender: username, message: msg});
-		
-		addMessage(msg);
-		document.getElementById('message-input').value = '';  // Vide le champ de saisie
-		console.log("MESSAGE ENVOYE !");  
+	  if (msg != "") {
+      postMessage(currentChan, msg);
+		  document.getElementById('message-input').value = '';  // Vide le champ de saisie
+		  console.log("MESSAGE ENVOYE !");  
 	  }
 	});
 
@@ -265,16 +247,15 @@ console.log(`Current username is ${username}`);
   function addMessage(mess) {
 	const chatPage = document.getElementById('chat-page')
 
-    console.log("message is ", mess);
     const message = document.createElement('div');
     message.classList.add('message');
 
 	const usernameElement = document.createElement('span');
 	usernameElement.classList.add('username');
-	usernameElement.textContent = username;
+	usernameElement.textContent = mess.sender;
 
 	const messElement = document.createElement('p');
-	messElement.textContent = mess;
+	messElement.textContent = mess.message;
 
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
@@ -285,3 +266,102 @@ console.log(`Current username is ${username}`);
 
 	chatPage.scrollTop = chatPage.scrollHeight;
   }
+
+////////////////////////////////////////////////
+        /* Function API fetch */
+///////////////////////////////////////////////
+
+// Add a new channel to the db
+async function addChannelToDb(currentChan) {
+  try {
+    const response = await fetch('/account/api/post_chan/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: currentChan
+        // invite_link: null
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de l\'ajout du chan');
+    }
+
+    console.log("nouveau chan ADD a la bdd");
+    addChannelToList(currentChan);
+  } catch (error) {
+      console.error('Erreur: ', error);
+  }
+
+}
+
+// Load channels that already exists and get them from db
+// When UserChan table created, use it
+  async function  loadChannels() {
+  
+    try {
+      const response = await fetch('/account/api/get_chans/', {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+      if (result.status == 'success' && Array.isArray(result.channels)) {
+        console.log("Canaux: ", result.channels);
+        result.channels.forEach(nameChan => {
+          addChannelToList(nameChan);
+        });
+
+      }
+      else {
+        console.log("Aucun canaux trouves...");
+      }
+    } catch(error) {
+      console.error('Erreur: ', error);
+    }
+  }
+
+// Load messages when the chan appear
+  async function getMessages(currentChan) {
+    try {
+      const response = await fetch(`/account/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+      if (result.status === 'success' && Array.isArray(result.messages)) {
+        console.log(`message du channel ${currentChan}: `, result.messages);
+        result.messages.forEach(message => addMessage(message));
+      }
+    } catch (error) {
+      console.error('Erreur: ', error);
+    }
+  }
+
+async function postMessage(currentChan, mess) {
+  try {
+    const response = await fetch('/account/api/post_message/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        channel_name: currentChan,
+        sender: username,
+        message: mess,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
+    }
+		addMessage(mess);
+  } catch(error) {
+      console.error('Erreur: ', error);
+  }
+}

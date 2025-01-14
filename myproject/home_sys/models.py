@@ -20,7 +20,7 @@ class Chans(models.Model):
 	id = models.AutoField(primary_key = True)
 	name = models.CharField(max_length = 150)
 	invite_link = models.CharField()
-	created = models.CharField()
+	date = models.DateTimeField(auto_now_add = True)
 
 	def __str__(self):
 		return self.name
@@ -85,3 +85,9 @@ class BlockUsers(models.Model):
 	idUser = models.IntegerField()
 	idBlocked = models.IntegerField()
 
+class Messages(models.Model):
+	id = models.AutoField(primary_key=True)
+	channel_name = models.CharField()
+	sender = models.CharField()
+	message = models.CharField()
+	date = models.DateTimeField(auto_now_add = True)

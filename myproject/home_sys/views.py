@@ -12,13 +12,7 @@ from .models import *
 import json
 from django.shortcuts import get_object_or_404
 
-# Creer une API django avec DRF (Django REST Framework)
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status 
-
-# Import Serializers
-from .serializers import SoloCasseBriqueSerializer
+from django.views.decorators.http import require_http_methods
 
 
 """
@@ -133,31 +127,6 @@ def get_current_user_id(request):
 	"""Renvoie l'ID de l'utilisateur actuellement connecté"""
 	return JsonResponse({'userId': request.user.id})
 
-@csrf_exempt
-@api_view (['POST']) # Simplifie la gestion des requests HTTP
-def addSoloCasseBrique(request):
-	print("hello hello, je suis la bitch")
-	if request.method == 'POST':
-
-		# Deserialiser les donnees entrantes
-		serializer = SoloCasseBriqueSerializer(data=request.data)
-
-		if serializer.is_valid():
-			# Save le nouvel objet dans la bdd
-			new_game = serializer.save()
-
-			# Reponse http sucess
-			return Response({
-				'status': 'success',
-				'game': serializer.data
-			}, status=status.HTTP_201_CREATED)
-		else:
-			# Reponse http echec
-			return Response({
-				'status': 'error',
-				'message': 'Invalid data',
-				'errors': serializer.errors
-			}, status=status.HTTP_400_BAD_REQUEST)
 
 # @csrf_exempt  # Désactive la protection CSRF pour cette vue (utile pendant les tests, mais à sécuriser en production)
 # def add_solo_casse_brique(request):
@@ -200,6 +169,24 @@ def addSoloCasseBrique(request):
 # 		# Si la requête n'est pas de type POST, retourner une erreur 405 (Méthode non autorisée)
 # 		return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 	
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_solo_casse_brique(request):
+    try:
+        data = json.loads(request.body)
+        new_game = SoloCasseBrique.objects.create(**data)
+        return JsonResponse({'status': 'success', 'game': {
+            'id': new_game.id,
+            'id_player': new_game.id_player,
+            'id_map': new_game.id_map,
+            'score': new_game.score,
+            'date': new_game.date.isoformat(),
+        }}, status=201)
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
 def map_view(request, map_id):
 	# Spécifiez le chemin de votre fichier .txt
 	selected_map = get_object_or_404(Maps, id=map_id)
@@ -215,4 +202,64 @@ def map_view(request, map_id):
 	return HttpResponse(map_data, content_type="text/plain")
 
 
+# """ CHANNELS VIEWS """
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_chan(request):
+	try:
+		data = json.loads(request.body)
+		new_chan = Chans.objects.create(**data)
+		return JsonResponse({'status': 'success', 'chan': {
+			'id': new_chan.id,
+			'name': new_chan.name,
+			'invite_link': new_chan.invite_link,
+			'date': new_chan.date.isoformat(),
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_chans(request):
+	try:
+		channels = Chans.objects.values_list('name', flat=True)
+		return JsonResponse({'status': 'success', 'channels': list(channels)}, status=200)
+	except Exception as e:
+		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des channels'}, status=500)
+ 
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_messages(request):
+	channel_name = request.GET.get('channel_name', None)
+
+	if not channel_name:
+		return JsonResponse({'status': 'error', 'message': 'Un nom de channel est requis !'}, status=400)
+
+	try:
+		messages = Messages.objects.filter(channel_name=channel_name).order_by('date')
+
+		if not messages.exists():
+			return JsonResponse({'status': 'error', 'message': 'Aucun message a recuperer'}, status=200)
+	
+		message_list = list(messages.values())
+		return JsonResponse({'status': 'success', 'messages': message_list}, status=200)
+	except Exception as e:
+		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des messages'}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_message(request):
+	try:
+		data = json.loads(request.body)
+		new_message = Messages.objects.create(**data)
+		return JsonResponse({'status': 'success', 'message': {
+			'id': new_message.id,
+			'channel_name': new_message.channel_name,
+			'sender': new_message.sender,
+			'message': new_message.message,
+			'date':new_message.date.isoformat(),
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

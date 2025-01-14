@@ -16,7 +16,13 @@ urlpatterns = [
     path('other_game/', other_game, name='other_game'),
     path('tournament/', tournament_page, name='tournament'),
     path('api/button-test/', button_test_page, name="button_test_page"),
+    # Game URLs
 	path('api/current-user/', get_current_user_id, name='current_user_id'),
-	path('api/addSoloCasseBrique/', addSoloCasseBrique, name='addSoloCasseBrique'),
-	path('api/map/<int:map_id>/', map_view, name="map_view")
+	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
+	path('api/map/<int:map_id>/', map_view, name="map_view"),
+    # Channels URLs
+    path('api/post_chan/', post_chan, name="post_chan"),
+    path('api/get_chans/', get_chans, name="get_chans"),
+    path('api/get_messages/', get_messages, name="get_messages"),
+    path('api/post_message/', post_message, name="post_message")
 ]

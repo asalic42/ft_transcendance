@@ -42,7 +42,7 @@ async function launch (idMap) {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
 	
-	await fetchMatp(idMap);
+	await fetchMap(idMap);
 	fps.style.display = 'flex';
 	title.style.display = 'flex';
 	canvasContainer.style.display = 'flex';
@@ -440,7 +440,7 @@ async function getCurrentPlayerId() {
 async function addNewGame(id_player, id_map, score) {
 	console.log("Appel de addnewgame");
 	try {
-		const response = await fetch('/account/api/addSoloCasseBrique/', {
+		const response = await fetch('/account/api/add_solo_casse_brique/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -463,7 +463,7 @@ async function addNewGame(id_player, id_map, score) {
 	}
 }
 
-function fetchMatp(mapId) {
+function fetchMap(mapId) {
 	return fetch(`/account/api/map/${mapId}/`)
 	.then(response => response.text())
 	.then(mapData => {
