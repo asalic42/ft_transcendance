@@ -192,19 +192,13 @@ h2 {
     margin-left: 20px;
     cursor: pointer;
     font-size: 36px;
-	width: 150px;
-	height: 60px;
+	width: 135px;
+	height: 60px;	
     padding: 15px;
-	
-
 	font-family: 'Thunder';
-	justify-content: center;
-	align-items: center;
 	display: flex;
-	text-decoration: none;
     border-radius: 10px;
-    outline: 3px solid #ED4EB0;
-    outline-offset: -1px;
+    outline: 4px solid #ED4EB0;
 	border: none;
 	background-color: #23232e;
     color: var(--font-color);
@@ -218,8 +212,7 @@ h2 {
 	color: var(--font-color);
 	border: none;
 	border-radius: 10px;
-    outline: 3px solid #ED4EB0;
-    outline-offset: -1px;
+    outline: 4px solid #ED4EB0;
 }
 
 .message .username {

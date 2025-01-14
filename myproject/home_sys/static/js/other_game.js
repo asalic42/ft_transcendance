@@ -1,3 +1,7 @@
+// Ajout de la gestion de l'accélération légère après chaque rebond
+const BALL_SPEED_INCREMENT = 0.075; // Incrément léger de la vitesse à chaque rebond
+const BALL_INITIAL_SPEED = 9; // Vitesse initiale de la balle
+
 // Variables
 let mapTab = [];
 var table;
@@ -12,7 +16,7 @@ var gameOver = document.getElementById("gameOver");
 const mapSelection = document.querySelector('.mapSelection');
 const game = document.querySelector('.game');
 var count = 0;
-var health = 3;
+var health = 5;
 
 class block {
 	x1; y1; width; height; state;
@@ -28,7 +32,6 @@ class block {
 let cachedUserId = null;
 
 //! Init
-
 
 mapSelection.addEventListener('click', (event) => {
 	if (event.target.tagName === 'BUTTON') {
@@ -48,17 +51,17 @@ async function launch (idMap) {
 	canvasContainer.style.display = 'flex';
 	mapSelection.style.display ='none';
 	createBlocks();
-	createBall(Math.floor(getRandomArbitrary(-11, 0)));
+	createBall();
 }
 let block_arr = [];
 
 function createBlocks() {
 	var start_x = table.width / 8;
 	var start_y = table.height / 24;
-	var x = start_x
-	var y = start_y;
-	var width = start_x;
-	var height = start_y;
+	var x = start_x - 5
+	var y = start_y - 5;
+	var width = start_x - 5;
+	var height = start_y - 5;
 
 	console.log("maptab");
 	console.log(mapTab);
@@ -68,15 +71,14 @@ function createBlocks() {
 			y += start_y;
 		}
 		x += start_x;
-		y = start_y;
+		y = start_y - 5;
 	}
 }
-
 
 function createBall(vy) {
 	// Balls coords
 	var ball = {coords : {x : (table.height / 2), y : table.height - 70},
-				const_vector : {vy : vy, vx : vy},
+				const_vector : {vy : BALL_INITIAL_SPEED, vx : BALL_INITIAL_SPEED, speed: BALL_INITIAL_SPEED},
 				vector : {},
 				radius : 13,
 				hit_horizontal : 0,
@@ -107,7 +109,6 @@ function movePlayer(player1Coords) {
 	}
 }
 
-
 function drawPlayer(player1Coords, color) {
 	
 	movePlayer(player1Coords);
@@ -120,7 +121,7 @@ function drawPlayer(player1Coords, color) {
 
 function isBallHittingPlayer(ball, player1Coords) {
 
-	if (ball.hit_player > 0 && ball.hit_player < 15) {// pendant les cinq prochaines frames impossible de rebondir sur les murs.
+	if (ball.hit_player > 0 && ball.hit_player < 15) {
 		ball.hit_player++;
 		return false;
 	}
@@ -128,10 +129,11 @@ function isBallHittingPlayer(ball, player1Coords) {
 	if (ball.hit_player >= 15)
 		ball.hit_player = 0;
 
-	if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 &&
-			ball.coords.y - ball.radius <= player1Coords.y1 - 7 + ball.radius / 2 &&
-			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2) {
-				ball.hit_player = 1
+	if (ball.coords.x + ball.radius / 2 >= player1Coords.x1 && ball.coords.x - ball.radius / 2 <= player1Coords.x2 &&
+			ball.coords.y + ball.radius >= player1Coords.y1 &&
+			ball.coords.y + ball.radius <= player1Coords.y2) {
+				ball.hit_player = 1;
+				incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
 				return true;
 			}
 
@@ -146,6 +148,16 @@ function rangeSlide(value) {
 
 //! Ball
 
+function incrementBallSpeed(ball) {
+	// Augmenter légèrement la vitesse
+	ball.const_vector.speed += BALL_SPEED_INCREMENT;
+	// Recalculer vx et vy pour maintenir la direction
+	const speedRatio = ball.const_vector.speed / Math.sqrt(ball.const_vector.vx ** 2 + ball.const_vector.vy ** 2);
+	ball.const_vector.vx *= speedRatio;
+	ball.const_vector.vy *= speedRatio;
+	ball.vector.vx = ball.const_vector.vx;
+	ball.vector.vy = ball.const_vector.vy;
+}
 
 function drawBall(ball) {
 	context.beginPath();
@@ -163,96 +175,123 @@ function drawBall(ball) {
 }
 
 function isBallHittingWall(ball) {
-	if ((ball.coords.x - ball.radius <= 0 || ball.coords.x + ball.radius >= table.height) && !ball.hit_horizontal) {
-		ball.hit_horizontal = 1;
-		ball.vector.vx = -ball.vector.vx;
+	// Collision avec les murs gauche ou droit
+	if ((ball.coords.x - ball.radius <= 0 || ball.coords.x + ball.radius >= table.width) && ball.hit_horizontal === 0) {
+		ball.hit_horizontal = 1; // Protection pour éviter des collisions consécutives
 		ball.const_vector.vx = -ball.const_vector.vx;
+		ball.vector.vx = ball.const_vector.vx;
+		incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
+
+		// Ajuster la position pour que la balle ne colle pas au mur
+		if (ball.coords.x - ball.radius <= 0) {
+			ball.coords.x = ball.radius;
+		} else if (ball.coords.x + ball.radius >= table.width) {
+			ball.coords.x = table.width - ball.radius;
+		}
 	}
-	else if (ball.coords.y - ball.radius <= 0 && !ball.hit_vertical) {
-		ball.hit_vertical = 1;
-		ball.vector.vy = -ball.vector.vy;
+
+	// Collision avec le plafond
+	if (ball.coords.y - ball.radius <= 0 && ball.hit_vertical === 0) {
+		ball.hit_vertical = 1; // Protection pour éviter des collisions consécutives
 		ball.const_vector.vy = -ball.const_vector.vy;
+		ball.vector.vy = ball.const_vector.vy;
+		incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
+
+		// Ajuster la position pour que la balle ne colle pas au plafond
+		ball.coords.y = ball.radius;
 	}
-	else if (ball.hit_horizontal) // pendant les quates prochaines frames impossible de rebondir sur les murs.
-		ball.hit_horizontal++;
-	
-	else if (ball.hit_vertical) // pendant les quates prochaines frames impossible de rebondir sur les murs.
-		ball.hit_vertical++;
 
-	if (ball.hit_vertical >= 5)
-		ball.hit_vertical = 0;
-	if (ball.hit_horizontal >= 5)
-		ball.hit_horizontal = 0;
+	// Décrément des délais de protection
+	if (ball.hit_horizontal > 0) ball.hit_horizontal++;
+	if (ball.hit_vertical > 0) ball.hit_vertical++;
 
-
+	// Réinitialisation des délais après quelques frames
+	if (ball.hit_horizontal > 5) ball.hit_horizontal = 0;
+	if (ball.hit_vertical > 5) ball.hit_vertical = 0;
 }
 
-function moveBall(ball, player1Coords) {
+function handlePlayerCollision(ball, player1Coords) {
+	const intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
+	ball.const_vector.vx = Math.max(-1, Math.min(1, intersection)) * Math.abs(ball.const_vector.vy);
+	ball.const_vector.vy = -ball.const_vector.vy;
+	incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
 
-	// Ball is hiting a player.
-	if (isBallHittingPlayer(ball, player1Coords)) {
-		var intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
-		if (intersection > 0 && intersection < 0.25)
-			intersection = 0.25;
-		else if (intersection > 1)
-			intersection = 1;
-		else if (intersection < -1)
-			intersection = -1;
-		else if (intersection < 0 && intersection > -0.25)
-			intersection = -0.25;
-		intersection *= Math.abs(ball.const_vector.vy);
-		ball.const_vector.vx = intersection;
-		ball.vector.vx = ball.const_vector.vx;
-		ball.const_vector.vy = -(ball.const_vector.vy);
-		ball.vector.vy = -ball.vector.vy;
+	ball.vector.vx = ball.const_vector.vx;
+	ball.vector.vy = ball.const_vector.vy;
+}
+
+
+function moveBall(ball, player1Coords) {
+	const steps = 5; // Subdiviser le mouvement en étapes
+	const stepX = ball.vector.vx / steps;
+	const stepY = ball.vector.vy / steps;
+
+	for (let i = 0; i < steps; i++) {
+		ball.coords.x += stepX;
+		ball.coords.y += stepY;
+
+		if (isBallHittingPlayer(ball, player1Coords)) {
+			handlePlayerCollision(ball, player1Coords);
+		}
+
+		isBallHittingWall(ball);
+		isBallHittingblock(ball);
 	}
-	isBallHittingWall(ball);
-	isBallHittingblock(ball);
-	ball.coords.x += ball.vector.vx;
-	ball.coords.y += ball.vector.vy;
 
 	drawBall(ball);
 }
 
 function isBallHittingblock(ball) {
 	for (let k = 0; k < block_arr.length; k++) {
-		if (!block_arr[k].state)
-			continue;
-		var ballFutureX = ball.coords.x + ball.vector.vx;
-		var ballFutureY = ball.coords.y + ball.vector.vy;
-		if (((ballFutureX + ball.radius >= block_arr[k].x1 && ballFutureX + ball.radius <= block_arr[k].x1 + block_arr[k].width ) || (ballFutureX - ball.radius >= block_arr[k].x1 && ballFutureX - ball.radius <= block_arr[k].x1 + block_arr[k].width ))
-			&&
-			((ballFutureY + ball.radius >= block_arr[k].y1 && ballFutureY + ball.radius <= block_arr[k].y1 + block_arr[k].height) || (ballFutureY - ball.radius >= block_arr[k].y1 && ballFutureY - ball.radius<= block_arr[k].y1 + block_arr[k].height)))
-			{
-				// console.log(ball.coords.y + " " + block_arr[k].y1 + " " + (block_arr[k].y1 + block_arr[k].height));
-				if (ball.hit_block)
-					break;
-				//* Determines how ball is going to bounce
-				if (ball.coords.x + ball.radius > block_arr[k].x1 && ball.coords.x - ball.radius < block_arr[k].x1 + block_arr[k].width) {
-					ball.const_vector.vy = -ball.const_vector.vy;
-					if (ball.const_vector.vy < 0 && ball.const_vector.vy > -15)
-						ball.const_vector.vy -= 0.25;
-					else if (ball.const_vector.vy < 15)
-						ball.const_vector.vy += 0.25;
-					ball.vector.vy = ball.const_vector.vy;
+		if (!block_arr[k].state) continue;
+
+		// Calcul des coordonnées futures de la balle
+		var ballFutureX = ball.coords.x + ball.const_vector.vx;
+		var ballFutureY = ball.coords.y + ball.const_vector.vy;
+
+		if (((ballFutureX + ball.radius >= block_arr[k].x1 && ballFutureX - ball.radius <= block_arr[k].x1 + block_arr[k].width)) &&
+			((ballFutureY + ball.radius >= block_arr[k].y1 && ballFutureY - ball.radius <= block_arr[k].y1 + block_arr[k].height))) {
+
+			const hitLeftOrRight = ball.coords.x <= block_arr[k].x1 || ball.coords.x >= block_arr[k].x1 + block_arr[k].width;
+			const hitTopOrBottom = ball.coords.y <= block_arr[k].y1 || ball.coords.y >= block_arr[k].y1 + block_arr[k].height;
+
+			if (hitLeftOrRight && hitTopOrBottom) {
+				// Collision sur un coin
+				ball.const_vector.vx = -ball.const_vector.vx;
+				ball.const_vector.vy = -ball.const_vector.vy;
+			} else if (hitLeftOrRight) {
+				// Collision sur les côtés gauche/droite
+				ball.const_vector.vx = -ball.const_vector.vx;
+				// Ajuster la position
+				if (ball.coords.x <= block_arr[k].x1) {
+					ball.coords.x = block_arr[k].x1 - ball.radius;
+				} else {
+					ball.coords.x = block_arr[k].x1 + block_arr[k].width + ball.radius;
 				}
-				else if (ball.coords.y + ball.radius > block_arr[k].y1 && ball.coords.y - ball.radius < block_arr[k].y1 + block_arr[k].height){
-					
-					ball.const_vector.vx = -(ball.const_vector.vx);
-					if (ball.const_vector.vx < 0 && ball.const_vector.vx > -15)
-						ball.const_vector.vx -= 0.25;
-					else if (ball.const_vector.vx < 15)
-						ball.const_vector.vx += 0.25;
-					ball.vector.vx = -ball.vector.vx;
+			} else if (hitTopOrBottom) {
+				// Collision sur les côtés haut/bas
+				ball.const_vector.vy = -ball.const_vector.vy;
+				// Ajuster la position
+				if (ball.coords.y <= block_arr[k].y1) {
+					ball.coords.y = block_arr[k].y1 - ball.radius;
+				} else {
+					ball.coords.y = block_arr[k].y1 + block_arr[k].height + ball.radius;
 				}
-				ball.hit_block = 2;
-				count += Math.abs(4 - block_arr[k].state); //* Add score 
-				block_arr[k].state-- ; //* Change block color
-				break;
 			}
+
+			// Mise à jour des vecteurs après la collision
+			ball.vector.vx = ball.const_vector.vx;
+			ball.vector.vy = ball.const_vector.vy;
+
+			// Augmenter légèrement la vitesse à chaque rebond
+			incrementBallSpeed(ball);
+
+			// Mise à jour de l'état de la brique et du score
+			block_arr[k].state--;
+			count += Math.abs(4 - block_arr[k].state);
+			break;
+		}
 	}
-	if (ball.hit_block > 0)
-		ball.hit_block--;
 }
 
 
@@ -276,7 +315,6 @@ function isEnd(ball) {
 //! Loop func
 let id=0;
 function launchAnim(ball, player1Coords, start) {
-
 	timeRelatedStuff(ball, start);
 	adaptVectorsToFps(ball, player1Coords);
 	start = Date.now();
@@ -358,6 +396,7 @@ function showReplayButton() {
 	});
 }
 
+
 //! Tools
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
@@ -387,7 +426,7 @@ function drawBlocks() {
 					context.fillStyle = "darkred";
 					break;
 			}
-			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width - 5, block_arr[k].height - 5, 10);
+			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width, block_arr[k].height, 10);
 			context.fill();
 		}
 	}

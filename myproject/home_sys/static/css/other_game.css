@@ -45,12 +45,11 @@ body{
 	justify-content: center;
 	align-items: center;
 	display: flex;
-	text-decoration: none;
 	width: 200px;
 	height: 60px;
     border-radius: 10px;
     outline: 3px solid #ED4EB0;
-    outline-offset: -1px;
+    cursor: pointer;
 	font-size: 32px;
 	border: none;
 	background-color: #141418;

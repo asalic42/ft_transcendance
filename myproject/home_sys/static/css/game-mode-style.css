@@ -44,13 +44,12 @@ body {
 	font-family: 'Thunder-SemiBold';
 	justify-content: center;
 	align-items: center;
+    cursor: pointer;
 	display: flex;
-	text-decoration: none;
 	width: 200px;
 	height: 60px;
     border-radius: 10px;
     outline: 3px solid #ED4EB0;
-    outline-offset: -1px;
 	font-size: 32px;
 	background-color: #141418;
     color: rgba(237, 78, 176, 0.9);
