@@ -4,9 +4,6 @@
 - socket.emit = fonction qui communique avec celle du cote client
 */
 
-// const { response } = require("express");
-
-// let socket;
 let chatVisible = false;
 let currentChan;
 
@@ -18,21 +15,9 @@ console.log(`Current username is ${username}`);
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
-	// socket = io('http://localhost:3000');
-
-	// socket.on('connect', () => {
-	//   console.log("Connection etablie");
-	// })
 
 	loadChannels();
 
-	// socket.on('channel-messages', (messages) => {
-	//   const chatContainer = document.getElementById('chat-page');
-	//   chatContainer.innerHTML = '';
-	  
-	//   console.log("Je tente de recup les messages !");
-	//   messages.forEach(message => addMessage(message.message));
-	// });
 
     const newChan = document.getElementById('new-chan');
     // const inviteButton = document.getElementById('add-friend-chan');
@@ -45,7 +30,7 @@ console.log(`Current username is ${username}`);
         reversePopCenterChat();
         currentChan = null;
         newChan.textContent = '+';
-        inviteButton.style.display = "none";
+        // inviteButton.style.display = "none";
         chatVisible = !chatVisible;
       }
       else {
@@ -57,7 +42,7 @@ console.log(`Current username is ${username}`);
           currentChan = nameChan;
 
           addChannelToDb(currentChan);
-          inviteFriendInChan(inviteButton);
+          // inviteFriendInChan(inviteButton);
         });
       }
     });
@@ -90,7 +75,7 @@ console.log(`Current username is ${username}`);
     chanItem.addEventListener('click', () => {
       popCenterChat(nameChan);
       document.getElementById('new-chan').textContent = '➙';
-      inviteFriendInChan(document.getElementById('add-friend-chan'));
+      // inviteFriendInChan(document.getElementById('add-friend-chan'));
       if (!chatVisible)
         chatVisible = !chatVisible;
       currentChan = nameChan;
@@ -180,30 +165,30 @@ console.log(`Current username is ${username}`);
     inputChannel.addEventListener('keydown', handleInputName);
   }
 
-  function inviteFriendInChan(inviteButton)
-  {
-    console.log("JE SUIS LAAAA");
+  // function inviteFriendInChan(inviteButton)
+  // {
+  //   console.log("JE SUIS LAAAA");
 
-    inviteButton.style.display = "inline";
-    inviteButton.addEventListener('click', () => {
-      const inputContainer = document.getElementById('input-chat-add');
-      const inputFriend = document.getElementById('input-add-friend-chan');
-      const overlay = document.getElementById('overlay');
+  //   inviteButton.style.display = "inline";
+  //   inviteButton.addEventListener('click', () => {
+  //     const inputContainer = document.getElementById('input-chat-add');
+  //     const inputFriend = document.getElementById('input-add-friend-chan');
+  //     const overlay = document.getElementById('overlay');
 
-      overlay.style.display = 'block';
-      inputContainer.classList.add('show');
+  //     overlay.style.display = 'block';
+  //     inputContainer.classList.add('show');
 
-      inputFriend.addEventListener('input', function() {
-          const userList = document.getElementById('users-list').getAttribute('data-users').split(', ');
-          if (!userList.includes(this.value)) {
-            alert(`User doesn't exist`);
-          }
-          else {
-            alert(`Invitation envoyee :)`);
-          }
-      });
-    });
-  }
+  //     inputFriend.addEventListener('input', function() {
+  //         const userList = document.getElementById('users-list').getAttribute('data-users').split(', ');
+  //         if (!userList.includes(this.value)) {
+  //           alert(`User doesn't exist`);
+  //         }
+  //         else {
+  //           alert(`Invitation envoyee :)`);
+  //         }
+  //     });
+  //   });
+  // }
 
   // Inverser la transition pour faire disparaitre le chat en cours
   function reversePopCenterChat() {
@@ -244,7 +229,7 @@ console.log(`Current username is ${username}`);
   }
 
   // Add the message on the chat conv
-  function addMessage(mess) {
+  function addMessage(mess, sender) {
 	const chatPage = document.getElementById('chat-page')
 
     const message = document.createElement('div');
@@ -252,17 +237,15 @@ console.log(`Current username is ${username}`);
 
 	const usernameElement = document.createElement('span');
 	usernameElement.classList.add('username');
-	usernameElement.textContent = mess.sender;
+	usernameElement.textContent = sender;
 
 	const messElement = document.createElement('p');
-	messElement.textContent = mess.message;
+	messElement.textContent = mess;
 
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
 
 	chatPage.appendChild(message);
-
-	// socket.emit('send-message', currentChan, message);
 
 	chatPage.scrollTop = chatPage.scrollHeight;
   }
@@ -326,6 +309,9 @@ async function addChannelToDb(currentChan) {
 
 // Load messages when the chan appear
   async function getMessages(currentChan) {
+    const chatContainer = document.getElementById('chat-page');
+    chatContainer.innerHTML = '';
+
     try {
       const response = await fetch(`/account/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
         headers: {
@@ -336,7 +322,7 @@ async function addChannelToDb(currentChan) {
       const result = await response.json();
       if (result.status === 'success' && Array.isArray(result.messages)) {
         console.log(`message du channel ${currentChan}: `, result.messages);
-        result.messages.forEach(message => addMessage(message));
+        result.messages.forEach(message => addMessage(message.message, message.sender));
       }
     } catch (error) {
       console.error('Erreur: ', error);
@@ -360,7 +346,7 @@ async function postMessage(currentChan, mess) {
     if (!response.ok) {
       throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
     }
-		addMessage(mess);
+		addMessage(mess, username);
   } catch(error) {
       console.error('Erreur: ', error);
   }

@@ -19,20 +19,6 @@ services:
     networks:
       - appnet
 
-  # node:
-  #   build: ./nodejs
-  #   volumes:
-  #     - ./nodejs:/app/www
-  #   environment:
-  #     DATABASE_URL: postgres://user:admin%40123@db:5432/mysqldb
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   networks:
-  #     - appnet
-
   web:
     build: .
     # container_name: django
