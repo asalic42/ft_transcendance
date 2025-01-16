@@ -6,6 +6,7 @@
 
 let chatVisible = false;
 let currentChan;
+let lastMessageId = 0;
 
 // Recup l'user courant
 const userElement = document.getElementById('current-username');
@@ -16,15 +17,13 @@ console.log(`Current username is ${username}`);
 /* MONITORING CHANNELS */
   document.addEventListener("DOMContentLoaded", function() {
 
-	loadChannels();
-
+	  loadChannels();
 
     const newChan = document.getElementById('new-chan');
     // const inviteButton = document.getElementById('add-friend-chan');
-
-
+    let liveChat;
     newChan.addEventListener('click', () => {
-
+      
       // Disparition du chat en cours
       if (chatVisible) {
         reversePopCenterChat();
@@ -32,6 +31,7 @@ console.log(`Current username is ${username}`);
         newChan.textContent = '+';
         // inviteButton.style.display = "none";
         chatVisible = !chatVisible;
+        clearInterval(liveChat);
       }
       else {
         // Creation de chan + ouverture
@@ -40,9 +40,15 @@ console.log(`Current username is ${username}`);
           newChan.textContent = '➙';
           chatVisible = !chatVisible;
           currentChan = nameChan;
-
+        
           addChannelToDb(currentChan);
           // inviteFriendInChan(inviteButton);
+          console.log("JE SUIS LA WESH");
+
+          liveChat = setInterval(() => {
+            liveChatFetch(lastMessageId);
+          }, 3000);
+
         });
       }
     });
@@ -232,8 +238,15 @@ console.log(`Current username is ${username}`);
   function addMessage(mess, sender) {
 	const chatPage = document.getElementById('chat-page')
 
-    const message = document.createElement('div');
-    message.classList.add('message');
+  // const messageContainer = createElement('div');
+  // messageContainer.id = 'message-container';
+  const message = document.createElement('div');
+  message.classList.add('message');
+  // console.log(`Username: ${username} et Sender: ${sender}`);
+  if (sender === username)
+    message.classList.add('sent');
+  else
+    message.classList.add('received');
 
 	const usernameElement = document.createElement('span');
 	usernameElement.classList.add('username');
@@ -245,6 +258,7 @@ console.log(`Current username is ${username}`);
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
 
+  // messageContainer.message()
 	chatPage.appendChild(message);
 
 	chatPage.scrollTop = chatPage.scrollHeight;
@@ -253,6 +267,28 @@ console.log(`Current username is ${username}`);
 ////////////////////////////////////////////////
         /* Function API fetch */
 ///////////////////////////////////////////////
+
+// Live chat with AJAX system
+async function liveChatFetch(lastMessageId) {
+  try {
+    const response = await fetch(`/live_chat/?channel_name=${encodeURIComponent(currentChan)}&?last_message=${lastMessageId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (data.new_message && data.new_message.length > 0) {
+      data.new_message.forEach(message => {
+        addMessage(message.message, message.sender);
+        lastMessageId = message.id;
+      });
+    }
+  } catch (error) {
+    console.error('Erreur: ', error);
+  }
+}
 
 // Add a new channel to the db
 async function addChannelToDb(currentChan) {
@@ -323,6 +359,9 @@ async function addChannelToDb(currentChan) {
       if (result.status === 'success' && Array.isArray(result.messages)) {
         console.log(`message du channel ${currentChan}: `, result.messages);
         result.messages.forEach(message => addMessage(message.message, message.sender));
+
+        lastMessageId = result.messages.length -1;
+        console.log("last id mess: ", lastMessageId);
       }
     } catch (error) {
       console.error('Erreur: ', error);
@@ -351,3 +390,4 @@ async function postMessage(currentChan, mess) {
       console.error('Erreur: ', error);
   }
 }
+

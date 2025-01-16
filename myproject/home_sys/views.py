@@ -127,49 +127,6 @@ def get_current_user_id(request):
 	"""Renvoie l'ID de l'utilisateur actuellement connecté"""
 	return JsonResponse({'userId': request.user.id})
 
-
-# @csrf_exempt  # Désactive la protection CSRF pour cette vue (utile pendant les tests, mais à sécuriser en production)
-# def add_solo_casse_brique(request):
-# 	if request.method == 'POST':
-# 		try:
-# 			# Récupérer les données envoyées dans le corps de la requête
-# 			data = json.loads(request.body)
-
-# 			# Extraire les données spécifiques
-# 			id_player = data['id_player']
-# 			id_map = data['id_map']
-# 			score = data['score']
-
-# 			# Créer un nouvel enregistrement dans la base de données
-# 			new_game = SoloCasseBrique.objects.create(
-# 				id_player=id_player,
-# 				id_map=id_map,
-# 				score=score
-# 			)
-
-# 			# Retourner une réponse JSON avec un message de succès et les données du nouveau jeu
-# 			response_data = {
-# 				'id': new_game.id,
-# 				'id_player': new_game.id_player,
-# 				'id_map': new_game.id_map,
-# 				'score': new_game.score,
-# 				'date': new_game.date.isoformat(),  # La date doit être au format ISO
-# 			}
-
-# 			return JsonResponse({'status': 'success', 'game': response_data}, status=201)
-
-# 		except KeyError:
-# 			# Si certaines données sont manquantes, retourner une erreur 400
-# 			return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
-# 		except json.JSONDecodeError:
-# 			# Si le JSON envoyé est invalide
-# 			return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
-
-# 	else:
-# 		# Si la requête n'est pas de type POST, retourner une erreur 405 (Méthode non autorisée)
-# 		return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
-	
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def add_solo_casse_brique(request):
@@ -202,7 +159,32 @@ def map_view(request, map_id):
 	return HttpResponse(map_data, content_type="text/plain")
 
 
-# """ CHANNELS VIEWS """
+# """ CHANNELS VIEWS """ #
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def live_chat(request):
+	channel = request.GET.get('channel', None)
+	last_message = request.GET.get('last_message', None)
+
+	if not channel:
+		return JsonResponse({'status': 'error', 'message': 'Channel name is required'}, status=400)
+
+	if last_message & last_message != 0:
+		new_message = new_message.filter(channel_name=channel, id=last_message)
+	else:
+		new_message = Messages.objects.filter(channel_name=channel)
+
+	if new_message.exists():
+		data = [{ 
+				'id': msg.id,
+				'channel_name': msg.channel_name,
+				'sender': msg.sender,
+				'message': msg.message,
+				'date':msg.date.isoformat()} for msg in new_message]
+		return JsonResponse({'new_message': data})
+	return JsonResponse({'new_message': []})
+
 
 @csrf_exempt
 @require_http_methods(["POST"])

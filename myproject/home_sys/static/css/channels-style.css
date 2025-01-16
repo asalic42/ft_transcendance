@@ -157,20 +157,49 @@ h1 {
 }
 
 /* Message input + button + message prints */
+/* .message { */
+    /* top: 10px; */
+    /* position: relative; */
+    /* overflow-wrap: break-word; */
+    /* word-wrap: break-word; */
+    /* display: inline-block; */
+    /* white-space: normal; */
+/* } */
+
 .message {
     top: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    max-width: 60%;
+
+  }
+
+.message.sent {
     align-self: flex-end;
-    position: relative;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    display: inline-block;
-    white-space: normal;
+    .username {
+        position: absolute;
+        right: 10px;
+        color: rgb(57, 117, 247);
+        font-weight: bold;
+    }
+
+}
+
+.message.received {
+    align-self: flex-start;
+
+    .username {
+        position: absolute;
+        left: 10px;
+        color: rgb(128, 255, 128);
+        font-weight: bold;
+    }
 }
 
 .input-container {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     align-items: center;
 }
 
@@ -188,15 +217,7 @@ h1 {
     width: 100%;
 }
 
-.message .username {
-    position: absolute;
-    right: 10px;
-    color: rgb(57, 117, 247);
-    font-weight: bold;
-}
-
 .message p {
-    margin: 10px;
     padding: 10px;
     margin-bottom: 5px;
     color: white;
