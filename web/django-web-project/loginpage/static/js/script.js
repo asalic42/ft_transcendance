@@ -76,9 +76,9 @@ function checkFormValidity(form, formInput, formButton) {
         if (passwordInput.value === confirmPasswordInput.value) {
             mismatchMessage.classList.remove('show');
 
-            console.log("isPasswordStrongEnough : ", is_password_strong_enough.value);
+            console.log("isPasswordStrongEnough : ", is_password_strong_enough);
 
-            if (is_password_strong_enough.value === true)
+            if (is_password_strong_enough === true)
                 confirmPasswordInput.classList.add('colored');
 
             mismatchMessage.style.transition = "all 0.2s ease";
@@ -110,7 +110,7 @@ function checkFormValidity(form, formInput, formButton) {
 
 function signup_button_condition() {
 
-    if (is_username_taken.value === true || is_email_taken.value === true || is_password_strong_enough.value === false)
+    if (is_username_taken.value === true || is_email_taken.value === true || is_password_strong_enough === false)
         signupSubmitButton.disabled = true;
 
     else if (is_form_valid.value === 2) {
@@ -303,19 +303,19 @@ function verif_password_solidity(baliseInput, chemin_fetch) {
                 {
                     case 0:
                         baliseInput.classList.add("s0");
-                        is_password_strong_enough.value = false;
+                        is_password_strong_enough = false;
                         break;
                     case 1:
                         baliseInput.classList.add("s1");
-                        is_password_strong_enough.value = false;
+                        is_password_strong_enough = false;
                         break;
                     case 2:
                         baliseInput.classList.add("s2");
-                        is_password_strong_enough.value = false;
+                        is_password_strong_enough = false;
                         break;
                     case 3:
                         baliseInput.classList.add("s3");
-                        is_password_strong_enough.value = false;
+                        is_password_strong_enough = false;
                         break;
                     case 4:
                         baliseInput.classList.add("s4");
@@ -335,7 +335,7 @@ const PasswordSingup = document.getElementById("password2");
 
 PasswordSingup.addEventListener('keyup', function() {
 
-    verif_password_solidity(PasswordSingup, '/check_password_solidity/?password', is_password_strong_enough.value);
+    verif_password_solidity(PasswordSingup, '/check_password_solidity/?password', is_password_strong_enough);
 });
 
 
