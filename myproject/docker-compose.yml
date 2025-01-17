@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: admin@123
       POSTGRES_DB: mysqldb
-      PGDATABASE: mysqldb  # Ajoutez cette ligne
+      PGDATABASE: mysqldb
 
     ports:
       - "5432:5432"
