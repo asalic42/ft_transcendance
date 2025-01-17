@@ -1,0 +1,112 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home space</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base-styles.css' %}">
+
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+</head>
+<body>
+
+    <nav class="navbar">
+        
+        <ul class="navbar-nav">
+
+            <li class="logo">
+                <a href="#" class="nav-icon">
+                    <span class="link-text logo-text">TotoBar</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
+                        <path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/>
+                    </svg>
+                </a>
+            </li>
+
+        <!--- HOME --->
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-icon">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/wmwqvixz.json"
+                        trigger="hover"
+                        target=".nav-item">
+                    </lord-icon>
+                    <span class="link-text">Accueil</span>
+                </a>
+            </li>
+
+        <!--- PROFILE --->
+            <li class="nav-item">
+                <a href="{% url 'profile' %}" class="nav-icon">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/hrjifpbq.json"
+                        trigger="hover"
+                        target=".nav-item">
+                    </lord-icon>
+                    <span class="link-text">Utilisateur</span>
+                </a>
+            </li>
+
+        <!--- CALENDAR --->
+            <li class="nav-item">
+                <a href="{% url 'unavailable' %}" class="nav-icon">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/ayhtotha.json"
+                        trigger="hover"
+                        target=".nav-item">
+                    </lord-icon>
+                    <span class="link-text">ChatRoom</span>
+                </a>
+            </li>
+
+        <!--- CHATROOM --->
+            <li class="nav-item">
+                <a href="{% url 'unavailable' %}" class="nav-icon">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/wmlleaaf.json"
+                        trigger="hover"
+                        target=".nav-item">
+                    </lord-icon>
+                    <span class="link-text">Calendrier</span>
+                </a>
+            </li>
+
+        <!--- STATISTICS --->
+            <li class="nav-item">
+                <a href="{% url 'unavailable' %}" class="nav-icon">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/uwinmnkh.json"
+                        trigger="hover"
+                        target=".nav-item">
+                    </lord-icon>
+                    <span class="link-text">Statistiques</span>
+                </a>
+            </li>
+
+        <!--- SETTINGS --->
+            <li class="nav-item">
+                <a href="{% url 'unavailable' %}" class="nav-icon">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/ifsxxxte.json"
+                        trigger="hover"
+                        target=".nav-item"
+                        state="hover-cog-4">
+                    </lord-icon>
+                    <span class="link-text">Paramètres</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
