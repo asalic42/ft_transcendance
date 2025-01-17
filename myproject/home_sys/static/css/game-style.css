@@ -18,7 +18,7 @@
 
 /* Stylisation du jeu */
 body{
-	background-color: #2B2B3B ;
+	background-color: var(--bg-site) ;
 }
 
 #game {

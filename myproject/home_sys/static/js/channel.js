@@ -358,7 +358,7 @@ async function liveChatFetch() {
 // Add a new channel to the db
 async function addChannelToDb(currentChan) {
   try {
-    const response = await fetch('/account/api/post_chan/', {
+    const response = await fetch('/accounts/api/post_chan/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -385,7 +385,7 @@ async function addChannelToDb(currentChan) {
   async function  loadChannels() {
   
     try {
-      const response = await fetch('/account/api/get_chans/', {
+      const response = await fetch('/accounts/api/get_chans/', {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -412,7 +412,7 @@ async function addChannelToDb(currentChan) {
     chatContainer.innerHTML = '';
 
     try {
-      const response = await fetch(`/account/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
+      const response = await fetch(`/accounts/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -435,7 +435,7 @@ async function addChannelToDb(currentChan) {
 
 async function postMessage(currentChan, mess) {
   try {
-    const response = await fetch('/account/api/post_message/', {
+    const response = await fetch('/accounts/api/post_message/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

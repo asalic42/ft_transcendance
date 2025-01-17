@@ -6,10 +6,13 @@
 
 <link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
-<div class="game-selection">
-	<button data-map="1">Map 1</button>
-	<button data-map="2">Map 2</button>
-	<button data-map="3">Map 3</button>
+<div class="mapSelection">
+    <h1 class="title">Choix de la map</h1>
+    <div class="map-choice">
+		<button class="mapButton" data-map="1">Map 1</button>
+		<button class="mapButton" data-map="2">Map 2</button>
+		<button class="mapButton" data-map="3">Map 3</button>
+	</div>
 </div>
 
 <h3 class="game" id="fps">Fps : 0 | Avg Fps : </h3>

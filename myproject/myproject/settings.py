@@ -49,10 +49,38 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'django.db.migrations.migration',
     'rest_framework',
-    'login_sys',
+    'social_django',
+    'loginpage',
     'home_sys',
     'channels',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'loginpage.backends.OAuth2_42',
+    'django.contrib.auth.backends.ModelBackend',  # Authentification standard Django
+)
+
+import environ
+
+env = environ.Env()
+environ.Env.read_env()  # Lire le fichier .env
+
+# Configuration OAuth pour 42
+
+SOCIAL_AUTH_42_KEY = env('42_CLIENT_ID')
+SOCIAL_AUTH_42_SECRET = env('42_CLIENT_SECRET')
+SOCIAL_AUTH_42_SCOPE = ['public']  # Vous pouvez ajuster les scopes selon vos besoins
+
+# Exemple d'URL d'autorisation
+OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
+
+# L'URL de redirection après autorisation
+OAUTH2_REDIRECT_URL = 'http://127.0.0.1:8000/oauth/callback/complete/42/'
+
+
+# URL de redirection après l'authentification
+#LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
+#LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
    	 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',  # Ce middleware est utilisé par social-auth-app-django
 ]
 
 ROOT_URLCONF = 'myproject.urls'
