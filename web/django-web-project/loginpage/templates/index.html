@@ -1,0 +1,161 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Images in Circle</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+    <div class="video-container">
+        <video id="videoIntroTransition" width="100vw" height="100vh" muted autoplay>
+            <source src="{% static 'videos/intro2.mp4' %}" type="video/mp4">
+            Votre navigateur ne prend pas en charge la vidéo HTML5.
+        </video>
+    </div>
+
+    <div class="background-container"></div>
+
+    <div class="lottie-container">
+        <!-- Lottie animations or other effects here -->
+    </div>
+
+    <div class="signin-container">
+        <form class="form1" id="id-signin-form" action="{% url 'sign_in' %}" method="POST">
+            {% csrf_token %}
+            <h2>SIGN IN</h2>
+
+            <div class="inputbox">
+
+
+                <input type="text" id="username" name="username" required="required">
+                <span>Username</span>
+            </div>
+
+            <!-- <div class="inputbox">
+                <input type="email" id="email" name="email" required="required">
+                <span>Email</span>
+            </div> -->
+
+            <div class="inputbox">
+                <input type="password" id="password" name="password" required="required">
+                <span>Password</span>
+            </div>
+
+            <div class="span-b-container">
+                <span class="span-b">Fields are mandatory</span>
+            </div>
+
+            <!-- <span class="forgot-password">> God bless me ! I forgot my holy password... <a href="#">Need another one</a></span> -->
+
+            <div class="bt-container">
+                <button type="submit" id="submitButton1" disabled>I'm ready</button>
+            </div>
+
+            <div class="next-sign-form-signin">
+                <span class="span-nfin">No account? 👉 <a class="trigger-nfin" href="#">Sign up</a> </span>
+            </div>
+
+        </form>
+
+        <button class="button42" type="button" id="button42-id" onclick="redirectTo42Login()">42</button>
+    
+    </div>
+
+    <div class="signup-container">
+        <form class="form2" id="id-signup-form" action="{% url 'sign_up' %}" method="POST">
+            {% csrf_token %}
+
+            <h2>SIGN UP</h2>
+
+            <div class="image-container" data-text="🔴​ In case of invalid username">
+                <img src="{% static 'images/icon-info.png' %}" alt="Image 1" class="hover-image">
+                <div class="line-container">
+                    <div class="line"></div>
+                    <div class="text-container">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="inputbox">
+                <input type="text" id="username2" name="username" required="required">
+                <span>Username</span>
+            </div>
+
+            <div class="image-container" data-text="🔴 In case of invalid email">
+                <img src="{% static 'images/icon-info.png' %}" alt="Image 2" class="hover-image">
+                <div class="line-container">
+                    <div class="line"></div>
+                    <div class="text-container">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="inputbox">
+                <input type="email" id="email2" name="email" required="required">
+                <span>Email</span>
+            </div>
+
+            <div class="image-container" data-text="Solidity : [🔴​🟠​🟡​🟢...​​], Dark Green is required.">
+                <img src="{% static 'images/icon-info.png' %}" alt="Image 2" class="hover-image">
+                <div class="line-container">
+                    <div class="line"></div>
+                    <div class="text-container">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="inputbox">
+                <input class="pass" type="password" id="password2" name="password" required="required">
+                <span>Password</span>
+            </div>
+            
+            <div class="inputbox">
+                <input class="pass_conf" type="password" id="confirm_password" name="confirm_password" required="required">
+                <span>Confirm password</span>
+            </div>
+
+            <span class="error-message" id="password-mismatch-message">⚠️ Passwords need to be the same</span>
+            
+            <button type="submit" id="submitButton2" disabled>Register</button>
+
+            <div class="next-sign-form-signup">
+                <span class="span-nfup">Already member? <a class="trigger-nfup" href="#">Sign in</a> </span>
+            </div>
+
+        </form>
+    </div>
+    
+    {% if messages %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var loginForm = document.querySelector('.signin-container');
+                loginForm.classList.add('shake');
+            });
+        </script>
+    {% else %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var loginForm = document.querySelector('.signin-container');
+                loginForm.classList.remove('shake');
+            });
+        </script>
+    {% endif %}
+
+    <script src="{% static 'js/script.js' %}"></script>
+
+    <script>
+        function redirectTo42Login() {
+            window.location.href = "{% url 'social:begin' '42' %}";
+        }
+    </script>
+
+</body>
+</html>
