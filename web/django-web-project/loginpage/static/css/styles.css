@@ -431,6 +431,20 @@ body {
     letter-spacing: 0.1em;
     border-radius: 2px;
   }
+
+  .inputbox .pass_conf.colored {
+    border-color: green;
+  }
+
+  .inputbox .pass_conf.colored ~ span {
+    padding: 0 5px;
+    font-size: 80%;
+    transform: translateX(5px) translateY(-5px);
+    background-color: green;
+    color: black;
+    letter-spacing: 0.1em;
+    border-radius: 2px;
+  }
   
 
 /********************** V. FORM SPAN *************************/
@@ -896,8 +910,8 @@ body {
 .line-container {
   position: relative;
   left: 10px; /* Ajusté pour que la ligne commence à droite de l'image */
-  margin-left: 10px; /* Ajusté pour espacer la ligne de l'image */
-  transform: translateY(-105%);
+  margin-left: 8px; /* Ajusté pour espacer la ligne de l'image */
+  transform: translateY(-95%);
   display: flex;
   align-items: center;
   opacity: 1;

@@ -67,22 +67,32 @@ function checkFormValidity(form, formInput, formButton) {
 
     // Vérification de la correspondance entre le mot de passe et la confirmation du mot de passe
     const passwordInput = form.querySelector('input[name="password"]');
-    const confirmPasswordInput = form.querySelector('input[name="confirm_password"]');
+    const confirmPasswordInput = document.querySelector('.pass_conf');
     const mismatchMessage = document.getElementById('password-mismatch-message');
 
 
-    if (passwordInput && confirmPasswordInput) {
+    if (passwordInput.value && confirmPasswordInput.value) {
 
         if (passwordInput.value === confirmPasswordInput.value) {
             mismatchMessage.classList.remove('show');
-            
+
+            console.log("isPasswordStrongEnough : ", is_password_strong_enough.value);
+
+            if (is_password_strong_enough.value === true)
+                confirmPasswordInput.classList.add('colored');
+
             mismatchMessage.style.transition = "all 0.2s ease";
             is_form_valid.value++;
         } else {
             mismatchMessage.classList.add('show');
+            confirmPasswordInput.classList.remove('colored');
             mismatchMessage.style.transition = "all 0.5s ease";
             signupSubmitButton.disabled = true;
         }
+    }
+    else {
+        confirmPasswordInput.classList.remove('colored');
+        mismatchMessage.classList.remove('show');
     }
 
     if (signinSubmitButton.disabled) {
@@ -100,7 +110,7 @@ function checkFormValidity(form, formInput, formButton) {
 
 function signup_button_condition() {
 
-    if (is_username_taken.value === true || is_email_taken.value === true || is_password_strong_enough === false)
+    if (is_username_taken.value === true || is_email_taken.value === true || is_password_strong_enough.value === false)
         signupSubmitButton.disabled = true;
 
     else if (is_form_valid.value === 2) {
@@ -293,19 +303,19 @@ function verif_password_solidity(baliseInput, chemin_fetch) {
                 {
                     case 0:
                         baliseInput.classList.add("s0");
-                        is_password_strong_enough = false;
+                        is_password_strong_enough.value = false;
                         break;
                     case 1:
                         baliseInput.classList.add("s1");
-                        is_password_strong_enough = false;
+                        is_password_strong_enough.value = false;
                         break;
                     case 2:
                         baliseInput.classList.add("s2");
-                        is_password_strong_enough = false;
+                        is_password_strong_enough.value = false;
                         break;
                     case 3:
                         baliseInput.classList.add("s3");
-                        is_password_strong_enough = false;
+                        is_password_strong_enough.value = false;
                         break;
                     case 4:
                         baliseInput.classList.add("s4");
@@ -325,7 +335,7 @@ const PasswordSingup = document.getElementById("password2");
 
 PasswordSingup.addEventListener('keyup', function() {
 
-    verif_password_solidity(PasswordSingup, '/check_password_solidity/?password', is_password_strong_enough);
+    verif_password_solidity(PasswordSingup, '/check_password_solidity/?password', is_password_strong_enough.value);
 });
 
 
