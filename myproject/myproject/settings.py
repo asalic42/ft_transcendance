@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'login_sys',
     'home_sys',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -82,7 +83,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
+ASGI_APPLICATION = 'myproject.asgi.application'
 
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

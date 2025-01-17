@@ -164,26 +164,29 @@ def map_view(request, map_id):
 @csrf_exempt
 @require_http_methods(["GET"])
 def live_chat(request):
-	channel = request.GET.get('channel', None)
-	last_message = request.GET.get('last_message', None)
+	channel = request.GET.get('channel_name', None)
+	last_message = request.GET.get('last_message', 0)
 
 	if not channel:
 		return JsonResponse({'status': 'error', 'message': 'Channel name is required'}, status=400)
 
-	if last_message & last_message != 0:
-		new_message = new_message.filter(channel_name=channel, id=last_message)
-	else:
-		new_message = Messages.objects.filter(channel_name=channel)
+	try:
+        # Récupérer les messages avec un ID supérieur au dernier reçu
+		new_message = Messages.objects.filter(channel_name=channel, id__gt=last_message).order_by('id')[:1]
+	except Messages.DoesNotExist:
+		return JsonResponse({'status': 'error', 'message': 'No messages found'}, status=404)
 
 	if new_message.exists():
-		data = [{ 
-				'id': msg.id,
-				'channel_name': msg.channel_name,
-				'sender': msg.sender,
-				'message': msg.message,
-				'date':msg.date.isoformat()} for msg in new_message]
+		msg = new_message.first()  # Prendre le premier message seulement
+		data = {
+            'id': msg.id,
+            'channel_name': msg.channel_name,
+            'sender': msg.sender,
+            'message': msg.message,
+            'date': msg.date.isoformat(),
+        }
 		return JsonResponse({'new_message': data})
-	return JsonResponse({'new_message': []})
+	return JsonResponse({'new_message': None})
 
 
 @csrf_exempt
