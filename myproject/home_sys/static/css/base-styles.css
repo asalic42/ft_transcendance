@@ -3,10 +3,12 @@
     
     font-size: 16px;                    /* Taille de police de base */
     font-family: 'Open Sans';               /*  Police de caractère par défaut */
-    --text-primary: #C2C2C2;          /* Couleur primaire du texte */
+    --text-primary: var(--font-color);          /* Couleur primaire du texte */
     --text-secondary: #ececec;        /* Couleur secondaire du texte */
     --bg-primary: #23232e;            /* Couleur de fond primaire */
     --bg-secondary: #141418;          /* Couleur de fond secondaire */
+	--bg-site: #2B2B3B;
+	--font-color: #d8d8d8;
     --transition-time: 400ms            /* Pour le temps de transitions */
     /* top: 0px; */
 }
@@ -43,7 +45,7 @@ main {
      /* Transition douce lors du changement de largeur */
 
     transition: width 400ms ease;
-    border-right: 5px solid var(--bg-secondary);
+    border-right: 0px solid var(--bg-secondary);
 }
 
 .navbar-nav {
