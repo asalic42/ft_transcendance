@@ -143,6 +143,24 @@ def add_solo_casse_brique(request):
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_pong(request):
+    try:
+        data = json.loads(request.body)
+        new_game = Pong.objects.create(**data)
+        return JsonResponse({'status': 'success', 'game': {
+            'id_p1': new_game.id_p1,
+            'id_p2': new_game.id_p2,
+            'score_p1': new_game.score_p1,
+            'score_p2': new_game.score_p2,
+            'date': new_game.date.isoformat(),
+			'difficulty': new_game.difficulty,
+			'bounce_nb': new_game.bounce_nb,
+        }}, status=201)
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
 
 def map_view(request, map_id):
 	# Spécifiez le chemin de votre fichier .txt

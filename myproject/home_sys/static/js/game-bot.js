@@ -3,6 +3,7 @@ var table;
 var context;
 var score_p1 = document.getElementById("scoreP1");
 var score_p2 = document.getElementById("scoreP2");
+var bounce = 0;
 var game = document.getElementById("game");
 var count_p1 = 0;
 var count_p2 = 0;
@@ -10,14 +11,13 @@ let stop = 0;
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
+let cachedUserId = null;
 
 //! Init
 
 window.onload = function() {
 	table = document.getElementById("game");
 	context = table.getContext("2d");
-
-	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 }
 
 function createBall(vx) {
@@ -38,6 +38,7 @@ function createBall(vx) {
 	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20, ball_predicted_hit : 0};
 
 	launchAnim(ball, player1Coords, player2Coords, Date.now());
+	isGameOver();
 }
 
 //! Players related stuff
@@ -103,13 +104,18 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 }
 
 var user_option = 2;
-function rangeSlide(value) {
-	document.getElementById('rangeValue').innerHTML = value;
-	user_option = value;
+function levelinput(value) {
+	var form = document.getElementById('LevelForm');
+	user_option = form.elements.levelfield.value;
+	document.getElementById('page').style.display = 'none';
+	document.getElementById('scores').style.display = 'flex';
+	document.getElementById('fps').style.display = 'flex';
+	document.getElementById('canvas-container').style.display = 'flex';
+	createBall(Math.floor(getRandomArbitrary(-11, 11)));
+
 }
 
 //! Ball
-
 
 function calculateBall(ball, player2Coords) {	
 	var pg_option = 5 - user_option;
@@ -165,6 +171,7 @@ function moveBall(ball, player1Coords, player2Coords) {
 
 	// Ball is hiting a player.
 	if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
+		bounce++;
 		ball.const_vector.vx = -(ball.const_vector.vx);
 		ball.vector.vx = -ball.vector.vx;
 		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30)
@@ -172,9 +179,6 @@ function moveBall(ball, player1Coords, player2Coords) {
 		else if (ball.const_vector.vx < 30)
 			ball.const_vector.vx += 1;
 	}
-
-	else if (isGameOver())
-		return true;
 
 	isBallHittingWall(ball);
 	ball.coords.x += ball.vector.vx;
@@ -201,7 +205,7 @@ function isPointWin(ball) {
 }
 
 //! Loop func
-
+let id=0;
 function launchAnim(ball, player1Coords, player2Coords, start) {
 
 	timeRelatedStuff(ball, player2Coords, start);
@@ -215,7 +219,7 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 	if (isPointWin(ball))
 		return ;
 	moveBall(ball, player1Coords, player2Coords);
-	requestAnimationFrame(function () {launchAnim(ball, player1Coords, player2Coords, start);});
+	id = requestAnimationFrame(function () {launchAnim(ball, player1Coords, player2Coords, start);});
 }
 
 //! Fps related stuff
@@ -265,12 +269,30 @@ function isGameOver() {
 	return false
 }
 
-function winnerWindow(player) {
+async function winnerWindow(player) {
 	
 	context.clearRect(0, 0, table.width, table.height);
-	
+	cancelAnimationFrame(id);
+
 	const winner1Text = document.getElementById("wrapper-player1");
 	const winner2Text = document.getElementById("wrapper-player2");
+	
+	try {
+		const playerId = await getCurrentPlayerId();
+		if (!playerId) {
+			console.error('Impossible de sauvegarder le score : utilisateur non connecté');
+			return;
+		}
+		console.log(playerId);
+
+		// Attendre que l'ajout du score soit terminé
+		await addNewGame(playerId);
+		
+		
+	} catch (error) {
+		console.error('Erreur lors de la sauvegarde du score:', error);
+	}
+
 	if (player == 1) {
 		drawOuterRectangle("#365fa0");
 		winner1Text.style.display = "block"; 
@@ -342,4 +364,50 @@ function update() {
 
 	context.fillStyle = '#ED4EB0';
 	context.fillRect(table.width / 2, 0, 5, table.height);
+}
+
+async function getCurrentPlayerId() {
+	if (cachedUserId !== null) {
+		return cachedUserId;
+	}
+	try {
+		const response = await fetch('/accounts/api/current-user/', {
+			credentials: 'same-origin'
+		});
+		const data = await response.json();
+		cachedUserId = data.userId;
+		return cachedUserId;
+	} catch (error) {
+		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		return null;
+	}
+}
+
+async function addNewGame(id_player) {
+	console.log("Appel de addnewgame");
+	try {
+		const response = await fetch('/accounts/api/add_pong/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({  // Convertit les données en JSON
+				id_p1: id_player,
+				id_p2: -1,
+				score_p1: count_p1,
+				score_p2: count_p2,
+				difficulty: user_option,
+				bounce_nb: bounce,
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout du jeu');
+		}
+
+		const result = await response.json();
+		console.log('Nouveau jeu ajouté:', result);
+	} catch (error) {
+		console.error('Erreur:', error);
+	}
 }

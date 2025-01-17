@@ -19,6 +19,7 @@ urlpatterns = [
     # Game URLs
 	path('api/current-user/', get_current_user_id, name='current_user_id'),
 	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
+	path('api/add_pong/', add_pong, name='add_solo_casse_brique'),
 	path('api/map/<int:map_id>/', map_view, name="map_view"),
     # Channels URLs
     path('api/post_chan/', post_chan, name="post_chan"),

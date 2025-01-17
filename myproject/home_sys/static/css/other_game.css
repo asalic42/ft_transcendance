@@ -54,11 +54,17 @@ body{
 	border: none;
 	background-color: #141418;
     color: rgba(237, 78, 176, 0.9);
+	transition: all 0.4s ease-in-out;
 }
 
 
 .mapButton:hover {
-	background-color: #3e3e44;
+	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
+				rgba(237, 78, 176, 0.3) -12px 10px,
+				rgba(237, 78, 176, 0.2) -16px 14px,
+				rgba(237, 78, 176, 0.1) -20px 18px;
+	background-color: #2E2E38;
+	transform: translateX(10px) translateY(-9px);
 }
 
 .game {
