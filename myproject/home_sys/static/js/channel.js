@@ -8,6 +8,7 @@ let chatVisible = false;
 let currentChan;
 let lastMessageId = 0;
 let liveChat;
+// let unreadMsg = {};
 
 // Recup l'user courant
 const userElement = document.getElementById('current-username');
@@ -40,12 +41,12 @@ console.log(`Current username is ${username}`);
           newChan.textContent = '➙';
           chatVisible = !chatVisible;
           currentChan = nameChan;
-        
-          addChannelToDb(currentChan);
+          
+          addChannelToDb(nameChan);
           // inviteFriendInChan(inviteButton);
 
           liveChat = setInterval(() => {
-            liveChatFetch();
+            liveChat();
           }, 100);
 
         });
@@ -72,10 +73,10 @@ console.log(`Current username is ${username}`);
 	    titleChan.textContent = nameChan;
       chanItem.appendChild(titleChan);
       
-      const notif = document.createElement('p');
-      notif.id = 'notif';
+      // const notif = document.createElement('p');
+      // notif.id = 'notif';
       // notif.textContent = '1';
-      chanItem.appendChild(notif);
+      // chanItem.appendChild(notif);
 
 	    clickToChannel(chanItem, nameChan);
 
@@ -130,7 +131,16 @@ console.log(`Current username is ${username}`);
 	localStorage.setItem('channels', JSON.stringify(channelArray));
   }
 
- 
+
+  // function plusDeNotifs(channelName) {
+  //   const chanItem = querySelector(`#channel-${channelName} #notif`);
+
+  //   if (chanItem.textContent)
+  //     chanItem.textContent = parseInt(chanItem.textContent) + 1;
+  //   else
+  //     chanItem.textContent = 1;
+  // }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* CENTER CHANNELS PART */
@@ -411,3 +421,56 @@ async function postMessage(currentChan, mess) {
       console.error('Erreur: ', error);
   }
 }
+
+
+// async function getNotifications() {
+//   try {
+//     const response = await fetch(`/accounts/api/get_chans/`, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
+
+//     if (!response.ok)
+//       throw new Error('Erreur lors de la recup des channels');
+
+//     const result = await response.json();
+//     if (result.status === 'success' && Array.isArray(result.channels)) {
+//       result.channels.forEach(async (channelName) => {
+//           try {
+//               const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
+//               headers: {
+//                 'Content-Type': 'application/json',
+//               },
+//             });
+        
+//             if (!response.ok) {
+//               console.log("Erreur de fetch");
+//             }
+        
+//             const data = await response.json();
+//             if (data.new_message && data.new_message.length > 0) {
+//               if (channelName != currentChan) {
+//                 unreadMsg[channelName] = (unreadMsg[channelName] || 0) + data.new_message.length;
+//                 console.log("channel name = ", channelName);
+//                 plusDeNotifs(channelName);
+//               }
+//               else {
+//                 data.new_message.forEach(message => {
+//                   addMessage(message.message, message.sender);
+//                   lastMessageId = message.id;
+//                 });
+//               }
+
+//           }
+//         } catch (error) {
+//           console.error('Error: ', error);
+//         }
+//       });
+//     }
+
+
+//   } catch (error) {
+//       console.error('Erreur: ', error);
+//   }
+// }
