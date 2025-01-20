@@ -63,12 +63,11 @@ if [ "$1" == "b-all" ]; then
     sudo docker-compose build
 
     echo -e "${PURPLE}> Launching services...${NC}"
+	# python3 manage.py collectstatic
     sudo docker-compose up # démarre en arrière-plan
 
     echo -e "${YELLOW}> Making Django migrations...${NC}"
 
-    sudo docker-compose run web python3 manage.py migrate
-	
     echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR http://0.0.0.0:8000 "
 fi
 
