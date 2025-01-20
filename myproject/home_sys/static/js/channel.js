@@ -44,7 +44,7 @@ console.log(`Current username is ${username}`);
           addChannelToDb(currentChan);
           // inviteFriendInChan(inviteButton);
 
-          lastMessageId = await getLastMessageId(nameChan);
+          // lastMessageId = await getLastMessageId(nameChan);
           liveChat = setInterval(() => {
             liveChatFetch();
           }, 1000);
@@ -54,29 +54,6 @@ console.log(`Current username is ${username}`);
     });
 
   });
-
-// let chatSocket;
-
-//   function connectWebSocket(channelName) {
-//     // Ferme la connexion précédente si elle existe
-//     if (chatSocket) {
-//       chatSocket.close();
-//     }
-
-//     // Crée une nouvelle connexion WebSocket
-//     chatSocket = new WebSocket(
-//       'ws://' + window.location.host + '/ws/channels/'
-//     );
-
-//     chatSocket.onmessage = function(e) {
-//       const data = JSON.parse(e.data);
-//       addMessage(data.message, data.sender);
-//     };
-
-//     chatSocket.onclose = function(e) {
-//       console.error('Chat socket closed unexpectedly');
-//     };
-//   }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* RIGHT CHANNELS PART */
@@ -126,7 +103,6 @@ console.log(`Current username is ${username}`);
       h2content.textContent = currentChan;
       await getMessages(currentChan);
 
-      // connectWebSocket(currentChan);
       // lastMessageId = await getLastMessageId(nameChan);
 
       if (liveChat) clearInterval(liveChat);
@@ -319,7 +295,7 @@ async function liveChatFetch() {
   console.log("my last id saved: ", lastMessageId);
 
   try {
-    const response = await fetch(`/account/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}}`, {
+    const response = await fetch(`/account/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&?last_message=${lastMessageId}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -331,24 +307,28 @@ async function liveChatFetch() {
 
     const data = await response.json();
     
-    if (data.new_message) {
+    if (data.new_message && data.new_message.length > 0) {
 
-      const message = data.new_message;
+      // const message = data.new_message;
       console.log("Nouveau message recu !");
 
-      addMessage(message.message, message.sender);
-      lastMessageId = message.id;
+      // addMessage(message.message, message.sender);
+      // lastMessageId = message.id;
       
-      data.new_message.forEach(message => {
-        console.log("id: ", data.new_message[data.new_message.length -1].id);
-      if (data.new_message[data.new_message.length -1].id > lastMessageId && lastMessageId > 0) {
-        console.log("dernier mess: ", data.new_message[data.new_message.length -1].message);
-        console.log(`id: ${data.new_message[data.new_message.length -1].id} | lastId: ${lastMessageId}`);
-        addMessage(data.new_message[data.new_message.length -1].message, data.new_message[data.new_message.length -1].sender);
-        lastMessageId = data.new_message[data.new_message.length -1].id;
-        }
-      });
-
+      // data.new_message.forEach(message => {
+      //   console.log("id: ", data.new_message[data.new_message.length -1].id);
+      // if (data.new_message[data.new_message.length -1].id > lastMessageId && lastMessageId > 0) {
+      //   console.log("dernier mess: ", data.new_message[data.new_message.length -1].message);
+      //   console.log(`id: ${data.new_message[data.new_message.length -1].id} | lastId: ${lastMessageId}`);
+      //   addMessage(data.new_message[data.new_message.length -1].message, data.new_message[data.new_message.length -1].sender);
+      //   lastMessageId = data.new_message[data.new_message.length -1].id;
+      //   }
+        
+        data.new_message.forEach(message => {
+          addMessage(message.message, message.sender);
+          lastMessageId = message.id;
+        });
+          
     }
   } catch (error) {
     console.error('Erreur: ', error);

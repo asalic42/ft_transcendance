@@ -165,16 +165,21 @@ def map_view(request, map_id):
 @require_http_methods(["GET"])
 def live_chat(request):
 	channel = request.GET.get('channel_name', None)
-	last_message = request.GET.get('last_message', 0)
+	last_message = request.GET.get('last_message', None)
 
 	if not channel:
 		return JsonResponse({'status': 'error', 'message': 'Channel name is required'}, status=400)
 
-	try:
-        # Récupérer les messages avec un ID supérieur au dernier reçu
-		new_message = Messages.objects.filter(channel_name=channel, id__gt=last_message).order_by('id')[:1]
-	except Messages.DoesNotExist:
-		return JsonResponse({'status': 'error', 'message': 'No messages found'}, status=404)
+	# try:
+    #     # Récupérer les messages avec un ID supérieur au dernier reçu
+	# 	new_message = Messages.objects.filter(channel_name=channel, id__gt=last_message).order_by('id')[:1]
+	# except Messages.DoesNotExist:
+	# 	return JsonResponse({'status': 'error', 'message': 'No messages found'}, status=404)
+
+	if last_message & last_message != 0:
+		new_message = new_message.filter(channel_name=channel, id=last_message)
+	else:
+		new_message = Messages.objects.filter(channel_name=channel)
 
 	if new_message.exists():
 		msg = new_message.first()  # Prendre le premier message seulement
