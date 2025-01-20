@@ -64,9 +64,18 @@ console.log(`Current username is ${username}`);
 
 	  if (!chanList.querySelector(`#channel-${nameChan}`)) {
 	    const chanItem = document.createElement('div');
-	    chanItem.id = `#channel-${nameChan}`;
-	    chanItem.textContent = nameChan;
+	    chanItem.id = `channel-${nameChan}`;
 	    chanItem.classList.add('chan-item');
+      
+      const titleChan = document.createElement('h2');
+      titleChan.id = 'title-chan';
+	    titleChan.textContent = nameChan;
+      chanItem.appendChild(titleChan);
+      
+      const notif = document.createElement('p');
+      notif.id = 'notif';
+      // notif.textContent = '1';
+      chanItem.appendChild(notif);
 
 	    clickToChannel(chanItem, nameChan);
 
@@ -152,7 +161,7 @@ console.log(`Current username is ${username}`);
 	center.classList.add('center');
 
 	center.innerHTML = `
-	  <h2 id="chat-name">${nameChan}</h2>
+	  <h2 id="chat-name" id="title">${nameChan}</h2>
 	  <div class="chat-page" id="chat-page"></div>
 	  <div class="input-container">
 		<input id="message-input" type="text" placeholder="Message...">
@@ -287,7 +296,6 @@ console.log(`Current username is ${username}`);
 
 // Live chat with AJAX system
 async function liveChatFetch() {
-  
   try {
     const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
       headers: {
