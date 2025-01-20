@@ -44,10 +44,9 @@ console.log(`Current username is ${username}`);
           addChannelToDb(currentChan);
           // inviteFriendInChan(inviteButton);
 
-          // lastMessageId = await getLastMessageId(nameChan);
           liveChat = setInterval(() => {
             liveChatFetch();
-          }, 1000);
+          }, 100);
 
         });
       }
@@ -101,15 +100,16 @@ console.log(`Current username is ${username}`);
 
       const h2content = document.getElementById('chat-name');
       h2content.textContent = currentChan;
+
+      const chatContainer = document.getElementById('chat-page');
+      chatContainer.innerHTML = '';  
       await getMessages(currentChan);
-
-      // lastMessageId = await getLastMessageId(nameChan);
-
+    
       if (liveChat) clearInterval(liveChat);
 
       liveChat = setInterval(() => {
         liveChatFetch();
-      }, 1000);
+      }, 100);
 
     });
   }
@@ -259,11 +259,8 @@ console.log(`Current username is ${username}`);
   function addMessage(mess, sender) {
 	const chatPage = document.getElementById('chat-page')
 
-  // const messageContainer = createElement('div');
-  // messageContainer.id = 'message-container';
   const message = document.createElement('div');
   message.classList.add('message');
-  // console.log(`Username: ${username} et Sender: ${sender}`);
   if (sender === username)
     message.classList.add('sent');
   else
@@ -279,7 +276,6 @@ console.log(`Current username is ${username}`);
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
 
-  // messageContainer.message()
 	chatPage.appendChild(message);
 
 	chatPage.scrollTop = chatPage.scrollHeight;
@@ -292,10 +288,8 @@ console.log(`Current username is ${username}`);
 // Live chat with AJAX system
 async function liveChatFetch() {
   
-  console.log("my last id saved: ", lastMessageId);
-
   try {
-    const response = await fetch(`/account/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&?last_message=${lastMessageId}`, {
+    const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -306,28 +300,12 @@ async function liveChatFetch() {
     }
 
     const data = await response.json();
-    
     if (data.new_message && data.new_message.length > 0) {
 
-      // const message = data.new_message;
-      console.log("Nouveau message recu !");
-
-      // addMessage(message.message, message.sender);
-      // lastMessageId = message.id;
-      
-      // data.new_message.forEach(message => {
-      //   console.log("id: ", data.new_message[data.new_message.length -1].id);
-      // if (data.new_message[data.new_message.length -1].id > lastMessageId && lastMessageId > 0) {
-      //   console.log("dernier mess: ", data.new_message[data.new_message.length -1].message);
-      //   console.log(`id: ${data.new_message[data.new_message.length -1].id} | lastId: ${lastMessageId}`);
-      //   addMessage(data.new_message[data.new_message.length -1].message, data.new_message[data.new_message.length -1].sender);
-      //   lastMessageId = data.new_message[data.new_message.length -1].id;
-      //   }
-        
-        data.new_message.forEach(message => {
-          addMessage(message.message, message.sender);
-          lastMessageId = message.id;
-        });
+      data.new_message.forEach(message => {
+        addMessage(message.message, message.sender);
+        lastMessageId = message.id;
+      });
           
     }
   } catch (error) {
@@ -373,7 +351,6 @@ async function addChannelToDb(currentChan) {
 
       const result = await response.json();
       if (result.status == 'success' && Array.isArray(result.channels)) {
-        console.log("Canaux: ", result.channels);
         result.channels.forEach(nameChan => {
           addChannelToList(nameChan);
         });
@@ -386,11 +363,8 @@ async function addChannelToDb(currentChan) {
     }
   }
 
-// Load messages when the chan appear
+  // Load messages when the chan appear
   async function getMessages(currentChan) {
-    const chatContainer = document.getElementById('chat-page');
-    chatContainer.innerHTML = '';
-
     try {
       const response = await fetch(`/accounts/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
         headers: {
@@ -400,13 +374,7 @@ async function addChannelToDb(currentChan) {
 
       const result = await response.json();
       if (result.status === 'success' && Array.isArray(result.messages)) {
-        console.log(`message du channel ${currentChan}: `, result.messages);
         result.messages.forEach(message => addMessage(message.message, message.sender));
-
-        // if (result.messages.length != lastMessageId) {
-        //   lastMessageId = result.messages.length;
-        //   console.log("last id mess: ", lastMessageId);
-        // }
       }
     } catch (error) {
       console.error('Erreur: ', error);
@@ -430,14 +398,6 @@ async function postMessage(currentChan, mess) {
     if (!response.ok) {
       throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
     }
-
-     // Envoie via WebSocket
-    // chatSocket.send(JSON.stringify({
-    //   'message': mess,
-    //   'sender': username
-    // }));
-		addMessage(mess, username);
-    lastMessageId = await getLastMessageId(currentChan);
 
   } catch(error) {
       console.error('Erreur: ', error);
