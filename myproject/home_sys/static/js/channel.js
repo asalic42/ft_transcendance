@@ -284,9 +284,20 @@ function addMessage(mess, sender) {
 	const messElement = document.createElement('p');
 	messElement.textContent = mess;
 
+	const messImage = document.createElement('img');
+	messImage.src = "/static/images/basePP.png";
+	messImage.style.cursor = 'pointer';
+	messImage.style.height = '50px';
+    messImage.style.width = '50px';
+
+	messImage.addEventListener('click', function() {
+		alert('Image clicked!');
+		window.location.href = "/accounts/unavailable/";
+	});
+
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
-
+	message.appendChild(messImage);
 	chatPage.appendChild(message);
 
 	chatPage.scrollTop = chatPage.scrollHeight;
