@@ -21,7 +21,7 @@ window.onload = function() {
     table = document.getElementById("game");
     context = table.getContext("2d");
 
-	document.getElementById('scores').style.display = 'flex';
+    document.getElementById('scores').style.display = 'flex';
 	document.getElementById('fps').style.display = 'flex';
 	document.getElementById('canvas-container').style.display = 'flex';
 	createBall(Math.floor(getRandomArbitrary(-10, 10)));
