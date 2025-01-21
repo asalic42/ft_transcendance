@@ -1,6 +1,5 @@
-// Ajout de la gestion de l'accélération légère après chaque rebond
-const BALL_SPEED_INCREMENT = 0.075; // Incrément léger de la vitesse à chaque rebond
-const BALL_INITIAL_SPEED = 9; // Vitesse initiale de la balle
+const BALL_SPEED_INCREMENT = 0.075;
+const BALL_INITIAL_SPEED = 9;
 
 // Variables
 let mapTab = [];
@@ -133,7 +132,7 @@ function isBallHittingPlayer(ball, player1Coords) {
 			ball.coords.y + ball.radius >= player1Coords.y1 &&
 			ball.coords.y + ball.radius <= player1Coords.y2) {
 				ball.hit_player = 1;
-				incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
+				incrementBallSpeed(ball);
 				return true;
 			}
 
@@ -149,9 +148,7 @@ function rangeSlide(value) {
 //! Ball
 
 function incrementBallSpeed(ball) {
-	// Augmenter légèrement la vitesse
 	ball.const_vector.speed += BALL_SPEED_INCREMENT;
-	// Recalculer vx et vy pour maintenir la direction
 	const speedRatio = ball.const_vector.speed / Math.sqrt(ball.const_vector.vx ** 2 + ball.const_vector.vy ** 2);
 	ball.const_vector.vx *= speedRatio;
 	ball.const_vector.vy *= speedRatio;
@@ -177,10 +174,10 @@ function drawBall(ball) {
 function isBallHittingWall(ball) {
 	// Collision avec les murs gauche ou droit
 	if ((ball.coords.x - ball.radius <= 0 || ball.coords.x + ball.radius >= table.width) && ball.hit_horizontal === 0) {
-		ball.hit_horizontal = 1; // Protection pour éviter des collisions consécutives
+		ball.hit_horizontal = 1;
 		ball.const_vector.vx = -ball.const_vector.vx;
 		ball.vector.vx = ball.const_vector.vx;
-		incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
+		incrementBallSpeed(ball);
 
 		// Ajuster la position pour que la balle ne colle pas au mur
 		if (ball.coords.x - ball.radius <= 0) {
@@ -192,20 +189,18 @@ function isBallHittingWall(ball) {
 
 	// Collision avec le plafond
 	if (ball.coords.y - ball.radius <= 0 && ball.hit_vertical === 0) {
-		ball.hit_vertical = 1; // Protection pour éviter des collisions consécutives
+		ball.hit_vertical = 1;
 		ball.const_vector.vy = -ball.const_vector.vy;
 		ball.vector.vy = ball.const_vector.vy;
-		incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
+		incrementBallSpeed(ball);
 
 		// Ajuster la position pour que la balle ne colle pas au plafond
 		ball.coords.y = ball.radius;
 	}
 
-	// Décrément des délais de protection
 	if (ball.hit_horizontal > 0) ball.hit_horizontal++;
 	if (ball.hit_vertical > 0) ball.hit_vertical++;
 
-	// Réinitialisation des délais après quelques frames
 	if (ball.hit_horizontal > 5) ball.hit_horizontal = 0;
 	if (ball.hit_vertical > 5) ball.hit_vertical = 0;
 }
@@ -214,7 +209,7 @@ function handlePlayerCollision(ball, player1Coords) {
 	const intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
 	ball.const_vector.vx = Math.max(-1, Math.min(1, intersection)) * Math.abs(ball.const_vector.vy);
 	ball.const_vector.vy = -ball.const_vector.vy;
-	incrementBallSpeed(ball); // Augmenter légèrement la vitesse à chaque rebond
+	incrementBallSpeed(ball);
 
 	ball.vector.vx = ball.const_vector.vx;
 	ball.vector.vy = ball.const_vector.vy;
@@ -279,14 +274,11 @@ function isBallHittingblock(ball) {
 				}
 			}
 
-			// Mise à jour des vecteurs après la collision
 			ball.vector.vx = ball.const_vector.vx;
 			ball.vector.vy = ball.const_vector.vy;
 
-			// Augmenter légèrement la vitesse à chaque rebond
 			incrementBallSpeed(ball);
 
-			// Mise à jour de l'état de la brique et du score
 			block_arr[k].state--;
 			count += Math.abs(4 - block_arr[k].state);
 			break;
@@ -377,13 +369,10 @@ async function winnerWindow() {
 		// Attendre que l'ajout du score soit terminé
 		await addNewGame(playerId, mapId, count);
 		
-		// Seulement après que le score est sauvegardé
-		showReplayButton();
-		
 	} catch (error) {
 		console.error('Erreur lors de la sauvegarde du score:', error);
-		showReplayButton();
 	}
+	showReplayButton();
 }
 
 // Séparer l'affichage du bouton replay de son action

@@ -18,9 +18,9 @@ body {
 	position: relative;	
 	box-sizing: border-box;
 	top: 250px;
+	width: 70%;
 	border: 3px solid #ED4EB0;
 	border-radius: 50px;
-	width: 70%;
 	display: block;
 	margin-left: auto;
     margin-right: auto;
@@ -40,8 +40,11 @@ body {
 	gap: 100px;				  /* Espace entre les deux liens */
 }
 
+.game-mode span {
+    font-family: 'Thunder-SemiBold';
+}
+
 .game-mode {
-	font-family: 'Thunder-SemiBold';
 	justify-content: center;
 	align-items: center;
     cursor: pointer;
@@ -53,12 +56,18 @@ body {
 	font-size: 32px;
 	background-color: #141418;
     color: rgba(237, 78, 176, 0.9);
+	transition: all 0.3s ease-in-out;
+}
+
+.game-mode:hover {
+	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
+				rgba(237, 78, 176, 0.3) -12px 10px,
+				rgba(237, 78, 176, 0.2) -16px 14px,
+				rgba(237, 78, 176, 0.1) -20px 18px;
+	background-color: #2E2E38;
+	transform: translateX(10px) translateY(-9px);
 }
 
 a {
 	text-decoration: none;
-}
-
-.game-mode:hover {
-	background-color: #3e3e44;
 }
