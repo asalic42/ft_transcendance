@@ -10,6 +10,8 @@ var count_p2 = 0;
 let stop = 0;                           // Endgame
 const keys = {};                        // Players bars
 
+// const socket = new WebSocket('ws://transcendance.42.paris/ws/game/pong/');
+
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
 	if (result >= -9 && result <= 9)
@@ -54,12 +56,22 @@ function update() {
     console.log('Creating player...');
 }
 
+// function sendPlayerMove(playerData) {
+    // const data = {
+        // type: "move",
+        // playerData: playerData
+    // };
+    // socket.send(JSON.stringify(data));
+// }
+
 window.addEventListener("keydown", (event) => {
     keys[event.key] = true;
+    sendPlayerMove({ key: event.key, type: "keydown"});
 });
 
 window.addEventListener("keyup", (event) => {
     keys[event.key] = false;
+    sendPlayerMove({ key: event.key, type: "keyup"});
 });
 
 function movePlayer(player1Coords, player2Coords) {

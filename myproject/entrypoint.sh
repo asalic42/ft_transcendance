@@ -12,4 +12,6 @@ python3 manage.py collectstatic --noinput;
 echo "Static done.";
 
 #? Launch server
-gunicorn myproject.wsgi:application --bind 0.0.0.0:8000;
+# gunicorn myproject.wsgi:application --bind 0.0.0.0:8000;
+#? Launch server with Daphne
+daphne -b 0.0.0.0 -p 8000 myproject.asgi:application
