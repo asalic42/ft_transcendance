@@ -47,6 +47,31 @@ h1 {
 	height: 600px;
 }
 
+.chan-item {
+    border-bottom: 2px solid #ED4EB0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+}
+
+#notif {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 25px;
+    margin-right: 15px;
+    background: #ED4EB0;
+    width: 30px;
+    height: 30px;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.chan-item #title-chan {
+    margin-left: 15px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 25px;
+}
+
  /* Actual chan here + scrollbar */
 .column {
 	height: 100%;
@@ -54,7 +79,7 @@ h1 {
 	transition: transform 1s ease;
 }
 
-.column h2 {
+.column #title {
 	padding-top: 5px;
 	background-color: var(--bg-primary);
 	font-family: 'Thunder-SemiBold';
@@ -66,7 +91,7 @@ h1 {
 	margin-bottom: 35px;
 }
 
-h2 {
+#title {
 	width: 100%;
 }
 
@@ -123,7 +148,7 @@ h2 {
 	height: calc(100% - 50px);
 }
 
-/* Buttons im the chat (new chan + invite people in it)*/
+/* Buttons in the chat (new chan + invite people in it)*/
 .button-chat {
 	font-size: 15px;
 	padding: 10px 14px;
@@ -184,16 +209,6 @@ h2 {
 	z-index: 9;
 	transition: opacity 0.3s ease;
 }
-
-/* Message input + button + message prints */
-/* .message { */
-	/* top: 10px; */
-	/* position: relative; */
-	/* overflow-wrap: break-word; */
-	/* word-wrap: break-word; */
-	/* display: inline-block; */
-	/* white-space: normal; */
-/* } */
 
 .message {
 	top: 10px;

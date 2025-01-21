@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'social_django',
     'loginpage',
     'home_sys',
+    'channels',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -114,7 +115,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
+ASGI_APPLICATION = 'myproject.asgi.application'
 
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

@@ -24,7 +24,8 @@ urlpatterns = [
     # Channels URLs
     path('api/post_chan/', post_chan, name="post_chan"),
     path('api/get_chans/', get_chans, name="get_chans"),
-    path('api/get_messages/', get_messages, name="get_messages"),
     path('api/post_message/', post_message, name="post_message"),
+    path('api/get_messages/', get_messages, name="get_messages"),
     path('api/live_chat/', live_chat, name="live_chat"),
+    path('api/get_chans/', get_chans, name="get_chans"),
 ]

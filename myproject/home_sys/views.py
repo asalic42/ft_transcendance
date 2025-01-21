@@ -182,16 +182,19 @@ def map_view(request, map_id):
 @csrf_exempt
 @require_http_methods(["GET"])
 def live_chat(request):
-	channel = request.GET.get('channel', None)
+	channel = request.GET.get('channel_name', None)
 	last_message = request.GET.get('last_message', None)
 
 	if not channel:
 		return JsonResponse({'status': 'error', 'message': 'Channel name is required'}, status=400)
 
-	if last_message & last_message != 0:
-		new_message = new_message.filter(channel_name=channel, id=last_message)
-	else:
-		new_message = Messages.objects.filter(channel_name=channel)
+	new_message = Messages.objects.filter(channel_name=channel)
+	if last_message and last_message != "0":
+		try:
+			last_message = int(last_message)
+			new_message = new_message.filter(id__gt=last_message)  # Récupérer les messages plus récents
+		except ValueError:
+			return JsonResponse({'status': 'error', 'message': 'Invalid last_message value'}, status=400)
 
 	if new_message.exists():
 		data = [{ 
@@ -201,7 +204,7 @@ def live_chat(request):
 				'message': msg.message,
 				'date':msg.date.isoformat()} for msg in new_message]
 		return JsonResponse({'new_message': data})
-	return JsonResponse({'new_message': []})
+	return JsonResponse({'new_message': None})
 
 
 @csrf_exempt
@@ -228,7 +231,7 @@ def get_chans(request):
 		return JsonResponse({'status': 'success', 'channels': list(channels)}, status=200)
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des channels'}, status=500)
- 
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_messages(request):
