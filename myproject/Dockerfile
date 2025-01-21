@@ -14,8 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # On copie tout le reste du code
 COPY . .
 
-# Et ici on renseigne les commandes par défauts pour lancer notre petit serveur Django
-#CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
-
-
+# Launch entrypoint script
 CMD ["sh", "entrypoint.sh"]
