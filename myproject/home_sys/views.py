@@ -89,9 +89,9 @@ def service_unavailable(request):
 
 @login_required
 def channels_page(request):
-    curr_user = request.user
-    users = User.objects.all()
-    return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
+	curr_user = request.user
+	users = User.objects.all()
+	return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
 
 @login_required
 def game_page(request):
@@ -115,12 +115,12 @@ def other_game(request):
 
 @login_required
 def tournament_page(request):
-    return (render(request, 'tournament.html'))
+	return (render(request, 'tournament.html'))
 
 @login_required
 def button_test_page():
-    users_list = User.objects.all()
-    return JsonResponse({'users_list': users_list})
+	users_list = User.objects.all()
+	return JsonResponse({'users_list': users_list})
 
 @login_required
 def get_current_user_id(request):
@@ -130,36 +130,36 @@ def get_current_user_id(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def add_solo_casse_brique(request):
-    try:
-        data = json.loads(request.body)
-        new_game = SoloCasseBrique.objects.create(**data)
-        return JsonResponse({'status': 'success', 'game': {
-            'id': new_game.id,
-            'id_player': new_game.id_player,
-            'id_map': new_game.id_map,
-            'score': new_game.score,
-            'date': new_game.date.isoformat(),
-        }}, status=201)
-    except (KeyError, json.JSONDecodeError) as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	try:
+		data = json.loads(request.body)
+		new_game = SoloCasseBrique.objects.create(**data)
+		return JsonResponse({'status': 'success', 'game': {
+			'id': new_game.id,
+			'id_player': new_game.id_player,
+			'id_map': new_game.id_map,
+			'score': new_game.score,
+			'date': new_game.date.isoformat(),
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def add_pong(request):
-    try:
-        data = json.loads(request.body)
-        new_game = Pong.objects.create(**data)
-        return JsonResponse({'status': 'success', 'game': {
-            'id_p1': new_game.id_p1,
-            'id_p2': new_game.id_p2,
-            'score_p1': new_game.score_p1,
-            'score_p2': new_game.score_p2,
-            'date': new_game.date.isoformat(),
+	try:
+		data = json.loads(request.body)
+		new_game = Pong.objects.create(**data)
+		return JsonResponse({'status': 'success', 'game': {
+			'id_p1': new_game.id_p1,
+			'id_p2': new_game.id_p2,
+			'score_p1': new_game.score_p1,
+			'score_p2': new_game.score_p2,
+			'date': new_game.date.isoformat(),
 			'difficulty': new_game.difficulty,
 			'bounce_nb': new_game.bounce_nb,
-        }}, status=201)
-    except (KeyError, json.JSONDecodeError) as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
 def map_view(request, map_id):
@@ -206,6 +206,15 @@ def live_chat(request):
 		return JsonResponse({'new_message': data})
 	return JsonResponse({'new_message': None})
 
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def does_channel_exist(request, asked_name):
+	try:
+		listing = Chans.objects.get(name=asked_name)
+		return JsonResponse({'status': 'success'})
+	except Chans.DoesNotExist:
+		return JsonResponse({'status': 'error'})
 
 @csrf_exempt
 @require_http_methods(["POST"])

@@ -17,172 +17,164 @@ console.log(`Current username is ${username}`);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* MONITORING CHANNELS */
-  document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
 
-	  loadChannels();
+	loadChannels();
 
-    const newChan = document.getElementById('new-chan');
-    // const inviteButton = document.getElementById('add-friend-chan');
-    newChan.addEventListener('click', () => {
-      
-      // Disparition du chat en cours
-      if (chatVisible) {
-        reversePopCenterChat();
-        currentChan = null;
-        newChan.textContent = '+';
-        // inviteButton.style.display = "none";
-        chatVisible = !chatVisible;
-        clearInterval(liveChat);
-      }
-      else {
-        // Creation de chan + ouverture
-        setChannelName(async function(nameChan) {
-          popCenterChat(nameChan);
-          newChan.textContent = '➙';
-          chatVisible = !chatVisible;
-          currentChan = nameChan;
-          
-          addChannelToDb(nameChan);
-          // inviteFriendInChan(inviteButton);
-
-          liveChat = setInterval(() => {
-            liveChat();
-          }, 100);
-
-        });
-      }
-    });
-
-  });
+	const newChan = document.getElementById('new-chan');
+	// const inviteButton = document.getElementById('add-friend-chan');
+	newChan.addEventListener('click', () => {
+		
+		// Disparition du chat en cours
+		if (chatVisible) {
+			reversePopCenterChat();
+			currentChan = null;
+			newChan.textContent = '+';
+			// inviteButton.style.display = "none";
+			chatVisible = !chatVisible;
+			clearInterval(liveChat);
+		}
+		else {
+		// Creation de chan + ouverture
+			setChannelName(async function(nameChan) {
+				addChannelToDb(nameChan)
+				try {
+					// doesChanExist(nameChan);
+					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
+					const data = await response.json();
+					
+					if (data.status === 'error') {
+						throw new Error("Chan doesn't exist"); // Channel exists
+					}
+					openCenter(nameChan);
+				}
+				catch (error) {
+					console.error(error);
+				}
+			});
+		}
+	});	
+});
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* RIGHT CHANNELS PART */
-  // Add channel to the right channel's list
-  function  addChannelToList(nameChan)
-  {
-    console.log("Name chan: ", nameChan);
-	  const chanList = document.getElementById('channels-list');
+	// Add channel to the right channel's list
+function	addChannelToList(nameChan) {
+	console.log("Name chan: ", nameChan);
+	const chanList = document.getElementById('channels-list');
 
-	  if (!chanList.querySelector(`#channel-${nameChan}`)) {
-	    const chanItem = document.createElement('div');
-	    chanItem.id = `channel-${nameChan}`;
-	    chanItem.classList.add('chan-item');
-      
-      const titleChan = document.createElement('h2');
-      titleChan.id = 'title-chan';
-	    titleChan.textContent = nameChan;
-      chanItem.appendChild(titleChan);
-      
-      // const notif = document.createElement('p');
-      // notif.id = 'notif';
-      // notif.textContent = '1';
-      // chanItem.appendChild(notif);
+	if (!chanList.querySelector(`#channel-${nameChan}`)) {
+		const chanItem = document.createElement('div');
+		chanItem.id = `channel-${nameChan}`;
+		chanItem.classList.add('chan-item');
+	
+		const titleChan = document.createElement('h2');
+		titleChan.id = 'title-chan';
+		titleChan.textContent = nameChan;
+		chanItem.appendChild(titleChan);
+			
+		// const notif = document.createElement('p');
+		// notif.id = 'notif';
+		// notif.textContent = '1';
+		// chanItem.appendChild(notif);
+	
+		clickToChannel(chanItem, nameChan);
+	
+		chanList.appendChild(chanItem);
+		saveChannel();
+	}
+}
 
-	    clickToChannel(chanItem, nameChan);
 
-	    chanList.appendChild(chanItem);
-	    saveChannel();
-	  }
-  }
+async function openCenter(nameChan) {
+	lastMessageId = 0;
+	popCenterChat(nameChan);
+	document.getElementById('new-chan').textContent = '➙';
+	// inviteFriendInChan(document.getElementById('add-friend-chan'));
+	if (!chatVisible)
+		chatVisible = !chatVisible;
+	currentChan = nameChan;
 
-  async function getLastMessageId(channelName) {
-    try {
-      const response = await fetch(`/account/api/live_chat/?channel_name=${encodeURIComponent(channelName)}`);
-      const data = await response.json();
-      if (data.new_message) {
-        return data.new_message.id; // Dernier message existant
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération du dernier message :', error);
-    }
-    return 0; // Aucun message dans le canal
-  }
+	const h2content = document.getElementById('chat-name');
+	h2content.textContent = currentChan;
 
-  // Cliquer sur un channel deja creer
-  function  clickToChannel(chanItem, nameChan) {
-    chanItem.addEventListener('click', async () => {
-      popCenterChat(nameChan);
-      document.getElementById('new-chan').textContent = '➙';
-      // inviteFriendInChan(document.getElementById('add-friend-chan'));
-      if (!chatVisible)
-        chatVisible = !chatVisible;
-      currentChan = nameChan;
+	const chatContainer = document.getElementById('chat-page');
+	chatContainer.innerHTML = '';	
+	// await getMessages(currentChan);
+	
+	if (liveChat) clearInterval(liveChat);
 
-      const h2content = document.getElementById('chat-name');
-      h2content.textContent = currentChan;
+	liveChat = setInterval(() => {
+		liveChatFetch();
+	}, 100);
+}
 
-      const chatContainer = document.getElementById('chat-page');
-      chatContainer.innerHTML = '';  
-      await getMessages(currentChan);
-    
-      if (liveChat) clearInterval(liveChat);
+	// Cliquer sur un channel deja creer
+function	clickToChannel(chanItem, nameChan) {
+	chanItem.addEventListener('click', async () => {
+		openCenter(nameChan);
+	});
+}
 
-      liveChat = setInterval(() => {
-        liveChatFetch();
-      }, 100);
-
-    });
-  }
-
-  // Save new channel
-  function  saveChannel() {
+	// Save new channel
+function	saveChannel() {
 	const channelList = document.querySelectorAll('.channel-item');
 	const channelArray = Array.from(channelList).map(channel => channel.textContent);
 	localStorage.setItem('channels', JSON.stringify(channelArray));
-  }
+}
 
 
-  // function plusDeNotifs(channelName) {
-  //   const chanItem = querySelector(`#channel-${channelName} #notif`);
+	// function plusDeNotifs(channelName) {
+	//	 const chanItem = querySelector(`#channel-${channelName} #notif`);
 
-  //   if (chanItem.textContent)
-  //     chanItem.textContent = parseInt(chanItem.textContent) + 1;
-  //   else
-  //     chanItem.textContent = 1;
-  // }
+	//	 if (chanItem.textContent)
+	//	 chanItem.textContent = parseInt(chanItem.textContent) + 1;
+	//	 else
+	//	 chanItem.textContent = 1;
+	// }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* CENTER CHANNELS PART */
-  // Main monitor for the center column and message listener
-  function  popCenterChat(nameChan) {
+	// Main monitor for the center column and message listener
+function	popCenterChat(nameChan) {
 	const page = document.querySelector('.page');
 	const channels = document.querySelector('.channels');
 
 	page.style.gridTemplateColumns = '1fr 3fr 1fr';
 
 	if (!document.querySelector('.center')) {
-	  const center = createChatPage(nameChan);
-	  page.insertBefore(center, channels);
+		const center = createChatPage(nameChan);
+		page.insertBefore(center, channels);
 
-	  addMessageListener();
+		addMessageListener();
 
-	  setTimeout(() => {
+		setTimeout(() => {
 		center.style.visibility = 'visible';
 		center.style.opacity = '1';
 		center.style.transform = 'scaleX(1)';
-	  }, 0);
+		}, 0);
 	}
-  }
+}
 
-  // Create the center column for the chat conv
-  function createChatPage(nameChan) {
+	// Create the center column for the chat conv
+function createChatPage(nameChan) {
 	const center = document.createElement('div');
 	center.classList.add('center');
 
 	center.innerHTML = `
-	  <h2 id="chat-name" id="title">${nameChan}</h2>
-	  <div class="chat-page" id="chat-page"></div>
-	  <div class="input-container">
+		<h2 id="chat-name" id="title">${nameChan}</h2>
+		<div class="chat-page" id="chat-page"></div>
+		<div class="input-container">
 		<input id="message-input" type="text" placeholder="Message...">
 		<button id="send-button">Envoyer</button>
-	  </div>
+		</div>
 	`;
 	return center;
-  }
+}
 
-  // Set un nom de channel a sa creation
-  function setChannelName(callback) {
+	// Set un nom de channel a sa creation
+function setChannelName(callback) {
 	const inputContainer = document.getElementById('input-channel');
 	const inputChannel = document.getElementById('channel-name');
 	const overlay = document.getElementById('overlay');
@@ -190,100 +182,100 @@ console.log(`Current username is ${username}`);
 	overlay.style.display = 'block';
 	inputContainer.classList.add('show');
 
-    function handleInputName(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        const name = inputChannel.value;
-        const pattern = /^[a-zA-Z0-9_-]+$/;
+	function handleInputName(event) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			const name = inputChannel.value;
+			const pattern = /^[a-zA-Z0-9_-]+$/;
 
-        if (name !== '' && pattern.test(name)) {
-          overlay.style.display = 'none';
-          inputContainer.classList.remove('show');
-          document.getElementById('channel-name').value = '';
-          inputChannel.removeEventListener('keydown', handleInputName);
-          callback(name);
-        }
-        else {
-          alert(`Enter a name !`);
-        }
-      }
-    }
-    inputChannel.addEventListener('keydown', handleInputName);
-  }
+			if (name !== '' && pattern.test(name)) {
+				overlay.style.display = 'none';
+				inputContainer.classList.remove('show');
+				document.getElementById('channel-name').value = '';
+				inputChannel.removeEventListener('keydown', handleInputName);
+				callback(name);
+			}
+			else {
+				alert(`Enter a name !`);
+			}
+		}
+	}
+	inputChannel.addEventListener('keydown', handleInputName);
+}
 
-  // function inviteFriendInChan(inviteButton)
-  // {
-  //   console.log("JE SUIS LAAAA");
+	// function inviteFriendInChan(inviteButton)
+	// {
+	//	 console.log("JE SUIS LAAAA");
 
-  //   inviteButton.style.display = "inline";
-  //   inviteButton.addEventListener('click', () => {
-  //     const inputContainer = document.getElementById('input-chat-add');
-  //     const inputFriend = document.getElementById('input-add-friend-chan');
-  //     const overlay = document.getElementById('overlay');
+	//	 inviteButton.style.display = "inline";
+	//	 inviteButton.addEventListener('click', () => {
+	//	 const inputContainer = document.getElementById('input-chat-add');
+	//	 const inputFriend = document.getElementById('input-add-friend-chan');
+	//	 const overlay = document.getElementById('overlay');
 
-  //     overlay.style.display = 'block';
-  //     inputContainer.classList.add('show');
+	//	 overlay.style.display = 'block';
+	//	 inputContainer.classList.add('show');
 
-  //     inputFriend.addEventListener('input', function() {
-  //         const userList = document.getElementById('users-list').getAttribute('data-users').split(', ');
-  //         if (!userList.includes(this.value)) {
-  //           alert(`User doesn't exist`);
-  //         }
-  //         else {
-  //           alert(`Invitation envoyee :)`);
-  //         }
-  //     });
-  //   });
-  // }
+	//	 inputFriend.addEventListener('input', function() {
+	//		 const userList = document.getElementById('users-list').getAttribute('data-users').split(', ');
+	//		 if (!userList.includes(this.value)) {
+	//			 alert(`User doesn't exist`);
+	//		 }
+	//		 else {
+	//			 alert(`Invitation envoyee :)`);
+	//		 }
+	//	 });
+	//	 });
+	// }
 
-  // Inverser la transition pour faire disparaitre le chat en cours
-  function reversePopCenterChat() {
+	// Inverser la transition pour faire disparaitre le chat en cours
+function reversePopCenterChat() {
 	const page = document.querySelector('.page');
 	const center = document.querySelector('.center');
 
 	page.style.gridTemplateColumns = '1fr 1fr';
 
 	if (center) {
-	  center.style.transform = 'translateX(-50%) scaleX(0)';
-	  center.style.visibility = 'hidden';
-	  center.style.opacity = '0';
-	  center.remove();
+		center.style.transform = 'translateX(-50%) scaleX(0)';
+		center.style.visibility = 'hidden';
+		center.style.opacity = '0';
+		center.remove();
 	}
-  }
+}
 
-  // Check if a message is send by a click or an ENTER, and send it
-  function addMessageListener() {
+	// Check if a message is send by a click or an ENTER, and send it
+function addMessageListener() {
 	const sendButton = document.getElementById('send-button');
 	sendButton.addEventListener('click', () => {
 
-	  const msg = document.getElementById('message-input').value;
-	  if (msg != "") {
-      postMessage(currentChan, msg);
-		  document.getElementById('message-input').value = '';  // Vide le champ de saisie
-		  console.log("MESSAGE ENVOYE !");  
-	  }
+		const msg = document.getElementById('message-input').value;
+		if (msg != "") {
+		postMessage(currentChan, msg);
+			document.getElementById('message-input').value = '';	// Vide le champ de saisie
+			console.log("MESSAGE ENVOYE !");	
+		}
 	});
 
 	const messageInput = document.getElementById('message-input');
 	messageInput.addEventListener('keydown', (event) => {
 
-	  if (event.key === 'Enter') {
-		event.preventDefault();  //Empeche le retour a la ligne !
-		sendButton.click();
-	  }
+		if (event.key === 'Enter') {
+			event.preventDefault();	//Empeche le retour a la ligne !
+			sendButton.click();
+		}
 	});
-  }
+}
 
-  // Add the message on the chat conv
-  function addMessage(mess, sender) {
+	// Add the message on the chat conv
+function addMessage(mess, sender) {
 	const chatPage = document.getElementById('chat-page')
 
-  const message = document.createElement('div');
-  message.classList.add('message');
-  if (sender === username)
-    message.classList.add('sent');
-  else
-    message.classList.add('received');
+	const message = document.createElement('div');
+	message.classList.add('message');
+	if (sender === username)
+		message.classList.add('sent');
+	else
+		message.classList.add('received');
 
 	const usernameElement = document.createElement('span');
 	usernameElement.classList.add('username');
@@ -298,179 +290,181 @@ console.log(`Current username is ${username}`);
 	chatPage.appendChild(message);
 
 	chatPage.scrollTop = chatPage.scrollHeight;
-  }
+}
 
 ////////////////////////////////////////////////
-        /* Function API fetch */
+		/* Function API fetch */
 ///////////////////////////////////////////////
 
 // Live chat with AJAX system
 async function liveChatFetch() {
-  try {
-    const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+	try {
+		const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
+			headers: {
+			'Content-Type': 'application/json',
+			},
+		});
 
-    if (!response.ok) {
-      console.log("Erreur de fetch");
-    }
+		if (!response.ok) {
+			console.log("Erreur du fetch " + `/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`);
+		}
 
-    const data = await response.json();
-    if (data.new_message && data.new_message.length > 0) {
-
-      data.new_message.forEach(message => {
-        addMessage(message.message, message.sender);
-        lastMessageId = message.id;
-      });
-          
-    }
-  } catch (error) {
-    console.error('Erreur: ', error);
-  }
+		const data = await response.json();
+		if (data.new_message && data.new_message.length > 0) {
+			console.log(data.new_message);
+			data.new_message.forEach(message => {
+				console.log("Adding message with id = " + message.id);
+				addMessage(message.message, message.sender);
+				lastMessageId = message.id;
+			});
+		}
+	} catch (error) {
+		console.error('Erreur: ', error);
+	}
 }
 
 // Add a new channel to the db
 async function addChannelToDb(currentChan) {
-  try {
-    const response = await fetch('/accounts/api/post_chan/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: currentChan
-        // invite_link: null
-      })
-    });
+	try {
+		const response = await fetch('/accounts/api/post_chan/', {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+			name: currentChan
+			// invite_link: null
+			})
+		});
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de l\'ajout du chan');
-    }
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout du chan');
+		}
 
-    console.log("nouveau chan ADD a la bdd");
-    addChannelToList(currentChan);
-  } catch (error) {
-      console.error('Erreur: ', error);
-  }
+		console.log("nouveau chan ADD a la bdd");
+		addChannelToList(currentChan);
+	} catch (error) {
+		console.error('Erreur: ', error);
+		return 0
+	}
+	return 1
 }
 
 // Load channels that already exists and get them from db
 // When UserChan table created, use it
-  async function  loadChannels() {
-  
-    try {
-      const response = await fetch('/accounts/api/get_chans/', {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+async function	loadChannels() {
+	
+	try {
+		const response = await fetch('/accounts/api/get_chans/', {
+		headers: {
+			'Content-Type': 'application/json',
+		}
+		});
 
-      const result = await response.json();
-      if (result.status == 'success' && Array.isArray(result.channels)) {
-        result.channels.forEach(nameChan => {
-          addChannelToList(nameChan);
-        });
-      }
-      else {
-        console.log("Aucun canaux trouves...");
-      }
-    } catch(error) {
-      console.error('Erreur: ', error);
-    }
-  }
+		const result = await response.json();
+		if (result.status == 'success' && Array.isArray(result.channels)) {
+		result.channels.forEach(nameChan => {
+			addChannelToList(nameChan);
+		});
+		}
+		else {
+		console.log("Aucun canaux trouves...");
+		}
+	} catch(error) {
+		console.error('Erreur: ', error);
+	}
+}
 
-  // Load messages when the chan appear
-  async function getMessages(currentChan) {
-    try {
-      const response = await fetch(`/accounts/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+	// Load messages when the chan appear
+async function getMessages(currentChan) {
+	try {
+		const response = await fetch(`/accounts/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		});
 
-      const result = await response.json();
-      if (result.status === 'success' && Array.isArray(result.messages)) {
-        result.messages.forEach(message => addMessage(message.message, message.sender));
-      }
-    } catch (error) {
-      console.error('Erreur: ', error);
-    }
-  }
+		const result = await response.json();
+		if (result.status === 'success' && Array.isArray(result.messages)) {
+			result.messages.forEach(message => addMessage(message.message, message.sender));
+		}
+	} catch (error) {
+		console.error('Erreur: ', error);
+	}
+}
 
 async function postMessage(currentChan, mess) {
-  try {
-    const response = await fetch('/accounts/api/post_message/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        channel_name: currentChan,
-        sender: username,
-        message: mess,
-      })
-    });
+	try {
+	const response = await fetch('/accounts/api/post_message/', {
+		method: 'POST',
+		headers: {
+		'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+		channel_name: currentChan,
+		sender: username,
+		message: mess,
+		})
+	});
 
-    if (!response.ok) {
-      throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
-    }
+	if (!response.ok) {
+		throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
+	}
 
-  } catch(error) {
-      console.error('Erreur: ', error);
-  }
+	} catch(error) {
+		console.error('Erreur: ', error);
+	}
 }
 
 
 // async function getNotifications() {
-//   try {
-//     const response = await fetch(`/accounts/api/get_chans/`, {
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
+//	 try {
+//	 const response = await fetch(`/accounts/api/get_chans/`, {
+//		 headers: {
+//		 'Content-Type': 'application/json',
+//		 },
+//	 });
 
-//     if (!response.ok)
-//       throw new Error('Erreur lors de la recup des channels');
+//	 if (!response.ok)
+//		 throw new Error('Erreur lors de la recup des channels');
 
-//     const result = await response.json();
-//     if (result.status === 'success' && Array.isArray(result.channels)) {
-//       result.channels.forEach(async (channelName) => {
-//           try {
-//               const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
-//               headers: {
-//                 'Content-Type': 'application/json',
-//               },
-//             });
-        
-//             if (!response.ok) {
-//               console.log("Erreur de fetch");
-//             }
-        
-//             const data = await response.json();
-//             if (data.new_message && data.new_message.length > 0) {
-//               if (channelName != currentChan) {
-//                 unreadMsg[channelName] = (unreadMsg[channelName] || 0) + data.new_message.length;
-//                 console.log("channel name = ", channelName);
-//                 plusDeNotifs(channelName);
-//               }
-//               else {
-//                 data.new_message.forEach(message => {
-//                   addMessage(message.message, message.sender);
-//                   lastMessageId = message.id;
-//                 });
-//               }
+//	 const result = await response.json();
+//	 if (result.status === 'success' && Array.isArray(result.channels)) {
+//		 result.channels.forEach(async (channelName) => {
+//			 try {
+//				 const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
+//				 headers: {
+//				 'Content-Type': 'application/json',
+//				 },
+//			 });
+		
+//			 if (!response.ok) {
+//				 console.log("Erreur de fetch");
+//			 }
+		
+//			 const data = await response.json();
+//			 if (data.new_message && data.new_message.length > 0) {
+//				 if (channelName != currentChan) {
+//				 unreadMsg[channelName] = (unreadMsg[channelName] || 0) + data.new_message.length;
+//				 console.log("channel name = ", channelName);
+//				 plusDeNotifs(channelName);
+//				 }
+//				 else {
+//				 data.new_message.forEach(message => {
+//					 addMessage(message.message, message.sender);
+//					 lastMessageId = message.id;
+//				 });
+//				 }
 
-//           }
-//         } catch (error) {
-//           console.error('Error: ', error);
-//         }
-//       });
-//     }
+//			 }
+//		 } catch (error) {
+//			 console.error('Error: ', error);
+//		 }
+//		 });
+//	 }
 
 
-//   } catch (error) {
-//       console.error('Erreur: ', error);
-//   }
+//	 } catch (error) {
+//		 console.error('Erreur: ', error);
+//	 }
 // }

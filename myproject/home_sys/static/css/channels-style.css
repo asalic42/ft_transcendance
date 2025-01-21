@@ -56,7 +56,7 @@ h1 {
 }
 
 #notif {
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Thunder';
     font-size: 25px;
     margin-right: 15px;
     background: #ED4EB0;
@@ -68,8 +68,9 @@ h1 {
 
 .chan-item #title-chan {
     margin-left: 15px;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Thunder';
     font-size: 25px;
+	word-wrap: break-word;
 }
 
  /* Actual chan here + scrollbar */

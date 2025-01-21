@@ -12,7 +12,6 @@ echo "${PURPLE_N}Migrations done.${NC}";
 #? for gunicorn
 echo "${PURPLE_N}Making static...${NC}";
 mkdir static;
-rm output;
 chmod -R 777 static/;
 python3 manage.py collectstatic --noinput;
 echo "${PURPLE_N}Static done.${NC}";

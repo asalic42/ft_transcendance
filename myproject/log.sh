@@ -58,6 +58,7 @@ fi
 
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
+	rm -rf static/;
 	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
 
 	LINE='127.0.0.1	transcendance.42.paris'
@@ -69,7 +70,7 @@ if [ "$1" == "b-all" ]; then
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up # démarre en arrière-plan
 
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://transcendance.42.paris "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://transcendance.42.paris"
 fi
 
 # SIMPLE BUILD
@@ -78,7 +79,7 @@ if [ "$1" == "b" ]; then
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris"
 fi
 
 # FULL REMOVE
