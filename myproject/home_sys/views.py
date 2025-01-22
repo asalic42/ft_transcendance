@@ -245,3 +245,13 @@ def post_message(request):
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	
+
+import requests
+from django.conf import settings
+from django.http import JsonResponse
+
+def get_ip_info(request):
+    url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
+    response = requests.get(url)
+    return JsonResponse(response.json())
