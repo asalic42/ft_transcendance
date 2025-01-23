@@ -106,7 +106,7 @@ async function openCenter(nameChan) {
 
 	liveChat = setInterval(() => {
 		liveChatFetch();
-	}, 100);
+	}, 300);
 }
 
 	// Cliquer sur un channel deja creer
@@ -272,36 +272,37 @@ function addMessage(mess, sender) {
 
 	const message = document.createElement('div');
 	message.classList.add('message');
-	if (sender === username)
+
+	if (sender === username) {
 		message.classList.add('sent');
-	else
+	}
+	else {
 		message.classList.add('received');
+	}
 
 	const usernameElement = document.createElement('span');
-	usernameElement.classList.add('username');
-	usernameElement.textContent = sender;
-
+	//usernameElement.classList.add('username');
+	usernameElement.innerHTML = `<img src='/static/images/basePP.png' id="caca">
+								 <p class="name">${sender}</p>`;
+	// usernameElement.textContent = sender;
+	
 	const messElement = document.createElement('p');
+	messElement.classList.add('text')
 	messElement.textContent = mess;
 
-	const messImage = document.createElement('img');
-	messImage.src = "/static/images/basePP.png";
-	messImage.style.cursor = 'pointer';
-	messImage.style.height = '50px';
-    messImage.style.width = '50px';
+	message.appendChild(usernameElement);
+	message.appendChild(messElement);
+	chatPage.appendChild(message);
 
-	messImage.addEventListener('click', function() {
+	const messImage = document.getElementById('caca');
+	usernameElement.addEventListener('click', function() {
 		alert('Image clicked!');
 		window.location.href = "/accounts/unavailable/";
 	});
 
-	message.appendChild(usernameElement);
-	message.appendChild(messElement);
-	message.appendChild(messImage);
-	chatPage.appendChild(message);
-
 	chatPage.scrollTop = chatPage.scrollHeight;
 }
+
 
 ////////////////////////////////////////////////
 		/* Function API fetch */
