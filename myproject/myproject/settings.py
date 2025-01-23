@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'loginpage',
     'home_sys',
     'channels',
+    'corsheaders',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -95,6 +96,7 @@ MIDDLEWARE = [
    	 'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',  # Ce middleware est utilisé par social-auth-app-django
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -180,3 +182,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CORS_ALLOWED_ORIGINS = [
+    "https://localhost:8000",
+    "https://transcendance.42.paris:8000",  # Ajouter ici l'URL de ton frontend si besoin
+]
+
+CORS_ALLOW_ALL_ORIGINS = True

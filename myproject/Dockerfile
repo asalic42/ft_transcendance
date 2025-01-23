@@ -2,7 +2,7 @@
 FROM python:3.10.12
 
 # Définir le répertoire de travail
-WORKDIR /app
+WORKDIR /app/
 
 # On copie le fichier de dépendances
 COPY requirements.txt .

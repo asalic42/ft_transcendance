@@ -10,8 +10,42 @@ var count_p2 = 0;
 let stop = 0;                           // Endgame
 const keys = {};                        // Players bars
 
-// const socket = new WebSocket('ws://transcendance.42.paris/ws/game/pong/');
 
+// WebSocket concerns
+const socket = new WebSocket('wss://transcendance.42.paris:8000/ws/game/pong/');
+
+socket.onopen = function() {
+	console.log("Connexion réussie au WebSocket");
+	console.log("Socket State: " + socket.readyState); // Cela devrait afficher 1 pour ouvert
+	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
+}
+// socket.onmessage = function(event) {
+// 	try {
+//         var data = JSON.parse(event.data);
+//         console.log("Données reçues :", data);
+//         updateGame(data);
+//     } catch (error) {
+//         console.error("Erreur de parsing des données du WebSocket :", error);
+//     }
+// };
+
+socket.onclose = function() {
+	console.log("Deconnexion du socket");
+};
+
+socket.onerror = function(error) {
+    console.error("Erreur WebSocket:", error);
+    console.log("Socket State: " + socket.readyState); // Cela peut être utile pour le débogage
+	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
+};
+
+// function updateGame(data) {
+// 	ball.coords = data.ball_coords;
+// 	player1Coords = data.player1_coords;
+// 	player2Coords = data.player2_coords;
+// }
+
+// Game Pong concerns 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
 	if (result >= -9 && result <= 9)
@@ -45,7 +79,7 @@ function drawInnerRectangle(color) {
     context.closePath();
 }
 
-function update() {
+function update(ball, player1Coords, player2Coords) {
 
 	drawOuterRectangle("#ED4EB0");
 	drawInnerRectangle("#23232e");
@@ -53,25 +87,25 @@ function update() {
     context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
+	// sendToSocket(ball, player1Coords, player2Coords);
     console.log('Creating player...');
 }
 
-// function sendPlayerMove(playerData) {
-    // const data = {
-        // type: "move",
-        // playerData: playerData
-    // };
-    // socket.send(JSON.stringify(data));
-// }
+function sendToSocket(ball, player1Coords, player2Coords) {
+	var data = {
+		'ball_coords': ball.coords,
+		'player1_coords': player1Coords,
+		'player2_coords': player2Coords,
+	};
+	socket.send(JSON.stringify(data));
+}
 
 window.addEventListener("keydown", (event) => {
     keys[event.key] = true;
-    sendPlayerMove({ key: event.key, type: "keydown"});
 });
 
 window.addEventListener("keyup", (event) => {
     keys[event.key] = false;
-    sendPlayerMove({ key: event.key, type: "keyup"});
 });
 
 function movePlayer(player1Coords, player2Coords) {
@@ -166,7 +200,7 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 		if (stop)
 			return;
         context.clearRect(0, 0, table.width, table.height);
-        update();
+        update(ball, player1Coords, player2Coords);
         drawPlayer(player1Coords, player2Coords, "#ED4EB0");
         if (isPointWin(ball))
             return ;
@@ -229,12 +263,10 @@ function moveBall(ball, player1Coords, player2Coords) {
 		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30) {
 			ball.vector.vx -= 1;
 			ball.const_vector.vx -= 1;
-
 		}
 		else if (ball.const_vector.vx < 30) {
 			ball.vector.vx += 1;
 			ball.const_vector.vx += 1;
-
 		}
 	}
 
