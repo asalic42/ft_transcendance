@@ -27,4 +27,5 @@ urlpatterns = [
     path('api/post_message/', post_message, name="post_message"),
     path('api/live_chat/', live_chat, name="live_chat"),
     path('get-ip-info/', get_ip_info, name='get_ip_info'),
+    path('user-settings/', settings_user, name='settings_user'),
 ]

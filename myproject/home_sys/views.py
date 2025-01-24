@@ -80,6 +80,10 @@ def delete_success(request):
 	return (render(request, 'delete_success.html'))
 
 @login_required
+def settings_user(request):
+	return (render(request, 'user-settings.html'))
+
+@login_required
 def profile_page(request):
 	return (render(request, 'profile.html'))
 

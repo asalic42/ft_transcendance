@@ -13,3 +13,4 @@ social-auth-core
 requests
 django-environ
 zxcvbn==4.4.28
+pillow
