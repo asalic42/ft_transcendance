@@ -28,4 +28,6 @@ urlpatterns = [
     path('api/live_chat/', live_chat, name="live_chat"),
     path('get-ip-info/', get_ip_info, name='get_ip_info'),
     path('user-settings/', settings_user, name='settings_user'),
+    path('user-settings/check_username/', check_username, name='check_username'),
+    path('user-settings/check_email/', check_email, name='check_email'),
 ]

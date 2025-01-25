@@ -259,3 +259,28 @@ def get_ip_info(request):
     url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
     response = requests.get(url)
     return JsonResponse(response.json())
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def check_username(request):
+    username = request.GET.get('username', '')
+    if (User.objects.filter(username=username).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+""" @require_GET
+def check_pseudo(request):
+    pseudo = request.GET.get('pseudo', '')
+    if (User.objects.filter(pseudo=pseudo).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False})) """
+
+@require_GET
+def check_email(request):
+    email = request.GET.get('email', '')
+    if (User.objects.filter(email=email).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
