@@ -7,6 +7,7 @@ from datetime import datetime
 class Users(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	name = models.CharField(max_length = 150)
+	pseudo = models.CharField(max_length=100, blank=True, null=True, default='pseudotest')
 	date = models.DateTimeField(auto_now_add = True)
 	image = models.ImageField(upload_to='profile_pics/', default='profile_pics/basePP.png')
 	#image = models.CharField(max_length = 255, default = 'static/images/basePP.png')

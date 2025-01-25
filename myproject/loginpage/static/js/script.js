@@ -79,8 +79,6 @@ function checkFormValidity(form, formInput, formButton) {
         if (passwordInput.value === confirmPasswordInput.value) {
             mismatchMessage.classList.remove('show');
 
-            console.log("isPasswordStrongEnough : ", is_password_strong_enough);
-
             if (is_password_strong_enough === true)
                 confirmPasswordInput.classList.add('colored');
 
@@ -249,8 +247,6 @@ checkFormValidity(signupForm, signupInputs, signupSubmitButton);
 function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, baliseInputSpan, len_respected) {
     const baliseContent = baliseInput.value.trim();
 
-    console.log("-----------------------------");
-
     if (baliseContent.length > 0) {
         // Effectuer la requête AJAX pour vérifier si le pseudo est disponible
         fetch(`${chemin_fetch}=${baliseContent}`)
@@ -264,7 +260,6 @@ function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, bali
                 } else {
                     if (len_respected.value === true)
                     {
-                        console.log("len_respected.value : ", len_respected.value)
                         baliseInput.classList.remove("invalid");
                         baliseInputSpan.classList.remove("invalid");    
                     }
@@ -298,8 +293,6 @@ UsernameInput.addEventListener('keyup', function() {
         is_username_len_respected.value = true;
     }
 
-    console.log("Username len respected ? : ", is_username_len_respected.value);
-
     verifierDisponibilitePseudo(UsernameInput,
         'check_username/?username',
         is_username_taken,
@@ -323,9 +316,6 @@ emailSignup.addEventListener('keyup', function() {
     else {
         is_email_len_respected.value = true;
     }
-
-    console.log("Email len respected ? : ", is_email_len_respected.value);
-
 
     if (emailFormatIsValid.value === true)
     {    

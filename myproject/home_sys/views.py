@@ -284,3 +284,34 @@ def check_email(request):
     if (User.objects.filter(email=email).exists()):
         return (JsonResponse({'is_taken' : True}))
     return (JsonResponse({'data' : False}))
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required  # Décorateur pour s'assurer que l'utilisateur est connecté
+from .models import User
+
+@login_required
+@csrf_exempt
+def update_user_info(request):
+	if request.method == 'POST':
+		# Utilise l'utilisateur connecté (request.user) pour identifier l'utilisateur
+ 
+		user = request.user  # On récupère l'utilisateur connecté
+        
+        # Récupère les nouvelles données depuis le formulaire
+		new_email = request.POST.get('email')
+		new_username = request.POST.get('username')
+		new_pseudo = request.POST.get('pseudo')
+
+		# Mets à jour les informations
+		if new_email:
+			user.email = new_email
+		if new_username:
+			user.username = new_username
+
+		user.save()  # Sauvegarde les changements dans la base de données
+		
+		return JsonResponse({"status": "success", "message": "Informations mises à jour."})
+    
+	return JsonResponse({"status": "error", "message": "Requête invalide."})

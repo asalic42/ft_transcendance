@@ -30,4 +30,5 @@ urlpatterns = [
     path('user-settings/', settings_user, name='settings_user'),
     path('user-settings/check_username/', check_username, name='check_username'),
     path('user-settings/check_email/', check_email, name='check_email'),
+    path('update-user/', update_user_info, name='update_user_info'),
 ]

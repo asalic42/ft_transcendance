@@ -16,7 +16,7 @@
             {% if request.user.is_authenticated %}
                 <div class="profile-user-info">
                     <span class="profile-username" style="color: black">👩‍🦲 : {{ request.user.username }}</span>
-                    <span class="profile-pseudo" style="color: black">👤 : {{ request.user.perso }}</span>
+                    <span class="profile-pseudo" style="color: black">👤 : {{ request.user.pseudo }}</span>
                     <span class="profile-email" style="color: black">📧 : {{ request.user.email }}</span>
                 </div>
             {% else %}
