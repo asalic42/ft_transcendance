@@ -8,6 +8,7 @@ let chatVisible = false;
 let currentChan;
 let lastMessageId = 0;
 let liveChat;
+let blockedUsersList = null;
 // let unreadMsg = {};
 
 // Recup l'user courant
@@ -20,7 +21,6 @@ console.log(`Current username is ${username}`);
 document.addEventListener("DOMContentLoaded", function() {
 
 	loadChannels();
-
 	const newChan = document.getElementById('new-chan');
 	// const inviteButton = document.getElementById('add-friend-chan');
 	newChan.addEventListener('click', () => {
@@ -100,7 +100,6 @@ async function openCenter(nameChan) {
 
 	const chatContainer = document.getElementById('chat-page');
 	chatContainer.innerHTML = '';	
-	// await getMessages(currentChan);
 	
 	if (liveChat) clearInterval(liveChat);
 
@@ -267,9 +266,12 @@ function addMessageListener() {
 }
 
 	// Add the message on the chat conv
-function addMessage(mess, sender) {
+function addMessage(mess, sender, id) {
+	console.log("sender id: " + id);
+	
+	
 	const chatPage = document.getElementById('chat-page')
-
+	
 	const message = document.createElement('div');
 	message.classList.add('message');
 
@@ -288,14 +290,19 @@ function addMessage(mess, sender) {
 	
 	const messElement = document.createElement('p');
 	messElement.classList.add('text')
-	messElement.textContent = mess;
+
+	if (blockedUsersList.includes(id)) { // Then user is blocked 
+		messElement.textContent = "You blocked this user";	
+		messElement.style.color = "red";
+	}
+	else messElement.textContent = mess;
 
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
 	chatPage.appendChild(message);
 
 	const messImage = document.getElementById('caca');
-	usernameElement.addEventListener('click', function() {
+	usernameElement.addEventListener('click', async function() {
 		alert('Image clicked!');
 		window.location.href = "/accounts/unavailable/";
 	});
@@ -326,7 +333,7 @@ async function liveChatFetch() {
 			console.log(data.new_message);
 			data.new_message.forEach(message => {
 				console.log("Adding message with id = " + message.id);
-				addMessage(message.message, message.sender);
+				addMessage(message.message, message.sender, message.idSender);
 				lastMessageId = message.id;
 			});
 		}
@@ -367,6 +374,9 @@ async function addChannelToDb(currentChan) {
 async function	loadChannels() {
 	
 	try {
+		await getCurrentPlayerId();
+		await getBlocked();
+
 		const response = await fetch('/accounts/api/get_chans/', {
 		headers: {
 			'Content-Type': 'application/json',
@@ -387,96 +397,107 @@ async function	loadChannels() {
 	}
 }
 
-	// Load messages when the chan appear
-async function getMessages(currentChan) {
-	try {
-		const response = await fetch(`/accounts/api/get_messages/?channel_name=${encodeURIComponent(currentChan)}`, {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		});
-
-		const result = await response.json();
-		if (result.status === 'success' && Array.isArray(result.messages)) {
-			result.messages.forEach(message => addMessage(message.message, message.sender));
-		}
-	} catch (error) {
-		console.error('Erreur: ', error);
-	}
-}
-
 async function postMessage(currentChan, mess) {
 	try {
-	const response = await fetch('/accounts/api/post_message/', {
-		method: 'POST',
-		headers: {
-		'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-		channel_name: currentChan,
-		sender: username,
-		message: mess,
-		})
-	});
-
-	if (!response.ok) {
-		throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
-	}
+		const response = await fetch('/accounts/api/post_message/', {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+			channel_name: currentChan,
+			sender: username,
+			message: mess,
+			idSender: cachedUserId,
+			})
+		});
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
+		}
+		const data = await response.json();
+		
+		// Accéder à idSender
+		const idSender = data.message.idSender;
+		console.log('idSender:', idSender);
 
 	} catch(error) {
 		console.error('Erreur: ', error);
 	}
 }
+let cachedUserId = null;
 
+async function getCurrentPlayerId() { // à lancer au chargement de la page;
+	if (cachedUserId !== null) {
+		return cachedUserId;
+	}
+	try {
+		const response = await fetch('/accounts/api/current-user/', {
+			credentials: 'same-origin'
+		});
+		const data = await response.json();
+		cachedUserId = data.userId;
+		return cachedUserId;
+	} catch (error) {
+		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		return null;
+	}
+}
 
-// async function getNotifications() {
-//	 try {
-//	 const response = await fetch(`/accounts/api/get_chans/`, {
-//		 headers: {
-//		 'Content-Type': 'application/json',
-//		 },
-//	 });
+async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
+	try {
+		const response = await fetch('/accounts/api/post_blocked/', {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+			idUser: cachedUserId, //  L'id du jouueur logged
+			idBlocked: idBlocked, //  L'id de l'utilidateur qui va être bloqué 
+			})
+		});
+		if (!response.ok) {
+			throw new Error('Erreur lors de l\'ajout d\'un nouveau blocked');
+		}
+		const data = await response.json();
+	} catch(error) {
+		console.error('Erreur: ', error);
+	}
+}
 
-//	 if (!response.ok)
-//		 throw new Error('Erreur lors de la recup des channels');
+function	getBlocked() {
+	fetch(`/accounts/api/get_blocked/${cachedUserId}/`)
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Erreur réseau');
+		}
+		return response.json();
+	})
+	.then(data => {
+		console.log('IDs des utilisateurs bloqués :', data.blocked_users_ids);
+		blockedUsersList = data.blocked_users_ids;
+	})
+	.catch(error => {
+		console.error('Erreur lors de la récupération des données :', error);
+	});
+}
 
-//	 const result = await response.json();
-//	 if (result.status === 'success' && Array.isArray(result.channels)) {
-//		 result.channels.forEach(async (channelName) => {
-//			 try {
-//				 const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
-//				 headers: {
-//				 'Content-Type': 'application/json',
-//				 },
-//			 });
-		
-//			 if (!response.ok) {
-//				 console.log("Erreur de fetch");
-//			 }
-		
-//			 const data = await response.json();
-//			 if (data.new_message && data.new_message.length > 0) {
-//				 if (channelName != currentChan) {
-//				 unreadMsg[channelName] = (unreadMsg[channelName] || 0) + data.new_message.length;
-//				 console.log("channel name = ", channelName);
-//				 plusDeNotifs(channelName);
-//				 }
-//				 else {
-//				 data.new_message.forEach(message => {
-//					 addMessage(message.message, message.sender);
-//					 lastMessageId = message.id;
-//				 });
-//				 }
-
-//			 }
-//		 } catch (error) {
-//			 console.error('Error: ', error);
-//		 }
-//		 });
-//	 }
-
-
-//	 } catch (error) {
-//		 console.error('Erreur: ', error);
-//	 }
-// }
+async function	post_deblock(a) {
+	try {
+		const response = await fetch('/accounts/api/post_deblock/', {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+			idUser: cachedUserId, //  L'id du jouueur logged
+			idBlocked: a, //  L'id de l'utilidateur qui va être débloqué 
+			})
+		});
+		if (!response.ok) {
+			throw new Error('Erreur lors du retrait d\'un nouveau blocked');
+		}
+		const data = await response.json();
+	} catch(error) {
+		console.error('Erreur: ', error);
+	}
+}

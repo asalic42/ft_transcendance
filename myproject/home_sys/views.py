@@ -201,6 +201,7 @@ def live_chat(request):
 				'id': msg.id,
 				'channel_name': msg.channel_name,
 				'sender': msg.sender,
+				'idSender': msg.idSender,
 				'message': msg.message,
 				'date':msg.date.isoformat()} for msg in new_message]
 		return JsonResponse({'new_message': data})
@@ -270,8 +271,45 @@ def post_message(request):
 			'id': new_message.id,
 			'channel_name': new_message.channel_name,
 			'sender': new_message.sender,
+			'idSender': new_message.idSender,
 			'message': new_message.message,
 			'date':new_message.date.isoformat(),
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_blocked(request, idPlayer):
+    # Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
+    blocked_users_ids = BlockUsers.objects.filter(idUser=idPlayer).values_list('idBlocked', flat=True).distinct()
+
+    # Convertir le QuerySet en liste pour la réponse JSON
+    blocked_users_ids_list = list(blocked_users_ids)
+
+    # Retourner la réponse JSON
+    return JsonResponse({'blocked_users_ids': blocked_users_ids_list})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_blocked(request):
+	try:
+		data = json.loads(request.body)
+		new_blocked = BlockUsers.objects.create(**data)
+		return JsonResponse({'status': 'success', 'message': {
+			"idUser": new_blocked.idUser, 
+			"idBlocked": new_blocked.idBlocked,
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_deblock(request):
+	try:
+		data = json.loads(request.body)
+		BlockUsers.objects.filter(idUser=data["idUser"], idBlocked=data["idBlocked"]).delete()
+		return JsonResponse({'status': 'success'})
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error'})

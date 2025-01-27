@@ -84,7 +84,6 @@ h1 {
 	padding-top: 5px;
 	background-color: var(--bg-primary);
 	font-family: 'Thunder-SemiBold';
-	font-family: 'Thunder-SemiBold';
 	font-size: 35px;
 	border: none;
 	border-radius: 7px;
@@ -222,6 +221,7 @@ h1 {
 }
 
 .message .name{
+	font-size: 30px;
 	margin-top: 0px;
 	margin-bottom: 60px;
 }
@@ -286,8 +286,8 @@ h1 {
 }
 
 .message img {
-	width: 24px;
-	height: 24px;
+	width: 28px;
+	height: 28px;
 }
 
 .message.sent img {
@@ -301,7 +301,7 @@ h1 {
 .text {
 	padding: 10px;
 	margin: 10px;
-	margin-top: 25px;
+	margin-top: 15px;
 	color: white;
 	background-color: black;
 	max-width: calc(100% - 20px);
@@ -331,4 +331,9 @@ h1 {
 
 .message.received span {
 	justify-content: flex-start;
+}
+
+.message.sent .text {
+	position: relative;
+	/* margin-right: 100%; */
 }

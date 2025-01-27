@@ -89,5 +89,6 @@ class Messages(models.Model):
 	id = models.AutoField(primary_key=True)
 	channel_name = models.CharField()
 	sender = models.CharField()
+	idSender = models.IntegerField()
 	message = models.CharField()
 	date = models.DateTimeField(auto_now_add = True)
