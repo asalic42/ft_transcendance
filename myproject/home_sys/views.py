@@ -271,12 +271,12 @@ def check_username(request):
         return (JsonResponse({'is_taken' : True}))
     return (JsonResponse({'data' : False}))
 
-""" @require_GET
+@require_GET
 def check_pseudo(request):
     pseudo = request.GET.get('pseudo', '')
-    if (User.objects.filter(pseudo=pseudo).exists()):
+    if (Users.objects.filter(pseudo=pseudo).exists()):
         return (JsonResponse({'is_taken' : True}))
-    return (JsonResponse({'data' : False})) """
+    return (JsonResponse({'data' : False}))
 
 @require_GET
 def check_email(request):
@@ -288,30 +288,82 @@ def check_email(request):
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required  # Décorateur pour s'assurer que l'utilisateur est connecté
-from .models import User
+from django.contrib.auth.decorators import login_required
+from .models import Users
 
 @login_required
 @csrf_exempt
 def update_user_info(request):
-	if request.method == 'POST':
-		# Utilise l'utilisateur connecté (request.user) pour identifier l'utilisateur
- 
-		user = request.user  # On récupère l'utilisateur connecté
+    if request.method == 'POST':
+        user = request.user  # Récupère l'utilisateur connecté
         
-        # Récupère les nouvelles données depuis le formulaire
-		new_email = request.POST.get('email')
-		new_username = request.POST.get('username')
-		new_pseudo = request.POST.get('pseudo')
+        # Récupère les nouvelles données depuis la requête
+        new_email = request.POST.get('email')
+        new_username = request.POST.get('username')
+        new_pseudo = request.POST.get('pseudo')
 
-		# Mets à jour les informations
-		if new_email:
-			user.email = new_email
-		if new_username:
-			user.username = new_username
+        try:
+            # Récupère le profil de l'utilisateur connecté
+            user_profile = Users.objects.get(user=user)
+            
+            # Mets à jour les informations
+            if new_email:
+                user.email = new_email
+            if new_username:
+                user.username = new_username
+            if new_pseudo:
+                user_profile.pseudo = new_pseudo  # Met à jour le pseudo
 
-		user.save()  # Sauvegarde les changements dans la base de données
-		
-		return JsonResponse({"status": "success", "message": "Informations mises à jour."})
-    
-	return JsonResponse({"status": "error", "message": "Requête invalide."})
+            # Sauvegarde les changements
+            user.save()
+            user_profile.save()  # Sauvegarde le profil utilisateur avec la nouvelle image
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Informations mises à jour.",
+            })
+
+
+        except Users.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
+
+    return JsonResponse({"status": "error", "message": "Requête invalide."})
+
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from .models import Users
+
+@login_required
+@csrf_exempt
+def upload_avatar(request):
+    if request.method == 'POST':
+        try:
+            # Récupère l'utilisateur connecté
+            user = request.user
+
+            # Récupère le fichier avatar envoyé
+            avatar_file = request.FILES.get('avatar')
+
+            if not avatar_file:
+                return JsonResponse({"status": "error", "message": "Aucun fichier sélectionné."})
+
+            # Récupère le profil utilisateur
+            user_profile = Users.objects.get(user=user)
+            
+            # Mets à jour l'image de l'utilisateur
+            user_profile.image = avatar_file
+            user_profile.save()  # Sauvegarde le profil avec la nouvelle image
+
+            # Retourne l'URL de la nouvelle image
+            return JsonResponse({
+                "status": "success",
+                "message": "Avatar mis à jour.",
+                "new_avatar_url": user_profile.image.url  # L'URL de l'image mise à jour
+            })
+
+        except Users.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
+
+    return JsonResponse({"status": "error", "message": "Requête invalide."})

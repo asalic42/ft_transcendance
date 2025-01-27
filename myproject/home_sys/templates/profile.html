@@ -10,13 +10,13 @@
     <div class="profile-container">
 
         <div class="profile-box">
-            <img class="profile-img" src="{% static 'images/basePP.png' %}" alt="">
+            <img class="profile-img" src="{{ user.users.image.url }}" alt="">
             <!-- <button class="profile-img-upload">➕</button> -->
 
             {% if request.user.is_authenticated %}
                 <div class="profile-user-info">
                     <span class="profile-username" style="color: black">👩‍🦲 : {{ request.user.username }}</span>
-                    <span class="profile-pseudo" style="color: black">👤 : {{ request.user.pseudo }}</span>
+                    <span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }}</span>
                     <span class="profile-email" style="color: black">📧 : {{ request.user.email }}</span>
                 </div>
             {% else %}

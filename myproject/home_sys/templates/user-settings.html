@@ -9,26 +9,32 @@
     <div class="settings-container">
 
         <div class="settings-box">
-            <img class="settings-img" src="{% static 'images/basePP.png' %}" alt="">
-            <button class="settings-img-upload">➕</button>
+
+            <img class="settings-img" src="{{ user.users.image.url }}" alt="Avatar" id="avatar-img" />
+
+            <button class="settings-img-upload">
+                <label for="s-avatar" class="custom-file-upload">➕</label>
+            </button>
+            
+            <input type="file" id="s-avatar" name="avatar" style="display: none;">
 
             {% if request.user.is_authenticated %}
                 <div class="settings-user-info">
                     <span class="settings-username" style="color: black">👩‍🦲 :<input id="s-username" type="text" class="settings-username" disabled placeholder="{{ request.user.username }}"> </span>
-                    <span class="settings-pseudo" style="color: black">👤 :<input id="s-pseudo" type="text" class="settings-pseudo" disabled placeholder="{{ request.user.pseudo }}"> </span>
+                    <span class="settings-pseudo" style="color: black">👤 :<input id="s-pseudo" type="text" class="settings-pseudo" disabled placeholder="{{ user.users.pseudo }}"> </span>
                     <span class="settings-email" style="color: black">📧 :<input id="s-email" type="text" class="settings-email" disabled placeholder="{{ request.user.email }}"> </span>
                 </div>
             {% else %}
                 <p>Vous n'êtes pas connecté.</p>
             {% endif %}
 
-            <button class="upgrade-or-save">Upgrade</button>
+            <button class="update-or-save">Update</button>
 
             <div class="settings-separator">
 
                 <p class="settings-text-settings-rdv">
                     Pour modifier vos informations, cliquez sur
-                    Upgrade, et Save.
+                    Update, et Save.
                 </p>
 
                 <button class="settings-logout" onclick="window.location.href='{% url 'signout' %}'">
@@ -70,7 +76,7 @@
 
         /* Ugrade/Save button */
 
-        .upgrade-or-save {
+        .update-or-save {
             font-family: 'Courier New', Courier, monospace;
             scale: 0.85;
             position: absolute;
@@ -85,7 +91,7 @@
             transition: all 0.2s ease;
         }
 
-        .upgrade-or-save:hover {
+        .update-or-save:hover {
             cursor: pointer;
             scale: 0.89;
         }
@@ -232,6 +238,10 @@
             transition: all 0.2s ease-out;
         }
 
+        .custom-file-upload:hover {
+            cursor: pointer;
+        }
+
         .settings-logout:hover,
         .settings-delete-account:hover {
             cursor: pointer;
@@ -249,9 +259,9 @@
 
     <script>
 
-        let upgrade_var = {value: false};
+        let update_var = {value: false};
 
-        const buttonUpgradeSave = document.querySelector(".upgrade-or-save");
+        const buttonUpdateSave = document.querySelector(".update-or-save");
 
         const inputUsername = document.querySelector(".settings-username");
         const inputPseudo = document.querySelector(".settings-pseudo");
@@ -259,20 +269,20 @@
 
         const allInputs = document.querySelectorAll(".settings-user-info input");
 
-        buttonUpgradeSave.addEventListener('click', function(e) {
+        buttonUpdateSave.addEventListener('click', function(e) {
             e.preventDefault();
 
-            upgrade_var.value = !upgrade_var.value;
+            update_var.value = !update_var.value;
 
-            if (upgrade_var.value === true) {
-                buttonUpgradeSave.textContent = "Save";
+            if (update_var.value === true) {
+                buttonUpdateSave.textContent = "Save";
                 allInputs.forEach(input => {
                     input.style.backgroundColor = "white";
                     input.disabled = false;
                     input.style.color = "black";
                 });
             } else {
-                buttonUpgradeSave.textContent = "Upgrade";
+                buttonUpdateSave.textContent = "Update";
                 allInputs.forEach(input => {
                     input.style.backgroundColor = "#212121";
                     input.disabled = true;
@@ -284,29 +294,70 @@
                 var new_pseudo = $('#s-pseudo').val(); // Récupère la valeur de l'input pseudo
                 var new_email = $('#s-email').val(); // Récupère la valeur de l'input email
 
+                // Crée un objet FormData pour envoyer les données
+                var formData = new FormData();
+                formData.append('username', new_username);
+                formData.append('pseudo', new_pseudo);
+                formData.append('email', new_email);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour sécuriser la requête
+
                 // On envoie les données via AJAX
                 $.ajax({
                     url: '{% url "update_user_info" %}',
                     type: 'POST',
-                    data: {
-                        'username': new_username,
-                        'pseudo': new_pseudo,
-                        'email': new_email,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}',  // CSRF token pour sécuriser la requête
-                    },
+                    data: formData,
+                    processData: false,  // Important : ne pas traiter les données (surtout pour les fichiers)
+                    contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
                     success: function(response) {
                         if (response.status === 'success') {
                             alert('Vos informations ont été mises à jour. ✅');
                         } else {
-                            alert('​​❌​ Erreur : ' + response.message);
+                            alert('❌ Erreur : ' + response.message);
                         }
                     },
                     error: function() {
-                        alert('​❌​ Erreur lors de la mise à jour des informations.​');
+                        alert('❌ Erreur lors de la mise à jour des informations.');
                     }
                 });
+        }});
+
+                // Lorsque l'utilisateur choisit un fichier, on déclenche l'upload via AJAX
+        $('#s-avatar').on('change', function(event) {
+            // Récupère le fichier choisi
+            var avatar_file = event.target.files[0];  // Le premier fichier choisi
+
+            // Vérifie si un fichier a bien été sélectionné
+            if (!avatar_file) {
+                alert('Veuillez choisir un fichier d\'avatar.');
+                return;
             }
+
+            // Crée un objet FormData pour envoyer le fichier
+            var formData = new FormData();
+            formData.append('avatar', avatar_file);  // Ajoute le fichier avatar
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour la sécurité
+
+            // On envoie les données via AJAX
+            $.ajax({
+                url: '{% url "upload_avatar" %}',  // URL de la vue pour uploader l'avatar
+                type: 'POST',
+                data: formData,
+                processData: false,  // Important : ne pas traiter les données
+                contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Met à jour l'image de profil sur la page immédiatement
+                        $('#avatar-img').attr('src', response.new_avatar_url);
+                    } else {
+                        alert('❌ Erreur : ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('❌ Erreur lors du téléchargement de l\'avatar.');
+                }
+            });
         });
+
 
 
         /* ------ Pour vérifier si le user/email est valide et est non pris ------ */
@@ -422,45 +473,66 @@
                 is_email_valid.value = true;
         });
 
+        const SpseudoInput = document.getElementById("s-pseudo");
+    
+        SpseudoInput.addEventListener('keyup', function() {
+
+            TestValidity(SpseudoInput,
+                'check_pseudo/?pseudo',
+                is_s_pseudo_already_taken,
+                is_s_pseudo_len_ok,
+                s_pseudo_whitespaces_found);
+        });
+
         function ActiveTextStatusColoration()
         {
-            TextColorStatus(SusernameInput, 
+            TextColorStatus(SusernameInput,
                 is_s_user_already_taken,
                 is_s_user_len_ok,
                 s_user_whitespaces_found);
 
-            TextColorStatus(SemailInput, 
+            TextColorStatus(SemailInput,
                 is_s_email_already_taken,
                 is_s_email_len_ok,
                 s_email_whitespaces_found);
+
+            TextColorStatus(SpseudoInput,
+                is_s_pseudo_already_taken,
+                is_s_pseudo_len_ok,
+                s_pseudo_whitespaces_found);
         }
 
 
         /* Fonction pour checker si les champs sont valides et changer l'état du bouton en conséquence  */
 
-        function button_upgrade_save_status() {
+        function button_update_save_status() {
 
             if (is_s_user_len_ok.value === false            ||
                 is_s_email_len_ok.value === false           ||
+                is_s_pseudo_len_ok.value === false          ||
+
                 is_s_user_already_taken.value === true      ||
                 is_s_email_already_taken.value === true     ||
+                is_s_pseudo_already_taken.value === true    ||
+                
                 s_user_whitespaces_found.value === true     ||
                 s_pseudo_whitespaces_found.value === true   ||
                 s_email_whitespaces_found.value === true    ||
+                
                 is_email_valid.value === false)
             {
-                buttonUpgradeSave.disabled = true;
+                buttonUpdateSave.disabled = true;
             }
             else
             {
-                buttonUpgradeSave.disabled = false;
+                buttonUpdateSave.disabled = false;
             }
 
-            if (upgrade_var.value === true)
+            if (update_var.value === true)
                 ActiveTextStatusColoration();
         }
 
-        setInterval(button_upgrade_save_status, 1);
+        setInterval(button_update_save_status, 1);
 
     </script>
 
