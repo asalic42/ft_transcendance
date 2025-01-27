@@ -67,7 +67,7 @@ if [ "$1" == "b-all" ]; then
     echo -e "${BLUE}> Building docker image... ${NC}"
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
-    sudo docker-compose up -d # démarre en arrière-plan
+    sudo docker-compose up # démarre en arrière-plan
 
     # python3 manage.py makemigrations
     # python3 manage.py migrate
@@ -117,5 +117,5 @@ if [ "$1" == "l" ]; then
     # done
 
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
-    open https://transcendance.42.paris/
+    open https://transcendance.42.paris/signin/
 fi

@@ -1,6 +1,4 @@
-
 services:
-
   db:
     image: postgres:13
     environment:
@@ -8,7 +6,6 @@ services:
       POSTGRES_PASSWORD: admin@123
       POSTGRES_DB: mysqldb
       PGDATABASE: mysqldb
-
     ports:
       - "5432:5432"
     volumes:
@@ -23,24 +20,24 @@ services:
 
   web:
     build: .
-    # ports:
-      # - "8000:8000"
     expose:
       - 8000
     volumes:
       - .:/app
       - static:/app/static
-
     environment:
       - DATABASE_URL=postgres://user:admin%40123@db:5432/mysqldb
+      - REDIS_HOST=redis
     depends_on:
+      redis:
+        condition: service_started
       db:
         condition: service_healthy
     networks:
       - appnet
 
   nginx:
-    build: 
+    build:
       context: ./nginx
       dockerfile: Dockerfile
     ports:
@@ -53,14 +50,19 @@ services:
     networks:
       - appnet
 
-  # redis:
-  #   image: redis:latest
-  #   ports:
-  #     - "6379:6379"
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - appnet
 
 volumes:
   postgres_data:
   static:
+  redis_data:
 
 networks:
   appnet:

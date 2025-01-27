@@ -10,15 +10,15 @@ var count_p2 = 0;
 let stop = 0;                           // Endgame
 const keys = {};                        // Players bars
 
-
 // WebSocket concerns
-const socket = new WebSocket('wss://transcendance.42.paris:8000/ws/game/pong/');
+const socket = new WebSocket("wss://transcendance.42.paris/ws/pong/");
 
 socket.onopen = function() {
 	console.log("Connexion réussie au WebSocket");
 	console.log("Socket State: " + socket.readyState); // Cela devrait afficher 1 pour ouvert
 	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
 }
+
 // socket.onmessage = function(event) {
 // 	try {
 //         var data = JSON.parse(event.data);
