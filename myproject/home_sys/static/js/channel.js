@@ -99,7 +99,7 @@ async function openCenter(nameChan) {
 	h2content.textContent = currentChan;
 
 	const chatContainer = document.getElementById('chat-page');
-	chatContainer.innerHTML = '';	
+	chatContainer.innerHTML = ``;	
 	
 	if (liveChat) clearInterval(liveChat);
 

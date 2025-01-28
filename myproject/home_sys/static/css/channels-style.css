@@ -1,3 +1,5 @@
+/*? Importation des polices */
+
 @font-face {
 	font-family: Thunder;
 	src: url("../fonts/Thunder-VF.ttf");
@@ -8,23 +10,19 @@
 	src: url("../fonts/Thunder-SemiBoldLC.otf");
 }
 
+
 body {
-	background-color: var(--bg-site);
+	background-color: var(--bg-site); /*? Arrière plan */
 }
 
 .page {
 	font-family: 'Thunder';
 	font-size: 25px;
-	margin: 0;
-	position: relative;
 	color: var(--font-color);
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 20px;
-	justify-content: center;
 	text-align: center;
-	box-sizing: border-box;
-	width: 100%;
 	transition: grid-template-columns 1s ease;
 }
 
@@ -40,7 +38,6 @@ h1 {
 
 #friends, #channels-list {
 	background-color: var(--bg-primary);
-	border: none;
 	border-radius: 7px;
 	border: 4px solid #ED4EB0;
 	width: 100%;
@@ -48,12 +45,12 @@ h1 {
 }
 
 .chan-item {
-    border-bottom: 2px solid #ED4EB0;
+    border-bottom: 3px solid #ED4EB0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 50px;
-}
+}	
 
 #notif {
     font-family: 'Thunder';
@@ -70,30 +67,14 @@ h1 {
     margin-left: 15px;
     font-family: 'Thunder';
     font-size: 25px;
-	word-wrap: break-word;
 }
 
  /* Actual chan here + scrollbar */
 .column {
-	height: 100%;
 	padding: 5px;
 	transition: transform 1s ease;
 }
 
-.column #title {
-	padding-top: 5px;
-	background-color: var(--bg-primary);
-	font-family: 'Thunder-SemiBold';
-	font-size: 35px;
-	border: none;
-	border-radius: 7px;
-	border: 4px solid #ED4EB0;
-	margin-bottom: 35px;
-}
-
-#title {
-	width: 100%;
-}
 
 .friends, .channels {
 	transition: transform 1s ease;
@@ -107,45 +88,59 @@ h1 {
 	transition: transform 0.2s ease;
 }
 
-.center h2 {
+.column #title,  .center h2{
 	padding-top: 5px;
 	background-color: var(--bg-primary);
-	border: none;
+	font-family: 'Thunder-SemiBold';
+	font-size: 35px;
 	border-radius: 7px;
 	border: 4px solid #ED4EB0;
 	margin-bottom: 35px;
-	font-size: 35px;
+	width: 100%;
 }
 
 .chat-page {
-	position: relative;
 	background-color: var(--bg-primary);
-	border: none;
 	border-radius: 7px;
 	border: 4px solid #ED4EB0;
 	width: 100%;
 	height: 600px;
 	margin-bottom: 10px;
-	flex-grow: 1;
 	overflow-y: auto;
 	scroll-behavior: smooth;
 	display: flex;
 	flex-direction: column;
+	padding-right: 0px; /* Augmentez cette valeur pour plus de décalage */
+    overflow-x: hidden;
 }
 
+/* Conteneur interne pour compenser le padding */
+.chat-page > .content {
+    width: calc(100% + 10px);
+    height: 100%;
+}
+
+/* Webkit : Style de la scrollbar */
 .chat-page::-webkit-scrollbar {
-	border-radius: 50%;
-	width: 10px;
+    width: 10px; 
 }
 
 .chat-page::-webkit-scrollbar-track {
-	border-radius: 10%;
-	background: var(--bg-primary);
+    background: white;
+    margin-right: 10px; /* Décalage supplémentaire si nécessaire */
 }
+
 .chat-page::-webkit-scrollbar-thumb {
-	background: var(--bg-secondary);
-	border-radius: 10px;
-	height: calc(100% - 50px);
+    background: white;
+    border-radius: 10px;
+}
+
+/* Firefox : Utilisez scrollbar-gutter si supporté */
+@supports (scrollbar-gutter: stable) {
+    .chat-page {
+        scrollbar-gutter: stable;
+        padding-right: 0; /* Désactive le padding si scrollbar-gutter est actif */
+    }
 }
 
 /* Buttons in the chat (new chan + invite people in it)*/
@@ -155,11 +150,9 @@ h1 {
 	margin: 15px;
 	color:#ED4EB0;
 	background-color: var(--bg-primary);
-	border: none;
 	border-radius: 7px;
 	border: 4px solid #ED4EB0;
 	cursor: pointer;
-	justify-self: start;
 }
 
 #add-friend-chan {
@@ -172,7 +165,6 @@ h1 {
 }
 
 .hidden-form.show {
-	display: block;
 	position: fixed;
 	top: 50%;
 	left: 50%;
@@ -180,21 +172,19 @@ h1 {
 	color: var(--font-color);
 	background-color: var(--bg-primary);
 	padding: 40px;
-	border: none;
 	border-radius: 7px;
 	border: 4px solid #ED4EB0;
-	box-shadow: 0 4px 10px rgb(0, 0, 0);
 	z-index: 10;
 		
 	/* centrer les elements dans le form */
 	display: flex;
-	align-items: center;
-	justify-content: center;
 	flex-direction: column;
 
 	input {
-		padding: 5px;
-		font-size: 15px;
+		font-family: 'Thunder';
+		padding: 8px;
+		font-size: 25px;
+		text-align: center;
 	}
 }
 
@@ -223,7 +213,8 @@ h1 {
 .message .name{
 	font-size: 30px;
 	margin-top: 0px;
-	margin-bottom: 60px;
+	padding-top: 3px;
+	font-weight: bold;
 }
 
 .message.sent {
@@ -232,57 +223,13 @@ h1 {
 }
 
 .message.sent .name {
-	padding-top: 3px;
-	right: 10px;
 	color: rgb(57, 117, 247);
-	font-weight: bold;
 	order: 2;
 }
 
-.message.received {
-	align-self: flex-start;	
-}
-
 .message.received .name {
-	padding-top: 3px;
-	left: 10px;
 	color: rgb(128, 255, 128);
-	font-weight: bold;
 	order: 1;
-}
-
-.input-container {
-	width: 100%;
-	display: flex;
-	/* justify-content: space-between; */
-	align-items: center;
-}
-
-#send-button {
-	margin-top: 12px;
-	margin-left: 20px;
-	cursor: pointer;
-	font-size: 30px;
-	width: 135px;
-	height: 40px;
-	font-family: 'Thunder';
-	border-radius: 10px;
-	outline: 4px solid #ED4EB0;
-	border: none;
-	background-color: #23232e;
-	color: var(--font-color);
-}
-
-#message-input {
-	margin-top: 12px;;
-	width: 100%;
-	height: 40px;
-	background-color: #23232e;
-	font-size: 25px;
-	color: var(--font-color);
-	border: none;
-	border-radius: 10px;
-	outline: 4px solid #ED4EB0;
 }
 
 .message img {
@@ -302,14 +249,13 @@ h1 {
 	padding: 10px;
 	margin: 10px;
 	margin-top: 15px;
-	color: white;
+	color: var(--font-color);
 	background-color: black;
 	max-width: calc(100% - 20px);
 	border-radius: 10px;
 	width: fit-content;
 	white-space: normal;
 	order: 2;
-	margin-left: 0px;
 }
 
 .message span {
@@ -335,5 +281,39 @@ h1 {
 
 .message.sent .text {
 	position: relative;
-	/* margin-right: 100%; */
+	/* margin-right: 100%;	 */
+}
+
+.input-container {
+	width: 100%;
+	display: flex;
+	align-items: center;
+}
+
+#send-button {
+	margin-top: 12px;
+	margin-left: 20px;
+	cursor: pointer;
+	font-size: 32px;
+	width: 135px;
+	height: 40px;
+	font-family: 'Thunder-SemiBold';
+	border-radius: 7px;
+	outline: 4px solid #ED4EB0;
+	border: none;
+	background-color: #23232e;
+	color: var(--font-color);
+}
+
+#message-input {
+	margin-top: 12px;;
+	width: 100%;
+	height: 40px;
+	background-color: #23232e;
+	margin-left: 4px;
+	border: none;
+	border-radius: 7px;
+	outline: 4px solid #ED4EB0;
+	font-size: 25px;
+	color: var(--font-color);
 }
