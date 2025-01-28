@@ -21,6 +21,17 @@ urlpatterns = [
 	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
 	path('api/add_pong/', add_pong, name='add_solo_casse_brique'),
 	path('api/map/<int:map_id>/', map_view, name="map_view"),
+    # Channels URLs
+    path('get-ip-info/', get_ip_info, name='get_ip_info'),
+    path('user-settings/', settings_user, name='settings_user'),
+    path('user-settings/check_username/', check_username, name='check_username'),
+    path('user-settings/check_email/', check_email, name='check_email'),
+    path('user-settings/check_pseudo/', check_pseudo, name='check_pseudo'),
+    path('user-settings/check_pp/<int:idU>/', check_pp, name='check_pp'),
+    path('update-user/', update_user_info, name='update_user_info'),
+    path('upload-avatar/', upload_avatar, name='upload_avatar'),
+    path('profile-user/<str:username>/', profile_view, name='profile'),
+	
 	# Channels URLs
 	path('api/post_chan/', post_chan, name="post_chan"),
 	path('api/get_chans/', get_chans, name="get_chans"),

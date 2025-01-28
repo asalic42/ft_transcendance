@@ -75,8 +75,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	// Add channel to the right channel's list
 function	addChannelToList(nameChan, pv) {
 	var chanList;
-	console.log('pv :' + pv);
-	console.log('nameChan :' + nameChan);
 	if (pv)
 		chanList = document.getElementById('friends');
 	else
@@ -234,10 +232,25 @@ function addMessageListener() {
 	});
 }
 
-	// Add the message on the chat conv
-function addMessage(mess, sender, id) {
-	console.log("sender id: " + id);
+function getPP(userId) {
+    return fetch(`/accounts/user-settings/check_pp/${userId}/`)
+        .then(response => {
+            if (response.status === 404) throw new Error('User not found');
+            return response.json(); // Parse JSON first
+        })
+        .then(data => {
+            console.log("User data:", data); // Now data is defined
+            return data; // Return for downstream use
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            throw error; // Re-throw for handling in addMessage
+        });
+}
 
+	// Add the message on the chat conv
+async function addMessage(mess, sender, id) {
+	console.log("sender id: " + id);
 
 	const chatPage = document.getElementById('chat-page')
 
@@ -251,8 +264,16 @@ function addMessage(mess, sender, id) {
 		message.classList.add('received');
 	}
 
+    let pp;
+    try {
+        const userData = await getPP(id); // Await the result of getPP
+        pp = userData.img; // Access the img property
+    } catch (error) {
+        console.error('Error fetching profile picture:', error);
+    }
+
 	const usernameElement = document.createElement('span');
-	usernameElement.innerHTML = `<img src='/static/images/basePP.png' id="caca">
+	usernameElement.innerHTML = `<img src='${pp}' id="caca">
 								 <p class="name">${sender}</p>`;
 
 	const messElement = document.createElement('p');
@@ -271,7 +292,7 @@ function addMessage(mess, sender, id) {
 	const messImage = document.getElementById('caca');
 	usernameElement.addEventListener('click', async function() {
 		alert('Image clicked!');
-		window.location.href = "/accounts/unavailable/";
+		window.location.href = `/accounts/profile-user/${sender}`;
 	});
 
 	chatPage.scrollTop = chatPage.scrollHeight;
@@ -351,10 +372,8 @@ async function	loadChannels() {
 		});
 
 		const result = await response.json();
-		console.log("Réponse brute:", result); // Debug
 		if (result.status === 'success' && Array.isArray(result.channels)) {
             result.channels.forEach(channel => {
-                console.log("Channel:", channel); // Debug
                 addChannelToList(
                     channel.name || 'Nom inconnu', 
                     channel.private || false

@@ -80,6 +80,10 @@ def delete_success(request):
 	return (render(request, 'delete_success.html'))
 
 @login_required
+def settings_user(request):
+	return (render(request, 'user-settings.html'))
+
+@login_required
 def profile_page(request):
 	return (render(request, 'profile.html'))
 
@@ -281,6 +285,133 @@ def post_message(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 	
+
+import requests
+from django.conf import settings
+from django.http import JsonResponse
+
+def get_ip_info(request):
+    url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
+    response = requests.get(url)
+    return JsonResponse(response.json())
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def check_username(request):
+    username = request.GET.get('username', '')
+    if (User.objects.filter(username=username).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_pseudo(request):
+    pseudo = request.GET.get('pseudo', '')
+    if (Users.objects.filter(pseudo=pseudo).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_email(request):
+    email = request.GET.get('email', '')
+    if (User.objects.filter(email=email).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import Users
+
+@login_required
+@csrf_exempt
+def update_user_info(request):
+    if request.method == 'POST':
+        user = request.user  # Récupère l'utilisateur connecté
+        
+        # Récupère les nouvelles données depuis la requête
+        new_email = request.POST.get('email')
+        new_username = request.POST.get('username')
+        new_pseudo = request.POST.get('pseudo')
+
+        try:
+            # Récupère le profil de l'utilisateur connecté
+            user_profile = Users.objects.get(user=user)
+            
+            # Mets à jour les informations
+            if new_email:
+                user.email = new_email
+            if new_username:
+                user.username = new_username
+            if new_pseudo:
+                user_profile.pseudo = new_pseudo  # Met à jour le pseudo
+
+            # Sauvegarde les changements
+            user.save()
+            user_profile.save()  # Sauvegarde le profil utilisateur avec la nouvelle image
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Informations mises à jour.",
+            })
+
+
+        except Users.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
+
+    return JsonResponse({"status": "error", "message": "Requête invalide."})
+
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from .models import Users
+
+@login_required
+@csrf_exempt
+def upload_avatar(request):
+    if request.method == 'POST':
+        try:
+            # Récupère l'utilisateur connecté
+            user = request.user
+
+            # Récupère le fichier avatar envoyé
+            avatar_file = request.FILES.get('avatar')
+
+            if not avatar_file:
+                return JsonResponse({"status": "error", "message": "Aucun fichier sélectionné."})
+
+            # Récupère le profil utilisateur
+            user_profile = Users.objects.get(user=user)
+            
+            # Mets à jour l'image de l'utilisateur
+            user_profile.image = avatar_file
+            user_profile.save()  # Sauvegarde le profil avec la nouvelle image
+
+            # Retourne l'URL de la nouvelle image
+            return JsonResponse({
+                "status": "success",
+                "message": "Avatar mis à jour.",
+                "new_avatar_url": user_profile.image.url  # L'URL de l'image mise à jour
+            })
+
+        except Users.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
+
+    return JsonResponse({"status": "error", "message": "Requête invalide."})
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
+
+@login_required
+def profile_view(request, username):
+    user = get_object_or_404(User, username=username)
+    return render(request, 'profile-other-user.html', {'profile_user': user})
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):
@@ -316,3 +447,11 @@ def post_deblock(request):
 		return JsonResponse({'status': 'success'})
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error'})
+
+@require_GET
+def check_pp(request, idU):
+    try:
+        user = get_object_or_404(Users, pk=idU)  # pk = primary key
+        return JsonResponse({'status': 'success', 'img': user.image.url})  # Ensure 'image' is the correct field
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)

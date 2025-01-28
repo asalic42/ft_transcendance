@@ -80,6 +80,8 @@ OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
 # L'URL de redirection après autorisation
 OAUTH2_REDIRECT_URL = 'http://127.0.0.1:8000/oauth/callback/complete/42/'
 
+# Pour le petit délire de la map avec la localisation ip
+IP_LOCALISATION= env('MAP_IP_LOCALISATION')
 
 # URL de redirection après l'authentification
 #LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
@@ -178,4 +180,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/media/'
+
+# Répertoire physique sur le disque où les fichiers médias seront stockés
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

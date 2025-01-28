@@ -7,44 +7,44 @@
     <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
 
-    <div class="profile-container">
+    <div class="other-profile-container">
 
-        <div class="profile-box">
-            <img class="profile-img" src="{{ user.users.image.url }}" alt="">
-            <!-- <button class="profile-img-upload">➕</button> -->
+        <div class="other-profile-box">
+            <img class="other-profile-img" src="{{ profile_user.users.image.url }}" alt="">
 
             {% if request.user.is_authenticated %}
-                <div class="profile-user-info">
-                    <span class="profile-username" style="color: black">👩‍🦲 : {{ request.user.username }}</span>
-                    <span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }}</span>
-                    <span class="profile-email" style="color: black">📧 : {{ request.user.email }}</span>
+                <div class="other-profile-user-info">
+                    <span class="other-profile-username" style="color: black">👩‍🦲 : {{ profile_user.username }}</span>
+                    <span class="other-profile-pseudo" style="color: black">👤 : {{ profile_user.pseudo }}</span>
+                    <span class="other-profile-email" style="color: black">📧 : {{ profile_user.email }}</span>
                 </div>
             {% else %}
                 <p>Vous n'êtes pas connecté.</p>
             {% endif %}
 
-            <div class="profile-separator">
+            <div class="other-profile-separator">
 
-                <p class="profile-text-settings-rdv">
-                    Si vous voulez modifier vos informations utilisateurs
-                    rendez-vous dans les settings.
+                <p class="other-profile-text-settings-rdv">
+                    Vous pouvez ajouter {{profile_user.username}} en ami(e)
+                    ou décider de le/la bloquer.
                 </p>
 
-                <button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+                <button class="other-profile-add-friend" disabled>Ajouter</button>
+                <button class="other-profile-block" disabled>Bloquer</button>
             </div>
         </div>
     </div>
 
     <style>
 
-        .profile-container {
+        .other-profile-container {
             display: flex;
             margin-top: 5%;
             justify-content: center; /* Centre horizontalement */
             align-items: center;
         }
 
-        .profile-box {
+        .other-profile-box {
             display: flex;
             width: 400px;
             height: 480px;
@@ -60,7 +60,7 @@
             background: linear-gradient(to right, #aa3196, #9159c0);
         }
 
-        .profile-separator {
+        .other-profile-separator {
             position: absolute;
             width: 400px;
             height: 160px;
@@ -71,7 +71,7 @@
             background-color: #d8d8d8;
         }
 
-        .profile-img {
+        .other-profile-img {
             width: 150px;
             height: 150px;
             border: 2px solid black;
@@ -80,25 +80,7 @@
             margin-bottom: 15px; /* Ajouté pour espacer l'image du texte */
         }
 
-        /* .profile-img-upload {
-            position: absolute;
-            width: auto;
-            height: auto;
-            padding: 5px;
-            border: 2px solid rgb(0, 0, 0);
-            border-radius: 50px;
-            margin-top: -375px;
-            margin-left: 110px;
-            transition: all 0.3s ease;
-        }
-
-        .profile-img-upload:hover {
-            background-color: rgb(69, 224, 22);
-            cursor: pointer;
-        }
-        */
-
-        .profile-user-info {
+        .other-profile-user-info {
             flex-direction: column;
             display: flex; /* Assure que les éléments sont empilés verticalement */
             justify-content: center;
@@ -108,7 +90,7 @@
             padding: 10px;
         }
 
-        .profile-user-info span {
+        .other-profile-user-info span {
             font-family: 'Courier New', Courier, monospace;
             display: flex;
             text-align: left;
@@ -116,13 +98,13 @@
             font-size: 20px;
         }
 
-        .profile-text-settings-rdv {
+        .other-profile-text-settings-rdv {
             color: black;
             margin-top: 10px; /* Ajouté pour espacer le texte du bas */
             padding: 20px;
         }
 
-        .profile-go-to-settings {
+        .other-profile-go-to-settings {
             width: 200px;
             height: auto;
             padding: 10px;
@@ -133,7 +115,7 @@
             transition: all 0.2s ease-out;
         }
 
-        .profile-go-to-settings:hover {
+        .other-profile-go-to-settings:hover {
             cursor: pointer;
             box-shadow: -5px 5px ;
             transform: translateX(5px) translateY(-5px);

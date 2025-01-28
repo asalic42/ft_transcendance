@@ -24,6 +24,9 @@ let is_password_strong_enough = {value: false};
 let is_form_valid = {value: 0};
 let emailFormatIsValid = {value: false};
 
+let is_username_len_respected = {value: true};
+let is_email_len_respected = {value: true};
+
 // Fonction pour vérifier la validité des champs et activer/désactiver le bouton
 function checkFormValidity(form, formInput, formButton) {
 
@@ -76,8 +79,6 @@ function checkFormValidity(form, formInput, formButton) {
         if (passwordInput.value === confirmPasswordInput.value) {
             mismatchMessage.classList.remove('show');
 
-            console.log("isPasswordStrongEnough : ", is_password_strong_enough);
-
             if (is_password_strong_enough === true)
                 confirmPasswordInput.classList.add('colored');
 
@@ -110,7 +111,12 @@ function checkFormValidity(form, formInput, formButton) {
 
 function signup_button_condition() {
 
-    if (is_username_taken.value === true || is_email_taken.value === true || is_password_strong_enough === false)
+    if (is_username_taken.value === true                || 
+            is_email_taken.value === true               || 
+            is_password_strong_enough === false         ||
+            is_username_len_respected.value === false   ||
+            is_email_len_respected.value === false)
+
         signupSubmitButton.disabled = true;
 
     else if (is_form_valid.value === 2) {
@@ -238,10 +244,8 @@ checkFormValidity(signupForm, signupInputs, signupSubmitButton);
 
 
 // Fonction générique pour gérer la vérification du pseudo
-function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, baliseInputSpan) {
+function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, baliseInputSpan, len_respected) {
     const baliseContent = baliseInput.value.trim();
-
-	console.log("Chemin construit : ", chemin_fetch, "=", baliseContent);
 
     if (baliseContent.length > 0) {
         // Effectuer la requête AJAX pour vérifier si le pseudo est disponible
@@ -254,8 +258,11 @@ function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, bali
                     baliseInputSpan.classList.add("invalid");
                     taken_bool.value = true;
                 } else {
-                    baliseInput.classList.remove("invalid");
-                    baliseInputSpan.classList.remove("invalid");
+                    if (len_respected.value === true)
+                    {
+                        baliseInput.classList.remove("invalid");
+                        baliseInputSpan.classList.remove("invalid");    
+                    }
                     taken_bool.value = false;
                 }
             })
@@ -263,8 +270,11 @@ function verifierDisponibilitePseudo(baliseInput, chemin_fetch, taken_bool, bali
                 console.error('Erreur lors de la vérification du pseudo:', error);
             });
     } else {
-        baliseInput.classList.remove("invalid");
-        baliseInputSpan.classList.remove("invalid");
+        if (len_respected.value === true)
+        {
+            baliseInput.classList.remove("invalid");
+            baliseInputSpan.classList.remove("invalid");
+        }
     }
 }
 
@@ -274,17 +284,46 @@ const UsernameInput = document.getElementById("username2");
 UsernameInput.addEventListener('keyup', function() {
     const UsernameInputSpan = UsernameInput.nextElementSibling;
 
-    verifierDisponibilitePseudo(UsernameInput, 'check_username/?username', is_username_taken, UsernameInputSpan);
+    if (UsernameInput.value.length > 24) {
+        is_username_len_respected.value = false;
+        UsernameInput.classList.add("invalid");
+        UsernameInputSpan.classList.add("invalid");
+    }
+    else {
+        is_username_len_respected.value = true;
+    }
+
+    verifierDisponibilitePseudo(UsernameInput,
+        'check_username/?username',
+        is_username_taken,
+        UsernameInputSpan,
+        is_username_len_respected);
 });
 
 
 const emailSignup = document.getElementById("email2");
 
 emailSignup.addEventListener('keyup', function() {
+
+    const emailSignupSpan = emailSignup.nextElementSibling;
+
+
+    if (emailSignup.value.length > 24) {
+        is_email_len_respected.value = false;
+        emailSignup.classList.add("invalid");
+        emailSignupSpan.classList.add("invalid");
+    }
+    else {
+        is_email_len_respected.value = true;
+    }
+
     if (emailFormatIsValid.value === true)
-    {
-        const emailSignupSpan = emailSignup.nextElementSibling;
-        verifierDisponibilitePseudo(emailSignup, 'check_email/?email', is_email_taken, emailSignupSpan);
+    {    
+        verifierDisponibilitePseudo(emailSignup,
+            'check_email/?email',
+            is_email_taken,
+            emailSignupSpan,
+            is_email_len_respected);
     }
 });
 
