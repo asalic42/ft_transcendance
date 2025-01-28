@@ -80,6 +80,10 @@ def delete_success(request):
 	return (render(request, 'delete_success.html'))
 
 @login_required
+def settings_user(request):
+	return (render(request, 'user-settings.html'))
+
+@login_required
 def profile_page(request):
 	return (render(request, 'profile.html'))
 
@@ -89,9 +93,9 @@ def service_unavailable(request):
 
 @login_required
 def channels_page(request):
-    curr_user = request.user
-    users = User.objects.all()
-    return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
+	curr_user = request.user
+	users = User.objects.all()
+	return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
 
 @login_required
 def game_page(request):
@@ -102,8 +106,16 @@ def game_choice_page(request):
 	return (render(request, 'game-choice.html'))
 
 @login_required
-def game_mode_page(request):
-	return (render(request, 'game-mode.html'))
+def game_mode_pong_page(request):
+	return (render(request, 'game-mode-pong.html'))
+
+@login_required
+def game_type_pong_page(request):
+	return (render(request, 'game-type-pong.html'))
+
+@login_required
+def game_distant_page(request):
+	return (render(request, 'game-distant.html'))
 
 @login_required
 def game_bot_page(request):
@@ -115,12 +127,12 @@ def other_game(request):
 
 @login_required
 def tournament_page(request):
-    return (render(request, 'tournament.html'))
+	return (render(request, 'tournament.html'))
 
 @login_required
 def button_test_page():
-    users_list = User.objects.all()
-    return JsonResponse({'users_list': users_list})
+	users_list = User.objects.all()
+	return JsonResponse({'users_list': users_list})
 
 @login_required
 def get_current_user_id(request):
@@ -130,36 +142,36 @@ def get_current_user_id(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def add_solo_casse_brique(request):
-    try:
-        data = json.loads(request.body)
-        new_game = SoloCasseBrique.objects.create(**data)
-        return JsonResponse({'status': 'success', 'game': {
-            'id': new_game.id,
-            'id_player': new_game.id_player,
-            'id_map': new_game.id_map,
-            'score': new_game.score,
-            'date': new_game.date.isoformat(),
-        }}, status=201)
-    except (KeyError, json.JSONDecodeError) as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	try:
+		data = json.loads(request.body)
+		new_game = SoloCasseBrique.objects.create(**data)
+		return JsonResponse({'status': 'success', 'game': {
+			'id': new_game.id,
+			'id_player': new_game.id_player,
+			'id_map': new_game.id_map,
+			'score': new_game.score,
+			'date': new_game.date.isoformat(),
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def add_pong(request):
-    try:
-        data = json.loads(request.body)
-        new_game = Pong.objects.create(**data)
-        return JsonResponse({'status': 'success', 'game': {
-            'id_p1': new_game.id_p1,
-            'id_p2': new_game.id_p2,
-            'score_p1': new_game.score_p1,
-            'score_p2': new_game.score_p2,
-            'date': new_game.date.isoformat(),
+	try:
+		data = json.loads(request.body)
+		new_game = Pong.objects.create(**data)
+		return JsonResponse({'status': 'success', 'game': {
+			'id_p1': new_game.id_p1,
+			'id_p2': new_game.id_p2,
+			'score_p1': new_game.score_p1,
+			'score_p2': new_game.score_p2,
+			'date': new_game.date.isoformat(),
 			'difficulty': new_game.difficulty,
 			'bounce_nb': new_game.bounce_nb,
-        }}, status=201)
-    except (KeyError, json.JSONDecodeError) as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
 def map_view(request, map_id):
@@ -173,7 +185,7 @@ def map_view(request, map_id):
 	except FileNotFoundError:
 		return HttpResponse("Carte non trouvée", status=404)
 
-	# Retourner le contenu du fichier en tant que réponse HTTP
+	# Retourner le contenu du fichier en tant que réponse https
 	return HttpResponse(map_data, content_type="text/plain")
 
 
@@ -201,11 +213,21 @@ def live_chat(request):
 				'id': msg.id,
 				'channel_name': msg.channel_name,
 				'sender': msg.sender,
+				'idSender': msg.idSender,
 				'message': msg.message,
 				'date':msg.date.isoformat()} for msg in new_message]
 		return JsonResponse({'new_message': data})
 	return JsonResponse({'new_message': None})
 
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def does_channel_exist(request, asked_name):
+	try:
+		listing = Chans.objects.get(name=asked_name)
+		return JsonResponse({'status': 'success'})
+	except Chans.DoesNotExist:
+		return JsonResponse({'status': 'error'})
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -218,6 +240,7 @@ def post_chan(request):
 			'name': new_chan.name,
 			'invite_link': new_chan.invite_link,
 			'date': new_chan.date.isoformat(),
+			'private': new_chan.private,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -226,12 +249,14 @@ def post_chan(request):
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_chans(request):
-	try:
-		channels = Chans.objects.values_list('name', flat=True)
-		return JsonResponse({'status': 'success', 'channels': list(channels)}, status=200)
-	except Exception as e:
-		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des channels'}, status=500)
-
+    try:
+        # Récupération des DEUX champs sous forme de dictionnaires
+        channels = list(Chans.objects.values('name', 'private'))
+        return JsonResponse({'status': 'success', 'channels': channels}, status=200)
+    except Exception as e:
+        print(f"Erreur serveur: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_messages(request):
@@ -261,8 +286,180 @@ def post_message(request):
 			'id': new_message.id,
 			'channel_name': new_message.channel_name,
 			'sender': new_message.sender,
+			'idSender': new_message.idSender,
 			'message': new_message.message,
 			'date':new_message.date.isoformat(),
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	
+
+import requests
+from django.conf import settings
+from django.http import JsonResponse
+
+def get_ip_info(request):
+    url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
+    response = requests.get(url)
+    return JsonResponse(response.json())
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def check_username(request):
+    username = request.GET.get('username', '')
+    if (User.objects.filter(username=username).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_pseudo(request):
+    pseudo = request.GET.get('pseudo', '')
+    if (Users.objects.filter(pseudo=pseudo).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_email(request):
+    email = request.GET.get('email', '')
+    if (User.objects.filter(email=email).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import Users
+
+@login_required
+@csrf_exempt
+def update_user_info(request):
+    if request.method == 'POST':
+        user = request.user  # Récupère l'utilisateur connecté
+        
+        # Récupère les nouvelles données depuis la requête
+        new_email = request.POST.get('email')
+        new_username = request.POST.get('username')
+        new_pseudo = request.POST.get('pseudo')
+
+        try:
+            # Récupère le profil de l'utilisateur connecté
+            user_profile = Users.objects.get(user=user)
+            
+            # Mets à jour les informations
+            if new_email:
+                user.email = new_email
+            if new_username:
+                user.username = new_username
+            if new_pseudo:
+                user_profile.pseudo = new_pseudo  # Met à jour le pseudo
+
+            # Sauvegarde les changements
+            user.save()
+            user_profile.save()  # Sauvegarde le profil utilisateur avec la nouvelle image
+            
+            return JsonResponse({
+                "status": "success",
+                "message": "Informations mises à jour.",
+            })
+
+
+        except Users.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
+
+    return JsonResponse({"status": "error", "message": "Requête invalide."})
+
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from .models import Users
+
+@login_required
+@csrf_exempt
+def upload_avatar(request):
+    if request.method == 'POST':
+        try:
+            # Récupère l'utilisateur connecté
+            user = request.user
+
+            # Récupère le fichier avatar envoyé
+            avatar_file = request.FILES.get('avatar')
+
+            if not avatar_file:
+                return JsonResponse({"status": "error", "message": "Aucun fichier sélectionné."})
+
+            # Récupère le profil utilisateur
+            user_profile = Users.objects.get(user=user)
+            
+            # Mets à jour l'image de l'utilisateur
+            user_profile.image = avatar_file
+            user_profile.save()  # Sauvegarde le profil avec la nouvelle image
+
+            # Retourne l'URL de la nouvelle image
+            return JsonResponse({
+                "status": "success",
+                "message": "Avatar mis à jour.",
+                "new_avatar_url": user_profile.image.url  # L'URL de l'image mise à jour
+            })
+
+        except Users.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
+
+    return JsonResponse({"status": "error", "message": "Requête invalide."})
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
+
+@login_required
+def profile_view(request, username):
+    user = get_object_or_404(User, username=username)
+    return render(request, 'profile-other-user.html', {'profile_user': user})
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_blocked(request, idPlayer):
+    # Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
+    blocked_users_ids = BlockUsers.objects.filter(idUser=idPlayer).values_list('idBlocked', flat=True).distinct()
+
+    # Convertir le QuerySet en liste pour la réponse JSON
+    blocked_users_ids_list = list(blocked_users_ids)
+
+    # Retourner la réponse JSON
+    return JsonResponse({'blocked_users_ids': blocked_users_ids_list})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_blocked(request):
+	try:
+		data = json.loads(request.body)
+		new_blocked = BlockUsers.objects.create(**data)
+		return JsonResponse({'status': 'success', 'message': {
+			"idUser": new_blocked.idUser, 
+			"idBlocked": new_blocked.idBlocked,
+		}}, status=201)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_deblock(request):
+	try:
+		data = json.loads(request.body)
+		BlockUsers.objects.filter(idUser=data["idUser"], idBlocked=data["idBlocked"]).delete()
+		return JsonResponse({'status': 'success'})
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error'})
+
+@require_GET
+def check_pp(request, idU):
+    try:
+        user = get_object_or_404(Users, pk=idU)  # pk = primary key
+        return JsonResponse({'status': 'success', 'img': user.image.url})  # Ensure 'image' is the correct field
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)

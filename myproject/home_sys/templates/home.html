@@ -10,10 +10,38 @@
 <h1>Bienvenue à toi fils !</h1>
 <p>Tu fais maintenant parti de la guild, voici tous les membres :</p>
 <ul>
-    {% for user in users %}
-        <li> {{ user.username }}</li>
+    <!-- home.html -->
+    {% for other_user in users %}
+    <li class="li-test">
+        {% if user.username != other_user.username %}
+            <button class="see-profile" onclick="window.location.href='{% url 'profile' username=other_user.username %}'">Voir le profil</button>
+        {% endif %}
+
+        {{ other_user.username }}
+    </li>
     {% empty %}
-        <li>Le Monastère vient d'ouvrir, il n'y a encore aucun fidèle...</li>
+    <li>Le Monastère vient d'ouvrir, il n'y a encore aucun fidèle...</li>
     {% endfor %}
 </ul>
+
+<style>
+
+    .li-test {
+        width: 150px;
+        border: 1px solid black;
+    }
+
+    .see-profile {
+        width: auto;
+        height: auto;
+        padding: 2px;
+        border: 1px solid black;
+    }
+
+    .see-profile:hover {
+        cursor: pointer;
+        background-color: blueviolet;
+    }
+</style>
+
 {% endblock %}

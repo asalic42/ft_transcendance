@@ -58,6 +58,7 @@ fi
 
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
+	rm -rf static/;
 	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
 
 	LINE='127.0.0.1	transcendance.42.paris'
@@ -69,7 +70,7 @@ if [ "$1" == "b-all" ]; then
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up # démarre en arrière-plan
 
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR http://0.0.0.0:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://transcendance.42.paris"
 fi
 
 # SIMPLE BUILD
@@ -78,7 +79,7 @@ if [ "$1" == "b" ]; then
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR http://0.0.0.0:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris"
 fi
 
 # FULL REMOVE
@@ -109,11 +110,11 @@ if [ "$1" == "l" ]; then
     fi
 
     # Attendre que le service soit accessible
-    until $(curl --output /dev/null --silent --head --fail http://0.0.0.0:8000); do
-        printf '.'
-        sleep 1
-    done
+    # until $(curl --output /dev/null --silent --head --fail http://0.0.0.0:8000); do
+    #     printf '.'
+    #     sleep 1
+    # done
 
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
-    open http://0.0.0.0:8000
+    open https://transcendance.42.paris/signin/
 fi

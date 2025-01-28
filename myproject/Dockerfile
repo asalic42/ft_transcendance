@@ -2,7 +2,7 @@
 FROM python:3.10.12
 
 # Définir le répertoire de travail
-WORKDIR /app
+WORKDIR /app/
 
 # On copie le fichier de dépendances
 COPY requirements.txt .
@@ -14,11 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # On copie tout le reste du code
 COPY . .
 
-# On expose le port de l'appli (django)
-EXPOSE 8000
-
-# Et ici on renseigne les commandes par défauts pour lancer notre petit serveur Django
-#CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
-
-
+# Launch entrypoint script
 CMD ["sh", "entrypoint.sh"]

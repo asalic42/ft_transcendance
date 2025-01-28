@@ -24,7 +24,7 @@ body {
 	display: block;
 	margin-left: auto;
     margin-right: auto;
-	background-color: #23232e;
+	background: linear-gradient(to bottom right, #232330, #14141e);
 }
 
 .title {
@@ -64,7 +64,7 @@ body {
 				rgba(237, 78, 176, 0.3) -12px 10px,
 				rgba(237, 78, 176, 0.2) -16px 14px,
 				rgba(237, 78, 176, 0.1) -20px 18px;
-	background-color: #2E2E38;
+				background-color: #2E2E38;
 	transform: translateX(10px) translateY(-9px);
 }
 

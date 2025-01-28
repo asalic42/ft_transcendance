@@ -1,12 +1,209 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
-    <form method="post">
-        {% csrf_token %}
-        <p>Pensais-tu vraiment ce que tu disais Fils ? Attention, si oui, nous te fermerons définitivement les portes.</p>
-        <button type="submit">Je n'ai jamais été croyant 🖕</button>
-        <a href="{% url 'home' %}">C'était une blague</a>
-    </form>
+    <div class="test-delete">
+        <form method="post" class="delete_my_account" action="{% url 'delete_account' %}">
+            {% csrf_token %}
+        
+            <div class="content-delete">
+                
+                <!-- Image -->
+                <img class="imgDelete" id="randomImage" src="" alt="Random Image">
+                
+                <!-- Texte -->
+                <div class="sub_imgDelete">
+                    <h2 class="test-test">You wouldn't dare</h2>
+                    <p>Click here and we'll forget all about this little incident.</p>
+                    <button onclick="window.location.href='{% url 'home' %}'" class="button-delete-1" type="button" >I slipped hahahahaha</button>
+                    <p class="userrefused">Click here and we'll find you, we've got your <span class="partie-text">ip address</span> buddy </p>
+                    <button class="button-delete-2" type="submit">i delete my account</button>
+                    <div id="map"></div>
+                </div>
+            </div>
+        </form>
+        
+    </div>
+
+    <style>
+
+        body {
+            background-color: #2B2B3B;
+        }
+
+        .test-delete {
+            display: flex;
+            margin-top: 10%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete_my_account {
+            width: 650px; /* Augmente la largeur pour accommoder l'image et le texte */
+            height: 450px;
+            background-image: linear-gradient(to bottom right, #ee4ad8, #ad4da1, #8c368f, rgb(131, 63, 131), rgb(70, 54, 143), rgb(86, 36, 165));
+            display: flex;
+            align-items: center; /* Centrer verticalement le contenu */
+            border-radius: 10px;
+            box-shadow: -10px 10px black;
+            border: 2px solid black;
+        }
+
+        .content-delete {
+            display: flex;
+            justify-content: space-between; /* Placer l'image et le texte côte à côte */
+            width: 100%; /* Prendre toute la largeur de la form */
+        }
+
+        .imgDelete {
+            width: auto; /* Ajuste la largeur de l'image */
+            height: auto;
+            scale: 0.45;
+            margin-left: -135px;
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .sub_imgDelete {
+            display: flex;
+            flex-direction: column;
+            margin-top: 250px;
+            padding-right: 15px;
+            align-items: flex-start; /* Aligner le texte à gauche */
+        }
+
+        .sub_imgDelete p {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 15px;
+            color: #f8f8f8;
+            margin-left: -140px;
+            margin-bottom: 20px;
+        }
+
+        .sub_imgDelete button {
+            width: auto;
+            height: 50px;
+            font-size: 14px;
+            border-radius: 10px;
+            margin-left: -50px;
+            margin-bottom: 20px;
+            transition: all 0.4s ease;
+        }
+
+        .sub_imgDelete .button-delete-1:hover {
+            box-shadow: -4px 4px black;
+            transform: translateX(2px) translateY(-2px);
+            background-color: rgb(16, 153, 16);
+            cursor: pointer;
+        }
+
+        .sub_imgDelete .button-delete-2:hover {
+            animation: dontdothat 0.2s ease infinite;
+            background-color: rgb(252, 0, 0);
+            scale: 1.08;
+            cursor: pointer;
+        }
+
+        .partie-text {
+            transition: all 2s ease;
+        }
+
+        .test-test {
+            margin-left: -95px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: white;
+            font-family: 'Courier New', Courier, monospace;
+            display: block;
+            transition: all 2s ease;
+        }
+
+
+        @keyframes dontdothat {
+            0% { transform: translateX(0) }
+            25% { transform: translateX(5px) }
+            50% { transform: translateX(-5px) }
+            75% { transform: translateX(5px) }
+            100% { transform: translateX(0) }
+        }
+
+        #map {
+            width: 370px;   /* Largeur du carré */
+            height: 150px;  /* Hauteur du carré */
+            border: 2px solid #333; /* Bordure autour du carré */
+            border-radius: 8px;  /* Coins arrondis pour un effet plus stylé */
+            margin-left: -140px;
+            margin-top: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 2s ease;
+            transition-delay: 0.7s;
+        }
+
+    </style>
+
+    <script>
+        // List of image paths
+        const images = [
+            "{% static 'images/petit_billet.jpg' %}",
+            "{% static 'images/on_peut_s_arranger.jpg' %}",
+            "{% static 'images/triste.jpg' %}"
+        ];
+
+        // Pick a random image
+        const randomImage = images[Math.floor(Math.random() * images.length)];
+
+        // Set the 'src' of the img tag
+        document.getElementById('randomImage').src = randomImage;
+
+        // Récupérer les éléments
+        const button = document.querySelector('.button-delete-2');
+        const hiddenElement = document.getElementById('map');
+        const spanText = document.querySelector('.partie-text');
+        const testTest = document.querySelector('.test-test');
+
+        // Ajouter un événement mouseover pour afficher l'élément
+        button.addEventListener('mouseover', function() {
+            hiddenElement.style.opacity = '1'; // Affiche l'élément
+            hiddenElement.style.pointerEvents = 'auto';
+            spanText.style.color = '#000000';
+            spanText.style.fontWeight = 'bold';
+            spanText.style.fontSize = '18px';
+            testTest.style.marginTop = "-70px";
+            testTest.style.opacity = "0";
+            testTest.style.pointerEvents = "none";
+        });
+
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+      // Fonction pour obtenir la localisation de l'IP via l'API ipinfo.io
+      fetch('http://127.0.0.1:8000/accounts/get-ip-info')  // Remplacez "YOUR_API_KEY" par votre clé API gratuite
+        .then(response => response.json())
+        .then(data => {
+          const ipLocation = data.loc.split(',');
+          const latitude = parseFloat(ipLocation[0]);
+          const longitude = parseFloat(ipLocation[1]);
+        
+          // Initialisation de la carte Leaflet
+          const map = L.map('map').setView([latitude, longitude], 13);
+        
+          // Ajout d'un fond de carte (OpenStreetMap)
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }).addTo(map);
+      
+          // Ajout d'un marqueur à la localisation de l'utilisateur
+          L.marker([latitude, longitude]).addTo(map)
+            .bindPopup('You are just here 😈.')
+            .openPopup();
+        })
+        .catch(error => {
+          console.error("Erreur lors de la récupération des données IP :", error);
+        });
+    </script>
 
 {% endblock %}
