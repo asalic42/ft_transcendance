@@ -1,2 +1,4 @@
 djenv
 myproject/.env
+myproject/home_sys/__pycache__
+myproject/loginpage/__pycache__

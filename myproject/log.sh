@@ -58,19 +58,19 @@ fi
 
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
+	rm -rf static/;
+	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
+
+	LINE='127.0.0.1	transcendance.42.paris'
+	FILE='/etc/hosts'
+	sudo grep -qF "$LINE" "$FILE" ||  echo "$LINE" | sudo tee -a "$FILE"
 
     echo -e "${BLUE}> Building docker image... ${NC}"
     sudo docker-compose build
-
     echo -e "${PURPLE}> Launching services...${NC}"
-    sudo docker-compose up -d # démarre en arrière-plan
+    sudo docker-compose up # démarre en arrière-plan
 
-    echo -e "${YELLOW}> Making Django migrations...${NC}"
-
-    sudo docker-compose run web python3 manage.py makemigrations
-    sudo docker-compose run web python3 manage.py migrate
-	
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR http://127.0.0.1:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://transcendance.42.paris"
 fi
 
 # SIMPLE BUILD
@@ -79,7 +79,7 @@ if [ "$1" == "b" ]; then
     sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR http://127.0.0.1:8000 "
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris"
 fi
 
 # FULL REMOVE
@@ -87,7 +87,7 @@ if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Stopping docker services...${NC}"
     sudo docker-compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    sudo docker system prune -a --volumes
+    sudo docker system prune --volumes
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
@@ -110,11 +110,11 @@ if [ "$1" == "l" ]; then
     fi
 
     # Attendre que le service soit accessible
-    #until $(curl --output /dev/null --silent --head --fail http://127.0.0.1:8000); do
-    #    printf '.'
-    #    sleep 1
-    #done
+    until $(curl --output /dev/null --silent --head --fail https://transcendance.42.paris); do
+        printf '.'
+        sleep 1
+    done
 
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
-    open http://127.0.0.1:8000
+    open https://transcendance.42.paris
 fi

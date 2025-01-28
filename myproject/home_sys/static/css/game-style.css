@@ -16,6 +16,74 @@
 	src: url("../fonts/Namaku.ttf");
 }
 
+@font-face {
+	font-family: Thunder-VF;
+	src: url("../fonts/Thunder-VF.ttf");
+}
+
+@font-face {
+	font-family: Thunder-SemiBold;
+	src: url("../fonts/Thunder-SemiBoldLC.otf");
+}
+
+#page {
+	font-family: 'Thunder-VF';
+	text-align: center;
+	position: relative;	
+	box-sizing: border-box;
+	top: 250px;
+	width: 70%;
+	border: 3px solid #ED4EB0;
+	border-radius: 50px;
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+	background-color: #23232e;
+}
+
+.title {
+	color: var(--font-color);
+	font-size: 	70px;
+}
+
+#LevelForm {
+	margin: 50px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	gap: 100px;	
+}
+
+.inputs {
+	font-family: 'Thunder-SemiBold';
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+    cursor: pointer;
+	display: flex;
+	width: 200px;
+	height: 60px;
+    border-radius: 10px;
+    outline: 3px solid #ED4EB0;
+	font-size: 32px;
+	background-color: #141418;
+    color: rgba(237, 78, 176, 0.9);
+	border: none;
+}
+
+#button {
+	transition: all 0.3s ease-in-out;
+}
+
+#button:hover {
+	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
+				rgba(237, 78, 176, 0.3) -12px 10px,
+				rgba(237, 78, 176, 0.2) -16px 14px,
+				rgba(237, 78, 176, 0.1) -20px 18px;
+	background-color: #2E2E38;
+	transform: translateX(10px) translateY(-9px);
+}
+
 /* Stylisation du jeu */
 body{
 	background-color: var(--bg-site) ;
@@ -26,11 +94,10 @@ body{
 	text-align:center;
 }
 
-.canvas-container {
+#canvas-container {
 	border-radius: 1%;
 	position: relative;
-	display: inline;
-	display: flex;
+	display: none;
 	align-items: center;
 	justify-content: center;
 	width: 99%
@@ -39,13 +106,18 @@ body{
 h3 {
 	text-align: center;
 }
+
+#fps {
+	margin-top: 5px;
+}
+
 /* Style des scores au top */
 .scores {
 	font-family: 'Namaku';
 	gap: 50px;
 	justify-content: center;
 	align-items: center;
-	display: flex;
+	display: none;
 	color: white;
 	text-align: center;
 }
@@ -68,51 +140,6 @@ h3 {
 	font-family: 'coolvetica-condensed-rg';
 	font-size: 30px;
 	margin: 0%;
-}
-
-
-.sliderDiv {
-	display: flex;
-	flex-direction: column;
-	/* justify-content: center; */
-	align-items: center;
-}
-
-.sliderDiv > span {
-	font-family: "Poppins", sans-serif;
-	font-size: 2em;
-	color: #999;
-	font-weight: 400;
-	width: 100%;
-	text-align: center;
-}
-
-.sliderDiv > input {
-	width: 80%;
-	height: 15px;
-	background: #111;
-	outline: 1px solid #ED4EB0;
-	border-radius: 10px;
-	overflow: hidden;
-	margin-top: 20px;
-}
-
-#range::-webkit-slider-thumb {
-	width: 11px;
-	height: 11px;
-	border-radius: 50%;
-	background: #ED4EB0;
-	cursor: pointer;
-	border: 2px solid #333;
-}
-
-#range::-moz-range-thumb {
-	width: 11px;
-	height: 11px;
-	border-radius: 50%;
-	background: #ED4EB0;
-	cursor: pointer;
-	border: 2px solid #333;
 }
 
 /*
