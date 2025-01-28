@@ -42,6 +42,7 @@ h1 {
 	border: 4px solid #ED4EB0;
 	width: 100%;
 	height: 600px;
+	overflow-y: auto;
 }
 
 .chan-item {
@@ -106,18 +107,12 @@ h1 {
 	width: 100%;
 	height: 600px;
 	margin-bottom: 10px;
-	overflow-y: auto;
-	scroll-behavior: smooth;
 	display: flex;
 	flex-direction: column;
 	padding-right: 0px; /* Augmentez cette valeur pour plus de décalage */
+	overflow-y: auto;
+	scroll-behavior: smooth;
     overflow-x: hidden;
-}
-
-/* Conteneur interne pour compenser le padding */
-.chat-page > .content {
-    width: calc(100% + 10px);
-    height: 100%;
 }
 
 /* Webkit : Style de la scrollbar */
@@ -155,9 +150,9 @@ h1 {
 	cursor: pointer;
 }
 
-#add-friend-chan {
+/* #add-friend-chan {
 	display: none;
-}
+} */
 
 /* Formular channel name */
 .hidden-form {

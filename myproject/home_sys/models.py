@@ -21,7 +21,7 @@ class Chans(models.Model):
 	name = models.CharField(unique=True, max_length = 30)
 	invite_link = models.CharField()
 	date = models.DateTimeField(auto_now_add = True)
-
+	private = models.IntegerField()
 	def __str__(self):
 		return self.name
 

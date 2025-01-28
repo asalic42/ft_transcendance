@@ -8,6 +8,7 @@ let chatVisible = false;
 let currentChan;
 let lastMessageId = 0;
 let liveChat;
+let liveChan;
 let blockedUsersList = null;
 // let unreadMsg = {};
 
@@ -20,8 +21,13 @@ console.log(`Current username is ${username}`);
 /* MONITORING CHANNELS */
 document.addEventListener("DOMContentLoaded", function() {
 
-	loadChannels();
+	if (liveChan) clearInterval(liveChan);
+
+	liveChan = setInterval(() => {
+		loadChannels();
+	}, 100);
 	const newChan = document.getElementById('new-chan');
+	// const newFren = document.getElementById('add-friend-chan');
 	// const inviteButton = document.getElementById('add-friend-chan');
 	newChan.addEventListener('click', () => {
 		
@@ -39,7 +45,6 @@ document.addEventListener("DOMContentLoaded", function() {
 			setChannelName(async function(nameChan) {
 				addChannelToDb(nameChan)
 				try {
-					// doesChanExist(nameChan);
 					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 					const data = await response.json();
 					
@@ -60,7 +65,6 @@ document.addEventListener("DOMContentLoaded", function() {
 /* RIGHT CHANNELS PART */
 	// Add channel to the right channel's list
 function	addChannelToList(nameChan) {
-	console.log("Name chan: ", nameChan);
 	const chanList = document.getElementById('channels-list');
 
 	if (!chanList.querySelector(`#channel-${nameChan}`)) {
@@ -72,19 +76,12 @@ function	addChannelToList(nameChan) {
 		titleChan.id = 'title-chan';
 		titleChan.textContent = nameChan;
 		chanItem.appendChild(titleChan);
-			
-		// const notif = document.createElement('p');
-		// notif.id = 'notif';
-		// notif.textContent = '1';
-		// chanItem.appendChild(notif);
 	
 		clickToChannel(chanItem, nameChan);
 	
 		chanList.appendChild(chanItem);
-		saveChannel();
 	}
 }
-
 
 async function openCenter(nameChan) {
 	lastMessageId = 0;
@@ -105,7 +102,7 @@ async function openCenter(nameChan) {
 
 	liveChat = setInterval(() => {
 		liveChatFetch();
-	}, 300);
+	}, 100);
 }
 
 	// Cliquer sur un channel deja creer
@@ -114,24 +111,6 @@ function	clickToChannel(chanItem, nameChan) {
 		openCenter(nameChan);
 	});
 }
-
-	// Save new channel
-function	saveChannel() {
-	const channelList = document.querySelectorAll('.channel-item');
-	const channelArray = Array.from(channelList).map(channel => channel.textContent);
-	localStorage.setItem('channels', JSON.stringify(channelArray));
-}
-
-
-	// function plusDeNotifs(channelName) {
-	//	 const chanItem = querySelector(`#channel-${channelName} #notif`);
-
-	//	 if (chanItem.textContent)
-	//	 chanItem.textContent = parseInt(chanItem.textContent) + 1;
-	//	 else
-	//	 chanItem.textContent = 1;
-	// }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /* CENTER CHANNELS PART */
@@ -202,31 +181,6 @@ function setChannelName(callback) {
 	inputChannel.addEventListener('keydown', handleInputName);
 }
 
-	// function inviteFriendInChan(inviteButton)
-	// {
-	//	 console.log("JE SUIS LAAAA");
-
-	//	 inviteButton.style.display = "inline";
-	//	 inviteButton.addEventListener('click', () => {
-	//	 const inputContainer = document.getElementById('input-chat-add');
-	//	 const inputFriend = document.getElementById('input-add-friend-chan');
-	//	 const overlay = document.getElementById('overlay');
-
-	//	 overlay.style.display = 'block';
-	//	 inputContainer.classList.add('show');
-
-	//	 inputFriend.addEventListener('input', function() {
-	//		 const userList = document.getElementById('users-list').getAttribute('data-users').split(', ');
-	//		 if (!userList.includes(this.value)) {
-	//			 alert(`User doesn't exist`);
-	//		 }
-	//		 else {
-	//			 alert(`Invitation envoyee :)`);
-	//		 }
-	//	 });
-	//	 });
-	// }
-
 	// Inverser la transition pour faire disparaitre le chat en cours
 function reversePopCenterChat() {
 	const page = document.querySelector('.page');
@@ -283,10 +237,8 @@ function addMessage(mess, sender, id) {
 	}
 
 	const usernameElement = document.createElement('span');
-	//usernameElement.classList.add('username');
 	usernameElement.innerHTML = `<img src='/static/images/basePP.png' id="caca">
 								 <p class="name">${sender}</p>`;
-	// usernameElement.textContent = sender;
 	
 	const messElement = document.createElement('p');
 	messElement.classList.add('text')
@@ -385,12 +337,9 @@ async function	loadChannels() {
 
 		const result = await response.json();
 		if (result.status == 'success' && Array.isArray(result.channels)) {
-		result.channels.forEach(nameChan => {
-			addChannelToList(nameChan);
+			result.channels.forEach(nameChan => {
+				addChannelToList(nameChan);
 		});
-		}
-		else {
-		console.log("Aucun canaux trouves...");
 		}
 	} catch(error) {
 		console.error('Erreur: ', error);
@@ -473,7 +422,6 @@ function	getBlocked() {
 		return response.json();
 	})
 	.then(data => {
-		console.log('IDs des utilisateurs bloqués :', data.blocked_users_ids);
 		blockedUsersList = data.blocked_users_ids;
 	})
 	.catch(error => {
