@@ -39,14 +39,14 @@ h1 {
 #friends, #channels-list {
 	background-color: var(--bg-primary);
 	border-radius: 7px;
-	border: 4px solid #ED4EB0;
+	border: 2px solid #ED4EB0;
 	width: 100%;
 	height: 600px;
 	overflow-y: auto;
 }
 
 .chan-item {
-    border-bottom: 3px solid #ED4EB0;
+    border-bottom: 2px solid #ED4EB0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -95,24 +95,28 @@ h1 {
 	font-family: 'Thunder-SemiBold';
 	font-size: 35px;
 	border-radius: 7px;
-	border: 4px solid #ED4EB0;
+	border: 2px solid #ED4EB0;
 	margin-bottom: 35px;
 	width: 100%;
+}
+
+#chat-name {
+	border: 2px solid #ED4EB0;
 }
 
 .chat-page {
 	background-color: var(--bg-primary);
 	border-radius: 7px;
-	border: 4px solid #ED4EB0;
+	border: 2px solid #ED4EB0;
 	width: 100%;
 	height: 600px;
-	margin-bottom: 10px;
 	display: flex;
 	flex-direction: column;
 	padding-right: 0px; /* Augmentez cette valeur pour plus de décalage */
 	overflow-y: auto;
 	scroll-behavior: smooth;
     overflow-x: hidden;
+	/* box-shadow: rgba(237, 78, 176, 0.7) 0px 0px 10px, rgba(237, 78, 176, 0.5) 0px 0px 20px, rgba(237, 78, 176, 0.3) 0px 0px 30px, rgba(237, 78, 176, 0.1) 0px 0px 40px; */
 }
 
 /* Webkit : Style de la scrollbar */
@@ -142,17 +146,13 @@ h1 {
 .button-chat {
 	font-size: 15px;
 	padding: 10px 14px;
-	margin: 15px;
+	margin: 22px;
 	color:#ED4EB0;
 	background-color: var(--bg-primary);
 	border-radius: 7px;
-	border: 4px solid #ED4EB0;
+	border: 2px solid #ED4EB0;
 	cursor: pointer;
 }
-
-/* #add-friend-chan {
-	display: none;
-} */
 
 /* Formular channel name */
 .hidden-form {
@@ -168,7 +168,7 @@ h1 {
 	background-color: var(--bg-primary);
 	padding: 40px;
 	border-radius: 7px;
-	border: 4px solid #ED4EB0;
+	border: 2px solid #ED4EB0;
 	z-index: 10;
 		
 	/* centrer les elements dans le form */
@@ -286,29 +286,66 @@ h1 {
 }
 
 #send-button {
-	margin-top: 12px;
-	margin-left: 20px;
+	margin: 22px;
 	cursor: pointer;
 	font-size: 32px;
 	width: 135px;
 	height: 40px;
 	font-family: 'Thunder-SemiBold';
 	border-radius: 7px;
-	outline: 4px solid #ED4EB0;
+	outline: 2px solid #ED4EB0;
 	border: none;
 	background-color: #23232e;
 	color: var(--font-color);
 }
 
 #message-input {
-	margin-top: 12px;;
+	margin: 22px;;
 	width: 100%;
 	height: 40px;
 	background-color: #23232e;
 	margin-left: 4px;
 	border: none;
 	border-radius: 7px;
-	outline: 4px solid #ED4EB0;
+	outline: 2px solid #ED4EB0;
 	font-size: 25px;
 	color: var(--font-color);
+}
+
+#friends, #channels-list, .chat-page, h2,button{
+    background: linear-gradient(to bottom right, var(--bg-primary), #1a1a24);
+    /* box-shadow: 0 0 25px rgba(237, 78, 176, 0.3); */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#friends:hover, #channels-list:hover, .chat-page:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
+}
+
+button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0px 15px rgba(237, 78, 176, 0.5);
+}
+
+.message .text {
+    background: linear-gradient(to bottom right, #333346, #2b2b39);
+    border: 2px solid #484858;
+    backdrop-filter: blur(5px);
+    line-height: 1.4;
+    border-radius: 15px;
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Animation des éléments de liste */
+.chan-item {
+    transition: all 0.3s ease;
+    padding: 4px;
+}
+
+.chan-item:hover {
+    background: rgba(237, 78, 176, 0.1);
 }

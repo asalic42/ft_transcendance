@@ -228,6 +228,7 @@ def post_chan(request):
 			'name': new_chan.name,
 			'invite_link': new_chan.invite_link,
 			'date': new_chan.date.isoformat(),
+			'private': new_chan.private,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -236,12 +237,14 @@ def post_chan(request):
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_chans(request):
-	try:
-		channels = Chans.objects.values_list('name', flat=True)
-		return JsonResponse({'status': 'success', 'channels': list(channels)}, status=200)
-	except Exception as e:
-		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des channels'}, status=500)
-
+    try:
+        # Récupération des DEUX champs sous forme de dictionnaires
+        channels = list(Chans.objects.values('name', 'private'))
+        return JsonResponse({'status': 'success', 'channels': channels}, status=200)
+    except Exception as e:
+        print(f"Erreur serveur: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_messages(request):
