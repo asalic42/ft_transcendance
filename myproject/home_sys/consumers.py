@@ -145,7 +145,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
     
     async def start_game(self):
-        # print("COUCOUOUUUUUUUU")
         while self.game.is_running:
 
             # Maj ball coords
