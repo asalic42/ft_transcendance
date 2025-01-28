@@ -33,4 +33,5 @@ urlpatterns = [
     path('user-settings/check_pseudo/', check_pseudo, name='check_pseudo'),
     path('update-user/', update_user_info, name='update_user_info'),
     path('upload-avatar/', upload_avatar, name='upload_avatar'),
+    path('profile-user/<str:username>/', profile_view, name='profile'),
 ]

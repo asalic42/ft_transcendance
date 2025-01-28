@@ -367,3 +367,13 @@ def upload_avatar(request):
             return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
 
     return JsonResponse({"status": "error", "message": "Requête invalide."})
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
+
+@login_required
+def profile_view(request, username):
+    user = get_object_or_404(User, username=username)
+    return render(request, 'profile-other-user.html', {'profile_user': user})
