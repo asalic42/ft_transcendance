@@ -18,4 +18,6 @@ echo "${PURPLE_N}Static done.${NC}";
 echo "${RED_N}Continuing server start-up...${NC}";
 
 #? Launch server
-gunicorn myproject.wsgi:application --bind 0.0.0.0:8000;
+# uvicorn myproject.asgi:application --host 0.0.0.0 --port 8000;
+#? Launch server with Daphne
+daphne --bind 0.0.0.0 --port 8000 myproject.asgi:application;

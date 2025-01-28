@@ -106,8 +106,16 @@ def game_choice_page(request):
 	return (render(request, 'game-choice.html'))
 
 @login_required
-def game_mode_page(request):
-	return (render(request, 'game-mode.html'))
+def game_mode_pong_page(request):
+	return (render(request, 'game-mode-pong.html'))
+
+@login_required
+def game_type_pong_page(request):
+	return (render(request, 'game-type-pong.html'))
+
+@login_required
+def game_distant_page(request):
+	return (render(request, 'game-distant.html'))
 
 @login_required
 def game_bot_page(request):
@@ -177,7 +185,7 @@ def map_view(request, map_id):
 	except FileNotFoundError:
 		return HttpResponse("Carte non trouvée", status=404)
 
-	# Retourner le contenu du fichier en tant que réponse HTTP
+	# Retourner le contenu du fichier en tant que réponse https
 	return HttpResponse(map_data, content_type="text/plain")
 
 

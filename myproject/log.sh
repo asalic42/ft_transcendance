@@ -110,11 +110,11 @@ if [ "$1" == "l" ]; then
     fi
 
     # Attendre que le service soit accessible
-    until $(curl --output /dev/null --silent --head --fail https://transcendance.42.paris); do
-        printf '.'
-        sleep 1
-    done
+    # until $(curl --output /dev/null --silent --head --fail http://0.0.0.0:8000); do
+    #     printf '.'
+    #     sleep 1
+    # done
 
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
-    open https://transcendance.42.paris
+    open https://transcendance.42.paris/signin/
 fi
