@@ -1,0 +1,539 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+    <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+
+    <div class="settings-container">
+
+        <div class="settings-box">
+
+            <img class="settings-img" src="{{ user.users.image.url }}" alt="Avatar" id="avatar-img" />
+
+            <button class="settings-img-upload">
+                <label for="s-avatar" class="custom-file-upload">➕</label>
+            </button>
+            
+            <input type="file" id="s-avatar" name="avatar" style="display: none;">
+
+            {% if request.user.is_authenticated %}
+                <div class="settings-user-info">
+                    <span class="settings-username" style="color: black">👩‍🦲 :<input id="s-username" type="text" class="settings-username" disabled placeholder="{{ request.user.username }}"> </span>
+                    <span class="settings-pseudo" style="color: black">👤 :<input id="s-pseudo" type="text" class="settings-pseudo" disabled placeholder="{{ user.users.pseudo }}"> </span>
+                    <span class="settings-email" style="color: black">📧 :<input id="s-email" type="text" class="settings-email" disabled placeholder="{{ request.user.email }}"> </span>
+                </div>
+            {% else %}
+                <p>Vous n'êtes pas connecté.</p>
+            {% endif %}
+
+            <button class="update-or-save">Update</button>
+
+            <div class="settings-separator">
+
+                <p class="settings-text-settings-rdv">
+                    Pour modifier vos informations, cliquez sur
+                    Update, et Save.
+                </p>
+
+                <button class="settings-logout" onclick="window.location.href='{% url 'signout' %}'">
+                    <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}">
+                    Logout
+                </button>
+                <button class="settings-delete-account" onclick="window.location.href='{% url 'delete_account' %}'">
+                    <img class="delete-svg" src="{% static 'images/delete-profile-svgrepo-com.svg' %}">    
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+
+        .settings-container {
+            display: flex;
+            margin-top: 5%;
+            justify-content: center; /* Centre horizontalement */
+            align-items: center;
+        }
+
+        .settings-box {
+            display: flex;
+            width: 400px;
+            height: 480px;
+            background-color: #888888;
+            border-radius: 10px;
+            border: 2px solid black;
+            flex-direction: column; /* Permet d'empiler les éléments */
+            justify-content: center; /* Centre le contenu verticalement */
+            align-items: center; /* Centre le contenu horizontalement */
+            text-align: center; /* Centre le texte à l'intérieur */
+            box-shadow: -10px 10px black;
+            transform: translateX(5px) translateY(-5px);
+            background: linear-gradient(to right, #aa3196, #9159c0);
+        }
+
+        /* Ugrade/Save button */
+
+        .update-or-save {
+            font-family: 'Courier New', Courier, monospace;
+            scale: 0.85;
+            position: absolute;
+            width: auto;
+            height: auto;
+            padding-left : 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            border-radius: 5px;
+            margin-top: 135px;
+            transition: all 0.2s ease;
+        }
+
+        .update-or-save:hover {
+            cursor: pointer;
+            scale: 0.89;
+        }
+
+        /* Separator box */
+
+        .settings-separator {
+            position: absolute;
+            width: 400px;
+            height: 140px;
+            margin-top: 340px;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            border: 2px solid black;
+            background-color: #d8d8d8;
+        }
+
+        /* Avatar img */
+
+        .settings-img {
+            width: 150px;
+            height: 150px;
+            border: 2px solid black;
+            border-radius: 50%;
+            margin-top: -140px;
+            margin-bottom: 15px; /* Ajouté pour espacer l'image du texte */
+        }
+
+        .settings-img-upload {
+            position: absolute;
+            width: auto;
+            height: auto;
+            padding: 5px;
+            border: 2px solid rgb(0, 0, 0);
+            border-radius: 50px;
+            margin-top: -375px;
+            margin-left: 110px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-img-upload:hover {
+            background-color: rgb(69, 224, 22);
+            cursor: pointer;
+            scale: 1.1;
+        }
+       
+        /* Case regroupant les infos utilisateurs */
+
+        .settings-user-info {
+            flex-direction: column;
+            display: flex; /* Assure que les éléments sont empilés verticalement */
+            justify-content: center;
+            background-color: #534d4d;
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 10px;
+            padding-bottom: 20px;
+        }
+
+        .settings-user-info span {
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            text-align: left;
+            align-items: left;
+            font-size: 20px;
+        }
+
+        .settings-user-info input {
+            border: 1px solid black;
+            color: #888888;
+            background-color: rgb(34, 34, 34);
+            outline: none;
+        }
+
+        .settings-user-info .settings-username {
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+
+        .settings-user-info .settings-pseudo {
+            border-top: 0px;
+            border-bottom: 0px;
+        }
+
+        .settings-user-info .settings-email {
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        .settings-text-settings-rdv {
+            color: black;
+            margin-top: 10px; /* Ajouté pour espacer le texte du bas */
+            padding: 10px;
+        }
+
+        /* Logout svg */
+
+        .logout-svg {
+            position: absolute ;
+            scale: 0.02;
+            margin-left: -415px;
+            margin-top: -393px;
+            font-weight: bold;
+            rotate: 180deg;
+        }
+
+        /* Logout elmt */
+
+        .settings-logout {
+            font-weight: bold;
+            width: 100px;
+            height: auto;
+            padding: 10px;
+            padding-left: 20px;
+            color: black;
+            margin-top: -60px;
+            margin-left: 0px;
+            border-radius: 10px;
+            transition: all 0.2s ease-out;
+        }
+
+        /* Delete svg */
+
+        .delete-svg {
+            position: absolute ;
+            scale: 0.03;
+            margin-left: -414px;
+            margin-top: -393px;
+            font-weight: bold;
+        }
+
+        /* Delete account elmt */
+
+        .settings-delete-account {
+            width: 100px;
+            height: auto;
+            padding: 10px;
+            color: black;
+            margin-top: -60px;
+            margin-left: 10px;
+            border-radius: 10px;
+            padding-left: 35px;
+            font-weight: bold;
+            transition: all 0.2s ease-out;
+        }
+
+        .custom-file-upload:hover {
+            cursor: pointer;
+        }
+
+        .settings-logout:hover,
+        .settings-delete-account:hover {
+            cursor: pointer;
+            scale: 1.1;
+            border-radius: 0;
+            box-shadow: -5px 5px ;
+        }
+
+        .settings-delete-account:hover {
+            background-color: red;
+        }
+
+
+    </style>
+
+    <script>
+
+        let update_var = {value: false};
+
+        const buttonUpdateSave = document.querySelector(".update-or-save");
+
+        const inputUsername = document.querySelector(".settings-username");
+        const inputPseudo = document.querySelector(".settings-pseudo");
+        const inputEmail = document.querySelector(".settings-email");
+
+        const allInputs = document.querySelectorAll(".settings-user-info input");
+
+        buttonUpdateSave.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            update_var.value = !update_var.value;
+
+            if (update_var.value === true) {
+                buttonUpdateSave.textContent = "Save";
+                allInputs.forEach(input => {
+                    input.style.backgroundColor = "white";
+                    input.disabled = false;
+                    input.style.color = "black";
+                });
+            } else {
+                buttonUpdateSave.textContent = "Update";
+                allInputs.forEach(input => {
+                    input.style.backgroundColor = "#212121";
+                    input.disabled = true;
+                    input.style.color = "#888888";
+                });
+                
+                // On envoie les nouvelles données quand on clique sur "Save"
+                var new_username = $('#s-username').val(); // Récupère la valeur de l'input username
+                var new_pseudo = $('#s-pseudo').val(); // Récupère la valeur de l'input pseudo
+                var new_email = $('#s-email').val(); // Récupère la valeur de l'input email
+
+                // Crée un objet FormData pour envoyer les données
+                var formData = new FormData();
+                formData.append('username', new_username);
+                formData.append('pseudo', new_pseudo);
+                formData.append('email', new_email);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour sécuriser la requête
+
+                // On envoie les données via AJAX
+                $.ajax({
+                    url: '{% url "update_user_info" %}',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // Important : ne pas traiter les données (surtout pour les fichiers)
+                    contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Vos informations ont été mises à jour. ✅');
+                        } else {
+                            alert('❌ Erreur : ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('❌ Erreur lors de la mise à jour des informations.');
+                    }
+                });
+        }});
+
+                // Lorsque l'utilisateur choisit un fichier, on déclenche l'upload via AJAX
+        $('#s-avatar').on('change', function(event) {
+            // Récupère le fichier choisi
+            var avatar_file = event.target.files[0];  // Le premier fichier choisi
+
+            // Vérifie si un fichier a bien été sélectionné
+            if (!avatar_file) {
+                alert('Veuillez choisir un fichier d\'avatar.');
+                return;
+            }
+
+            // Crée un objet FormData pour envoyer le fichier
+            var formData = new FormData();
+            formData.append('avatar', avatar_file);  // Ajoute le fichier avatar
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour la sécurité
+
+            // On envoie les données via AJAX
+            $.ajax({
+                url: '{% url "upload_avatar" %}',  // URL de la vue pour uploader l'avatar
+                type: 'POST',
+                data: formData,
+                processData: false,  // Important : ne pas traiter les données
+                contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Met à jour l'image de profil sur la page immédiatement
+                        $('#avatar-img').attr('src', response.new_avatar_url);
+                    } else {
+                        alert('❌ Erreur : ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('❌ Erreur lors du téléchargement de l\'avatar.');
+                }
+            });
+        });
+
+
+
+        /* ------ Pour vérifier si le user/email est valide et est non pris ------ */
+
+        // Fonction générique pour gérer la vérification du pseudo
+        function verifiervaliditeelmt(baliseInput, chemin_fetch, taken_bool) {
+            const baliseContent = baliseInput.value.trim();
+
+            if (baliseContent.length > 0) {
+                // Effectuer la requête AJAX pour vérifier si le pseudo est disponible
+                fetch(`${chemin_fetch}=${baliseContent}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Mise à jour de l'interface utilisateur selon la disponibilité
+                        if (data.is_taken) {
+                            taken_bool.value = true;
+                        } else {
+                            taken_bool.value = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la vérification du pseudo:', error);
+                    });
+            }
+        }
+
+        let is_s_user_len_ok = {value: true};
+        let is_s_pseudo_len_ok = {value: true};
+        let is_s_email_len_ok = {value: true};
+
+        let s_user_whitespaces_found = {value: false};
+        let s_pseudo_whitespaces_found = {value: false};
+        let s_email_whitespaces_found = {value: false};
+
+        let is_s_user_already_taken = {value: false};
+        let is_s_pseudo_already_taken = {value: false};
+        let is_s_email_already_taken = {value: false};
+
+        let is_email_valid = {value: true};
+
+        /* Pour tester les whitespaces */
+
+        function containsWhitespace(value) {
+           return /\s/.test(value); 
+        }
+        
+        /* Pour le user */
+
+        const SusernameInput = document.getElementById("s-username");
+
+        function TestValidity(InputBalise, fetch_url, bool_taken, bool_is_ok, bool_whitespace)
+        {
+            if (containsWhitespace(InputBalise.value)){
+                bool_whitespace.value = true;
+            }
+            else {
+                bool_whitespace.value = false;
+            }
+
+            if (InputBalise.value.length > 24) {
+                is_s_user_len_ok.value = false;
+            }
+            else {
+                is_s_user_len_ok.value = true;
+            }
+
+            verifiervaliditeelmt(InputBalise,
+                fetch_url,
+                bool_taken);
+        }
+
+        function TextColorStatus(InputBalise, bool_taken, bool_is_ok, bool_whitespace)
+        {
+            if (bool_taken.value === true          ||
+                    bool_is_ok.value === false     ||
+                    bool_whitespace.value === true)
+            {
+                InputBalise.style.color = "red";
+            }
+            else {
+                InputBalise.style.color = "black";
+            }
+        }
+
+        SusernameInput.addEventListener('keyup', function() {
+            
+            TestValidity(SusernameInput,
+                'check_username/?username',
+                is_s_user_already_taken,
+                is_s_user_len_ok,
+                s_user_whitespaces_found);
+        });
+
+        /* Pour l email */
+
+        function validateEmail(email) {
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return emailPattern.test(email);
+        }
+
+        const SemailInput = document.getElementById("s-email");
+    
+        SemailInput.addEventListener('keyup', function() {
+
+            TestValidity(SemailInput,
+                'check_email/?email',
+                is_s_email_already_taken,
+                is_s_email_len_ok,
+                s_email_whitespaces_found);
+
+            is_email_valid.value = validateEmail(SemailInput.value);
+            if (SemailInput.value.trim() === '')
+                is_email_valid.value = true;
+        });
+
+        const SpseudoInput = document.getElementById("s-pseudo");
+    
+        SpseudoInput.addEventListener('keyup', function() {
+
+            TestValidity(SpseudoInput,
+                'check_pseudo/?pseudo',
+                is_s_pseudo_already_taken,
+                is_s_pseudo_len_ok,
+                s_pseudo_whitespaces_found);
+        });
+
+        function ActiveTextStatusColoration()
+        {
+            TextColorStatus(SusernameInput,
+                is_s_user_already_taken,
+                is_s_user_len_ok,
+                s_user_whitespaces_found);
+
+            TextColorStatus(SemailInput,
+                is_s_email_already_taken,
+                is_s_email_len_ok,
+                s_email_whitespaces_found);
+
+            TextColorStatus(SpseudoInput,
+                is_s_pseudo_already_taken,
+                is_s_pseudo_len_ok,
+                s_pseudo_whitespaces_found);
+        }
+
+
+        /* Fonction pour checker si les champs sont valides et changer l'état du bouton en conséquence  */
+
+        function button_update_save_status() {
+
+            if (is_s_user_len_ok.value === false            ||
+                is_s_email_len_ok.value === false           ||
+                is_s_pseudo_len_ok.value === false          ||
+
+                is_s_user_already_taken.value === true      ||
+                is_s_email_already_taken.value === true     ||
+                is_s_pseudo_already_taken.value === true    ||
+                
+                s_user_whitespaces_found.value === true     ||
+                s_pseudo_whitespaces_found.value === true   ||
+                s_email_whitespaces_found.value === true    ||
+                
+                is_email_valid.value === false)
+            {
+                buttonUpdateSave.disabled = true;
+            }
+            else
+            {
+                buttonUpdateSave.disabled = false;
+            }
+
+            if (update_var.value === true)
+                ActiveTextStatusColoration();
+        }
+
+        setInterval(button_update_save_status, 1);
+
+    </script>
+
+{% endblock %}

@@ -503,8 +503,6 @@ function fetchMap(mapId) {
 	.then(mapData => {
 		const mapLines = mapData.split('\n');
 		mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
-		console.log(mapLines);  // Affiche la carte sous forme de tableau 2D
-		
 	})
 	.catch(error => {
 		console.error('Erreur lors de la récupération des données de la carte:', error);

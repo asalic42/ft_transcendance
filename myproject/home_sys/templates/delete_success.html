@@ -6,17 +6,84 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
         <title>Banni</title>
     </head>
     <body>
 
-        <h1>Banni</h1>
-        <img src="{% static 'images/giphy.gif' %}" alt="Rebelle">
+        <div class="delete-success-container">
 
-        <p>Le père a fait une crise cardiaque. Le Monastère vous a banni à jamais.</p>
-        <p>Revenir sous une nouvelle identité ? <a href="{% url 'signin' %}">Je suis Batman</a></p>
+            <div class="page-box">
+                <h1 class="dsuccess-title">Well... your choice.</h1>
+                <!-- <img src="{% static 'images/giphy.gif' %}" alt="Rebelle"> -->
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+                <img class="dsuccess-img" src="{% static 'images/giphy.gif' %}" alt="">
+
+                <div class="sub-box">
+                    <p>Bravo 👏👏👏, you've made the move to leave us and it's a most respectable one.</p>
+                    <p>For this courage, we forget the charges against you and offer you a new opportunity: <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Second chance</a></p>
+                    <p class="m-msg">As per company policy, a team of cleaners has been sent to erase you and your insolence. Thank you for your understanding.</p>
+                </div>
+            </div>
+        </div>
     </body>
+
+    <style>
+
+        .delete-success-container {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page-box {
+            display: flex;
+            width: 400px;
+            height: 600px;
+            background-color: #434a46;
+            box-shadow: -10px 10px black;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 1px solid black;
+        }
+
+        .dsuccess-title {
+            margin-top: 10px;
+            padding-bottom: 10px;
+            font-size: 37px;
+            color: black;
+            border: 1px solid black;
+            border-radius: 10px;
+            background-color: #ccc;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .dsuccess-img {
+            width: 350px;
+            height: 200px;
+            border-radius: 10px;
+        }
+
+        .sub-box {
+            margin-top: 30px;
+            width: 400px;
+            height: 305px;
+            background-color: #888888;
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .sub-box p {
+            margin-top: 25px;
+            padding: 10px;
+            color: black;
+        }
+
+        .sub-box .m-msg {
+            font-size: 8px;
+        }
+
+    </style>
 </html>

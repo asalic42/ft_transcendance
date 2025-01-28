@@ -7,8 +7,10 @@ from datetime import datetime
 class Users(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	name = models.CharField(max_length = 150)
+	pseudo = models.CharField(max_length=100, blank=True, null=True, default='pseudotest')
 	date = models.DateTimeField(auto_now_add = True)
-	image = models.CharField(max_length = 255, default = 'static/images/basePP.png')
+	image = models.ImageField(upload_to='profile_pics/', default='profile_pics/basePP.png')
+	#image = models.CharField(max_length = 255, default = 'static/images/basePP.png')
 	status = models.BooleanField(default = True)
 	win_nb = models.IntegerField(default = 0)
 	lose_nb = models.IntegerField(default = 0)
@@ -18,10 +20,10 @@ class Users(models.Model):
 
 class Chans(models.Model):
 	id = models.AutoField(primary_key = True)
-	name = models.CharField(unique=True, max_length = 150)
+	name = models.CharField(unique=True, max_length = 30)
 	invite_link = models.CharField()
 	date = models.DateTimeField(auto_now_add = True)
-
+	private = models.BooleanField(default=False)
 	def __str__(self):
 		return self.name
 
@@ -89,5 +91,6 @@ class Messages(models.Model):
 	id = models.AutoField(primary_key=True)
 	channel_name = models.CharField()
 	sender = models.CharField()
+	idSender = models.IntegerField()
 	message = models.CharField()
 	date = models.DateTimeField(auto_now_add = True)
