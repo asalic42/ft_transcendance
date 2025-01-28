@@ -37,7 +37,6 @@ h1 {
 }
 
 #friends, #channels-list {
-	background-color: var(--bg-primary);
 	border-radius: 7px;
 	border: 2px solid #ED4EB0;
 	width: 100%;
@@ -91,13 +90,14 @@ h1 {
 
 .column #title,  .center h2{
 	padding-top: 5px;
-	background-color: var(--bg-primary);
 	font-family: 'Thunder-SemiBold';
 	font-size: 35px;
 	border-radius: 7px;
 	border: 2px solid #ED4EB0;
 	margin-bottom: 35px;
-	width: 100%;
+	/* width: 100%; */
+	padding-top: 11.75px;
+	padding-bottom: 11.475px;
 }
 
 #chat-name {
@@ -105,7 +105,6 @@ h1 {
 }
 
 .chat-page {
-	background-color: var(--bg-primary);
 	border-radius: 7px;
 	border: 2px solid #ED4EB0;
 	width: 100%;
@@ -148,7 +147,6 @@ h1 {
 	padding: 10px 14px;
 	margin: 22px;
 	color:#ED4EB0;
-	background-color: var(--bg-primary);
 	border-radius: 7px;
 	border: 2px solid #ED4EB0;
 	cursor: pointer;
@@ -165,7 +163,7 @@ h1 {
 	left: 50%;
 	transform: translate(-50%, -50%);
 	color: var(--font-color);
-	background-color: var(--bg-primary);
+	background: linear-gradient(to bottom right, #232330, #14141e);
 	padding: 40px;
 	border-radius: 7px;
 	border: 2px solid #ED4EB0;
@@ -311,11 +309,13 @@ h1 {
 	font-size: 25px;
 	color: var(--font-color);
 }
-
 #friends, #channels-list, .chat-page, h2,button{
-    background: linear-gradient(to bottom right, var(--bg-primary), #1a1a24);
+	/* background: linear-gradient(to bottom right, #232330, #14141e); */
+	background: linear-gradient(to bottom right, var(--bg-primary), #1a1a24);
+	/*? background: linear-gradient(to bottom right, var(--bg-primary), #181b26); */
+	/** background: linear-gradient(to bottom right, #232330, #14141e); */
     /* box-shadow: 0 0 25px rgba(237, 78, 176, 0.3); */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 #friends:hover, #channels-list:hover, .chat-page:hover {
@@ -325,7 +325,8 @@ h1 {
 
 button:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0px 15px rgba(237, 78, 176, 0.5);
+    box-shadow: 0 0px 15px rgba(237, 78, 176, 0.5)
+
 }
 
 .message .text {
