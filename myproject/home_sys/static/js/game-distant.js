@@ -19,15 +19,15 @@ socket.onopen = function() {
 	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
 }
 
-// socket.onmessage = function(event) {
-// 	try {
-//         var data = JSON.parse(event.data);
-//         console.log("Données reçues :", data);
-//         updateGame(data);
-//     } catch (error) {
-//         console.error("Erreur de parsing des données du WebSocket :", error);
-//     }
-// };
+socket.onmessage = function(event) {
+	try {
+        var data = JSON.parse(event.data);
+        console.log("Données reçues :", data);
+        updateGame(data);
+    } catch (error) {
+        console.error("Erreur de parsing des données du WebSocket :", error);
+    }
+};
 
 socket.onclose = function() {
 	console.log("Deconnexion du socket");
@@ -39,11 +39,11 @@ socket.onerror = function(error) {
 	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
 };
 
-// function updateGame(data) {
-// 	ball.coords = data.ball_coords;
-// 	player1Coords = data.player1_coords;
-// 	player2Coords = data.player2_coords;
-// }
+function updateGame(data) {
+	ball.coords = data.ball_coords;
+	player1Coords = data.player1_coords;
+	player2Coords = data.player2_coords;
+}
 
 // Game Pong concerns 
 function getRandomArbitrary(min, max) {
@@ -87,7 +87,7 @@ function update(ball, player1Coords, player2Coords) {
     context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
-	// sendToSocket(ball, player1Coords, player2Coords);
+	sendToSocket(ball, player1Coords, player2Coords);
     console.log('Creating player...');
 }
 
