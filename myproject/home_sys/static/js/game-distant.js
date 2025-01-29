@@ -7,6 +7,15 @@ var fps = document.getElementById("fps");
 var game = document.getElementById("game");
 const keys = {};                        // Players bars
 let currentPlayer = null;
+let gameState = {
+	player1_coords: null,
+	player2_coords: null,
+	ball_coords: null,
+	scores: {
+		p1: 0,
+		p2: 0
+	}
+};
 
 // WebSocket concerns
 const socket = new WebSocket("wss://transcendance.42.paris/ws/pong/");
@@ -22,23 +31,51 @@ socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
         console.log("Données reçues :", data);
 
+		// if (data.action === "game_restarted") {
+		// 	console.log("Relance du jeu . . .");
+
+		// 	context.clearRect(0, 0, table.width, table.height);
+		// 	gameState.player1_coords = null;
+		// 	gameState.player2_coords = null;
+		// 	gameState.ball_coords = null;
+		// 	gameState.scores.p1 = 0;
+		// 	gameState.scores.p2 = 0;
+		// 	score_p1.textContent = 0;
+		// 	score_p2.textContent = 0;
+		// 	currentPlayer = null;
+		// 	keys = {};
+		// }
+
 		if (data.number) {
 			currentPlayer = data.number;
 			console.log("Vous etes le joueur numero ", currentPlayer);
 		}
 
-        context.clearRect(0, 0, table.width, table.height);
-		update(data)
+		if (data.player1_coords) gameState.player1_coords = data.player1_coords;
+		if (data.player2_coords) gameState.player2_coords = data.player2_coords;
+		if (data.ball_coords) gameState.ball_coords = data.ball_coords;
+		if (data.scores) gameState.scores = data.scores;
 
-		if (data.scores) {
-			score_p1.innerText = data.scores.p1;
-			score_p2.innerText = data.scores.p2;
-
-			if (data.scores.p1 >= 5)
-				winnerWindow(1);
-			else if (data.scores.p2 >= 5)
-				winnerWindow(2);
-		}
+		requestAnimationFrame(() => {
+			context.clearRect(0, 0, table.width, table.height);
+			update(gameState);
+			
+			if (gameState.scores) {
+				score_p1.innerText = gameState.scores.p1;
+				score_p2.innerText = gameState.scores.p2;
+	
+				console.log(`Scores = ${gameState.scores.p1} || ${gameState.scores.p2}`)
+				if (gameState.scores.p1 >= 5) {
+					console.log("P1 a gagne !");
+					winnerWindow(1);
+				}
+				else if (gameState.scores.p2 >= 5) {
+					console.log("P2 a gagne !");
+					winnerWindow(2);
+				}
+			}
+	
+		})
 
     } catch (error) {
         console.error("Erreur de parsing des données du WebSocket :", error);
@@ -78,6 +115,7 @@ function drawInnerRectangle(color) {
 }
 
 function drawPlayer(player1Coords, player2Coords) {
+	if (!player1Coords || !player2Coords) return;
 	
 	context.fillStyle = "#ED4EB0";
 	context.beginPath();
@@ -88,7 +126,7 @@ function drawPlayer(player1Coords, player2Coords) {
 }
 
 function drawBall(ball) {
-	// console.log(`ball coords: ${ball.x}, ${ball.y}`);
+	if (!ball) return; 
 
 	context.beginPath();
     context.fillStyle = 'white';
@@ -112,14 +150,10 @@ function update(gameState) {
     context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
-	if (gameState.player1_coords && gameState.player2_coords) {
-		drawPlayer(gameState.player1_coords, gameState.player2_coords); }
-		
-		console.log("hey !");
-	if (gameState.ball_coords) {
-		console.log("je suis pas la !");
-		drawBall(gameState.ball_coords);
-	}
+	drawPlayer(gameState.player1_coords, gameState.player2_coords);
+
+	drawBall(gameState.ball_coords);
+
     console.log('Creating player...');
 }
 
@@ -133,22 +167,22 @@ window.addEventListener("keyup", (event) => {
 });
 
 function sendPlayerMove() {
+	const moveData = {};
 	if (keys["ArrowUp"] || keys["ArrowDown"]) {
-		if (currentPlayer == 1) {
-			socket.send(JSON.stringify({
-				player1_coords: {
-					y1: keys["ArrowUp"] ? -10 : 10 //-1 = up / 1 = down
-				}
-			}));
-		}
-		else if (currentPlayer == 2) {
-			socket.send(JSON.stringify({
-				player2_coords: {
-					y1: keys["ArrowDown"] ? -10 : 10 //-1 = up / 1 = down 
-				}
-			}));
+		const moveValue = keys["ArrowUp"] ? -20 : 20;
+
+		if (currentPlayer === 1) {
+			moveData.player1_coords = { y1: moveValue };			
+		} else if (currentPlayer === 2) {
+			moveData.player2_coords = { y1: moveValue };
 		}
 	}
+
+	 // N'envoyer que si on a des données à envoyer
+	if (Object.keys(moveData).length > 0 && socket.readyState === WebSocket.OPEN) {
+        console.log("Envoi du mouvement:", moveData); // Debug
+        socket.send(JSON.stringify(moveData));
+    }
 }
 
 function winnerWindow(player) {
@@ -177,7 +211,15 @@ function newGame(player) {
 		button.style.color = "#C42021";
 	else
 		button.style.color = "#365FA0";
-	button.addEventListener("click", () => {
-		window.location.reload();
-    });
+
+	button.addEventListener("click", resetGame);
+}
+
+function resetGame() {
+	if (socket.readyState === WebSocket.OPEN) {
+		socket.send(JSON.stringify({action: "restart_game"}));
+		console.log("Demande de reset du jeu");
+	} else {
+		console.log("Echec");
+	}
 }

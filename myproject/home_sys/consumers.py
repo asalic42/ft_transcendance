@@ -2,6 +2,8 @@ import json
 import random
 import asyncio
 from collections import defaultdict
+from channels.exceptions import ChannelFull
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class PongGame:
@@ -11,7 +13,7 @@ class PongGame:
         self.players = {}
         self.ball = {
             'coords': {'x': 960, 'y': 475},
-            'vector': {'vx': 10, 'vy': 0},
+            'vector': {'vx': 20, 'vy': random.randint(-10, 10)},
             'radius': 13
         }
         self.scores = {'p1': 0, 'p2': 0}
@@ -42,6 +44,7 @@ class PongGame:
     def remove_player(self, channel_name):
         if channel_name in self.players:
             del self.players[channel_name]
+            self.is_running = False
     
     # Update player position in the game
     def update_player_coords(self, channel_name, coords):
@@ -51,16 +54,13 @@ class PongGame:
     # Update state of the game (ball/players coords and scores)
     def get_game_state(self):
         player1_coords = None
+        player2_coords = None
+
         for player in self.players.values():
             if player['number'] == 1:
                 player1_coords = player['coords']
-                break
-        
-        player2_coords = None
-        for player in self.players.values():
-            if player['number'] == 2:
+            elif player['number'] == 2:
                 player2_coords = player['coords']
-                break
         
         return {
             'ball_coords': self.ball['coords'],
@@ -69,13 +69,11 @@ class PongGame:
             'scores': self.scores
         }
 
-
 class PongConsumer(AsyncWebsocketConsumer):
     
     games = defaultdict(PongGame)
 
     async def connect(self):
-        print('JE SUIS LA, PUYTAIN DE TA MERE')
         self.room_name = "pong"
         self.room_group_name = f"game_{self.room_name}"
         self.game = self.games[self.room_group_name]
@@ -91,11 +89,24 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-        print(f"Player connected: {self.channel_name}")
+
+        player_number = self.game.players[self.channel_name]['number']
+        initial_state_game = self.game.get_game_state()
+        await self.send(text_data=json.dumps({
+            'type': 'game_state',
+            'number': player_number,
+            'ball_coords': initial_state_game['ball_coords'],
+            'player1_coords': initial_state_game['player1_coords'],
+            'player2_coords': initial_state_game['player2_coords'],
+            'scores': initial_state_game['scores']
+        }))
+
+        print(f"Player {player_number} connected: {self.channel_name}")
 
         if len(self.game.players) == 2 and not self.game.is_running:
             self.game.is_running = True
-            await self.start_game()
+            asyncio.create_task(self.start_game())
+
 
     async def disconnect(self, close_code):
         self.game.remove_player(self.channel_name)
@@ -107,37 +118,69 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
         print(f"Player disconnected: {self.channel_name}")
         
+
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        print(f"Message received: {data}")
+        if not self.game.is_running:
+            return
+        try:
+            data = json.loads(text_data)
 
-        player_coords = None
+            # if data["action"] == "restart_game":
+            # Réinitialiser les valeurs côté serveur
+            # self.game_state["scores"] = {"p1": 0, "p2": 0}
+            # self.game_state["player1_coords"] = {"y1": 400, "y2": 480}
+            # self.game_state["player2_coords"] = {"y1": 400, "y2": 480}
+            # self.game_state["ball_coords"] = {"x": 475, "y": 475}
 
-        # Si player == 1 on accepte ses nouvelles coords
-        if 'player1_coords' in data and self.game.players[self.channel_name]['number'] == 1:
-            player_coords = data['player1_coords']
+            
+            player_number = self.game.players[self.channel_name]['number']
+            current_coords = self.game.players[self.channel_name]['coords']
 
-        # Si player == 2 on accepte ses nouvelles coords
-        elif 'player2_coords' in data and self.game.players[self.channel_name]['number'] == 2:
-            player_coords = data['player2_coords']
+            # Si player == 1 on accepte ses nouvelles coords
+            if player_number == 1 and 'player1_coords' in data:
+                new_y1 = current_coords['y1'] + data['player1_coords']['y1']
+                new_y1 = max(0, min(new_y1, 870))
 
-        if player_coords:
-            self.game.update_player_coords(self.game.channel_name, player_coords)
+                current_coords['y1'] = new_y1
+                current_coords['y2'] = new_y1 + 80
+
+                print(f"Maj coords Player 1: {current_coords}")
+
+            # Si player == 2 on accepte ses nouvelles coords
+            elif player_number == 2 and 'player2_coords' in data:
+                new_y1 = current_coords['y1'] + data['player2_coords']['y1']
+                new_y1 = max(0, min(new_y1, 870))
+
+                current_coords['y1'] = new_y1
+                current_coords['y2'] = new_y1 + 80
+
+                print(f"Maj coords Player 2: {current_coords}")
+
+            self.game.update_player_coords(self.channel_name, current_coords)
             await self.send_game_state()
+
+        except Exception as e:
+            print(f"Erreur inattendue: {str(e)}")
         
     async def send_game_state(self):
-        print("j'envoie un message !")
-        state = self.game.get_game_state()
-        await self.channel_layer.group_send(
-            self.room_group_name, {
-                'type': 'game_update',
-                **state # Decompresse les donnees envoyees !
-            }
-        )
+        try:
+            state = self.game.get_game_state()
+            await self.channel_layer.group_send(
+                self.room_group_name, {
+                    'type': 'game_update',
+                    'ball_coords': state['ball_coords'],
+                    'player1_coords': state['player1_coords'],
+                    'player2_coords': state['player2_coords'],
+                    'scores': state['scores']
+                },
+            )
+        except ChannelFull:
+            print("Channel full in send_game_state")
 
     async def game_update(self, event):
         # Envoyer les mises à jour à WebSocket
         await self.send(text_data=json.dumps({
+            'type': 'game_state',
             'ball_coords': event['ball_coords'],
             'player1_coords': event['player1_coords'],
             'player2_coords': event['player2_coords'],
@@ -145,56 +188,64 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
     
     async def start_game(self):
-        while self.game.is_running:
+        update_interval = 0.05
+        last_update = asyncio.get_event_loop().time()
 
-            # Maj ball coords
-            self.game.ball['coords']['x'] += self.game.ball['vector']['vx']
-            self.game.ball['coords']['y'] += self.game.ball['vector']['vy']
+        while self.game.is_running and len(self.game.players) == 2:
+            current_time = asyncio.get_event_loop().time()
 
-            # Collision ball with wall
-            if (self.game.ball['coords']['y'] - self.game.ball['radius'] <= 0 or
-            self.game.ball['coords']['y'] + self.game.ball['radius'] >= 950):
-                self.game.ball['vector']['vy'] = -self.game.ball['vector']['vy']
-            
-            # Collision ball with player
-            ball = self.game.ball
-            for player in self.game.players.values():
-                coords = player['coords']
+            if current_time - last_update >= update_interval:
+                ball = self.game.ball
 
-                # print(ball['coords']['x'] - ball['radius'])
-                # print(" | ")
-                # print(coords['x1'])
+                # Maj ball coords
+                ball['coords']['x'] += ball['vector']['vx']
+                ball['coords']['y'] += ball['vector']['vy']
 
-                if (player['number'] == 1 and
-                    ball['coords']['x'] - ball['radius'] >= coords['x1'] and
-                    ball['coords']['x'] - ball['radius'] <= coords['x2'] + abs(ball['vector']['vx'] *1) and
-                    ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] / 2 and
-                    ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2):
-                    print("Collision joueur 1")
-                    ball['vector']['vx'] = abs(ball['vector']['vx']) +1
+                # Collision ball with wall
+                if (ball['coords']['y'] - ball['radius'] <= 0 or
+                    ball['coords']['y'] + ball['radius'] >= 950):
+                     ball['vector']['vy'] = -ball['vector']['vy']
 
-                elif (player['number'] == 2 and
-                      ball['coords']['x'] + ball['radius'] >= coords['x1'] - abs(ball['vector']['vx'] *1) and
-                      ball['coords']['x'] + ball['radius'] <= coords['x2'] and
-                      ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] /2 and
-                      ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2 ):
-                    print("Collision joueur 2")
-                    ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1) 
+                # Collision ball with player
+                for player in self.game.players.values():
+                    coords = player['coords']
+
+                    if (player['number'] == 1 and
+                        ball['coords']['x'] - ball['radius'] >= coords['x1'] and
+                        ball['coords']['x'] - ball['radius'] <= coords['x2'] + abs(ball['vector']['vx'] *1) and
+                        ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] / 2 and
+                        ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2):
+
+                        print("Collision joueur 1")
+                        ball['vector']['vx'] = abs(ball['vector']['vx']) +1
+
+                    elif (player['number'] == 2 and
+                          ball['coords']['x'] + ball['radius'] >= coords['x1'] - abs(ball['vector']['vx'] *1) and
+                          ball['coords']['x'] + ball['radius'] <= coords['x2'] and
+                          ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] /2 and
+                          ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2 ):
+                        print("Collision joueur 2")
+                        ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1) 
+
+                # Player add score
+                if ball['coords']['x'] + ball['radius'] >= 1920:
+                    self.game.scores['p1'] += 1
+                    self.reset_ball(-20)
+                elif ball['coords']['x'] - ball['radius'] <= 0:
+                    self.game.scores['p2'] += 1
+                    self.reset_ball(20)
+
+                if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
+                    self.game.is_running = False
+
+                try:
+                    await self.send_game_state()
+                except ChannelFull:
+                    print("Channel full, skipping update")
                 
-            # Player add score
-            if ball['coords']['x'] + ball['radius'] >= 1920:
-                self.game.scores['p1'] += 1
-                self.reset_ball(-10)
-            elif ball['coords']['x'] - ball['radius'] <= 0:
-                self.game.scores['p2'] += 1
-                self.reset_ball(10)
-            
-            if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
-                self.game.is_running = False
+                last_update = current_time
 
-            await self.send_game_state()
-
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.01)
     
     def reset_ball(self, direction):
         self.game.ball['coords'] = {'x': 960, 'y': 475}
