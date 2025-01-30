@@ -67,6 +67,7 @@ h1 {
     margin-left: 15px;
     font-family: 'Thunder';
     font-size: 25px;
+	background: none;
 }
 
  /* Actual chan here + scrollbar */
@@ -197,10 +198,11 @@ h1 {
 	top: 10px;
 	margin: 10px;
 	border-radius: 10px;
-	max-width: 60%;
+	max-width: 80%;
 	display: flex;
 	position: relative;
 	flex-wrap: wrap;
+	word-wrap: break-word;
 }
 
 .message .name{
@@ -212,7 +214,8 @@ h1 {
 
 .message.sent {
 	align-self: flex-end;
-	left: 74px;
+	/* left: 74px; */
+	justify-content: flex-end;
 }
 
 .message.sent .name {
@@ -245,7 +248,7 @@ h1 {
 	margin-top: 15px;
 	color: var(--font-color);
 	background-color: black;
-	max-width: calc(100% - 20px);
+	/* max-width: calc(100% - 20px); */
 	border-radius: 10px;
 	width: fit-content;
 	white-space: normal;
@@ -266,7 +269,7 @@ h1 {
 
 .message.sent span {
 	justify-content: flex-end;
-	right: 75px;
+	/* right: 75px; */
 }
 
 .message.received span {
@@ -275,7 +278,6 @@ h1 {
 
 .message.sent .text {
 	position: relative;
-	/* margin-right: 100%;	 */
 }
 
 .input-container {
@@ -332,7 +334,7 @@ button:hover {
 
 .message .text {
     background: linear-gradient(to bottom right, #333346, #2b2b39);
-    border: 2px solid #484858;
+    border: 2px solid #5a5a6e;
     backdrop-filter: blur(5px);
     line-height: 1.4;
     border-radius: 15px;
@@ -340,6 +342,7 @@ button:hover {
 	padding-right: 15px;
 	padding-top: 5px;
 	padding-bottom: 5px;
+	max-width: 100%;
 }
 
 /* Animation des éléments de liste */

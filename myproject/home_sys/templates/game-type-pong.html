@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
+
+<div class="page">
+	<div class="rectangle"></div>
+	<h1 class="title">Choix du type de jeu</h1>
+	<div class="mode-choices">
+
+		<a href="{% url 'game' %}" class="game">
+			<span class="game-mode">Local</span>
+		</a>
+		<a href="{% url 'game-distant' %}" class="game-distant">
+			<span class="game-mode">Distant</span>
+		</a>
+	</div>
+
+</div>
+
+
+{% endblock %}

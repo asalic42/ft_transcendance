@@ -1,0 +1,183 @@
+// Variables
+var table = document.getElementById("game");
+var	context = table.getContext("2d");
+var score_p1 = document.getElementById("scoreP1");
+var score_p2 = document.getElementById("scoreP2");
+var fps = document.getElementById("fps");
+var game = document.getElementById("game");
+const keys = {};                        // Players bars
+let currentPlayer = null;
+
+// WebSocket concerns
+const socket = new WebSocket("wss://transcendance.42.paris/ws/pong/");
+
+socket.onopen = function() {
+	console.log("Connexion réussie au WebSocket");
+	console.log("Socket State: " + socket.readyState); // Cela devrait afficher 1 pour ouvert
+	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
+}
+
+socket.onmessage = function(event) {
+	try {
+        const data = JSON.parse(event.data);
+        console.log("Données reçues :", data);
+
+		if (data.number) {
+			currentPlayer = data.number;
+			console.log("Vous etes le joueur numero ", currentPlayer);
+		}
+
+        context.clearRect(0, 0, table.width, table.height);
+		update(data)
+
+		if (data.scores) {
+			score_p1.innerText = data.scores.p1;
+			score_p2.innerText = data.scores.p2;
+
+			if (data.scores.p1 >= 5)
+				winnerWindow(1);
+			else if (data.scores.p2 >= 5)
+				winnerWindow(2);
+		}
+
+    } catch (error) {
+        console.error("Erreur de parsing des données du WebSocket :", error);
+    }
+};
+
+socket.onclose = function() {
+	console.log("Deconnexion du socket");
+};
+
+socket.onerror = function(error) {
+    console.error("Erreur WebSocket:", error);
+    console.log("Socket State: " + socket.readyState); // Cela peut être utile pour le débogage
+	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
+};
+  
+window.onload = function() {
+    document.getElementById('scores').style.display = 'flex';
+	document.getElementById('fps').style.display = 'flex';
+	document.getElementById('canvas-container').style.display = 'flex';
+}
+
+function drawOuterRectangle(color) {
+    context.fillStyle = color;
+	context.beginPath();
+	context.roundRect(0, 0, table.width, table.height, 10);
+	context.fill();
+	context.closePath();
+}
+
+function drawInnerRectangle(color) {
+	context.fillStyle = color;
+	context.beginPath();
+	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
+	context.fill();
+    context.closePath();
+}
+
+function drawPlayer(player1Coords, player2Coords) {
+	
+	context.fillStyle = "#ED4EB0";
+	context.beginPath();
+	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
+	context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+	context.fill();
+	context.closePath();
+}
+
+function drawBall(ball) {
+	// console.log(`ball coords: ${ball.x}, ${ball.y}`);
+
+	context.beginPath();
+    context.fillStyle = 'white';
+    context.arc(ball.x, ball.y, 13, Math.PI * 2, false);
+    context.fill();
+    context.closePath();
+	
+	context.beginPath();
+	context.fillStyle = "#23232e";
+    context.arc(ball.x, ball.y, 13 - 2, Math.PI * 2, false);
+    context.fill();
+    context.stroke();
+    context.closePath();
+}
+
+function update(gameState) {
+
+	drawOuterRectangle("#ED4EB0");
+	drawInnerRectangle("#23232e");
+
+    context.fillStyle = '#ED4EB0';
+    context.fillRect(table.width / 2, 0, 5, table.height);
+
+	if (gameState.player1_coords && gameState.player2_coords) {
+		drawPlayer(gameState.player1_coords, gameState.player2_coords); }
+		
+		console.log("hey !");
+	if (gameState.ball_coords) {
+		console.log("je suis pas la !");
+		drawBall(gameState.ball_coords);
+	}
+    console.log('Creating player...');
+}
+
+window.addEventListener("keydown", (event) => {
+    keys[event.key] = true;
+	sendPlayerMove();
+});
+
+window.addEventListener("keyup", (event) => {
+    keys[event.key] = false;
+});
+
+function sendPlayerMove() {
+	if (keys["ArrowUp"] || keys["ArrowDown"]) {
+		if (currentPlayer == 1) {
+			socket.send(JSON.stringify({
+				player1_coords: {
+					y1: keys["ArrowUp"] ? -10 : 10 //-1 = up / 1 = down
+				}
+			}));
+		}
+		else if (currentPlayer == 2) {
+			socket.send(JSON.stringify({
+				player2_coords: {
+					y1: keys["ArrowDown"] ? -10 : 10 //-1 = up / 1 = down 
+				}
+			}));
+		}
+	}
+}
+
+function winnerWindow(player) {
+	
+	context.clearRect(0, 0, table.width, table.height);
+    
+	const winner1Text = document.getElementById("wrapper-player1");
+	const winner2Text = document.getElementById("wrapper-player2");
+	if (player == 1) {
+        drawOuterRectangle("#365fa0");
+        winner1Text.style.display = "block";
+    }
+	else {
+        drawOuterRectangle("#C42021");
+		winner2Text.style.display = "block";
+    }
+    drawInnerRectangle("#23232e");
+    newGame(player);
+}
+
+function newGame(player) {
+    const button = document.getElementById("replay-button");
+    button.style.display = "block";
+
+	if (player == 1)
+		button.style.color = "#C42021";
+	else
+		button.style.color = "#365FA0";
+	button.addEventListener("click", () => {
+		window.location.reload();
+    });
+}
