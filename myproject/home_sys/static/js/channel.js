@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	newChan.addEventListener('click', () => {
 		// Creation de chan + ouverture
 			setChannelName(async function(nameChan) {
-				addChannelToDb(nameChan, 0)
+				addChannelToDb(nameChan, 0, "")
 				try {
 					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 					const data = await response.json();
@@ -42,7 +42,16 @@ document.addEventListener("DOMContentLoaded", function() {
 					if (data.status === 'error') {
 						throw new Error("Chan doesn't exist"); // Channel exists
 					}
-					openCenter(nameChan);
+					console.log('data :' + data);
+					if (data.private) {
+						const result = await doesUserHaveAccessToChan(data.id, cachedUserId);
+						if (result)
+							openCenter(nameChan);
+						else
+							alert("Not allowed");
+					}
+					else 
+						openCenter(nameChan);
 				}
 				catch (error) {
 					console.error(error);
@@ -52,8 +61,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	newFren.addEventListener('click', () => {
 		// Creation de chan + ouverture
-			setChannelName(async function(nameChan) {
-				addChannelToDb(nameChan, 1)
+			setChannelNamePV(async function(nameChan, ami) {
+				addChannelToDb(nameChan, 1,ami)
 				try {
 					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 					const data = await response.json();
@@ -61,7 +70,15 @@ document.addEventListener("DOMContentLoaded", function() {
 					if (data.status === 'error') {
 						throw new Error("Chan doesn't exist"); // Channel exists
 					}
-					openCenter(nameChan);
+					if (data.private) {
+						const result = await doesUserHaveAccessToChan(data.id, cachedUserId);
+						if (result)
+							openCenter(nameChan);
+						else
+							alert("Not allowed");
+					}
+					else 
+						openCenter(nameChan);
 				}
 				catch (error) {
 					console.error(error);
@@ -73,10 +90,32 @@ document.addEventListener("DOMContentLoaded", function() {
 //////////////////////////////////////////////////////////////////////////////////////////
 /* RIGHT CHANNELS PART */
 	// Add channel to the right channel's list
-function	addChannelToList(nameChan, pv) {
+
+async function doesUserHaveAccessToChan(idC, idU) {
+	return fetch(`/accounts/api/doesUserHaveAccessToChan/${idC}/${idU}`)
+		.then(response => {
+			if (response.status === 404) throw new Error('User not found');
+			return response.json(); // Parse JSON first
+		})
+		.then(data => {
+			if (data.allowed == 'True')
+				return true;
+			return false;
+		})
+		.catch(error => {
+			console.log(error);
+			return false;
+		});
+}	
+	
+async function	addChannelToList(nameChan, pv, idChan) {
 	var chanList;
-	if (pv)
+	if (pv) {
+		const result = await doesUserHaveAccessToChan(idChan, cachedUserId);
+		if (!result)
+			return;
 		chanList = document.getElementById('friends');
+	}
 	else
 		chanList = document.getElementById('channels-list');
 
@@ -164,6 +203,38 @@ function createChatPage(nameChan) {
 	return center;
 }
 
+function setChannelNamePV(callback) {
+	const inputContainer = document.getElementById('input-dm');
+	const inputChannel = document.getElementById('name-input-add-friend-chan');
+	const inputAmi = document.getElementById('input-add-friend-chan');
+	const overlay = document.getElementById('overlay');
+
+	overlay.style.display = 'block';
+	inputContainer.classList.add('show');
+
+	function handleInputName(event) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			const name = inputChannel.value;
+			const ami = inputAmi.value;
+			const pattern = /^[a-zA-Z0-9_-]+$/;
+
+			if (name !== '' && pattern.test(name)) {
+				overlay.style.display = 'none';
+				inputContainer.classList.remove('show');
+				document.getElementById('channel-name').value = '';
+				inputChannel.removeEventListener('keydown', handleInputName);
+				callback(name, ami);
+			}
+			else {
+				alert(`Enter a name !`);
+			}
+		}
+	}
+	inputChannel.addEventListener('keydown', handleInputName);
+}
+
+
 	// Set un nom de channel a sa creation
 function setChannelName(callback) {
 	const inputContainer = document.getElementById('input-channel');
@@ -233,19 +304,19 @@ function addMessageListener() {
 }
 
 function getPP(userId) {
-    return fetch(`/accounts/user-settings/check_pp/${userId}/`)
-        .then(response => {
-            if (response.status === 404) throw new Error('User not found');
-            return response.json(); // Parse JSON first
-        })
-        .then(data => {
-            console.log("User data:", data); // Now data is defined
-            return data; // Return for downstream use
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-            throw error; // Re-throw for handling in addMessage
-        });
+	return fetch(`/accounts/user-settings/check_pp/${userId}/`)
+		.then(response => {
+			if (response.status === 404) throw new Error('User not found');
+			return response.json(); // Parse JSON first
+		})
+		.then(data => {
+			console.log("User data:", data); // Now data is defined
+			return data; // Return for downstream use
+		})
+		.catch(error => {
+			console.error('Fetch error:', error);
+			throw error; // Re-throw for handling in addMessage
+		});
 }
 
 	// Add the message on the chat conv
@@ -264,13 +335,13 @@ async function addMessage(mess, sender, id) {
 		message.classList.add('received');
 	}
 
-    let pp;
-    try {
-        const userData = await getPP(id); // Await the result of getPP
-        pp = userData.img; // Access the img property
-    } catch (error) {
-        console.error('Error fetching profile picture:', error);
-    }
+	let pp;
+	try {
+		const userData = await getPP(id); // Await the result of getPP
+		pp = userData.img; // Access the img property
+	} catch (error) {
+		console.error('Error fetching profile picture:', error);
+	}
 
 	const usernameElement = document.createElement('span');
 	usernameElement.innerHTML = `<img src='${pp}' id="caca">
@@ -330,8 +401,43 @@ async function liveChatFetch() {
 	}
 }
 
+function getIdByName(name) {
+	return fetch(`/accounts/api/getNameById/${name}/`)
+		.then(response => {
+			if (response.status === 404) throw new Error('User not found');
+			return response.json(); // Parse JSON first
+		})
+		.then(data => {
+			return data; // Return for downstream use
+		})
+		.catch(error => {
+			throw error; // Re-throw for handling in addMessage
+		});
+}
+
+async function addPvChan(chanId, amiName) {
+	const userData = await getIdByName(amiName);
+	pk = userData.pk;
+
+	const response = await fetch('/accounts/api/postPv/', {
+		method: 'POST',
+		headers: {
+		'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			id_chan: chanId,
+			id_u1: cachedUserId,
+			id_u2: pk,
+		})
+	});
+
+	if (!response.ok) {
+		throw new Error('Erreur lors de l\'ajout du chan');
+	}
+}
+
 // Add a new channel to the db
-async function addChannelToDb(currentChan, pv) {
+async function addChannelToDb(currentChan, pv, ami) {
 	try {
 		const response = await fetch('/accounts/api/post_chan/', {
 			method: 'POST',
@@ -350,7 +456,15 @@ async function addChannelToDb(currentChan, pv) {
 		}
 
 		console.log("nouveau chan ADD a la bdd");
-		addChannelToList(currentChan, pv);
+		
+		const data = await response.json();
+		console.log(data);
+		var chanId = data.chan.id;
+
+		if (pv) {
+			addPvChan(chanId, ami);
+		}
+		addChannelToList(currentChan, pv, chanId);
 	} catch (error) {
 		console.error('Erreur: ', error);
 		return 0
@@ -372,14 +486,12 @@ async function	loadChannels() {
 		});
 
 		const result = await response.json();
+
 		if (result.status === 'success' && Array.isArray(result.channels)) {
-            result.channels.forEach(channel => {
-                addChannelToList(
-                    channel.name || 'Nom inconnu', 
-                    channel.private || false
-                );
-            });	
-        }
+			result.channels.forEach(channel => {
+				addChannelToList( channel.name, channel.private, channel.id );
+			});	
+		}
 	} catch(error) {
 		console.error('Erreur: ', error);
 	}

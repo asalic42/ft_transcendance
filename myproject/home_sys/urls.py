@@ -45,4 +45,7 @@ urlpatterns = [
 	path('api/get_blocked/<int:idPlayer>/', get_blocked, name="get_blocked"),
 	path('api/post_blocked/', post_blocked, name="post_blocked"),
 	path('api/post_deblock/', post_deblock, name="post_deblock"),
+	path('api/postPv/', postPv, name="postPv"),
+	path('api/doesUserHaveAccessToChan/<int:idC>/<int:idU>', doesUserHaveAccessToChan, name="doesUserHaveAccessToChan"),
+	path('api/getNameById/<str:nameU>/', getNameById, name="getNameById"),
 ]
