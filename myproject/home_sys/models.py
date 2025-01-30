@@ -92,7 +92,7 @@ class Messages(models.Model):
 	channel_name = models.CharField()
 	sender = models.CharField()
 	idSender = models.IntegerField()
-	message = models.CharField()
+	message = models.CharField(max_length=1000)
 	date = models.DateTimeField(auto_now_add = True)
 
 class PrivateChan(models.Model):

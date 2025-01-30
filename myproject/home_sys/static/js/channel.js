@@ -171,7 +171,7 @@ function	popCenterChat(nameChan) {
 	const page = document.querySelector('.page');
 	const channels = document.querySelector('.channels');
 
-	page.style.gridTemplateColumns = '1fr 3fr 1fr';
+	page.style.gridTemplateColumns = '1fr minmax(0, 3fr) 1fr';
 
 	if (!document.querySelector('.center')) {
 		const center = createChatPage(nameChan);
@@ -521,6 +521,7 @@ async function postMessage(currentChan, mess) {
 		console.log('idSender:', idSender);
 
 	} catch(error) {
+		alert("Wow ! That's a long message. It should work better if it shrinks down.");
 		console.error('Erreur: ', error);
 	}
 }
