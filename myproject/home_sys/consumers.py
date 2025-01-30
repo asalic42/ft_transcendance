@@ -17,10 +17,10 @@ class PongGame:
     def reset_game(self):
         self.ball = {
             'coords': {'x': 960, 'y': 475},
-            'vector': {'vx': 20, 'vy': random.randint(-10, 10)},
+            'vector': {'vx': self.get_random_arbitrary(-10, 10), 'vy': self.get_random_arbitrary(-10, 10)},
             'radius': 13
         }
-        self.scores = {'p1': 4, 'p2': 0}
+        self.scores = {'p1': 0, 'p2': 0}
         for player in self.players.values():
             player_number = player['number']
             player['coords'] =  {
@@ -31,6 +31,12 @@ class PongGame:
                 'vy': 30
             }
 
+    # Direction aleatoire de la balle 
+    def get_random_arbitrary(self, min, max):
+        result = random.random() * (max - min) + min
+        if result >= -9 and result <= 9:
+            return self.get_random_arbitrary(min, max)
+        return result
 
     # Add player to the game if its possible
     def add_player(self, channel_name):
@@ -171,13 +177,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                 game_state = self.game.get_game_state()
 
-                await self.send(text_data=json.dumps({
-                    'type': 'game_restarted',
-                    'ball_coords': game_state['ball_coords'],
-                    'player1_coords': game_state['player1_coords'],
-                    'player2_coords': game_state['player2_coords'],
-                    'scores': game_state['scores']
-                }))
+                await self.channel_layer.group_send(
+                    self.room_group_name, {
+                    'type': 'new_game',
+                    **game_state
+                })
+
                 asyncio.create_task(self.start_game())
                 return
         except json.JSONDecodeError:
@@ -190,10 +195,11 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name, {
                     'type': 'game_update',
-                    'ball_coords': state['ball_coords'],
-                    'player1_coords': state['player1_coords'],
-                    'player2_coords': state['player2_coords'],
-                    'scores': state['scores']
+                    # 'ball_coords': state['ball_coords'],
+                    # 'player1_coords': state['player1_coords'],
+                    # 'player2_coords': state['player2_coords'],
+                    # 'scores': state['scores']
+                    **state
                 },
             )
         except ChannelFull:
@@ -208,6 +214,17 @@ class PongConsumer(AsyncWebsocketConsumer):
             'player2_coords': event['player2_coords'],
             'scores': event['scores']
         }))
+
+    async def new_game(self, event):
+        # Envoyer les mises à jour à WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'game_restarted',
+            'ball_coords': event['ball_coords'],
+            'player1_coords': event['player1_coords'],
+            'player2_coords': event['player2_coords'],
+            'scores': event['scores']
+        }))
+    
     
     async def start_game(self):
         update_interval = 0.05

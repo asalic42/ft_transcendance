@@ -12,7 +12,7 @@ let gameState = {
 	player2_coords: null,
 	ball_coords: null,
 	scores: {
-		p1: 4,
+		p1: 0,
 		p2: 0
 	}
 };
@@ -33,9 +33,12 @@ socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
         console.log("Données reçues :", data);
 
+		console.log("game type: ", data.type);
 		if (data.type == "game_restarted") {
+			// Clean and reset variables
 			context.clearRect(0, 0, table.width, table.height);
-			console.log("SCores: ", gameState.scores.p1);
+			const button = document.getElementById("replay-button");
+    		button.style.display = "none";
 			const winner1Text = document.getElementById("wrapper-player1");
 			const winner2Text = document.getElementById("wrapper-player2");
 
@@ -53,7 +56,7 @@ socket.onmessage = function(event) {
 				player2_coords: null,
 				ball_coords: null,
 				scores: {
-					p1: 4,
+					p1: 0,
 					p2: 0
 				}
 			};
@@ -244,8 +247,6 @@ function newGame(player) {
 function resetGame() {
 	if (socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify({action: "restart_game"}));
-		const button = document.getElementById("replay-button");
-    	button.style.display = "none";
 		console.log("Demande de reset du jeu");
 	} else {
 		console.log("Echec");
