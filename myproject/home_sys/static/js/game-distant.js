@@ -21,9 +21,9 @@ let gameState = {
 const socket = new WebSocket("wss://transcendance.42.paris/ws/pong/");
 
 socket.onopen = function() {
-	console.log("Connexion réussie au WebSocket");
-	console.log("Socket State: " + socket.readyState); // Cela devrait afficher 1 pour ouvert
-	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
+	// console.log("Connexion réussie au WebSocket");
+	// console.log("Socket State: " + socket.readyState); // Cela devrait afficher 1 pour ouvert
+	// console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
 }
 
 let start = Date.now();
@@ -31,11 +31,11 @@ let compteur = 0;
 socket.onmessage = function(event) {
 	try {
         const data = JSON.parse(event.data);
-        console.log("Données reçues :", data);
+        // console.log("Données reçues :", data);
 
 		if (data.type == "game_restarted") {
 			context.clearRect(0, 0, table.width, table.height);
-			console.log("SCores: ", gameState.scores.p1);
+			// console.log("SCores: ", gameState.scores.p1);
 			const winner1Text = document.getElementById("wrapper-player1");
 			const winner2Text = document.getElementById("wrapper-player2");
 
@@ -65,7 +65,7 @@ socket.onmessage = function(event) {
 
 		if (data.number) {
 			currentPlayer = data.number;
-			console.log("Vous etes le joueur numero ", currentPlayer);
+			// console.log("Vous etes le joueur numero ", currentPlayer);
 		}
 
 		if (data.player1_coords) gameState.player1_coords = data.player1_coords;
@@ -90,13 +90,13 @@ socket.onmessage = function(event) {
 				score_p1.innerText = gameState.scores.p1;
 				score_p2.innerText = gameState.scores.p2;
 	
-				console.log(`Scores = ${gameState.scores.p1} || ${gameState.scores.p2}`)
+				// console.log(`Scores = ${gameState.scores.p1} || ${gameState.scores.p2}`)
 				if (gameState.scores.p1 >= 5) {
-					console.log("P1 a gagne !");
+					// console.log("P1 a gagne !");
 					winnerWindow(1);
 				}
 				else if (gameState.scores.p2 >= 5) {
-					console.log("P2 a gagne !");
+					// console.log("P2 a gagne !");
 					winnerWindow(2);
 				}
 			}
@@ -109,13 +109,13 @@ socket.onmessage = function(event) {
 };
 
 socket.onclose = function() {
-	console.log("Deconnexion du socket");
+	// console.log("Deconnexion du socket");
 };
 
 socket.onerror = function(error) {
     console.error("Erreur WebSocket:", error);
-    console.log("Socket State: " + socket.readyState); // Cela peut être utile pour le débogage
-	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
+    // console.log("Socket State: " + socket.readyState); // Cela peut être utile pour le débogage
+	// console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
 };
   
 window.onload = function() {
@@ -180,7 +180,7 @@ function update(gameState) {
 
 	drawBall(gameState.ball_coords);
 
-    console.log('Creating player...');
+    // console.log('Creating player...');
 }
 
 window.addEventListener("keydown", (event) => {
@@ -206,7 +206,7 @@ function sendPlayerMove() {
 
 	 // N'envoyer que si on a des données à envoyer
 	if (Object.keys(moveData).length > 0 && socket.readyState === WebSocket.OPEN) {
-        console.log("Envoi du mouvement:", moveData); // Debug
+        // console.log("Envoi du mouvement:", moveData); // Debug
         socket.send(JSON.stringify(moveData));
     }
 }
@@ -246,8 +246,8 @@ function resetGame() {
 		socket.send(JSON.stringify({action: "restart_game"}));
 		const button = document.getElementById("replay-button");
     	button.style.display = "none";
-		console.log("Demande de reset du jeu");
+		// console.log("Demande de reset du jeu");
 	} else {
-		console.log("Echec");
+		// console.log("Echec");
 	}
 }
