@@ -146,7 +146,7 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 
 	let percentage = (elapsedTime / 16.66).toPrecision(5);
 	ball.vector.vx = ball.const_vector.vx * percentage;
-	ball.vector.vy = ball.const_vector.vy *percentage;
+	ball.vector.vy = ball.const_vector.vy * percentage;
 	player1Coords.vy = player1Coords.const_vy * percentage;
 	player2Coords.vy = player2Coords.const_vy * percentage;
 	start = Date.now();

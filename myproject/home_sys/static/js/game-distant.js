@@ -12,7 +12,7 @@ let gameState = {
 	player2_coords: null,
 	ball_coords: null,
 	scores: {
-		p1: 0,
+		p1: 4,
 		p2: 0
 	}
 };
@@ -26,25 +26,42 @@ socket.onopen = function() {
 	console.log("URL du WebSocket:", socket.url); // Affiche l'URL du WebSocket
 }
 
+let start = Date.now();
+let compteur = 0;
 socket.onmessage = function(event) {
 	try {
         const data = JSON.parse(event.data);
         console.log("Données reçues :", data);
 
-		// if (data.action === "game_restarted") {
-		// 	console.log("Relance du jeu . . .");
+		if (data.type == "game_restarted") {
+			context.clearRect(0, 0, table.width, table.height);
+			console.log("SCores: ", gameState.scores.p1);
+			const winner1Text = document.getElementById("wrapper-player1");
+			const winner2Text = document.getElementById("wrapper-player2");
 
-		// 	context.clearRect(0, 0, table.width, table.height);
-		// 	gameState.player1_coords = null;
-		// 	gameState.player2_coords = null;
-		// 	gameState.ball_coords = null;
-		// 	gameState.scores.p1 = 0;
-		// 	gameState.scores.p2 = 0;
-		// 	score_p1.textContent = 0;
-		// 	score_p2.textContent = 0;
-		// 	currentPlayer = null;
-		// 	keys = {};
-		// }
+			if (gameState.scores.p1 >= 5) {
+				drawOuterRectangle("#365fa0");
+				winner1Text.style.display = "none";
+			}
+			else {
+				drawOuterRectangle("#C42021");
+				winner2Text.style.display = "none";
+			}
+
+			gameState = {
+				player1_coords: null,
+				player2_coords: null,
+				ball_coords: null,
+				scores: {
+					p1: 4,
+					p2: 0
+				}
+			};
+			keys = {};
+			currentPlayer = null;
+			score_p1.innerText = 0;
+			score_p2.innerText = 0;
+		}
 
 		if (data.number) {
 			currentPlayer = data.number;
@@ -57,6 +74,15 @@ socket.onmessage = function(event) {
 		if (data.scores) gameState.scores = data.scores;
 
 		requestAnimationFrame(() => {
+			compteur++;
+
+			let end = Date.now();
+			if (end - start > 1000) {
+				fps.innerText = "Fps: " + compteur;
+				compteur = 0;
+				start = Date.now();
+			}
+
 			context.clearRect(0, 0, table.width, table.height);
 			update(gameState);
 			
@@ -218,6 +244,8 @@ function newGame(player) {
 function resetGame() {
 	if (socket.readyState === WebSocket.OPEN) {
 		socket.send(JSON.stringify({action: "restart_game"}));
+		const button = document.getElementById("replay-button");
+    	button.style.display = "none";
 		console.log("Demande de reset du jeu");
 	} else {
 		console.log("Echec");

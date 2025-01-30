@@ -1,37 +1,49 @@
-import json
-import random
-import asyncio
-from collections import defaultdict
-from channels.exceptions import ChannelFull
-from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.exceptions import ChannelFull
+from collections import defaultdict
+import asyncio
+import random
+import json
+import sys
 
 class PongGame:
 
     # Define default variables
     def __init__(self):
         self.players = {}
+        self.reset_game()
+        self.is_running = False
+
+    def reset_game(self):
         self.ball = {
             'coords': {'x': 960, 'y': 475},
             'vector': {'vx': 20, 'vy': random.randint(-10, 10)},
             'radius': 13
         }
-        self.scores = {'p1': 0, 'p2': 0}
-        self.game_loop = None
-        self.is_running = False
+        self.scores = {'p1': 4, 'p2': 0}
+        for player in self.players.values():
+            player_number = player['number']
+            player['coords'] =  {
+                'x1': 92 if player_number == 1 else 1820,
+                'y1': 435,
+                'x2': 100 if player_number == 1 else 1828,
+                'y2': 515,
+                'vy': 30
+            }
+
 
     # Add player to the game if its possible
     def add_player(self, channel_name):
         if len(self.players) >= 2:
             return False
         
-        player_number =len(self.players) + 1
+        player_number = len(self.players) + 1
         initial_coords = {
             'x1': 92 if player_number == 1 else 1820,
             'y1': 435,
             'x2': 100 if player_number == 1 else 1828,
             'y2': 515,
-            'vy': 20
+            'vy': 30
         }
 
         self.players[channel_name] = {
@@ -61,7 +73,7 @@ class PongGame:
                 player1_coords = player['coords']
             elif player['number'] == 2:
                 player2_coords = player['coords']
-        
+
         return {
             'ball_coords': self.ball['coords'],
             'player1_coords': player1_coords,
@@ -111,27 +123,20 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         self.game.remove_player(self.channel_name)
         self.game.is_running = False
-
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
         print(f"Player disconnected: {self.channel_name}")
-        
 
     async def receive(self, text_data):
-        if not self.game.is_running:
-            return
+        # sys.stdout.flush()
         try:
             data = json.loads(text_data)
 
-            # if data["action"] == "restart_game":
-            # Réinitialiser les valeurs côté serveur
-            # self.game_state["scores"] = {"p1": 0, "p2": 0}
-            # self.game_state["player1_coords"] = {"y1": 400, "y2": 480}
-            # self.game_state["player2_coords"] = {"y1": 400, "y2": 480}
-            # self.game_state["ball_coords"] = {"x": 475, "y": 475}
-
+            if not self.game.is_running:
+                await self.receive_restarted(data)
+                return
             
             player_number = self.game.players[self.channel_name]['number']
             current_coords = self.game.players[self.channel_name]['coords']
@@ -144,8 +149,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 current_coords['y1'] = new_y1
                 current_coords['y2'] = new_y1 + 80
 
-                print(f"Maj coords Player 1: {current_coords}")
-
             # Si player == 2 on accepte ses nouvelles coords
             elif player_number == 2 and 'player2_coords' in data:
                 new_y1 = current_coords['y1'] + data['player2_coords']['y1']
@@ -154,14 +157,33 @@ class PongConsumer(AsyncWebsocketConsumer):
                 current_coords['y1'] = new_y1
                 current_coords['y2'] = new_y1 + 80
 
-                print(f"Maj coords Player 2: {current_coords}")
-
             self.game.update_player_coords(self.channel_name, current_coords)
             await self.send_game_state()
 
         except Exception as e:
             print(f"Erreur inattendue: {str(e)}")
         
+    async def receive_restarted(self, data):
+        try:
+            if data['action'] == "restart_game":
+                self.game.reset_game()
+                self.game.is_running = True
+
+                game_state = self.game.get_game_state()
+
+                await self.send(text_data=json.dumps({
+                    'type': 'game_restarted',
+                    'ball_coords': game_state['ball_coords'],
+                    'player1_coords': game_state['player1_coords'],
+                    'player2_coords': game_state['player2_coords'],
+                    'scores': game_state['scores']
+                }))
+                asyncio.create_task(self.start_game())
+                return
+        except json.JSONDecodeError:
+            print("Invalid Error JSON")
+            return
+
     async def send_game_state(self):
         try:
             state = self.game.get_game_state()
@@ -190,6 +212,8 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def start_game(self):
         update_interval = 0.05
         last_update = asyncio.get_event_loop().time()
+        print("\033[0;34m Demarrage du jeu ! \033[0m")
+        sys.stdout.flush()
 
         while self.game.is_running and len(self.game.players) == 2:
             current_time = asyncio.get_event_loop().time()
@@ -212,7 +236,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                     if (player['number'] == 1 and
                         ball['coords']['x'] - ball['radius'] >= coords['x1'] and
-                        ball['coords']['x'] - ball['radius'] <= coords['x2'] + abs(ball['vector']['vx'] *1) and
+                        ball['coords']['x'] - ball['radius'] <= coords['x2'] + abs(ball['vector']['vx'] * 1.05) and
                         ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] / 2 and
                         ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2):
 
@@ -225,6 +249,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                           ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] /2 and
                           ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2 ):
                         print("Collision joueur 2")
+                        sys.stdout.flush()
                         ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1) 
 
                 # Player add score
