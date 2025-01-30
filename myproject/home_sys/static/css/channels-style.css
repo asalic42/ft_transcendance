@@ -67,6 +67,7 @@ h1 {
     margin-left: 15px;
     font-family: 'Thunder';
     font-size: 25px;
+	background: none;
 }
 
  /* Actual chan here + scrollbar */
