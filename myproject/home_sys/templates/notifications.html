@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+    <div class="friends_and_blocked_user">
+        <!-- FRIENDS -->
+        <div class="friends_box">
+            <h2>FRIENDS</h2>
+
+            {% for other_user in users.friends.all %}
+            <div class="if_founded">
+                <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+
+                <p class="user-username">{{ other_user }} </p>
+                <button class="remove-friend" data-username="{{ other_user }}">Remove</button>
+            </div>
+            {% empty %}
+            <div class="if_not_founded">
+                <p>No friends</p>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <!-- BLOCKED -->
+        <div class="blocked_box">
+            <h2>BLOCKED</h2>
+
+            {% for other_user in users.blocked.all %}
+            <div class="if_founded">
+                <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+
+                <p class="user-username">{{ other_user }} </p>
+                <button class="remove-user-blocked" data-username="{{ other_user }}">Remove</button>
+            </div>
+            {% empty %}
+            <div class="if_not_founded">
+                <p>No user blocked</p>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <div class="friend_request_box">
+        <h2>FRIENDS REQUEST</h2>
+
+        {% for other_user in users.friends_request.all %}
+        <div class="if_founded">
+            <!-- Afficher la photo de profil de l'utilisateur -->
+            <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+
+            <!-- Afficher le nom d'utilisateur -->
+            <p class="user-username">{{ other_user }} </p>
+
+            <!-- Boutons pour accepter, refuser ou bloquer -->
+            <button class="add-it" data-username="{{ other_user }}">Accept</button>
+            <button class="decline-it" data-username="{{ other_user }}">Decline</button>
+            <button class="block-it" data-username="{{ other_user }}">Block</button>
+        </div>
+        {% empty %}
+        <div class="if_not_founded">
+            <p>No friends requests</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <style>
+
+        body {
+            background-color: var(--bg-site);
+            color: #d8d8d8;
+        }
+
+        .friends_and_blocked_user {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-bottom: 20px
+        }
+
+        .friends_box,
+        .blocked_box {
+            width: 550px;
+            height: auto;
+            border: 2px solid black;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            background-color: #23232e;
+        }
+
+        .blocked_box {
+            margin-left: 40px;
+        }
+
+        .friend_request_box {
+            width: auto;
+            height: auto;
+            border: 2px solid black;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            background-color: #23232e;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .if_founded {
+            display: flex; /* Afficher les éléments en ligne */
+            align-items: center; /* Centrer verticalement les éléments */
+            gap: 10px; /* Espacement entre les éléments */
+            padding: 10px;
+            border-top: 2px solid black;
+            background-color: #141418;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .if_not_founded {
+            text-align: center;
+        }
+
+        .user-pp {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid black;
+        }
+
+        .user-username {
+            font-size: 18px;
+            margin: 0; /* Supprimer la marge pour un meilleur alignement */
+        }
+
+        button {
+            padding: 5px 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-it {
+            background-color: green;
+            color: white;
+        }
+
+        .decline-it {
+            background-color: orange;
+            color: white;
+        }
+
+        .block-it,
+        .remove-friend,
+        .remove-user-blocked {
+            background-color: red;
+            color: white;
+        }
+
+        .add-it,
+        .decline-it,
+        .block-it,
+        .remove-friend,
+        .remove-user-blocked {
+            transition: all 0.1s ease;
+        }
+
+        .add-it:hover,
+        .decline-it:hover,
+        .block-it:hover,
+        .remove-friend:hover,
+        .remove-user-blocked:hover {
+            scale: 1.1;
+        }
+
+    </style>
+
+    <script>
+
+        function getResponse(baliseName, url, dataStatus, msgStart, msgEnd)
+        {
+            document.querySelectorAll(`${baliseName}`).forEach(button => {
+                button.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    fetch(`/accounts/${url}/${username}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === `${dataStatus}`) {
+                            alert(`${msgStart} ${username} ${msgEnd}`);
+                            location.reload(); // Recharger la page pour mettre à jour la liste
+                        } else {
+                            alert('Erreur : ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Erreur:', error));
+                });
+            });
+        }
+
+        getResponse(".add-it", "accept_friend_request", "friend_added", "Vous êtes maintenant ami avec", ".");
+        getResponse(".decline-it", "decline_friend_request", "friend_request_declined", "Demande d'ami de", "refusée.");
+        getResponse(".block-it", "block_user", "user_blocked", "Utilisateur", "bloqué.");
+        getResponse(".remove-friend", "remove_friend", "user_removed", "", "n'est désormait plus votre ami.");
+        getResponse(".remove-user-blocked", "remove_blocked_user", "blocked_user_removed", "Le user", "est débloqué.");
+
+
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [cookieName, cookieValue] = cookie.trim().split('=');
+                if (cookieName === name) {
+                    return decodeURIComponent(cookieValue);
+                }
+            }
+            return null;
+        }
+    </script>
+
+{% endblock %}

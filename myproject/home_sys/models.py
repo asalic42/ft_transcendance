@@ -10,7 +10,11 @@ class Users(models.Model):
 	pseudo = models.CharField(max_length=100, blank=True, null=True, default='pseudotest')
 	date = models.DateTimeField(auto_now_add = True)
 	image = models.ImageField(upload_to='profile_pics/', default='profile_pics/basePP.png')
-	#image = models.CharField(max_length = 255, default = 'static/images/basePP.png')
+	
+	friends = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_friends')
+	friends_request = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_friend_requests')
+	blocked = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_blocked')
+
 	status = models.BooleanField(default = True)
 	win_nb = models.IntegerField(default = 0)
 	lose_nb = models.IntegerField(default = 0)
