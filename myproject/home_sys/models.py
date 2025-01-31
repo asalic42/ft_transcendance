@@ -46,13 +46,15 @@ class UserAchievements(models.Model):
 
 class Pong(models.Model):
 	id = models.AutoField(primary_key = True)
-	id_p1 = models.IntegerField()
-	id_p2 = models.IntegerField()
+	id_p1 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='pong_games_as_p1')
+	id_p2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='pong_games_as_p2', null=True, blank=True)
+	is_bot_game = models.BooleanField(default=False)  # Indique si c'est contre un bot	score_p1 = models.IntegerField()
 	score_p1 = models.IntegerField()
 	score_p2 = models.IntegerField()
 	date = models.DateTimeField(auto_now_add = True)
 	difficulty = models.IntegerField()
-	bounce_nb = models.IntegerField()
+	bounce_nb = models.IntegerField()    
+    
 
 class Tournaments(models.Model):
 	idTournaments = models.IntegerField()
@@ -65,7 +67,7 @@ class MatchsTournaments(models.Model):
 
 class SoloCasseBrique(models.Model):
 	id = models.AutoField(primary_key = True)
-	id_player = models.IntegerField()
+	id_player = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='S_CB_games')
 	id_map = models.IntegerField()
 	score = models.IntegerField()
 	date = models.DateTimeField(auto_now_add = True)
@@ -76,8 +78,8 @@ class Maps(models.Model):
 
 class MultiCasseBrique(models.Model):
 	id = models.AutoField(primary_key = True)
-	id_p1 = models.IntegerField()
-	id_p2 = models.IntegerField()
+	id_p1 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_games_as_p1')
+	id_p2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_games_as_p2')
 	score_p1 = models.IntegerField()
 	score_p2 = models.IntegerField()
 	date = models.DateTimeField(auto_now_add = True)

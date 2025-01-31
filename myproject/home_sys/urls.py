@@ -7,7 +7,7 @@ urlpatterns = [
     path('deleteAccount/', delete_account, name='delete_account'),
     path('deleteSuccess/', delete_success, name='delete_success'),
     path('unavailable/', service_unavailable, name='unavailable'),
-    path('profile/', profile_page, name='profile'),
+    # path('profile/', profile_page, name='profile'),
     path('channels/', channels_page, name='channels'),
     path('game-choice/', game_choice_page, name='game-choice'),
     path('game-mode-pong/', game_mode_pong_page, name='game-mode-pong'),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('user-settings/check_pp/<int:idU>/', check_pp, name='check_pp'),
     path('update-user/', update_user_info, name='update_user_info'),
     path('upload-avatar/', upload_avatar, name='upload_avatar'),
-    path('profile-user/<str:username>/', profile_view, name='profile'),
+    path('profile/<str:username>/', profile_view, name='profile'),
 	
 	# Channels URLs
 	path('api/post_chan/', post_chan, name="post_chan"),

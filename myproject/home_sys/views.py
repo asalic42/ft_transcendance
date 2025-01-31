@@ -144,6 +144,10 @@ def get_current_user_id(request):
 def add_solo_casse_brique(request):
 	try:
 		data = json.loads(request.body)
+
+		user = Users.objects.get(user_id=data.get('id_p1'))
+		data['id_player'] = user
+
 		new_game = SoloCasseBrique.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
 			'id': new_game.id,
@@ -160,19 +164,29 @@ def add_solo_casse_brique(request):
 def add_pong(request):
 	try:
 		data = json.loads(request.body)
+		# Récupérer l'utilisateur correspondant à l'ID
+		user = Users.objects.get(user_id=data.get('id_p1'))
+		if data['id_p2'] is not None:
+			data['id_p2'] = Users.objects.get(user_id=data.get('id_p2'))
+
+		# Remplacer l'ID par l'objet Users
+		data['id_p1'] = user
+		
 		new_game = Pong.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
-			'id_p1': new_game.id_p1,
-			'id_p2': new_game.id_p2,
+			'id_p1': new_game.id_p1.id,
+			'id_p2': new_game.id_p2.id if new_game.id_p2 else None,
+			'is_bot_game': new_game.is_bot_game,
 			'score_p1': new_game.score_p1,
 			'score_p2': new_game.score_p2,
 			'date': new_game.date.isoformat(),
 			'difficulty': new_game.difficulty,
 			'bounce_nb': new_game.bounce_nb,
 		}}, status=201)
+	except Users.DoesNotExist:
+		return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-
 
 def map_view(request, map_id):
 	# Spécifiez le chemin de votre fichier .txt
@@ -416,10 +430,37 @@ def upload_avatar(request):
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 
+from django.shortcuts import redirect
+
 @login_required
 def profile_view(request, username):
-	user = get_object_or_404(User, username=username)
-	return render(request, 'profile-other-user.html', {'profile_user': user})
+    # Si aucun username n'est fourni, utiliser l'utilisateur connecté
+    if not username:
+        return redirect('profile', username=request.user.username)
+    
+    try:
+        user = User.objects.get(username=username)
+        users_profile = Users.objects.get(user=user)
+        
+        games_P = Pong.objects.filter(
+            models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
+        ).order_by('-date')
+        
+        games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+        games_M_CB = MultiCasseBrique.objects.filter(
+            models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
+        ).order_by('-date')
+
+        return render(request, 'profile.html', {
+            'user': user,
+            'games_P': games_P,
+            'games_S_CB': games_S_CB,
+            'games_M_CB': games_M_CB
+        })
+        
+    except User.DoesNotExist:
+        return redirect('home')
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):

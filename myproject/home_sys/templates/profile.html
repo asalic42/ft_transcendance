@@ -6,7 +6,6 @@
 
     <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
-
     <div class="profile-container">
 
         <div class="profile-box">
@@ -15,9 +14,9 @@
 
             {% if request.user.is_authenticated %}
                 <div class="profile-user-info">
-                    <span class="profile-username" style="color: black">👩‍🦲 : {{ request.user.username }}</span>
-                    <span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }}</span>
-                    <span class="profile-email" style="color: black">📧 : {{ request.user.email }}</span>
+                    <span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
+                    <span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
+                    <span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
                 </div>
             {% else %}
                 <p>Vous n'êtes pas connecté.</p>
@@ -55,10 +54,15 @@
             justify-content: center; /* Centre le contenu verticalement */
             align-items: center; /* Centre le contenu horizontalement */
             text-align: center; /* Centre le texte à l'intérieur */
-            box-shadow: -10px 10px black;
-            transform: translateX(5px) translateY(-5px);
+            box-shadow: -10px 10px #14141e;
             background: linear-gradient(to right, #aa3196, #9159c0);
+			transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
         }
+
+		.profile-box:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
+		}
 
         .profile-separator {
             position: absolute;
@@ -130,16 +134,156 @@
             margin-top: -20px;
             background: linear-gradient(to right, #aa3196, #721bb9);
             border-radius: 10px;
-            transition: all 0.2s ease-out;
+            {% comment %} transition: all 0.2s ease-out; {% endcomment %}
         }
 
         .profile-go-to-settings:hover {
             cursor: pointer;
-            box-shadow: -5px 5px ;
-            transform: translateX(5px) translateY(-5px);
+            {% comment %} box-shadow: -5px 5px ; {% endcomment %}
+            {% comment %} transform: translateX(5px) translateY(-5px); {% endcomment %}
         }
 
 
     </style>
+	<div class="game-history-container">
+        <h2>Historique des parties</h2>
+        
+        <div class="game-history-section">
+            <h3>Parties Pong</h3>
+            {% if games_P %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Adversaire</th>
+                            <th>Score</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for game in games_P %}
+                        <tr>
+                            <td>{{ game.date|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if game.is_bot_game %}
+                                    Bot (Niveau {{ game.difficulty }})
+                                {% elif game.id_p1 == user.users %}
+                                    {{ game.id_p2.name }}
+                                {% else %}
+                                    {{ game.id_p1.name }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if game.id_p1 == user.users %}
+                                    {{ game.score_p1 }} - {{ game.score_p2 }}
+                                {% else %}
+                                    {{ game.score_p2 }} - {{ game.score_p1 }}
+                                {% endif %}
+                            </td>
+                            <td>{% if game.is_bot_game %}Bot{% else %}Joueur{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aucune partie Pong jouée</p>
+            {% endif %}
+        </div>
 
+        <div class="game-history-section">
+            <h3>Parties Solo Casse-Briques</h3>
+            {% if games_S_CB %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Carte</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for game in games_S_CB %}
+                        <tr>
+                            <td>{{ game.date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ game.id_map }}</td>
+                            <td>{{ game.score }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aucune partie Solo Casse-Briques jouée</p>
+            {% endif %}
+        </div>
+
+        <div class="game-history-section">
+            <h3>Parties Multi Casse-Briques</h3>
+            {% if games_M_CB %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Adversaire</th>
+                            <th>Score</th>
+                            <th>Carte</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for game in games_M_CB %}
+                        <tr>
+                            <td>{{ game.date|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if game.id_p1 == user.users %}
+                                    {{ game.id_p2.name }}
+                                {% else %}
+                                    {{ game.id_p1.name }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if game.id_p1 == user.users %}
+                                    {{ game.score_p1 }} - {{ game.score_p2 }}
+                                {% else %}
+                                    {{ game.score_p2 }} - {{ game.score_p1 }}
+                                {% endif %}
+                            </td>
+                            <td>{{ game.map }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aucune partie Multi Casse-Briques jouée</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        .game-history-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 10px;
+			color: black;
+        }
+
+        .game-history-section {
+            margin-bottom: 20px;
+        }
+
+        .game-history-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .game-history-section table th, 
+        .game-history-section table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .game-history-section table thead {
+            background-color: #f2f2f2;
+        }
+    </style>
 {% endblock %}

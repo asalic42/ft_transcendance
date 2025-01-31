@@ -393,7 +393,8 @@ async function addNewGame(id_player) {
 			},
 			body: JSON.stringify({  // Convertit les données en JSON
 				id_p1: id_player,
-				id_p2: -1,
+				id_p2: null,
+				is_bot_game: true,
 				score_p1: count_p1,
 				score_p2: count_p2,
 				difficulty: user_option,
