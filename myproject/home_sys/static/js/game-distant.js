@@ -12,7 +12,7 @@ let gameState = {
 	player2_coords: null,
 	ball_coords: null,
 	scores: {
-		p1: 4,
+		p1: 0,
 		p2: 0
 	}
 };
@@ -53,7 +53,7 @@ socket.onmessage = function(event) {
 				player2_coords: null,
 				ball_coords: null,
 				scores: {
-					p1: 4,
+					p1: 0,
 					p2: 0
 				}
 			};
@@ -74,6 +74,7 @@ socket.onmessage = function(event) {
 		if (data.scores) gameState.scores = data.scores;
 
 		requestAnimationFrame(() => {
+			sendPlayerMove();
 			compteur++;
 
 			let end = Date.now();
@@ -185,7 +186,6 @@ function update(gameState) {
 
 window.addEventListener("keydown", (event) => {
     keys[event.key] = true;
-	sendPlayerMove();
 });
 
 window.addEventListener("keyup", (event) => {
@@ -194,8 +194,8 @@ window.addEventListener("keyup", (event) => {
 
 function sendPlayerMove() {
 	const moveData = {};
-	if (keys["ArrowUp"] || keys["ArrowDown"]) {
-		const moveValue = keys["ArrowUp"] ? -20 : 20;
+	if (keys["z"] || keys["s"]) {
+		const moveValue = keys["z"] ? -10 : 10;
 
 		if (currentPlayer === 1) {
 			moveData.player1_coords = { y1: moveValue };			
