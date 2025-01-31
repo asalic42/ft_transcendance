@@ -13,6 +13,7 @@ class PongGame:
         self.players = {}
         self.reset_game()
         self.is_running = False
+        self.multiplyer = 0
 
     def reset_game(self):
         self.ball = {
@@ -49,7 +50,7 @@ class PongGame:
             'y1': 435,
             'x2': 100 if player_number == 1 else 1828,
             'y2': 515,
-            'vy': 30
+            'vy': 10
         }
 
         self.players[channel_name] = {
@@ -149,7 +150,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             # Si player == 1 on accepte ses nouvelles coords
             if player_number == 1 and 'player1_coords' in data:
-                new_y1 = current_coords['y1'] + data['player1_coords']['y1']
+                new_y1 = current_coords['y1'] + (data['player1_coords']['y1'] * self.game.multiplyer)
                 new_y1 = max(0, min(new_y1, 870))
 
                 current_coords['y1'] = new_y1
@@ -157,7 +158,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             # Si player == 2 on accepte ses nouvelles coords
             elif player_number == 2 and 'player2_coords' in data:
-                new_y1 = current_coords['y1'] + data['player2_coords']['y1']
+                new_y1 = current_coords['y1'] + (data['player2_coords']['y1'] * self.game.multiplyer)
                 new_y1 = max(0, min(new_y1, 870))
 
                 current_coords['y1'] = new_y1
@@ -231,16 +232,16 @@ class PongConsumer(AsyncWebsocketConsumer):
         last_update = asyncio.get_event_loop().time()
         print("\033[0;34m Demarrage du jeu ! \033[0m")
         sys.stdout.flush()
-
         while self.game.is_running and len(self.game.players) == 2:
+            update_interval = 0.016 # 60 FPS
             current_time = asyncio.get_event_loop().time()
-
+            # current_time.set_debug(True)
             if current_time - last_update >= update_interval:
                 ball = self.game.ball
 
                 # Maj ball coords
-                ball['coords']['x'] += ball['vector']['vx']
-                ball['coords']['y'] += ball['vector']['vy']
+                ball['coords']['x'] += ball['vector']['vx'] * self.game.multiplyer
+                ball['coords']['y'] += ball['vector']['vy'] * self.game.multiplyer
 
                 # Collision ball with wall
                 if (ball['coords']['y'] - ball['radius'] <= 0 or
@@ -257,7 +258,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                         ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] / 2 and
                         ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2):
 
-                        print("Collision joueur 1")
+                        # print("Collision joueur 1")
                         ball['vector']['vx'] = abs(ball['vector']['vx']) +1
 
                     elif (player['number'] == 2 and
@@ -265,29 +266,32 @@ class PongConsumer(AsyncWebsocketConsumer):
                           ball['coords']['x'] + ball['radius'] <= coords['x2'] and
                           ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] /2 and
                           ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2 ):
-                        print("Collision joueur 2")
+                        # print("Collision joueur 2")
                         sys.stdout.flush()
                         ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1) 
 
                 # Player add score
                 if ball['coords']['x'] + ball['radius'] >= 1920:
                     self.game.scores['p1'] += 1
-                    self.reset_ball(-20)
+                    self.reset_ball(-10)
                 elif ball['coords']['x'] - ball['radius'] <= 0:
                     self.game.scores['p2'] += 1
-                    self.reset_ball(20)
+                    self.reset_ball(10)
 
                 if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
                     self.game.is_running = False
 
                 try:
                     await self.send_game_state()
+                    elapsed = asyncio.get_event_loop().time() - current_time
+                    remaining_time = update_interval - elapsed
+                    self.game.multiplyer = remaining_time / update_interval
+                    if remaining_time > 0:
+                        await asyncio.sleep(remaining_time)  # ⬅️ LE SLEEP EST ICI !
                 except ChannelFull:
                     print("Channel full, skipping update")
                 
                 last_update = current_time
-
-            await asyncio.sleep(0.01)
     
     def reset_ball(self, direction):
         self.game.ball['coords'] = {'x': 960, 'y': 475}
