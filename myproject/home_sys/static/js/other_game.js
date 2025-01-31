@@ -32,11 +32,12 @@ let cachedUserId = null;
 
 //! Init
 
+var selectedMap;
 mapSelection.addEventListener('click', (event) => {
 	if (event.target.tagName === 'BUTTON') {
-	  const selectedMap = event.target.dataset.map;
-	  console.log(selectedMap)
-	  launch(selectedMap);
+		selectedMap = event.target.dataset.map
+		console.log(selectedMap)
+		launch(selectedMap);
 	}
 });
 
@@ -280,7 +281,7 @@ function isBallHittingblock(ball) {
 			incrementBallSpeed(ball);
 
 			block_arr[k].state--;
-			count += Math.abs(4 - block_arr[k].state);
+			count += Math.abs(5 - block_arr[k].state);
 			break;
 		}
 	}
@@ -363,11 +364,10 @@ async function winnerWindow() {
 			return;
 		}
 		
-		var mapId = 1;
-		console.log(playerId, count, mapId);
+		console.log(playerId, count);
 
 		// Attendre que l'ajout du score soit terminé
-		await addNewGame(playerId, mapId, count);
+		await addNewGame(playerId, count);
 		
 	} catch (error) {
 		console.error('Erreur lors de la sauvegarde du score:', error);
@@ -471,7 +471,7 @@ async function getCurrentPlayerId() {
 	}
 }
 
-async function addNewGame(id_player, id_map, score) {
+async function addNewGame(id_player, score) {
 	console.log("Appel de addnewgame");
 	try {
 		const response = await fetch('/accounts/api/add_solo_casse_brique/', {
@@ -481,7 +481,7 @@ async function addNewGame(id_player, id_map, score) {
 			},
 			body: JSON.stringify({  // Convertit les données en JSON
 				id_player: id_player,
-				id_map: id_map,
+				id_map: mapSelection,
 				score: score
 			})
 		});

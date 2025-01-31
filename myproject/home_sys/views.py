@@ -145,13 +145,13 @@ def add_solo_casse_brique(request):
 	try:
 		data = json.loads(request.body)
 
-		user = Users.objects.get(user_id=data.get('id_p1'))
+		user = Users.objects.get(user_id=data.get('id_player'))
 		data['id_player'] = user
 
 		new_game = SoloCasseBrique.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
 			'id': new_game.id,
-			'id_player': new_game.id_player,
+			# 'id_player': new_game.id_player,
 			'id_map': new_game.id_map,
 			'score': new_game.score,
 			'date': new_game.date.isoformat(),
