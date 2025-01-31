@@ -31,18 +31,22 @@
 	text-align: center;
 	position: relative;	
 	box-sizing: border-box;
-	top: 250px;
+	top: 200px;
 	width: 70%;
 	border: 3px solid #ED4EB0;
 	border-radius: 50px;
-	display: block;
 	margin-left: auto;
-    margin-right: auto;
-	background-color: #23232e;
+	margin-right: auto;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	background: linear-gradient(to bottom right, #232330, #14141e);
 }
 
 .title {
 	color: var(--font-color);
+	width: 100%;
 	font-size: 	70px;
 }
 
@@ -59,15 +63,15 @@
 	text-align: center;
 	justify-content: center;
 	align-items: center;
-    cursor: pointer;
+	cursor: pointer;
 	display: flex;
 	width: 200px;
 	height: 60px;
-    border-radius: 10px;
-    outline: 3px solid #ED4EB0;
+	border-radius: 10px;
+	outline: 3px solid #ED4EB0;
 	font-size: 32px;
 	background-color: #141418;
-    color: rgba(237, 78, 176, 0.9);
+	color: rgba(237, 78, 176, 0.9);
 	border: none;
 }
 
@@ -85,9 +89,6 @@
 }
 
 /* Stylisation du jeu */
-body{
-	background-color: var(--bg-site) ;
-}
 
 #game {
 	width: 100%;
@@ -205,3 +206,29 @@ svg text {
 	display: block;
 	position: absolute;
 };
+
+.retour {
+	height: 10%;
+	padding-right: 85%;
+	top: 30px;
+	position: relative;
+}
+
+#retour {
+	width: 100px;
+	height: 30px;
+	border-radius: 5px;
+	outline: 3px solid #ED4EB0;
+	font-size: 20px;
+}
+
+.retour {
+	height: 10%;
+	padding-right: 85%;
+	top: 30px;
+	position: relative;
+}
+
+a {
+	text-decoration: none;
+}

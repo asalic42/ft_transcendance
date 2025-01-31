@@ -12,16 +12,26 @@ body {
 	background-color: var(--bg-site);
 }
 
+.retour {
+    height: 10%;
+	padding-right: 85%;
+    top: 30px;
+    position: relative;
+}
+
 .page {
 	font-family: 'Thunder-VF';
 	text-align: center;
 	position: relative;	
 	box-sizing: border-box;
-	top: 250px;
+	top: 200px;
 	width: 70%;
 	border: 3px solid #ED4EB0;
 	border-radius: 50px;
-	display: block;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
 	margin-left: auto;
     margin-right: auto;
 	background: linear-gradient(to bottom right, #232330, #14141e);
@@ -30,6 +40,7 @@ body {
 .title {
 	color: var(--font-color);
 	font-size: 	70px;
+	width: 100%;
 }
 
 .mode-choices {
@@ -70,4 +81,12 @@ body {
 
 a {
 	text-decoration: none;
+}
+
+#retour {
+	width: 100px;
+	height: 30px;
+    border-radius: 5px;
+    outline: 3px solid #ED4EB0;
+	font-size: 20px;
 }
