@@ -120,24 +120,37 @@ class PongConsumer(AsyncWebsocketConsumer):
             'scores': initial_state_game['scores']
         }))
 
-        print(f"Player {player_number} connected: {self.channel_name}")
-
         if len(self.game.players) == 2 and not self.game.is_running:
             self.game.is_running = True
             asyncio.create_task(self.start_game())
 
 
     async def disconnect(self, close_code):
+
+        loser = self.game.players[self.channel_name]['number']
+        await self.channel_layer.group_send(
+            self.room_group_name, {
+                'type': 'game_won',
+                'loser': loser 
+            }
+        )
         self.game.remove_player(self.channel_name)
         self.game.is_running = False
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
-        print(f"Player disconnected: {self.channel_name}")
+        print("Player disco")
+
+    async def game_won(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'game_won',
+            'loser': event['loser']
+        }))
+        print("MEssage ENVOYE")
+        sys.stdout.flush()
 
     async def receive(self, text_data):
-        # sys.stdout.flush()
         try:
             data = json.loads(text_data)
 
@@ -151,7 +164,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             # Si player == 1 on accepte ses nouvelles coords
             if player_number == 1 and 'player1_coords' in data:
                 new_y1 = current_coords['y1'] + (data['player1_coords']['y1'] * self.game.multiplyer)
-                new_y1 = max(0, min(new_y1, 870))
+                new_y1 = max(10, min(new_y1, 860))
 
                 current_coords['y1'] = new_y1
                 current_coords['y2'] = new_y1 + 80
@@ -159,7 +172,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             # Si player == 2 on accepte ses nouvelles coords
             elif player_number == 2 and 'player2_coords' in data:
                 new_y1 = current_coords['y1'] + (data['player2_coords']['y1'] * self.game.multiplyer)
-                new_y1 = max(0, min(new_y1, 870))
+                new_y1 = max(10, min(new_y1, 860))
 
                 current_coords['y1'] = new_y1
                 current_coords['y2'] = new_y1 + 80
@@ -196,10 +209,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name, {
                     'type': 'game_update',
-                    # 'ball_coords': state['ball_coords'],
-                    # 'player1_coords': state['player1_coords'],
-                    # 'player2_coords': state['player2_coords'],
-                    # 'scores': state['scores']
                     **state
                 },
             )
@@ -235,7 +244,6 @@ class PongConsumer(AsyncWebsocketConsumer):
         while self.game.is_running and len(self.game.players) == 2:
             update_interval = 0.016 # 60 FPS
             current_time = asyncio.get_event_loop().time()
-            # current_time.set_debug(True)
             if current_time - last_update >= update_interval:
                 ball = self.game.ball
 
@@ -258,17 +266,17 @@ class PongConsumer(AsyncWebsocketConsumer):
                         ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] / 2 and
                         ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2):
 
-                        # print("Collision joueur 1")
-                        ball['vector']['vx'] = abs(ball['vector']['vx']) +1
+                        if ball['vector']['vx'] > -25 and ball['vector']['vx'] < 25:
+                            ball['vector']['vx'] = abs(ball['vector']['vx']) +1
 
                     elif (player['number'] == 2 and
                           ball['coords']['x'] + ball['radius'] >= coords['x1'] - abs(ball['vector']['vx'] *1) and
                           ball['coords']['x'] + ball['radius'] <= coords['x2'] and
                           ball['coords']['y'] - ball['radius'] <= coords['y2'] + ball['radius'] /2 and
                           ball['coords']['y'] + ball['radius'] >= coords['y1'] - ball['radius'] / 2 ):
-                        # print("Collision joueur 2")
-                        sys.stdout.flush()
-                        ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1) 
+                        
+                        if ball['vector']['vx'] > -25 and ball['vector']['vx'] < 25:
+                            ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1)
 
                 # Player add score
                 if ball['coords']['x'] + ball['radius'] >= 1920:
@@ -295,4 +303,4 @@ class PongConsumer(AsyncWebsocketConsumer):
     
     def reset_ball(self, direction):
         self.game.ball['coords'] = {'x': 960, 'y': 475}
-        self.game.ball['vector'] = {'vx': direction, 'vy': random.randint(-10, 10)}
+        self.game.ball['vector'] = {'vx': direction, 'vy': self.game.get_random_arbitrary(-10, 10)}

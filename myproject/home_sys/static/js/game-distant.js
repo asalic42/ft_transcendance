@@ -5,6 +5,7 @@ var score_p1 = document.getElementById("scoreP1");
 var score_p2 = document.getElementById("scoreP2");
 var fps = document.getElementById("fps");
 var game = document.getElementById("game");
+var disconnected = document.getElementById("disconnected");
 const keys = {};                        // Players bars
 let currentPlayer = null;
 let gameState = {
@@ -31,12 +32,23 @@ let compteur = 0;
 socket.onmessage = function(event) {
 	try {
         const data = JSON.parse(event.data);
-        // console.log("Données reçues :", data);
 
 		console.log("game type: ", data.type);
-		if (data.type == "game_restarted") {
+		if (data.type == "game_won"){
+			console.log("loser = ", data.loser);
+			if (data.loser == 2)
+				winnerWindow(1);
+			else 
+				winnerWindow(2);
+			disconnected.style.display = "block";
+		}
+		
+		else if (data.type == "game_restarted") {
 			// Clean and reset variables
 			context.clearRect(0, 0, table.width, table.height);
+			if (disconnected.style.display === "block") {
+				disconnected.style.display = "none";
+			}
 			const button = document.getElementById("replay-button");
     		button.style.display = "none";
 			const winner1Text = document.getElementById("wrapper-player1");
@@ -113,7 +125,7 @@ socket.onmessage = function(event) {
 };
 
 socket.onclose = function() {
-	// console.log("Deconnexion du socket");
+	console.log("Deconnexion du socket");
 };
 
 socket.onerror = function(error) {
@@ -197,8 +209,8 @@ window.addEventListener("keyup", (event) => {
 
 function sendPlayerMove() {
 	const moveData = {};
-	if (keys["z"] || keys["s"]) {
-		const moveValue = keys["z"] ? -10 : 10;
+	if (keys["ArrowUp"] || keys["ArrowDown"]) {
+		const moveValue = keys["ArrowUp"] ? -10 : 10;
 
 		if (currentPlayer === 1) {
 			moveData.player1_coords = { y1: moveValue };			
@@ -209,7 +221,6 @@ function sendPlayerMove() {
 
 	 // N'envoyer que si on a des données à envoyer
 	if (Object.keys(moveData).length > 0 && socket.readyState === WebSocket.OPEN) {
-        // console.log("Envoi du mouvement:", moveData); // Debug
         socket.send(JSON.stringify(moveData));
     }
 }
