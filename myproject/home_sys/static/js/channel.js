@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	liveChan = setInterval(() => {
 		loadChannels();
-	}, 100);
+	}, 500);
 	const newChan = document.getElementById('new-chan');
 	const newFren = document.getElementById('add-friend-chan');
 	// const inviteButton = document.getElementById('add-friend-chan');
@@ -154,7 +154,7 @@ async function openCenter(nameChan) {
 
 	liveChat = setInterval(() => {
 		liveChatFetch();
-	}, 100);
+	}, 500);
 }
 
 	// Cliquer sur un channel deja creer
@@ -363,7 +363,7 @@ async function addMessage(mess, sender, id) {
 	const messImage = document.getElementById('caca');
 	usernameElement.addEventListener('click', async function() {
 		alert('Image clicked!');
-		window.location.href = `/accounts/profile-user/${sender}`;
+		window.location.href = `/accounts/profile/${sender}`;
 	});
 
 	chatPage.scrollTop = chatPage.scrollHeight;

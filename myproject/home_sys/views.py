@@ -214,7 +214,7 @@ def live_chat(request):
 	if not channel:
 		return JsonResponse({'status': 'error', 'message': 'Channel name is required'}, status=400)
 
-	new_message = Messages.objects.filter(channel_name=channel)
+	new_message = Messages.objects.filter(channel_name=channel).order_by('id')
 	if last_message and last_message != "0":
 		try:
 			last_message = int(last_message)
