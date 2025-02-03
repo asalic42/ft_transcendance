@@ -1,10 +1,20 @@
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+django.setup()
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.exceptions import ChannelFull
+from channels.db import database_sync_to_async
 from collections import defaultdict
 import asyncio
 import random
 import json
 import sys
+
+from .models import *
+
 
 class PongGame:
 
@@ -44,7 +54,7 @@ class PongGame:
         if len(self.players) >= 2:
             return False
         
-        player_number = len(self.players) + 1
+        player_number = len(self.players) +1
         initial_coords = {
             'x1': 92 if player_number == 1 else 1820,
             'y1': 435,
@@ -55,7 +65,8 @@ class PongGame:
 
         self.players[channel_name] = {
             'number': player_number,
-            'coords': initial_coords
+            'coords': initial_coords,
+            # 'user_id': user_id
         }
         return True
 
@@ -97,6 +108,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.room_name = "pong"
         self.room_group_name = f"game_{self.room_name}"
         self.game = self.games[self.room_group_name]
+        # user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
         # try to add player
         if not self.game.add_player(self.channel_name):
@@ -112,9 +124,14 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         player_number = self.game.players[self.channel_name]['number']
         initial_state_game = self.game.get_game_state()
+        # player1_name = await database_sync_to_async(self.get_player_name)(1)
+        # player2_name = await database_sync_to_async(self.get_player_name)(2)
+
         await self.send(text_data=json.dumps({
             'type': 'game_state',
             'number': player_number,
+            # 'player1_name': player1_name,
+            # 'player2_name': player2_name,
             'ball_coords': initial_state_game['ball_coords'],
             'player1_coords': initial_state_game['player1_coords'],
             'player2_coords': initial_state_game['player2_coords'],
@@ -353,3 +370,15 @@ class PongConsumer(AsyncWebsocketConsumer):
     def reset_ball(self, direction):
         self.game.ball['coords'] = {'x': 960, 'y': 475}
         self.game.ball['vector'] = {'vx': direction, 'vy': self.game.get_random_arbitrary(-10, 10)}
+
+    # def get_player_name(self, player_number):
+    #     for player in self.game.players.values():
+    #         if player['number'] == player_number:
+    #             user_id = player.get('user_id')
+    #             try:
+    #                 user = User.objects.get(id=user_id)
+    #                 return user.username
+    #             except User.DoesNotExist:
+    #                 return f"Player {player_number}"
+    #     return f"Player {player_number}"
+        
