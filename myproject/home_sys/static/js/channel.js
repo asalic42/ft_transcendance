@@ -204,34 +204,43 @@ function createChatPage(nameChan) {
 }
 
 function setChannelNamePV(callback) {
-	const inputContainer = document.getElementById('input-dm');
-	const inputChannel = document.getElementById('name-input-add-friend-chan');
-	const inputAmi = document.getElementById('input-add-friend-chan');
-	const overlay = document.getElementById('overlay');
+    const inputContainer = document.getElementById('input-dm');
+    const channelNameInput = document.getElementById('name-input-add-friend-chan'); // Text input for channel name
+    const friendSelect = document.getElementById('input-add-friend-chan'); // Dropdown for friends
+    const overlay = document.getElementById('overlay');
 
-	overlay.style.display = 'block';
-	inputContainer.classList.add('show');
+    overlay.style.display = 'block';
+    inputContainer.classList.add('show');
 
-	function handleInputName(event) {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			const name = inputChannel.value;
-			const ami = inputAmi.value;
-			const pattern = /^[a-zA-Z0-9_-]+$/;
+    function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const channelName = channelNameInput.value;
+            const selectedFriendId = friendSelect.value;
+            const pattern = /^[a-zA-Z0-9_-]+$/;
 
-			if (name !== '' && pattern.test(name)) {
-				overlay.style.display = 'none';
-				inputContainer.classList.remove('show');
-				document.getElementById('channel-name').value = '';
-				inputChannel.removeEventListener('keydown', handleInputName);
-				callback(name, ami);
-			}
-			else {
-				alert(`Enter a name !`);
-			}
-		}
-	}
-	inputChannel.addEventListener('keydown', handleInputName);
+            // Validate both fields
+            if (!selectedFriendId) {
+                alert('Please select a friend from the dropdown');
+                return;
+            }
+
+            if (!channelName || !pattern.test(channelName)) {
+                alert('Please enter a valid channel name (letters, numbers, underscores, or hyphens)');
+                return;
+            }
+
+            // Clear and close
+            overlay.style.display = 'none';
+            inputContainer.classList.remove('show');
+            channelNameInput.value = ''; // Clear channel name input
+			console.log("selectedFriendId:" + selectedFriendId);
+            callback(channelName, selectedFriendId); // Pass both values
+        }
+    }
+
+    // Listen for Enter on the channel name input
+    channelNameInput.addEventListener('keydown', handleEnterKey);
 }
 
 
@@ -415,8 +424,8 @@ function getIdByName(name) {
 }
 
 async function addPvChan(chanId, amiName) {
-	const userData = await getIdByName(amiName);
-	pk = userData.pk;
+	// const userData = await getIdByName(amiName);
+	pk = amiName;
 
 	const response = await fetch('/accounts/api/postPv/', {
 		method: 'POST',

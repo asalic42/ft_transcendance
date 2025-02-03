@@ -93,9 +93,22 @@ def service_unavailable(request):
 
 @login_required
 def channels_page(request):
-	curr_user = request.user
-	users = User.objects.all()
-	return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
+    # Récupérer le profil de l'utilisateur connecté
+    current_user_profile = request.user.users
+
+    # Récupérer les demandes d'ami
+    friends = current_user_profile.friends.all()
+
+    # Passer les demandes d'ami au template
+    context = {
+        'users': {
+            'friends': friends
+        },
+        'current_user': request.user,
+        'all_users': User.objects.all()
+    }
+
+    return render(request, 'channels.html', context)
 
 @login_required
 def game_page(request):
@@ -434,32 +447,32 @@ from django.shortcuts import redirect
 
 @login_required
 def profile_view(request, username):
-    # Si aucun username n'est fourni, utiliser l'utilisateur connecté
-    if not username:
-        return redirect('profile', username=request.user.username)
-    
-    try:
-        user = User.objects.get(username=username)
-        users_profile = Users.objects.get(user=user)
-        
-        games_P = Pong.objects.filter(
-            models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
-        ).order_by('-date')
-        
-        games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
-        games_M_CB = MultiCasseBrique.objects.filter(
-            models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
-        ).order_by('-date')
+	# Si aucun username n'est fourni, utiliser l'utilisateur connecté
+	if not username:
+		return redirect('profile', username=request.user.username)
+		
+	try:
+		user = User.objects.get(username=username)
+		users_profile = Users.objects.get(user=user)
+		
+		games_P = Pong.objects.filter(
+			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
+		).order_by('-date')
+		
+		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+		games_M_CB = MultiCasseBrique.objects.filter(
+			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
+		).order_by('-date')
 
-        return render(request, 'profile.html', {
-            'user': user,
-            'games_P': games_P,
-            'games_S_CB': games_S_CB,
-            'games_M_CB': games_M_CB
-        })
-        
-    except User.DoesNotExist:
-        return redirect('home')
+		return render(request, 'profile.html', {
+			'user': user,
+			'games_P': games_P,
+			'games_S_CB': games_S_CB,
+			'games_M_CB': games_M_CB
+		})
+		
+	except User.DoesNotExist:
+		return redirect('home')
 
 
 @csrf_exempt
@@ -551,28 +564,28 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def add_friend(request, username):
-    if request.method == 'POST':
-        current_user = request.user.users
-        other_user = get_object_or_404(User, username=username)
+	if request.method == 'POST':
+		current_user = request.user.users
+		other_user = get_object_or_404(User, username=username)
 
-        logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
-        logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
-        logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
-              
-        if other_user in current_user.friends_request.all():
-                logger.info(f"\033[33m #2 condition\033[0m")
-                # Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
-                current_user.friends.add(other_user)
-                other_user.users.friends.add(current_user)
-                current_user.friends_request.remove(other_user)
-                return JsonResponse({'status': 'friend_added'})
-        else:
-            logger.info(f"\033[33m #3 condition\033[0m")
-            # Sinon, ajouter l'utilisateur actuel dans la liste des demandes d'ami de l'utilisateur visité
-            other_user.users.friends_request.add(current_user)
-            return JsonResponse({'status': 'friend_request_sent'})
+		logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
+		logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
+		logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
+			  
+		if other_user in current_user.friends_request.all():
+				logger.info(f"\033[33m #2 condition\033[0m")
+				# Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
+				current_user.friends.add(other_user)
+				other_user.users.friends.add(current_user)
+				current_user.friends_request.remove(other_user)
+				return JsonResponse({'status': 'friend_added'})
+		else:
+			logger.info(f"\033[33m #3 condition\033[0m")
+			# Sinon, ajouter l'utilisateur actuel dans la liste des demandes d'ami de l'utilisateur visité
+			other_user.users.friends_request.add(current_user)
+			return JsonResponse({'status': 'friend_request_sent'})
 
-    return JsonResponse({'status': 'error'}, status=400)
+	return JsonResponse({'status': 'error'}, status=400)
 
 
 # --------------------------------------------------------------------------------------#
@@ -582,104 +595,104 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def notification_page(request):
-    # Récupérer le profil de l'utilisateur connecté
-    current_user_profile = request.user.users
+	# Récupérer le profil de l'utilisateur connecté
+	current_user_profile = request.user.users
 
-    # Récupérer les demandes d'ami
-    friend_requests = current_user_profile.friends_request.all()
+	# Récupérer les demandes d'ami
+	friend_requests = current_user_profile.friends_request.all()
 
-    # Passer les demandes d'ami au template
-    context = {
-        'users': current_user_profile,  # Passer le profil de l'utilisateur
-        'friend_requests': friend_requests,  # Passer les demandes d'ami
-    }
+	# Passer les demandes d'ami au template
+	context = {
+		'users': current_user_profile,  # Passer le profil de l'utilisateur
+		'friend_requests': friend_requests,  # Passer les demandes d'ami
+	}
 
-    return render(request, 'notifications.html', context)
+	return render(request, 'notifications.html', context)
 
 @login_required
 def accept_friend_request(request, username):
-    if request.method == 'POST':
-        try:
-            current_user_profile = request.user.users
-            other_user = get_object_or_404(User, username=username)
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
 
-            logger.info(f"\033[32m<Accept_friend_request> : Other_user : {other_user.users}\033[0m")
+			logger.info(f"\033[32m<Accept_friend_request> : Other_user : {other_user.users}\033[0m")
 
-            # Ajouter l'utilisateur à la liste d'amis
-            current_user_profile.friends.add(other_user.users)
-            other_user.users.friends.add(current_user_profile)
+			# Ajouter l'utilisateur à la liste d'amis
+			current_user_profile.friends.add(other_user.users)
+			other_user.users.friends.add(current_user_profile)
 
-            # Supprimer la demande d'ami
-            current_user_profile.friends_request.remove(other_user.users)
+			# Supprimer la demande d'ami
+			current_user_profile.friends_request.remove(other_user.users)
 
-            return JsonResponse({'status': 'friend_added'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+			return JsonResponse({'status': 'friend_added'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
 @login_required
 def decline_friend_request(request, username):
-    if request.method == 'POST':
-        try:
-            current_user_profile = request.user.users
-            other_user = get_object_or_404(User, username=username)
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
 
-            # Supprimer la demande d'ami
-            current_user_profile.friends_request.remove(other_user.users)
+			# Supprimer la demande d'ami
+			current_user_profile.friends_request.remove(other_user.users)
 
-            return JsonResponse({'status': 'friend_request_declined'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+			return JsonResponse({'status': 'friend_request_declined'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
 @login_required
 def block_user(request, username):
-    if request.method == 'POST':
-        try:
-            current_user_profile = request.user.users
-            other_user = get_object_or_404(User, username=username)
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
 
-            # Ajouter l'utilisateur à la liste des utilisateurs bloqués
-            current_user_profile.blocked.add(other_user.users)
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.blocked.add(other_user.users)
 
-            # Supprimer la demande d'ami (si elle existe)
-            current_user_profile.friends_request.remove(other_user.users)
+			# Supprimer la demande d'ami (si elle existe)
+			current_user_profile.friends_request.remove(other_user.users)
 
-            return JsonResponse({'status': 'user_blocked'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+			return JsonResponse({'status': 'user_blocked'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
 @login_required
 def remove_friend(request, username):
-    if request.method == 'POST':
-        try:
-            current_user_profile = request.user.users
-            other_user = get_object_or_404(User, username=username)
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
 
-            # Ajouter l'utilisateur à la liste des utilisateurs bloqués
-            current_user_profile.friends.remove(other_user.users)
-            other_user.users.friends.remove(current_user_profile)
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.friends.remove(other_user.users)
+			other_user.users.friends.remove(current_user_profile)
 
-            # Supprimer la demande d'ami (si elle existe)
+			# Supprimer la demande d'ami (si elle existe)
 
-            return JsonResponse({'status': 'user_removed'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+			return JsonResponse({'status': 'user_removed'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
 @login_required
 def remove_blocked_user(request, username):
-    if request.method == 'POST':
-        try:
-            current_user_profile = request.user.users
-            other_user = get_object_or_404(User, username=username)
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
 
-            # Ajouter l'utilisateur à la liste des utilisateurs bloqués
-            current_user_profile.blocked.remove(other_user.users)
-            # Supprimer la demande d'ami (si elle existe)
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.blocked.remove(other_user.users)
+			# Supprimer la demande d'ami (si elle existe)
 
-            return JsonResponse({'status': 'blocked_user_removed'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+			return JsonResponse({'status': 'blocked_user_removed'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
