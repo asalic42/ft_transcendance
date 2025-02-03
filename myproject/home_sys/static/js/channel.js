@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
 					if (data.status === 'error') {
 						throw new Error("Chan doesn't exist"); // Channel exists
 					}
-					console.log('data :' + data);
+					// console.log('data :' + data);
 					if (data.private) {
 						const result = await doesUserHaveAccessToChan(data.id, cachedUserId);
 						if (result)
@@ -289,7 +289,7 @@ function addMessageListener() {
 		if (msg != "") {
 		postMessage(currentChan, msg);
 			document.getElementById('message-input').value = '';	// Vide le champ de saisie
-			console.log("MESSAGE ENVOYE !");
+			// console.log("MESSAGE ENVOYE !");
 		}
 	});
 
@@ -310,7 +310,7 @@ function getPP(userId) {
 			return response.json(); // Parse JSON first
 		})
 		.then(data => {
-			console.log("User data:", data); // Now data is defined
+			// console.log("User data:", data); // Now data is defined
 			return data; // Return for downstream use
 		})
 		.catch(error => {
@@ -321,7 +321,6 @@ function getPP(userId) {
 
 	// Add the message on the chat conv
 async function addMessage(mess, sender, id) {
-	console.log("sender id: " + id);
 
 	const chatPage = document.getElementById('chat-page')
 
@@ -389,12 +388,12 @@ async function liveChatFetch() {
 
 		const data = await response.json();
 		if (data.new_message && data.new_message.length > 0) {
-			console.log(data.new_message);
-			data.new_message.forEach(message => {
-				console.log("Adding message with id = " + message.id);
-				addMessage(message.message, message.sender, message.idSender);
+			// console.log(data.new_message);
+			for (var message of data.new_message) {
+				// console.log("Adding message with id = " + message.id);
+				await addMessage(message.message, message.sender, message.idSender);
 				lastMessageId = message.id;
-			});
+			}
 		}
 	} catch (error) {
 		console.error('Erreur: ', error);
@@ -455,10 +454,10 @@ async function addChannelToDb(currentChan, pv, ami) {
 			throw new Error('Erreur lors de l\'ajout du chan');
 		}
 
-		console.log("nouveau chan ADD a la bdd");
+		// console.log("nouveau chan ADD a la bdd");
 		
 		const data = await response.json();
-		console.log(data);
+		// console.log(data);
 		var chanId = data.chan.id;
 
 		if (pv) {
@@ -518,7 +517,7 @@ async function postMessage(currentChan, mess) {
 
 		// Accéder à idSender
 		const idSender = data.message.idSender;
-		console.log('idSender:', idSender);
+		// console.log('idSender:', idSender);
 
 	} catch(error) {
 		alert("Wow ! That's a long message. It should work better if it shrinks down.");
