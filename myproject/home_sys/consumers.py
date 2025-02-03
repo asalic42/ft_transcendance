@@ -92,6 +92,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     
     games = defaultdict(PongGame)
 
+    # Connexion au serveur
     async def connect(self):
         self.room_name = "pong"
         self.room_group_name = f"game_{self.room_name}"
@@ -122,9 +123,10 @@ class PongConsumer(AsyncWebsocketConsumer):
 
         if len(self.game.players) == 2 and not self.game.is_running:
             self.game.is_running = True
+
             asyncio.create_task(self.start_game())
 
-
+    # Deconnexion du serveur
     async def disconnect(self, close_code):
 
         loser = self.game.players[self.channel_name]['number']
@@ -142,14 +144,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         )
         print("Player disco")
 
+    # Game win suite a une deconnexion de joueur
     async def game_won(self, event):
         await self.send(text_data=json.dumps({
             'type': 'game_won',
             'loser': event['loser']
         }))
-        print("MEssage ENVOYE")
-        sys.stdout.flush()
 
+    # Messages recus du client
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
@@ -183,6 +185,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"Erreur inattendue: {str(e)}")
         
+    # Message du client lorsque le bouton Replay a ete active
     async def receive_restarted(self, data):
         try:
             if data['action'] == "restart_game":
@@ -203,6 +206,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             print("Invalid Error JSON")
             return
 
+    # Envoie des donnees de la game a tous les participants
     async def send_game_state(self):
         try:
             state = self.game.get_game_state()
@@ -215,8 +219,9 @@ class PongConsumer(AsyncWebsocketConsumer):
         except ChannelFull:
             print("Channel full in send_game_state")
 
+
+    # Envoyer les mises à jour à WebSocket
     async def game_update(self, event):
-        # Envoyer les mises à jour à WebSocket
         await self.send(text_data=json.dumps({
             'type': 'game_state',
             'ball_coords': event['ball_coords'],
@@ -225,22 +230,41 @@ class PongConsumer(AsyncWebsocketConsumer):
             'scores': event['scores']
         }))
 
+    # Envoyer les mises à jour à WebSocket pour un Replay
     async def new_game(self, event):
-        # Envoyer les mises à jour à WebSocket
         await self.send(text_data=json.dumps({
             'type': 'game_restarted',
+            'number': self.game.players[self.channel_name]['number'],
             'ball_coords': event['ball_coords'],
             'player1_coords': event['player1_coords'],
             'player2_coords': event['player2_coords'],
             'scores': event['scores']
         }))
-    
-    
+
+    # Compte a rebours avant la game
+    async def start_countdown(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'countdown',
+            'message': event['message']
+        }))
+
+    # Debut du jeu
     async def start_game(self):
         update_interval = 0.05
         last_update = asyncio.get_event_loop().time()
         print("\033[0;34m Demarrage du jeu ! \033[0m")
         sys.stdout.flush()
+
+        countdown_messages = ['3', '2', '1', 'Start!']
+        for message in countdown_messages:
+            await self.channel_layer.group_send(
+                self.room_group_name, {
+                    'type': 'start_countdown',
+                    'message': message
+                }
+            )
+            await asyncio.sleep(1)
+
         while self.game.is_running and len(self.game.players) == 2:
             update_interval = 0.016 # 60 FPS
             current_time = asyncio.get_event_loop().time()
@@ -268,6 +292,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 
                         if ball['vector']['vx'] > -25 and ball['vector']['vx'] < 25:
                             ball['vector']['vx'] = abs(ball['vector']['vx']) +1
+                        else:
+                            ball['vector']['vx'] = abs(ball['vector']['vx'])
+
 
                     elif (player['number'] == 2 and
                           ball['coords']['x'] + ball['radius'] >= coords['x1'] - abs(ball['vector']['vx'] *1) and
@@ -277,14 +304,35 @@ class PongConsumer(AsyncWebsocketConsumer):
                         
                         if ball['vector']['vx'] > -25 and ball['vector']['vx'] < 25:
                             ball['vector']['vx'] = -(abs(ball['vector']['vx']) +1)
+                        else:
+                            ball['vector']['vx'] = -abs(ball['vector']['vx'])
 
                 # Player add score
                 if ball['coords']['x'] + ball['radius'] >= 1920:
                     self.game.scores['p1'] += 1
                     self.reset_ball(-10)
+                    for player in self.game.players.values():
+
+                        player['coords'] = {
+                            'x1': 92 if player['number'] == 1 else 1820,
+                            'y1': 435,
+                            'x2': 100 if player['number'] == 1 else 1828,
+                            'y2': 515,
+                            'vy': 30
+                        }
+                
                 elif ball['coords']['x'] - ball['radius'] <= 0:
                     self.game.scores['p2'] += 1
                     self.reset_ball(10)
+                    for player in self.game.players.values():
+
+                        player['coords'] = {
+                            'x1': 92 if player['number'] == 1 else 1820,
+                            'y1': 435,
+                            'x2': 100 if player['number'] == 1 else 1828,
+                            'y2': 515,
+                            'vy': 30
+                        }
 
                 if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
                     self.game.is_running = False
@@ -301,6 +349,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 
                 last_update = current_time
     
+    # Reset de la balle apres chaque score+1
     def reset_ball(self, direction):
         self.game.ball['coords'] = {'x': 960, 'y': 475}
         self.game.ball['vector'] = {'vx': direction, 'vy': self.game.get_random_arbitrary(-10, 10)}

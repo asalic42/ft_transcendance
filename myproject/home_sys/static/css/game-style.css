@@ -157,7 +157,8 @@ svg text {
 	width: 1920; height: 1080;
 	stroke-width: 3;
 	stroke: #365FA0;
-	font-size: 100px;
+	/* font-size: 100px; */
+	font-size: 5vw;
 }
 
 
@@ -204,9 +205,25 @@ svg text {
 .wrapper {
 	display: block;
 	position: absolute;
-};
+}
 
 /* CSS Game Distant: Multiplayer Pong */
+
+#overlay {
+	display: none;
+	z-index: 6;
+	position: absolute;
+    transform: translate(-50%, -50%);
+	text-align: center;
+	top: 50%;
+	left: 50%;
+}
+
+#overlay #countdown {
+	color: white;
+	font-size: 28px;
+}
+
 #disconnected {
 	display: none;
 	color: white;
