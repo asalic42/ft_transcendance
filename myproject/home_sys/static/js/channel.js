@@ -574,6 +574,7 @@ function	getBlocked() {
 	})
 	.then(data => {
 		blockedUsersList = data.blocked_users_ids;
+		console.log("blockedUsersList:" + blockedUsersList);
 	})
 	.catch(error => {
 		console.error('Erreur lors de la récupération des données :', error);

@@ -30,7 +30,13 @@
 					</p>
 					<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
 				{% else %}
-					<p>Impossible de modifier les informations, ce n'est pas votre compte</p>
+					<p class="other-profile-text-settings-rdv">
+						Vous pouvez ajouter {{profile_user.username}} en ami(e)
+						ou décider de le/la bloquer.
+					</p>
+				
+					<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
+					<button class="other-profile-block">BLOCK🖕</button>
 				{% endif %}
 
 			</div>
@@ -39,12 +45,47 @@
 
 	<style>
 
+		.other-profile-add-friend,
+        .other-profile-block {
+            width: auto;
+            height: auto;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            border-radius: 10px;
+            margin-right: 10px;
+            margin-left: 10px;
+            border: 1px solid black;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
 		.profile-container {
 			display: flex;
 			margin-top: 5%;
 			justify-content: center; /* Centre horizontalement */
 			align-items: center;
 		}
+
+		.other-profile-add-friend {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+        
+        .other-profile-add-friend:hover {
+            background-color: rgb(0, 179, 0);
+            scale: 1.15;
+            box-shadow: 0px 0px 10px 2px rgba(0, 194, 0, 0.74);
+            cursor: pointer;
+        }
+
+        .other-profile-block:hover {
+            background-color: red;
+            scale: 1.15;
+            box-shadow: 0px 0px 10px 2px rgba(194, 0, 0, 0.74);
+            cursor: pointer;
+        }
 
 		.profile-box {
 			display: flex;
@@ -148,6 +189,85 @@
 
 
 	</style>
+
+    <script>
+
+        const addButton = document.querySelector(".other-profile-add-friend");
+
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Récupérer et encoder le username
+            const username = encodeURIComponent(addButton.getAttribute('data-username'));
+
+            if (!username) {
+                console.error("Username non trouvé !");
+                alert("Erreur : Utilisateur non trouvé.");
+                return;
+            }
+
+            console.log("Username récupéré :", username); // Debugging
+
+            // Construire l'URL correctement
+            const url = `/accounts/add_friend/${username}/`;
+
+            // Récupérer le token CSRF
+            const csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error("CSRF token non trouvé !");
+                alert("Erreur : CSRF token manquant.");
+                return;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                console.log("Réponse reçue:", response);
+                if (!response.ok) {
+                    throw new Error('Erreur réseau ou serveur');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Données reçues:", data);
+                if (data.status === 'friend_added') {
+                    alert('Ami ajouté avec succès !');
+                } else if (data.status === 'friend_request_sent') {
+                    alert('Demande d\'ami envoyée !');
+                } else {
+                    alert('Une erreur s\'est produite.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Une erreur s'est produite lors de l'ajout de l'ami. Veuillez réessayer.");
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+
+
 	<div class="game-history-container">
 		<h2>Historique des parties</h2>
 		

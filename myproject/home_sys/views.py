@@ -461,19 +461,18 @@ def profile_view(request, username):
     except User.DoesNotExist:
         return redirect('home')
 
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):
 	# Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
-	blocked_users_ids = BlockUsers.objects.filter(idUser=idPlayer).values_list('idBlocked', flat=True).distinct()
-
-	# Convertir le QuerySet en liste pour la réponse JSON
-	blocked_users_ids_list = list(blocked_users_ids)
-
+	current_user_profile = request.user.users
+	
+	all_users_id = [elmt.id for elmt in current_user_profile.blocked.all()]
 	# Retourner la réponse JSON
-	return JsonResponse({'blocked_users_ids': blocked_users_ids_list})
+	return JsonResponse({'blocked_users_ids': all_users_id})
 
-@csrf_exempt
+""" @csrf_exempt
 @require_http_methods(["POST"])
 def post_blocked(request):
 	try:
@@ -484,10 +483,10 @@ def post_blocked(request):
 			"idBlocked": new_blocked.idBlocked,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400) """
 	
 
-@csrf_exempt
+""" @csrf_exempt
 @require_http_methods(["POST"])
 def post_deblock(request):
 	try:
@@ -495,7 +494,7 @@ def post_deblock(request):
 		BlockUsers.objects.filter(idUser=data["idUser"], idBlocked=data["idBlocked"]).delete()
 		return JsonResponse({'status': 'success'})
 	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error'})
+		return JsonResponse({'status': 'error'}) """
 
 @require_GET
 def check_pp(request, idU):
@@ -538,4 +537,149 @@ def getNameById(request, nameU):
 		return JsonResponse({'status': 'success', 'pk': user.pk})  # Ensure 'image' is the correct field
 	except User.DoesNotExist:
 		return JsonResponse({'error': 'User not found'}, status=404)
-	
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Users
+from django.contrib.auth.models import User
+
+import logging
+
+# Configurez le logger
+logger = logging.getLogger(__name__)
+
+@login_required
+def add_friend(request, username):
+    if request.method == 'POST':
+        current_user = request.user.users
+        other_user = get_object_or_404(User, username=username)
+
+        logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
+        logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
+        logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
+              
+        if other_user in current_user.friends_request.all():
+                logger.info(f"\033[33m #2 condition\033[0m")
+                # Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
+                current_user.friends.add(other_user)
+                other_user.users.friends.add(current_user)
+                current_user.friends_request.remove(other_user)
+                return JsonResponse({'status': 'friend_added'})
+        else:
+            logger.info(f"\033[33m #3 condition\033[0m")
+            # Sinon, ajouter l'utilisateur actuel dans la liste des demandes d'ami de l'utilisateur visité
+            other_user.users.friends_request.add(current_user)
+            return JsonResponse({'status': 'friend_request_sent'})
+
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+# --------------------------------------------------------------------------------------#
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def notification_page(request):
+    # Récupérer le profil de l'utilisateur connecté
+    current_user_profile = request.user.users
+
+    # Récupérer les demandes d'ami
+    friend_requests = current_user_profile.friends_request.all()
+
+    # Passer les demandes d'ami au template
+    context = {
+        'users': current_user_profile,  # Passer le profil de l'utilisateur
+        'friend_requests': friend_requests,  # Passer les demandes d'ami
+    }
+
+    return render(request, 'notifications.html', context)
+
+@login_required
+def accept_friend_request(request, username):
+    if request.method == 'POST':
+        try:
+            current_user_profile = request.user.users
+            other_user = get_object_or_404(User, username=username)
+
+            logger.info(f"\033[32m<Accept_friend_request> : Other_user : {other_user.users}\033[0m")
+
+            # Ajouter l'utilisateur à la liste d'amis
+            current_user_profile.friends.add(other_user.users)
+            other_user.users.friends.add(current_user_profile)
+
+            # Supprimer la demande d'ami
+            current_user_profile.friends_request.remove(other_user.users)
+
+            return JsonResponse({'status': 'friend_added'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def decline_friend_request(request, username):
+    if request.method == 'POST':
+        try:
+            current_user_profile = request.user.users
+            other_user = get_object_or_404(User, username=username)
+
+            # Supprimer la demande d'ami
+            current_user_profile.friends_request.remove(other_user.users)
+
+            return JsonResponse({'status': 'friend_request_declined'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def block_user(request, username):
+    if request.method == 'POST':
+        try:
+            current_user_profile = request.user.users
+            other_user = get_object_or_404(User, username=username)
+
+            # Ajouter l'utilisateur à la liste des utilisateurs bloqués
+            current_user_profile.blocked.add(other_user.users)
+
+            # Supprimer la demande d'ami (si elle existe)
+            current_user_profile.friends_request.remove(other_user.users)
+
+            return JsonResponse({'status': 'user_blocked'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def remove_friend(request, username):
+    if request.method == 'POST':
+        try:
+            current_user_profile = request.user.users
+            other_user = get_object_or_404(User, username=username)
+
+            # Ajouter l'utilisateur à la liste des utilisateurs bloqués
+            current_user_profile.friends.remove(other_user.users)
+            other_user.users.friends.remove(current_user_profile)
+
+            # Supprimer la demande d'ami (si elle existe)
+
+            return JsonResponse({'status': 'user_removed'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def remove_blocked_user(request, username):
+    if request.method == 'POST':
+        try:
+            current_user_profile = request.user.users
+            other_user = get_object_or_404(User, username=username)
+
+            # Ajouter l'utilisateur à la liste des utilisateurs bloqués
+            current_user_profile.blocked.remove(other_user.users)
+            # Supprimer la demande d'ami (si elle existe)
+
+            return JsonResponse({'status': 'blocked_user_removed'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
