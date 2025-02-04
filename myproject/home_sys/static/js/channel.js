@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				addChannelToDb(nameChan, 0, "")
 				try {
 					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
-					const data = await response.json();
+						const data = await response.json();
 
 					if (data.status === 'error') {
 						throw new Error("Chan doesn't exist"); // Channel exists
@@ -387,7 +387,7 @@ async function liveChatFetch() {
 	try {
 		const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
 			headers: {
-			'Content-Type': 'application/json',
+				'Content-Type': 'application/json',
 			},
 		});
 
@@ -429,8 +429,10 @@ async function addPvChan(chanId, amiName) {
 
 	const response = await fetch('/accounts/api/postPv/', {
 		method: 'POST',
+		credentials: 'same-origin',
 		headers: {
-		'Content-Type': 'application/json',
+			'X-CSRFToken': csrftoken,  // Use the function directly
+			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
 			id_chan: chanId,
@@ -449,8 +451,10 @@ async function addChannelToDb(currentChan, pv, ami) {
 	try {
 		const response = await fetch('/accounts/api/post_chan/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
-			'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,  // Use the function directly
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 			name: currentChan,
@@ -509,14 +513,16 @@ async function postMessage(currentChan, mess) {
 	try {
 		const response = await fetch('/accounts/api/post_message/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
-			'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,  // Use the function directly
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-			channel_name: currentChan,
-			sender: username,
-			message: mess,
-			idSender: cachedUserId,
+				channel_name: currentChan,
+				sender: username,
+				message: mess,
+				idSender: cachedUserId,
 			})
 		});
 		if (!response.ok) {

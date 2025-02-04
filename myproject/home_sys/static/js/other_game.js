@@ -476,18 +476,21 @@ async function addNewGame(id_player, score) {
 	try {
 		const response = await fetch('/accounts/api/add_solo_casse_brique/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
+				'X-CSRFToken': csrftoken,  // Use the function directly
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({  // Convertit les données en JSON
+			body: JSON.stringify({
 				id_player: id_player,
-				id_map: mapSelection,
+				id_map: selectedMap,
 				score: score
 			})
 		});
 
 		if (!response.ok) {
-			throw new Error('Erreur lors de l\'ajout du jeu');
+			const text = await response.text();
+			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
 		}
 
 		const result = await response.json();

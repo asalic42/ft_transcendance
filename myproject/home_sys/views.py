@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import *
 import json
 from django.shortcuts import get_object_or_404
@@ -152,7 +153,7 @@ def get_current_user_id(request):
 	"""Renvoie l'ID de l'utilisateur actuellement connecté"""
 	return JsonResponse({'userId': request.user.id})
 
-@csrf_exempt
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def add_solo_casse_brique(request):
 	try:
@@ -172,7 +173,6 @@ def add_solo_casse_brique(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def add_pong(request):
 	try:
@@ -218,7 +218,6 @@ def map_view(request, map_id):
 
 # """ CHANNELS VIEWS """ #
 
-@csrf_exempt
 @require_http_methods(["GET"])
 def live_chat(request):
 	channel = request.GET.get('channel_name', None)
@@ -246,8 +245,6 @@ def live_chat(request):
 		return JsonResponse({'new_message': data})
 	return JsonResponse({'new_message': None})
 
-
-@csrf_exempt
 @require_http_methods(["GET"])
 def does_channel_exist(request, asked_name):
 	try:
@@ -256,7 +253,6 @@ def does_channel_exist(request, asked_name):
 	except Chans.DoesNotExist:
 		return JsonResponse({'status': 'error'})
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def post_chan(request):
 	try:
@@ -272,9 +268,6 @@ def post_chan(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-
-
-@csrf_exempt
 @require_http_methods(["GET"])
 def get_chans(request):
 	try:
@@ -284,7 +277,6 @@ def get_chans(request):
 		print(f"Erreur serveur: {str(e)}")
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	
-@csrf_exempt
 @require_http_methods(["GET"])
 def get_messages(request):
 	channel_name = request.GET.get('channel_name', None)
@@ -303,7 +295,6 @@ def get_messages(request):
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des messages'}, status=500)
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def post_message(request):
 	try:
@@ -362,7 +353,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Users
 
 @login_required
-@csrf_exempt
 def update_user_info(request):
 	if request.method == 'POST':
 		user = request.user  # Récupère l'utilisateur connecté
@@ -406,7 +396,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Users
 
 @login_required
-@csrf_exempt
 def upload_avatar(request):
 	if request.method == 'POST':
 		try:
@@ -475,7 +464,6 @@ def profile_view(request, username):
 		return redirect('home')
 
 
-@csrf_exempt
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):
 	# Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
@@ -529,7 +517,6 @@ def doesUserHaveAccessToChan(request, idC, idU):
 	except:
 		return JsonResponse({'status': 'error'})
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def	postPv(request):
 	try:
@@ -557,10 +544,10 @@ from django.contrib.auth.decorators import login_required
 from .models import Users
 from django.contrib.auth.models import User
 
-import logging
+# import logging
 
 # Configurez le logger
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 @login_required
 def add_friend(request, username):
@@ -568,19 +555,19 @@ def add_friend(request, username):
 		current_user = request.user.users
 		other_user = get_object_or_404(User, username=username)
 
-		logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
-		logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
-		logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
+		# logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
+		# logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
+		# logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
 			  
 		if other_user in current_user.friends_request.all():
-				logger.info(f"\033[33m #2 condition\033[0m")
+				# logger.info(f"\033[33m #2 condition\033[0m")
 				# Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
 				current_user.friends.add(other_user)
 				other_user.users.friends.add(current_user)
 				current_user.friends_request.remove(other_user)
 				return JsonResponse({'status': 'friend_added'})
 		else:
-			logger.info(f"\033[33m #3 condition\033[0m")
+			# logger.info(f"\033[33m #3 condition\033[0m")
 			# Sinon, ajouter l'utilisateur actuel dans la liste des demandes d'ami de l'utilisateur visité
 			other_user.users.friends_request.add(current_user)
 			return JsonResponse({'status': 'friend_request_sent'})
