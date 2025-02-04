@@ -1,0 +1,5 @@
+.env
+myproject/home_sys/__pycache__/ 
+myproject/home_sys/migrations/__pycache__/
+myproject/loginpage/migrations/__pycache__/ 
+

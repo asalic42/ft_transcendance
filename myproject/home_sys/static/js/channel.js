@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	liveChan = setInterval(() => {
 		loadChannels();
-	}, 100);
+	}, 500);
 	const newChan = document.getElementById('new-chan');
 	const newFren = document.getElementById('add-friend-chan');
 	// const inviteButton = document.getElementById('add-friend-chan');
@@ -37,12 +37,12 @@ document.addEventListener("DOMContentLoaded", function() {
 				addChannelToDb(nameChan, 0, "")
 				try {
 					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
-					const data = await response.json();
+						const data = await response.json();
 
 					if (data.status === 'error') {
 						throw new Error("Chan doesn't exist"); // Channel exists
 					}
-					console.log('data :' + data);
+					// console.log('data :' + data);
 					if (data.private) {
 						const result = await doesUserHaveAccessToChan(data.id, cachedUserId);
 						if (result)
@@ -154,7 +154,7 @@ async function openCenter(nameChan) {
 
 	liveChat = setInterval(() => {
 		liveChatFetch();
-	}, 100);
+	}, 500);
 }
 
 	// Cliquer sur un channel deja creer
@@ -204,34 +204,43 @@ function createChatPage(nameChan) {
 }
 
 function setChannelNamePV(callback) {
-	const inputContainer = document.getElementById('input-dm');
-	const inputChannel = document.getElementById('name-input-add-friend-chan');
-	const inputAmi = document.getElementById('input-add-friend-chan');
-	const overlay = document.getElementById('overlay');
+    const inputContainer = document.getElementById('input-dm');
+    const channelNameInput = document.getElementById('name-input-add-friend-chan'); // Text input for channel name
+    const friendSelect = document.getElementById('input-add-friend-chan'); // Dropdown for friends
+    const overlay = document.getElementById('overlay');
 
-	overlay.style.display = 'block';
-	inputContainer.classList.add('show');
+    overlay.style.display = 'block';
+    inputContainer.classList.add('show');
 
-	function handleInputName(event) {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			const name = inputChannel.value;
-			const ami = inputAmi.value;
-			const pattern = /^[a-zA-Z0-9_-]+$/;
+    function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const channelName = channelNameInput.value;
+            const selectedFriendId = friendSelect.value;
+            const pattern = /^[a-zA-Z0-9_-]+$/;
 
-			if (name !== '' && pattern.test(name)) {
-				overlay.style.display = 'none';
-				inputContainer.classList.remove('show');
-				document.getElementById('channel-name').value = '';
-				inputChannel.removeEventListener('keydown', handleInputName);
-				callback(name, ami);
-			}
-			else {
-				alert(`Enter a name !`);
-			}
-		}
-	}
-	inputChannel.addEventListener('keydown', handleInputName);
+            // Validate both fields
+            if (!selectedFriendId) {
+                alert('Please select a friend from the dropdown');
+                return;
+            }
+
+            if (!channelName || !pattern.test(channelName)) {
+                alert('Please enter a valid channel name (letters, numbers, underscores, or hyphens)');
+                return;
+            }
+
+            // Clear and close
+            overlay.style.display = 'none';
+            inputContainer.classList.remove('show');
+            channelNameInput.value = ''; // Clear channel name input
+			console.log("selectedFriendId:" + selectedFriendId);
+            callback(channelName, selectedFriendId); // Pass both values
+        }
+    }
+
+    // Listen for Enter on the channel name input
+    channelNameInput.addEventListener('keydown', handleEnterKey);
 }
 
 
@@ -289,7 +298,7 @@ function addMessageListener() {
 		if (msg != "") {
 		postMessage(currentChan, msg);
 			document.getElementById('message-input').value = '';	// Vide le champ de saisie
-			console.log("MESSAGE ENVOYE !");
+			// console.log("MESSAGE ENVOYE !");
 		}
 	});
 
@@ -310,7 +319,7 @@ function getPP(userId) {
 			return response.json(); // Parse JSON first
 		})
 		.then(data => {
-			console.log("User data:", data); // Now data is defined
+			// console.log("User data:", data); // Now data is defined
 			return data; // Return for downstream use
 		})
 		.catch(error => {
@@ -321,7 +330,6 @@ function getPP(userId) {
 
 	// Add the message on the chat conv
 async function addMessage(mess, sender, id) {
-	console.log("sender id: " + id);
 
 	const chatPage = document.getElementById('chat-page')
 
@@ -363,7 +371,7 @@ async function addMessage(mess, sender, id) {
 	const messImage = document.getElementById('caca');
 	usernameElement.addEventListener('click', async function() {
 		alert('Image clicked!');
-		window.location.href = `/accounts/profile-user/${sender}`;
+		window.location.href = `/accounts/profile/${sender}`;
 	});
 
 	chatPage.scrollTop = chatPage.scrollHeight;
@@ -379,7 +387,7 @@ async function liveChatFetch() {
 	try {
 		const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
 			headers: {
-			'Content-Type': 'application/json',
+				'Content-Type': 'application/json',
 			},
 		});
 
@@ -389,12 +397,12 @@ async function liveChatFetch() {
 
 		const data = await response.json();
 		if (data.new_message && data.new_message.length > 0) {
-			console.log(data.new_message);
-			data.new_message.forEach(message => {
-				console.log("Adding message with id = " + message.id);
-				addMessage(message.message, message.sender, message.idSender);
+			// console.log(data.new_message);
+			for (var message of data.new_message) {
+				// console.log("Adding message with id = " + message.id);
+				await addMessage(message.message, message.sender, message.idSender);
 				lastMessageId = message.id;
-			});
+			}
 		}
 	} catch (error) {
 		console.error('Erreur: ', error);
@@ -416,13 +424,15 @@ function getIdByName(name) {
 }
 
 async function addPvChan(chanId, amiName) {
-	const userData = await getIdByName(amiName);
-	pk = userData.pk;
+	// const userData = await getIdByName(amiName);
+	pk = amiName;
 
 	const response = await fetch('/accounts/api/postPv/', {
 		method: 'POST',
+		credentials: 'same-origin',
 		headers: {
-		'Content-Type': 'application/json',
+			'X-CSRFToken': csrftoken,  // Use the function directly
+			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
 			id_chan: chanId,
@@ -441,8 +451,10 @@ async function addChannelToDb(currentChan, pv, ami) {
 	try {
 		const response = await fetch('/accounts/api/post_chan/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
-			'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,  // Use the function directly
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 			name: currentChan,
@@ -455,10 +467,10 @@ async function addChannelToDb(currentChan, pv, ami) {
 			throw new Error('Erreur lors de l\'ajout du chan');
 		}
 
-		console.log("nouveau chan ADD a la bdd");
+		// console.log("nouveau chan ADD a la bdd");
 		
 		const data = await response.json();
-		console.log(data);
+		// console.log(data);
 		var chanId = data.chan.id;
 
 		if (pv) {
@@ -501,14 +513,16 @@ async function postMessage(currentChan, mess) {
 	try {
 		const response = await fetch('/accounts/api/post_message/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
-			'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,  // Use the function directly
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-			channel_name: currentChan,
-			sender: username,
-			message: mess,
-			idSender: cachedUserId,
+				channel_name: currentChan,
+				sender: username,
+				message: mess,
+				idSender: cachedUserId,
 			})
 		});
 		if (!response.ok) {
@@ -518,7 +532,7 @@ async function postMessage(currentChan, mess) {
 
 		// Accéder à idSender
 		const idSender = data.message.idSender;
-		console.log('idSender:', idSender);
+		// console.log('idSender:', idSender);
 
 	} catch(error) {
 		alert("Wow ! That's a long message. It should work better if it shrinks down.");
@@ -575,6 +589,7 @@ function	getBlocked() {
 	})
 	.then(data => {
 		blockedUsersList = data.blocked_users_ids;
+		console.log("blockedUsersList:" + blockedUsersList);
 	})
 	.catch(error => {
 		console.error('Erreur lors de la récupération des données :', error);

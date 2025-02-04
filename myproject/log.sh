@@ -61,6 +61,7 @@ if [ "$1" == "b-all" ]; then
 	rm -rf static/;
 	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
 
+	pip install --no-cache-dir -r requirements.txt
 	LINE='127.0.0.1	transcendance.42.paris'
 	FILE='/etc/hosts'
 	sudo grep -qF "$LINE" "$FILE" ||  echo "$LINE" | sudo tee -a "$FILE"

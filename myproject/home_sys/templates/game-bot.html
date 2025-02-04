@@ -16,6 +16,9 @@
 </div>
 
 <div id="page">
+	<a href="{% url 'game-mode-pong' %}" class="retour">
+		<span class="inputs" id="retour" >Retour</span>
+	</a>
     <h1 class="title">Choix de la difficulté du bot (1-4)</h1>
 	<div id="input">
 		<form id="LevelForm" action="javascript:levelinput()" method="get" name="LevelForm">
@@ -26,7 +29,7 @@
 </div>
 
 <div id="canvas-container">
-	<canvas width="1920" height="950" id="game"></canvas>
+	<canvas width="1920" height="850" id="game"></canvas>
 	<div id="button-container">
 		<button id="replay-button" style="display: none;">Play again !</button>
 	</div>

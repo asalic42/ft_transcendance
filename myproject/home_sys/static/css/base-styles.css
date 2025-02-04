@@ -17,7 +17,9 @@ body {
     /* Styles généraux pour le corps de la page */
 
     color: black;                      /* Couleur du texte par défaut */
-    background-color: white;           /* Couleur de fond par défaut */
+	background-color: #2B2B3B;
+	background: linear-gradient(to bottom right, #2B2B3B, #323247);
+	height: 1080px;
     margin: 0;                           /* Supprime la marge par défaut */
     padding: 0;                          /* Supprime le remplissage par défaut */
 }

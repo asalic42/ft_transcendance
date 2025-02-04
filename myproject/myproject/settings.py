@@ -95,7 +95,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-   	 'django.contrib.messages.middleware.MessageMiddleware',
+   	'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',  # Ce middleware est utilisé par social-auth-app-django
     'corsheaders.middleware.CorsMiddleware',
@@ -200,3 +200,23 @@ MEDIA_URL = '/media/'
 # Répertoire physique sur le disque où les fichiers médias seront stockés
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',  # Chemin vers le fichier de logs
+        },
+    },
+    'loggers': {
+        '': {  # Racine de tous les loggers
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',  # Niveau de log (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            'propagate': True,
+        },
+    },
+}

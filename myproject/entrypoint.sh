@@ -2,6 +2,9 @@ PURPLE_N='\033[0;35m'
 NC='\033[0m'
 GREEN_N='\033[0;32m'
 
+#? dep
+# apt-get update && apt-get install -y libpq-dev gcc python3-dev
+# pip install -r requirements.txt
 
 #? migrations
 echo "${PURPLE_N}Making migrations...${NC}";
@@ -16,6 +19,7 @@ chmod -R 777 static/;
 python3 manage.py collectstatic --noinput;
 echo "${PURPLE_N}Static done.${NC}";
 echo "${GREEN_N}Continuing server start-up...${NC}";
+
 
 #? Launch server
 # uvicorn myproject.asgi:application --host 0.0.0.0 --port 8000;

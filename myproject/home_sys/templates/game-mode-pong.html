@@ -8,6 +8,9 @@
 
 <div class="page">
     <div class="rectangle"></div>
+	<a href="{% url 'game-choice' %}" class="retour">
+		<span class="game-mode" id="retour" >Retour</span>
+	</a>
     <h1 class="title">Choix du mode de jeu</h1>
     <div class="mode-choices">
         <a href="{% url 'game-type-pong' %}" class="game">

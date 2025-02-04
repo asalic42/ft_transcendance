@@ -302,6 +302,12 @@
                 formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour sécuriser la requête
 
                 // On envoie les données via AJAX
+				$.ajaxSetup({
+					headers: {
+						'X-CSRFToken': csrftoken
+					}
+				});
+				
                 $.ajax({
                     url: '{% url "update_user_info" %}',
                     type: 'POST',
