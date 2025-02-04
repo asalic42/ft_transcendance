@@ -2,10 +2,6 @@ PURPLE_N='\033[0;35m'
 NC='\033[0m'
 GREEN_N='\033[0;32m'
 
-#? dep
-# apt-get update && apt-get install -y libpq-dev gcc python3-dev
-# pip install -r requirements.txt
-
 #? migrations
 echo "${PURPLE_N}Making migrations...${NC}";
 python3 manage.py makemigrations --noinput;
