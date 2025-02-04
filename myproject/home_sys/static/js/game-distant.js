@@ -4,7 +4,7 @@ var	context = table.getContext("2d");
 var score_p1 = document.getElementById("scoreP1");
 var player1_name = document.getElementById("title-p1");
 var score_p2 = document.getElementById("scoreP2");
-var player2_name = document.getElementById("title-p1");
+var player2_name = document.getElementById("title-p2");
 var fps = document.getElementById("fps");
 var game = document.getElementById("game");
 var disconnected = document.getElementById("disconnected");
@@ -52,6 +52,11 @@ socket.onmessage = function(event) {
 			game_restarted(data);
 		}
 
+		else if (data.type == "players_name") {
+			if (data.player1_name) player1_name.innerText = data.player1_name;
+			if (data.player2_name) player2_name.innerText = data.player2_name;
+		}
+
 		else if (data.type == "game_state") {
 			overlay.style.display = 'none';
 			startGame(data);
@@ -78,8 +83,7 @@ window.onload = function() {
 
 function startGame(data) {
 
-	if (data.player1_name) player1_name.innerText = data.player1_name;
-	if (data.player2_name) player2_name.innerText = data.player2_name;
+	
 	if (data.number) currentPlayer = data.number;
 	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
 	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
