@@ -131,7 +131,7 @@ def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 @login_required
-def game_distant_page(request):
+def game_distant_page(request, game_id):
 	return (render(request, 'game-distant.html'))
 
 @login_required
