@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
+
+<div class="mapSelection">
+    <h1 class="title">Choix de la map</h1>
+    <div class="map-choice">
+		<button class="mapButton" data-map="1">Map 1</button>
+		<button class="mapButton" data-map="2">Map 2</button>
+		<button class="mapButton" data-map="3">Map 3</button>
+	</div>
+</div>
+
+<h3 class="game" id="fps">Fps : 0 | Avg Fps : </h3>
+
+<!-- Game Player 1  -->
+
+<div class="player1">
+    <h3 class="game1" id="title1">Score : 0 </h3>
+
+    <div class="game1" id="canvas-container">
+    	<canvas width="1000" height="1000" id="game1"></canvas>
+
+    	<div id="button-container">
+    		<button id="replay-button" style="display: none;">Play again !</button>
+    	</div>
+    	<text style="display: none;" text-anchor="middle" id="gameOver">
+    		You lost... Womp Womp :&#40;
+    	</text>
+    </div>
+</div>
+
+<!-- Game Player 2  -->
+
+<div class="player2">
+    <h3 class="game2" id="title2">Score : 0 </h3>
+
+    <div class="game2" id="canvas-container">
+    	<canvas width="1000" height="1000" id="game2"></canvas>
+
+    	<div id="button-container">
+    		<button id="replay-button" style="display: none;">Play again !</button>
+    	</div>
+    	<text style="display: none;" text-anchor="middle" id="gameOver">
+    		You lost... Womp Womp :&#40;
+    	</text>
+    </div>
+</div>
+
+<script src="{% static 'js/other_game.js' %}"></script>
+
+{% endblock %}

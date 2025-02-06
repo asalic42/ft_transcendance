@@ -114,7 +114,7 @@ def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 @login_required
-def game_distant_page(request, game_id):
+def game_distant_page(request):
 	return (render(request, 'game-distant.html'))
 
 @login_required
@@ -124,6 +124,14 @@ def game_bot_page(request):
 @login_required
 def other_game(request):
 	return (render(request, 'other_game.html'))
+
+@login_required
+def other_game_choice(request):
+	return (render(request, 'other_game_choice.html'))
+
+@login_required
+def other_game_multi(request):
+	return (render(request, 'other_game_multi.html'))
 
 @login_required
 def tournament_page(request):
