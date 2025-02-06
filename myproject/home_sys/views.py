@@ -1,5 +1,5 @@
 import os
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -7,14 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.http import require_http_methods, require_GET
+from django.conf import settings
 from .models import *
 import json
-from django.shortcuts import get_object_or_404
-
-from django.views.decorators.http import require_http_methods
-
+import requests
 
 """
 |
@@ -50,7 +48,6 @@ def signout(request):
 |   Ici on gère la suppression d'un compte utilisateur de la BDD.
 |   Une fois effacé, on redirige sur la page de "compte effacé avec succès"
 |
-|
 """
 @login_required
 def delete_account(request):
@@ -68,7 +65,6 @@ def delete_account(request):
 """
 |
 |   Redirige sur la page correspondante quand le compte est effacé avec succès.
-|
 |
 """
 
@@ -92,6 +88,13 @@ def profile_page(request):
 def service_unavailable(request):
 	return (render(request, 'service_unavailable.html'))
 
+"""
+|
+|	Charge la page des channels avec les informations necessaires (ami, profil)
+|	On aurait pu passer le currentuser differement, via des cookies, mais flemmee : c'était implémenté comme ça, pourquoi changer une équipe qui gagne?
+|
+"""
+
 @login_required
 def channels_page(request):
     # Récupérer le profil de l'utilisateur connecté
@@ -100,7 +103,7 @@ def channels_page(request):
     # Récupérer les demandes d'ami
     friends = current_user_profile.friends.all()
 
-    # Passer les demandes d'ami au template
+    # Passer les ami au template
     context = {
         'users': {
             'friends': friends
@@ -153,6 +156,11 @@ def get_current_user_id(request):
 	"""Renvoie l'ID de l'utilisateur actuellement connecté"""
 	return JsonResponse({'userId': request.user.id})
 
+"""
+|
+|	Add la partie dans la database. id_player n'est pas vraiment un id, c'est un "pointeur"
+|
+"""
 @ensure_csrf_cookie
 @require_http_methods(["POST"])
 def add_solo_casse_brique(request):
@@ -165,7 +173,7 @@ def add_solo_casse_brique(request):
 		new_game = SoloCasseBrique.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
 			'id': new_game.id,
-			# 'id_player': new_game.id_player,
+			'id_player': new_game.id_player,
 			'id_map': new_game.id_map,
 			'score': new_game.score,
 			'date': new_game.date.isoformat(),
@@ -177,12 +185,11 @@ def add_solo_casse_brique(request):
 def add_pong(request):
 	try:
 		data = json.loads(request.body)
-		# Récupérer l'utilisateur correspondant à l'ID
+
 		user = Users.objects.get(user_id=data.get('id_p1'))
 		if data['id_p2'] is not None:
 			data['id_p2'] = Users.objects.get(user_id=data.get('id_p2'))
 
-		# Remplacer l'ID par l'objet Users
 		data['id_p1'] = user
 		
 		new_game = Pong.objects.create(**data)
@@ -201,23 +208,34 @@ def add_pong(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
+"""
+|
+|	Ici on va aller cherche la map demandé dans la database, où est stocké le chemin pour y acceder.
+|	On lit le fichier, et on renvoie le texte brut, il sera traité côté client.
+|
+"""
 def map_view(request, map_id):
-	# Spécifiez le chemin de votre fichier .txt
 	selected_map = get_object_or_404(Maps, id=map_id)
-	# Lire le fichier .txt
 
+	# Lire le fichier .txt
 	try:
 		with open(selected_map.LinkMaps, 'r') as file:
 			map_data = file.read()
 	except FileNotFoundError:
 		return HttpResponse("Carte non trouvée", status=404)
 
-	# Retourner le contenu du fichier en tant que réponse https
+	# Retourner le contenu du fichier en tant que réponse http
 	return HttpResponse(map_data, content_type="text/plain")
 
 
 # """ CHANNELS VIEWS """ #
 
+"""
+|
+|	La view qui va être appellée en boucle dans le fetch côté client
+|	Pas très propre, on aurait pu utiliser des websockets. Dommage.
+|
+"""
 @require_http_methods(["GET"])
 def live_chat(request):
 	channel = request.GET.get('channel_name', None)
@@ -310,20 +328,11 @@ def post_message(request):
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-	
-
-import requests
-from django.conf import settings
-from django.http import JsonResponse
 
 def get_ip_info(request):
 	url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
 	response = requests.get(url)
 	return JsonResponse(response.json())
-
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
 
 @require_GET
 def check_username(request):
@@ -537,12 +546,6 @@ def getNameById(request, nameU):
 		return JsonResponse({'status': 'success', 'pk': user.pk})  # Ensure 'image' is the correct field
 	except User.DoesNotExist:
 		return JsonResponse({'error': 'User not found'}, status=404)
-
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Users
-from django.contrib.auth.models import User
 
 # import logging
 
