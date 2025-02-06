@@ -12,6 +12,7 @@ urlpatterns = [
     path('game-choice/', game_choice_page, name='game-choice'),
     path('game-mode-pong/', game_mode_pong_page, name='game-mode-pong'),
     path('game-type-pong/', game_type_pong_page, name="game-type-pong"),
+    path('game-distant/', game_distant_page_choice, name="game-distant-choice"),
     path('game-distant/<int:game_id>/', game_distant_page, name="game-distant"),
     path('game/', game_page, name='game'),
     path('game-bot/', game_bot_page, name='game-bot'),

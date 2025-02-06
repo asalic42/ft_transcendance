@@ -131,8 +131,13 @@ def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 @login_required
+def game_distant_page_choice(request):
+	all_games = CurrentGame.objects.all()
+	return (render(request, 'game-type-pong2.html', {'all_games': all_games}))
+
+@login_required
 def game_distant_page(request, game_id):
-	return (render(request, 'game-distant.html'))
+	return (render(request, 'game-distant.html', {'game_id':game_id}))
 
 @login_required
 def game_bot_page(request):

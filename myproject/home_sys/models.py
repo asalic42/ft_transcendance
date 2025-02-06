@@ -106,3 +106,6 @@ class PrivateChan(models.Model):
 	id_chan = models.IntegerField(unique = True)
 	id_u1 = models.IntegerField()
 	id_u2 = models.IntegerField()
+
+class CurrentGame(models.Model):
+    game_id = models.IntegerField(unique=True)

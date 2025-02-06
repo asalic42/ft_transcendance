@@ -103,14 +103,27 @@ class PongConsumer(AsyncWebsocketConsumer):
 		
 	games = defaultdict(PongGame)
 
+
+	@database_sync_to_async
+	def create_current_game(self):
+		print ("game has been added into the database")
+		game = CurrentGame.objects.create(game_id=self.game_id)
+	
+	@database_sync_to_async
+	def delete_current_game(self):
+		# On peut supprimer en filtrant sur game_id
+		CurrentGame.objects.filter(game_id=self.game_id).delete()
+	
 	# Connexion au serveur
 	async def connect(self):
-		self.room_name = "pong"
-		self.room_group_name = f"game_{self.room_name}"
+		# Récupération de l'ID de la partie depuis l'URL
+		self.game_id = self.scope['url_route']['kwargs']['game_id']
+		self.room_group_name = f"game_{self.game_id}"
 		self.game = self.games[self.room_group_name]
+
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
-		# try to add player
+		# Ajout du joueur à la partie
 		if not self.game.add_player(self.channel_name, user_id):
 			await self.close()
 			return
@@ -133,16 +146,18 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'player2_coords': initial_state_game['player2_coords'],
 			'scores': initial_state_game['scores']
 		}))
+		if len(self.game.players) == 1 and not self.game.is_running:
+			await self.create_current_game()
 
 		if len(self.game.players) == 2 and not self.game.is_running:
 			self.game.is_running = True
+			await self.delete_current_game()
 
 			await self.send_game_state()
 			asyncio.create_task(self.start_game())
 
 	# Deconnexion du serveur
 	async def disconnect(self, close_code):
-
 		loser = self.game.players[self.channel_name]['number']
 		await self.channel_layer.group_send(
 			self.room_group_name, {
@@ -157,6 +172,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			self.channel_name
 		)
 		print("Player disco")
+		await self.delete_current_game()
 
 	# Game win suite a une deconnexion de joueur
 	async def game_won(self, event):
