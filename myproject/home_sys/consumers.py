@@ -128,8 +128,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'type': 'game_state',
 			'number': player_number,
-			# 'player1_name': player1_name,
-			# 'player2_name': player2_name,
 			'ball_coords': initial_state_game['ball_coords'],
 			'player1_coords': initial_state_game['player1_coords'],
 			'player2_coords': initial_state_game['player2_coords'],
@@ -139,6 +137,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 		if len(self.game.players) == 2 and not self.game.is_running:
 			self.game.is_running = True
 
+			await self.send_game_state()
 			asyncio.create_task(self.start_game())
 
 	# Deconnexion du serveur
@@ -288,9 +287,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 			},
 		)
 
-		print("NAMES SENT")
-		sys.stdout.flush()
-
 		update_interval = 0.05
 		last_update = asyncio.get_event_loop().time()
 		print("\033[0;34m Demarrage du jeu ! \033[0m")
@@ -319,7 +315,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 				# Collision ball with wall
 				if (ball['coords']['y'] - ball['radius'] <= 0 or
 					ball['coords']['y'] + ball['radius'] >= 950):
-					 ball['vector']['vy'] = -ball['vector']['vy']
+						ball['vector']['vy'] = -ball['vector']['vy']
 
 				# Collision ball with player
 				for player in self.game.players.values():
