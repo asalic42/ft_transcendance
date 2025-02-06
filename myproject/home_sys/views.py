@@ -398,7 +398,24 @@ def add_friend(request, username):
         logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
         logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
         logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
-              
+        
+
+        # Si Current User veut ajouté un ami qu'il a bloqué...
+        if (other_user.users in current_user.blocked.all()):
+              return JsonResponse({'status': 'unblockBefore'})
+
+        # Si Current User in OtherUser Friend list
+        if (current_user in other_user.users.friends.all()):
+              return JsonResponse({'status': 'friend'})
+
+        # Si Current User in OtherUser Blocked list
+        if (current_user in other_user.users.blocked.all()):
+              return JsonResponse({'status': 'blocked'})
+        
+        # Si Current User in OtherUser Friends_request list
+        if (current_user in other_user.users.friends_request.all()):
+              return JsonResponse({'status': 'waiting'})
+
         if other_user in current_user.friends_request.all():
                 logger.info(f"\033[33m #2 condition\033[0m")
                 # Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
@@ -444,6 +461,13 @@ def accept_friend_request(request, username):
             other_user = get_object_or_404(User, username=username)
 
             logger.info(f"\033[32m<Accept_friend_request> : Other_user : {other_user.users}\033[0m")
+
+            if (other_user.users in current_user_profile.blocked.all()):
+              return JsonResponse({'status': 'unblockBefore'})
+
+            # Si Current User in OtherUser Blocked list
+            if (current_user_profile in other_user.users.blocked.all()):
+              return JsonResponse({'status': 'blocked'})
 
             # Ajouter l'utilisateur à la liste d'amis
             current_user_profile.friends.add(other_user.users)
