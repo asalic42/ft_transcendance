@@ -15,11 +15,11 @@ let blockedUsersList = null;
 // Recup l'user courant
 const userElement = document.getElementById('current-username');
 const username = userElement.getAttribute('data-username');
-console.log(`Current username is ${username}`);
+// console.log(`Current username is ${username}`);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/* MONITORING CHANNELS */
 
+//! MONITORING
 
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 
 	newFren.addEventListener('click', () => {
-		// Creation de chan + ouverture
+		// Creation de chan pv + ouverture
 			setChannelNamePV(async function(nameChan, ami) {
 				addChannelToDb(nameChan, 1,ami)
 				try {
@@ -87,26 +87,37 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 
-//////////////////////////////////////////////////////////////////////////////////////////
-/* RIGHT CHANNELS PART */
-	// Add channel to the right channel's list
+// Cliquer sur un channel deja creer
+function	clickToChannel(chanItem, nameChan) {
+	chanItem.addEventListener('click', async () => {
+		openCenter(nameChan);
+	});
+}
 
-async function doesUserHaveAccessToChan(idC, idU) {
-	return fetch(`/accounts/api/doesUserHaveAccessToChan/${idC}/${idU}`)
-		.then(response => {
-			if (response.status === 404) throw new Error('User not found');
-			return response.json(); // Parse JSON first
-		})
-		.then(data => {
-			if (data.allowed == 'True')
-				return true;
-			return false;
-		})
-		.catch(error => {
-			console.log(error);
-			return false;
-		});
-}	
+// Check if a message is send by a click or an ENTER, and send it
+function addMessageListener() {
+	const sendButton = document.getElementById('send-button');
+	sendButton.addEventListener('click', () => {
+
+		const msg = document.getElementById('message-input').value;
+		if (msg != "") {
+		postMessage(currentChan, msg);
+			document.getElementById('message-input').value = '';	// Vide le champ de saisie
+			// console.log("MESSAGE ENVOYE !");
+		}
+	});
+
+	const messageInput = document.getElementById('message-input');
+	messageInput.addEventListener('keydown', (event) => {
+
+		if (event.key === 'Enter') {
+			event.preventDefault();	//Empeche le retour a la ligne !
+			sendButton.click();
+		}
+	});
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 	
 async function	addChannelToList(nameChan, pv, idChan) {
 	var chanList;
@@ -157,15 +168,8 @@ async function openCenter(nameChan) {
 	}, 500);
 }
 
-	// Cliquer sur un channel deja creer
-function	clickToChannel(chanItem, nameChan) {
-	chanItem.addEventListener('click', async () => {
-		openCenter(nameChan);
-	});
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
-/* CENTER CHANNELS PART */
+//! CENTER CHANNELS PART
 	// Main monitor for the center column and message listener
 function	popCenterChat(nameChan) {
 	const page = document.querySelector('.page');
@@ -202,47 +206,6 @@ function createChatPage(nameChan) {
 	`;
 	return center;
 }
-
-function setChannelNamePV(callback) {
-    const inputContainer = document.getElementById('input-dm');
-    const channelNameInput = document.getElementById('name-input-add-friend-chan'); // Text input for channel name
-    const friendSelect = document.getElementById('input-add-friend-chan'); // Dropdown for friends
-    const overlay = document.getElementById('overlay');
-
-    overlay.style.display = 'block';
-    inputContainer.classList.add('show');
-
-    function handleEnterKey(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const channelName = channelNameInput.value;
-            const selectedFriendId = friendSelect.value;
-            const pattern = /^[a-zA-Z0-9_-]+$/;
-
-            // Validate both fields
-            if (!selectedFriendId) {
-                alert('Please select a friend from the dropdown');
-                return;
-            }
-
-            if (!channelName || !pattern.test(channelName)) {
-                alert('Please enter a valid channel name (letters, numbers, underscores, or hyphens)');
-                return;
-            }
-
-            // Clear and close
-            overlay.style.display = 'none';
-            inputContainer.classList.remove('show');
-            channelNameInput.value = ''; // Clear channel name input
-			console.log("selectedFriendId:" + selectedFriendId);
-            callback(channelName, selectedFriendId); // Pass both values
-        }
-    }
-
-    // Listen for Enter on the channel name input
-    channelNameInput.addEventListener('keydown', handleEnterKey);
-}
-
 
 	// Set un nom de channel a sa creation
 function setChannelName(callback) {
@@ -289,29 +252,6 @@ function reversePopCenterChat() {
 	}
 }
 
-	// Check if a message is send by a click or an ENTER, and send it
-function addMessageListener() {
-	const sendButton = document.getElementById('send-button');
-	sendButton.addEventListener('click', () => {
-
-		const msg = document.getElementById('message-input').value;
-		if (msg != "") {
-		postMessage(currentChan, msg);
-			document.getElementById('message-input').value = '';	// Vide le champ de saisie
-			// console.log("MESSAGE ENVOYE !");
-		}
-	});
-
-	const messageInput = document.getElementById('message-input');
-	messageInput.addEventListener('keydown', (event) => {
-
-		if (event.key === 'Enter') {
-			event.preventDefault();	//Empeche le retour a la ligne !
-			sendButton.click();
-		}
-	});
-}
-
 function getPP(userId) {
 	return fetch(`/accounts/user-settings/check_pp/${userId}/`)
 		.then(response => {
@@ -328,7 +268,7 @@ function getPP(userId) {
 		});
 }
 
-	// Add the message on the chat conv
+// Add the message on the chat conv
 async function addMessage(mess, sender, id) {
 
 	const chatPage = document.getElementById('chat-page')
@@ -370,14 +310,73 @@ async function addMessage(mess, sender, id) {
 
 	const messImage = document.getElementById('caca');
 	usernameElement.addEventListener('click', async function() {
-		alert('Image clicked!');
 		window.location.href = `/accounts/profile/${sender}`;
 	});
 
 	chatPage.scrollTop = chatPage.scrollHeight;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//! LEFT CHAN PART
 
+// Add channel to the right channel's list
+async function doesUserHaveAccessToChan(idC, idU) {
+	return fetch(`/accounts/api/doesUserHaveAccessToChan/${idC}/${idU}`)
+		.then(response => {
+			if (response.status === 404) throw new Error('User not found');
+			return response.json(); // Parse JSON first
+		})
+		.then(data => {
+			if (data.allowed == 'True')
+				return true;
+			return false;
+		})
+		.catch(error => {
+			console.log(error);
+			return false;
+		});
+}	
+	
+
+function setChannelNamePV(callback) {
+	const inputContainer = document.getElementById('input-dm');
+	const channelNameInput = document.getElementById('name-input-add-friend-chan'); // Text input for channel name
+	const friendSelect = document.getElementById('input-add-friend-chan'); // Dropdown for friends
+	const overlay = document.getElementById('overlay');
+
+	overlay.style.display = 'block';
+	inputContainer.classList.add('show');
+
+	function handleEnterKey(event) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			const channelName = channelNameInput.value;
+			const selectedFriendId = friendSelect.value;
+			const pattern = /^[a-zA-Z0-9_-]+$/;
+
+			// Validate both fields
+			if (!selectedFriendId) {
+				alert('Please select a friend from the dropdown');
+				return;
+			}
+
+			if (!channelName || !pattern.test(channelName)) {
+				alert('Please enter a valid channel name (letters, numbers, underscores, or hyphens)');
+				return;
+			}
+
+			// Clear and close
+			overlay.style.display = 'none';
+			inputContainer.classList.remove('show');
+			channelNameInput.value = ''; // Clear channel name input
+			// console.log("selectedFriendId:" + selectedFriendId);
+			callback(channelName, selectedFriendId); // Pass both values
+		}
+	}
+
+	// Listen for Enter on the channel name input
+	channelNameInput.addEventListener('keydown', handleEnterKey);
+}
 ////////////////////////////////////////////////
 		/* Function API fetch */
 ///////////////////////////////////////////////
