@@ -35,8 +35,10 @@
 	width: 70%;
 	border: 3px solid #ED4EB0;
 	border-radius: 50px;
+	display: block;
 	margin-left: auto;
 	margin-right: auto;
+	
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -98,6 +100,7 @@
 #canvas-container {
 	border-radius: 1%;
 	position: relative;
+    z-index: 5;
 	display: none;
 	align-items: center;
 	justify-content: center;
@@ -155,7 +158,6 @@ svg {
 svg text {
 	fill: #121217; /* Pas de remplissage par défaut */
 	animation: stroke 2s alternate;
-	width: 1920; height: 1080;
 	stroke-width: 3;
 	stroke: #365FA0;
 	/* font-size: 100px; */
