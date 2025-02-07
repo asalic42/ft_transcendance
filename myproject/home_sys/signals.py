@@ -19,6 +19,8 @@ def save_user_profile(sender, instance, **kwargs):
 @receiver(post_migrate)
 def run_after_migrations(sender, **kwargs):
 	cursor = connection.cursor()
+	cursor.execute("DELETE FROM home_sys_currentgame;")  # Delete tous les channels qui n'ont pas été supprimés (serveur éteint subitement)
+	# print("Salon supprimés")
 	cursor.execute("SELECT COUNT(*) FROM home_sys_maps;")  # Vérifie si des cartes existent déjà
 	count = cursor.fetchone()[0]
 

@@ -13,6 +13,7 @@ from django.conf import settings
 from .models import *
 import json
 import requests
+from .utils import add_pong_logic
 
 """
 |
@@ -131,8 +132,13 @@ def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 @login_required
-def game_distant_page(request):
-	return (render(request, 'game-distant.html'))
+def game_distant_page_choice(request):
+	all_games = CurrentGame.objects.all()
+	return (render(request, 'game-type-pong2.html', {'all_games': all_games}))
+
+@login_required
+def game_distant_page(request, game_id):
+	return (render(request, 'game-distant.html', {'game_id':game_id}))
 
 @login_required
 def game_bot_page(request):
@@ -181,32 +187,15 @@ def add_solo_casse_brique(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-@require_http_methods(["POST"])
 def add_pong(request):
-	try:
-		data = json.loads(request.body)
-
-		user = Users.objects.get(user_id=data.get('id_p1'))
-		if data['id_p2'] is not None:
-			data['id_p2'] = Users.objects.get(user_id=data.get('id_p2'))
-
-		data['id_p1'] = user
-		
-		new_game = Pong.objects.create(**data)
-		return JsonResponse({'status': 'success', 'game': {
-			'id_p1': new_game.id_p1.id,
-			'id_p2': new_game.id_p2.id if new_game.id_p2 else None,
-			'is_bot_game': new_game.is_bot_game,
-			'score_p1': new_game.score_p1,
-			'score_p2': new_game.score_p2,
-			'date': new_game.date.isoformat(),
-			'difficulty': new_game.difficulty,
-			'bounce_nb': new_game.bounce_nb,
-		}}, status=201)
-	except Users.DoesNotExist:
-		return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
-	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    try:
+        data = json.loads(request.body)
+        game_data = add_pong_logic(data)
+        return JsonResponse({'status': 'success', 'game': game_data}, status=201)
+    except Users.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 """
 |
