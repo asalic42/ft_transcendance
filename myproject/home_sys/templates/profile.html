@@ -461,14 +461,19 @@
 
 	<style>
 		.game-history-container {
-			flex: 1;
+			
+			max-height: 400px;
 			margin-top: 55px;
-			width: 300px;
+			width: 30%;
 			padding: 20px;
-			background-color: #f4f4f4;
+			background-color: #d9d9d9;
 			border-radius: 10px;
 			border: 2px solid black;
-			color: blackDF²;
+			color: black;
+			overflow-y: auto;
+			
+			display: block;         /* On garde le mode block pour le conteneur */
+			text-align: center;     /* Centre le texte du conteneur */
 		}
 
 		.game-history-section {
@@ -478,21 +483,24 @@
 		.game-history-section table {
 			width: 100%;
 			border-collapse: collapse;
+			margin: 0 auto;         /* Centre le tableau horizontalement */
 		}
 
 		.game-history-section table th, 
 		.game-history-section table td {
+			background-color: #ca70ca;
 			border: 1px solid #ddd;
 			padding: 8px;
-			text-align: left;
+			text-align: center;     /* Centre le texte dans les cellules */
 		}
 
-		.game-history-section table thead {
-			background-color: #f2f2f2;
+		.game-history-section table thead th {
+			background-color: #2d2fbb;
 		}
 
 		body {
 			color: #000000;
 		}
+
 	</style>
 {% endblock %}
