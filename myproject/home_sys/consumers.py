@@ -12,6 +12,7 @@ import asyncio
 import random
 import json
 import sys
+from .utils import add_pong_logic
 
 from .models import *
 
@@ -23,7 +24,9 @@ class PongGame:
 		self.players = {}
 		self.reset_game()
 		self.is_running = False
+		self.is_over = False
 		self.multiplyer = 0
+		self.bounce = 0
 
 	def reset_game(self):
 		self.ball = {
@@ -32,6 +35,7 @@ class PongGame:
 			'radius': 13
 		}
 		self.scores = {'p1': 0, 'p2': 0}
+		self.bounce = 0
 		for player in self.players.values():
 			player_number = player['number']
 			player['coords'] =  {
@@ -54,7 +58,12 @@ class PongGame:
 		if len(self.players) >= 2:
 			return False
 		
-		player_number = len(self.players) +1
+		player_number = len(self.players) + 1
+		if len(self.players) == 1:
+			for player in self.players.values():
+				if player['number'] == 2:
+					player_number = 1
+					  
 		initial_coords = {
 			'x1': 92 if player_number == 1 else 1820,
 			'y1': 435,
@@ -74,7 +83,6 @@ class PongGame:
 	def remove_player(self, channel_name):
 		if channel_name in self.players:
 			del self.players[channel_name]
-			self.is_running = False
 		
 	# Update player position in the game
 	def update_player_coords(self, channel_name, coords):
@@ -86,12 +94,17 @@ class PongGame:
 		player1_coords = None
 		player2_coords = None
 
+		if (len(self.players) < 2 and dont_raise == False):
+			raise RuntimeError("There has been an error. Sorry for the invonviniance.")
+
 		for player in self.players.values():
+			print(f"player : {player['number']} coords are : {player['coords']}")
+			if player['coords'] is None:
+				raise RuntimeError("There has been an error. Sorry for the invonviniance.")
 			if player['number'] == 1:
 				player1_coords = player['coords']
 			elif player['number'] == 2:
 				player2_coords = player['coords']
-
 		return {
 			'ball_coords': self.ball['coords'],
 			'player1_coords': player1_coords,
@@ -99,15 +112,56 @@ class PongGame:
 			'scores': self.scores
 		}
 
+dont_raise = False
 class PongConsumer(AsyncWebsocketConsumer):
 		
 	games = defaultdict(PongGame)
 
+	@database_sync_to_async
+	def add_pong_game(self, data):
+		return add_pong_logic(data)
+
+	async def add_pong_serializer(self):
+		print('adding game')
+		
+		try:
+			for player in self.game.players.values():
+				if player['number'] == 1:
+					id_p1 = player['user_id']
+				elif player['number'] == 2:
+					id_p2 = player['user_id']
+	
+			
+			data = {
+				'id_p1': id_p1,
+				'id_p2': id_p2,
+				'is_bot_game': False,
+				'score_p1': self.game.scores['p1'],
+				'score_p2': self.game.scores['p2'],
+				'difficulty': -1,
+				'bounce_nb': self.game.bounce,
+			}
+
+			game_data = await self.add_pong_game(data)
+			await self.send(text_data=json.dumps({
+				'type': 'game_created',
+				'game': game_data
+			}))
+		except Exception as e:
+			print('error')
+			## Gère les erreurs (par exemple, envoyer une erreur au client)
+			#await self.send(text_data=json.dumps({
+			#	'type': 'error',
+			#	'message': str(e)
+			#}))
 
 	@database_sync_to_async
 	def create_current_game(self):
-		print ("game has been added into the database")
-		game = CurrentGame.objects.create(game_id=self.game_id)
+		game, created = CurrentGame.objects.get_or_create(game_id=self.game_id)
+		if created:
+			print("game has been added into the database")
+		else:
+			print("game already exists in the database")
 	
 	@database_sync_to_async
 	def delete_current_game(self):
@@ -136,7 +190,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 		await self.accept()
 
 		player_number = self.game.players[self.channel_name]['number']
+		global dont_raise
+		dont_raise = True
 		initial_state_game = self.game.get_game_state()
+		dont_raise = False
+			
 
 		await self.send(text_data=json.dumps({
 			'type': 'game_state',
@@ -149,30 +207,43 @@ class PongConsumer(AsyncWebsocketConsumer):
 		if len(self.game.players) == 1 and not self.game.is_running:
 			await self.create_current_game()
 
-		if len(self.game.players) == 2 and not self.game.is_running:
+		if len(self.game.players) == 2 and not self.game.is_running and not self.game.is_over:
 			self.game.is_running = True
 			await self.delete_current_game()
-
 			await self.send_game_state()
 			asyncio.create_task(self.start_game())
 
 	# Deconnexion du serveur
 	async def disconnect(self, close_code):
-		loser = self.game.players[self.channel_name]['number']
-		await self.channel_layer.group_send(
-			self.room_group_name, {
-				'type': 'game_won',
-				'loser': loser 
-			}
-		)
-		self.game.remove_player(self.channel_name)
 		self.game.is_running = False
+		self.game.is_over = True
+	
+		if self.channel_name in self.game.players:
+			player_number = self.game.players[self.channel_name]['number']
+			if player_number == 1:
+				self.game.scores['p2'] = 1
+			elif player_number == 2:
+				self.game.scores['p1'] = 1
+	
+			loser = player_number
+			
+			await self.send_game_state()
+			await self.channel_layer.group_send(
+				self.room_group_name, {
+					'type': 'game_won',
+					'loser': loser 
+				}
+			)
+			self.game.remove_player(self.channel_name)
+		else:
+			print(f"Channel {self.channel_name} already removed from players.")
+		
 		await self.channel_layer.group_discard(
 			self.room_group_name,
 			self.channel_name
 		)
 		print("Player disco")
-		await self.delete_current_game()
+		await self.close()
 
 	# Game win suite a une deconnexion de joueur
 	async def game_won(self, event):
@@ -217,24 +288,30 @@ class PongConsumer(AsyncWebsocketConsumer):
 		
 	# Message du client lorsque le bouton Replay a ete active
 	async def receive_restarted(self, data):
-		try:
-			if data['action'] == "restart_game":
-				self.game.reset_game()
-				self.game.is_running = True
-
-				game_state = self.game.get_game_state()
-
-				await self.channel_layer.group_send(
-					self.room_group_name, {
-					'type': 'new_game',
-					**game_state
-				})
-
-				asyncio.create_task(self.start_game())
+		if (not self.game.is_running and len(self.game.players) == 2):
+			try:
+				if data['action'] == "restart_game":
+					self.game.reset_game()
+	
+					game_state = None
+					try:
+						game_state = self.game.get_game_state()
+					except RuntimeError:
+						await self.send(text_data=json.dumps({'type': 'game_error'}))
+					
+					self.game.is_running = True
+					self.game.is_over = False
+					await self.channel_layer.group_send(
+						self.room_group_name, {
+						'type': 'new_game',
+						**game_state
+					})
+	
+					asyncio.create_task(self.start_game())
+					return
+			except json.JSONDecodeError:
+				print("Invalid Error JSON")
 				return
-		except json.JSONDecodeError:
-			print("Invalid Error JSON")
-			return
 
 	# Envoie des donnees de la game a tous les participants
 	async def send_game_state(self):
@@ -246,6 +323,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 					**state
 				},
 			)
+		except RuntimeError:
+			await self.send(text_data=json.dumps({'type': 'game_error'}))
+			
 		except ChannelFull:
 			print("Channel full in send_game_state")
 
@@ -310,13 +390,16 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 		countdown_messages = ['3', '2', '1', 'Start!']
 		for message in countdown_messages:
-			await self.channel_layer.group_send(
-				self.room_group_name, {
-					'type': 'start_countdown',
-					'message': message
-				}
-			)
-			await asyncio.sleep(1)
+			if self.game.is_running:
+				await self.channel_layer.group_send(
+					self.room_group_name, {
+						'type': 'start_countdown',
+						'message': message
+					}
+				)
+				await asyncio.sleep(1)
+			else:
+				break
 
 		while self.game.is_running and len(self.game.players) == 2:
 			update_interval = 0.016 # 60 FPS
@@ -330,13 +413,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 				# Collision ball with wall
 				if (ball['coords']['y'] - ball['radius'] <= 0 or
-					ball['coords']['y'] + ball['radius'] >= 950):
+					ball['coords']['y'] + ball['radius'] >= 850):
 						ball['vector']['vy'] = -ball['vector']['vy']
 
 				# Collision ball with player
 				for player in self.game.players.values():
 					coords = player['coords']
-
+					self.game.bounce += 1
 					if (player['number'] == 1 and
 						ball['coords']['x'] - ball['radius'] >= coords['x1'] and
 						ball['coords']['x'] - ball['radius'] <= coords['x2'] + abs(ball['vector']['vx'] * 1.05) and
@@ -387,8 +470,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 							'vy': 30
 						}
 
-				if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
+				if self.game.scores['p1'] >= 1 or self.game.scores['p2'] >= 1:
 					self.game.is_running = False
+					await self.add_pong_serializer()
 
 				try:
 					await self.send_game_state()

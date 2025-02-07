@@ -35,7 +35,8 @@ let start = Date.now();
 let compteur = 0;
 socket.onmessage = function(event) {
 	try {
-        const data = JSON.parse(event.data);
+		const data = JSON.parse(event.data);
+		console.log(data.type);
 
 		if (data.type == "countdown") {
 			countdownBeforeGame(data);
@@ -61,6 +62,10 @@ socket.onmessage = function(event) {
 			overlay.style.display = 'none';
 			startGame(data);
 		}
+		else if (data.type == "game_error") {
+			cancelAnimationFrame(animation_id);
+			alert("Sorry, there has been a server side error. Please, change rooms.");
+		}
 
     } catch (error) {
         console.error("Erreur de parsing des données du WebSocket :", error);
@@ -81,6 +86,8 @@ window.onload = function() {
 	document.getElementById('canvas-container').style.display = 'flex';
 }
 
+var animation_id;
+
 function startGame(data) {
 
 	
@@ -90,7 +97,7 @@ function startGame(data) {
 	if (data.ball_coords) gameState.ball_coords = data.ball_coords;
 	if (data.scores) gameState.scores = data.scores;
 
-	requestAnimationFrame(() => {
+	animation_id = requestAnimationFrame(() => {
 		sendPlayerMove();
 		compteur++;
 
@@ -102,16 +109,17 @@ function startGame(data) {
 		}
 
 		context.clearRect(0, 0, table.width, table.height);
+		console.log('gameState : ' + gameState);
 		update(gameState);
 		
 		if (gameState.scores) {
 			score_p1.innerText = gameState.scores.p1;
 			score_p2.innerText = gameState.scores.p2;
 
-			if (gameState.scores.p1 >= 5) {
+			if (gameState.scores.p1 >= 1) {
 				winnerWindow(1);
 			}
-			else if (gameState.scores.p2 >= 5) {
+			else if (gameState.scores.p2 >= 1) {
 				winnerWindow(2);
 			}
 		}
@@ -128,13 +136,13 @@ function game_restarted(data) {
 	const winner1Text = document.getElementById("wrapper-player1");
 	const winner2Text = document.getElementById("wrapper-player2");
 
-	if (gameState.scores.p1 >= 5) {
+	winner1Text.style.display = "none";
+	winner2Text.style.display = "none";
+	if (gameState.scores.p1 >= 1) {
 		drawOuterRectangle("#365fa0");
-		winner1Text.style.display = "none";
 	}
 	else {
 		drawOuterRectangle("#C42021");
-		winner2Text.style.display = "none";
 	}
 
 	if (data.number) currentPlayer = data.number;
@@ -170,12 +178,21 @@ function drawInnerRectangle(color) {
 }
 
 function drawPlayer(player1Coords, player2Coords) {
+	console.log('player1Coords: ' + player1Coords);
+	console.log('player2Coords: ' + player2Coords);
 	if (!player1Coords || !player2Coords) return;
 	
 	context.fillStyle = "#ED4EB0";
 	context.beginPath();
-	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
-	context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+	console.log("player1Coords.x1 :" + player1Coords.x1 + " player1Coords.y1: " + player1Coords.y1);
+	console.log("player2Coords.x1 :" + player2Coords.x1 + " player2Coords.y1: " + player2Coords.y1);
+	
+	if (player1Coords) {
+        context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
+    }
+    if (player2Coords) {
+        context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+    }
 	context.fill();
 	context.closePath();
 }
@@ -205,6 +222,7 @@ function update(gameState) {
     context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
+	console.log('drawing player');
 	drawPlayer(gameState.player1_coords, gameState.player2_coords);
 	drawBall(gameState.ball_coords);
 }
