@@ -11,17 +11,12 @@ var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
 var fps = document.getElementById("fps");
 
-var score1 = document.getElementById("title1");
-var score2 = document.getElementById("title2");
+var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
 const mapSelection = document.querySelector('.mapSelection');
-const game1 = document.querySelector('.game1');
-const game2 = document.querySelector('.game2');
-var count1 = 0;
-var count2 = 0;
+const game = document.querySelector('.game');
+var count = 0;
 var health = 5;
-
-const socket = new WebSocket('ws://transcendance.42.paris/ws/casse-brique')
 
 class block {
 	x1; y1; width; height; state;
@@ -33,7 +28,6 @@ class block {
 		this.state = state;
 	}
 }
-
 let cachedUserId = null;
 
 //! Init
@@ -47,15 +41,12 @@ mapSelection.addEventListener('click', (event) => {
 });
 
 async function launch (idMap) {
-	table1 = document.getElementById("game1");
-	table2 = document.getElementById("game2");
-	context1 = table1.getContext("2d");
-	context2 = table2.getContext("2d");
+	table = document.getElementById("game");
+	context = table.getContext("2d");
 	
 	await fetchMap(idMap);
 	fps.style.display = 'flex';
-	title1.style.display = 'flex';
-	title2.style.display = 'flex';
+	title.style.display = 'flex';
 	canvasContainer.style.display = 'flex';
 	mapSelection.style.display ='none';
 

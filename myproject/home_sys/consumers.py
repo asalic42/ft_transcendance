@@ -422,13 +422,13 @@ class Block:
 class CasseBriqueGame:
 	def __init__(self):
 		self.players = {}
+		self.scores = {'p1': 0, 'p2': 0 }
+		self.health = {'p1': 5, 'p2': 5}
+		self.block_array = self.create_blocks(block_array=[])
 		self.reset_game()
 		self.is_running = False
 
 	def reset_game(self):
-		self.block_array = self.create_blocks(block_array=[])
-
-		self.scores = {'p1': 0, 'p2': 0 }
 		self.ball = {
 			1:{
 				'coords' : {'x' : 500 / 2, 'y' : 800 - 70 },
@@ -523,6 +523,7 @@ class CasseBriqueGame:
 				player2_coords = player['coords']
 
 		return {
+			'blocks': self.block_array,
 			'ball_p1': self.ball[1]['coords'],
 			'ball_p2': self.ball[2]['coords'],
 			'player1_coords': player1_coords,
@@ -568,12 +569,16 @@ class CasseBriqueConsumer:
 		if len(self.game.players) == 2 and not self.game.is_running:
 			self.game.is_running = True
 
-			await self.send_game_state()
+			await self.send_game_state(0)
 			asyncio.create_task(self.start_game())
 		
 	# async def disconnect(self):
 # 
 	# async def receive(self):
+
+	""" """ """ """ """ """ """ """ """ """
+	""" Back ball concerns """
+	""" """ """ """ """ """ """ """ """ """
 
 	# Increment the speed of the ball after a collision
 	def increment_ball_speed(self, ball_player):
@@ -609,6 +614,7 @@ class CasseBriqueConsumer:
 			# Ajuster la position pour que la balle ne colle pas au plafond
 			ball_player['coords']['y'] = ball_player['radius']
 		
+	# Collision ball with blocks
 	def collision_block(self, ball_player, number):
 		for block in range(self.game.block_array.length()):
 			if not block.state:
@@ -650,11 +656,81 @@ class CasseBriqueConsumer:
 				self.increment_ball_speed(ball_player)
 				block.state -= 1
 				if number == 1:
-					self.scores['p1'] += abs(4 - block.state)
+					self.scores['p1'] += abs(5 - block.state)
 				elif number == 2:
-					self.scores['p2'] += abs(4 - block.state)
+					self.scores['p2'] += abs(5 - block.state)
 				break
 
+	# look if there is a ball collision with player
+	def is_collision_player(self, ball_player, player_coords):
+		if ball_player['hit_player'] > 0 and ball_player['hit_player'] < 15:
+			ball_player['hit_player'] +=1
+			return False
+
+		if ball_player['hit_player'] >= 15:
+			ball_player['hit_player'] = 0
+
+		if ball_player['coords']['x'] + ball_player['radius'] / 2 >= player_coords['coords']['x1'] and \
+			ball_player['coords']['x'] - ball_player['radius'] / 2 <= player_coords['coords']['x2'] and \
+			ball_player['coords']['y'] + ball_player['radius'] >= player_coords['coords']['y1'] and \
+			ball_player['coords']['y'] + ball_player['radius'] <= player_coords['coords']['y2']:
+				ball_player['hit_player'] = 1
+				self.increment_ball_speed(ball_player)
+				return True
+		return False
+
+	def handle_player_collision(self, ball_player, player_coords):
+		intersection = ((player_coords['coords']['x1'] + 60 - ball_player['coords']['x']) / -60)
+		ball_player['const_vector']['vx'] = max(-1, min(1, intersection)) * abs(ball_player['const_vector']['vy'])
+		ball_player['const_vector']['vy'] = -ball_player['const_vector']['vy']
+		self.increment_ball_speed(ball_player)
+
+		ball_player['vector']['vx'] = ball_player['const_vector']['vx']
+		ball_player['vector']['vy'] = ball_player['const_vector']['vy']
+
+	def move_ball(self, ball_player, number):
+		steps = 5
+		step_x = ball_player['vector']['x'] / steps
+		step_y = ball_player['vector']['y'] / steps
+		player_coords = self.game.players[self.channel_name]
+
+		for step in steps:
+			ball_player.coords.x += step_x
+			ball_player.coords.y += step_y
+
+			if self.is_collision_player(ball_player, player_coords):
+				self.handle_player_collision(ball_player, player_coords)
+		
+			self.collision_walls_top(ball_player)
+			self.collision_block(ball_player, number)
+
+	""" """ """ """ """ """ """ """ """ """
+	""" Sender Messages"""
+	""" """ """ """ """ """ """ """ """ """
+	async def send_game_state(self, time):
+		try:
+			state = self.game.get_game_state()
+			await self.channel_layer.group_send(
+				self.room_group_name, {
+					'type': 'game_update',
+					'time': time,
+					**state
+				},
+			)
+		except ChannelFull:
+			print("Channel full in send_game_state")
+	
+	async def game_update(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'game_state',
+			'time': event['time'],
+			'blocks': event['blocks'],
+			'ball_p1': event['ball_p1'],
+			'ball_p2': event['ball_p2'],
+			'player1_coords': event['player1_coords'],
+			'player2_coords': event['player2_coords'],
+			'scores': event['scores']
+		}))
 
 	async def start_game(self):
 		player1_name = await database_sync_to_async(get_player_name)(self.game.players.values(), 1)
@@ -687,11 +763,12 @@ class CasseBriqueConsumer:
 			)
 			await asyncio.sleep(1)
 		
-		
+		time_left = 60
 		while self.game.is_running and len(self.game.players) == 2:
 			update_interval = 0.016 # 60 FPS
 			current_time = asyncio.get_event_loop().time()
 			if current_time - last_update >= update_interval:
+
 				ball_p1 = self.game.ball[1]
 				ball_p2 = self.game.ball[2]
 
@@ -706,44 +783,36 @@ class CasseBriqueConsumer:
 
 				self.move_ball(ball_p1, 1)
 				self.move_ball(ball_p2, 2)
+
+				# Check if a player lost a life
+				self.is_round_end(ball_p1, ball_p2)
+
+				# End of the game
+				if time_left <= 0:
+					self.game.is_running = False
 				
-				# Move Ball
-					#Collision ball wall right/left and the top
-					# self.collision_walls_top(ball_p1)
-					# self.collision_walls_top(ball_p2)
+				try:
+					await self.send_game_state(time_left)
+					elapsed = asyncio.get_event_loop().time() - current_time
+					remaining_time = update_interval - elapsed
+					self.game.multiplyer = remaining_time / update_interval
+					if remaining_time > 0:
+						await asyncio.sleep(remaining_time)  # ⬅️ LE SLEEP EST ICI !
+				except ChannelFull:
+					print("Channel full, skipping update")
+				
+				await asyncio.sleep(1)
+				time_left -= 1
+				last_update = current_time
 
-					# Collision ball with blocks
-					# self.collision_block(ball_p1, 1)
-					# self.collision_block(ball_p2, 2)
 
-	def collision_player(self, ball_player, player_coords):
-		if ball_player['hit_player'] > 0 and ball_player['hit_player'] < 15:
-			ball_player['hit_player'] +=1
-			return False
-
-		if ball_player['hit_player'] >= 15:
-			ball_player['hit_player'] = 0
-
-		if ball_player['coords']['x'] + ball_player['radius'] / 2 >= player_coords.x1 and ball_player['coords']['x'] - ball_player['radius'] / 2 <= player_coords.x2 and ball_player['coords']['y'] + ball_player['radius'] >= player_coords.y1 and ball_player['coords']['y'] + ball_player['radius'] <= player_coords.y2:
-			ball_player['hit_player'] = 1
-			self.increment_ball_speed(ball_player)
-			return True
-
-		return False
-
-	def move_ball(self, ball_player, number):
-		steps = 5
-		step_x = ball_player['vector']['x'] / steps
-		step_y = ball_player['vector']['y'] / steps
-		player_number = self.game.players[self.channel_name]
-
-		for step in steps:
-			ball_player.coords.x += step_x
-			ball_player.coords.y += step_y
-
-			if self.collision_player(ball_player, player_number):
-				# self.handle_player_collision(ball_player, player_number)
-			
-			self.collision_walls_top(ball_player)
-			self.collision_block(ball_player, number)
-
+	# Check si le round est fini pour chaque joueur et en demarre un autre
+	def is_round_end(self, ball_p1, ball_p2):
+		if ball_p1['coords']['y'] + ball_p1['radius'] >= 800:
+			if self.game.scores['p1'] > 5:
+				self.game.scores['p1'] -= 5
+			self.game.reset_game()
+		if ball_p2['coords']['y'] + ball_p2['radius'] >= 800:
+			if self.game.scores['p1'] > 5:
+				self.game.scores['p2'] -= 5
+			self.game.reset_game()

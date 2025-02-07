@@ -16,14 +16,16 @@
 </div>
 
 <h3 class="game" id="fps">Fps : 0 | Avg Fps : </h3>
+<h3 class="timer" id="timer" display="none">Time left </h3>
 
 <!-- Game Player 1  -->
 
 <div class="player1">
+	<h3 class="playername1" id="playername1">Player 1</h3>
     <h3 class="game1" id="title1">Score : 0 </h3>
 
     <div class="game1" id="canvas-container">
-    	<canvas width="1000" height="1000" id="game1"></canvas>
+    	<canvas width="500" height="800" id="game1"></canvas>
 
     	<div id="button-container">
     		<button id="replay-button" style="display: none;">Play again !</button>
@@ -37,10 +39,11 @@
 <!-- Game Player 2  -->
 
 <div class="player2">
+	<h3 class="playername2" id="playername2">Player 2</h3>
     <h3 class="game2" id="title2">Score : 0 </h3>
 
     <div class="game2" id="canvas-container">
-    	<canvas width="1000" height="1000" id="game2"></canvas>
+    	<canvas width="500" height="800" id="game2"></canvas>
 
     	<div id="button-container">
     		<button id="replay-button" style="display: none;">Play again !</button>
@@ -50,6 +53,12 @@
     	</text>
     </div>
 </div>
+
+<div id="overlay">
+	<h1 id="countdown">3</h1>
+</div>
+
+<h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
 
 <script src="{% static 'js/other_game.js' %}"></script>
 

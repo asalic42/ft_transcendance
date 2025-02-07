@@ -83,7 +83,6 @@ window.onload = function() {
 
 function startGame(data) {
 
-	
 	if (data.number) currentPlayer = data.number;
 	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
 	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
