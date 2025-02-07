@@ -20,4 +20,4 @@ echo "${GREEN_N}Continuing server start-up...${NC}";
 #? Launch server
 # uvicorn myproject.asgi:application --host 0.0.0.0 --port 8000;
 #? Launch server with Daphne
-daphne --bind 0.0.0.0 --port 8000 myproject.asgi:application;daphne --bind 0.0.0.0 --port 8000 myproject.asgi:application;
+daphne --bind 0.0.0.0 --port 8000 myproject.asgi:application;
