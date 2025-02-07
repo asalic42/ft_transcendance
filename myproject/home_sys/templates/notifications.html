@@ -16,6 +16,8 @@
 
                 <p class="user-username">{{ other_user }} </p>
                 <button class="remove-friend" data-username="{{ other_user }}">Remove</button>
+                <button class="talk-friend" data-username="{{ other_user }}">Talk 💬​</button>
+                <button class="invite-friend" data-username="{{ other_user }}">Invite 🫲</button>
             </div>
             {% empty %}
             <div class="if_not_founded">
@@ -146,12 +148,12 @@
             cursor: pointer;
         }
 
-        .add-it {
+        .add-it, .talk-friend {
             background-color: green;
             color: white;
         }
 
-        .decline-it {
+        .decline-it, .invite-friend {
             background-color: orange;
             color: white;
         }
@@ -167,7 +169,9 @@
         .decline-it,
         .block-it,
         .remove-friend,
-        .remove-user-blocked {
+        .remove-user-blocked,
+        .talk-friend,
+        .invite-friend {
             transition: all 0.1s ease;
         }
 
@@ -175,13 +179,51 @@
         .decline-it:hover,
         .block-it:hover,
         .remove-friend:hover,
-        .remove-user-blocked:hover {
+        .remove-user-blocked:hover,
+        .talk-friend:hover,
+        .invite-friend:hover {
             scale: 1.1;
         }
 
     </style>
 
     <script>
+
+        function getAddFriendResponse(baliseName, url, dataStatus)
+        {
+            document.querySelectorAll(`${baliseName}`).forEach(button => {
+                button.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    fetch(`/accounts/${url}/${username}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === `blocked`) {
+                            alert(`Impossible d'accepter car vous êtes bloqué par cet utilisateur.`);
+                            location.reload(); // Recharger la page pour mettre à jour la liste
+                        }
+                        else if (data.status === `unblockBefore`) {
+                            alert(`Pour accepter la demande d'ami de cet utilisateur, veuillez le débloquer.`);
+                            location.reload();
+                        }
+                        else if (data.status === `friend_added`) {
+                            alert(`L'Utilisateur <${username}> a bien été ajouté en ami !`);
+                            location.reload();
+                        }
+                        else {
+                            alert('Erreur : ' + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Erreur:', error));
+                });
+            });
+        }
 
         function getResponse(baliseName, url, dataStatus, msgStart, msgEnd)
         {
@@ -210,7 +252,7 @@
             });
         }
 
-        getResponse(".add-it", "accept_friend_request", "friend_added", "Vous êtes maintenant ami avec", ".");
+        getAddFriendResponse(".add-it", "accept_friend_request", "friend_added");
         getResponse(".decline-it", "decline_friend_request", "friend_request_declined", "Demande d'ami de", "refusée.");
         getResponse(".block-it", "block_user", "user_blocked", "Utilisateur", "bloqué.");
         getResponse(".remove-friend", "remove_friend", "user_removed", "", "n'est désormait plus votre ami.");

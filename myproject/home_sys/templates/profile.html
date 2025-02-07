@@ -6,44 +6,167 @@
 
 	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
-	<div class="profile-container">
+	<div class="parent-container">
 
-		<div class="profile-box">
-			<img class="profile-img" src="{{ user.users.image.url }}" alt="">
-			<!-- <button class="profile-img-upload">➕</button> -->
+		<div class="profile-container">
 
-			{% if request.user.is_authenticated %}
-				<div class="profile-user-info">
-					<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
-					<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
-					<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
-				</div>
-			{% else %}
-				<p>Vous n'êtes pas connecté.</p>
-			{% endif %}
+			<div class="profile-box">
+				<img class="profile-img" src="{{ user.users.image.url }}" alt="">
+				<!-- <button class="profile-img-upload">➕</button> -->
 
-			<div class="profile-separator">
-				{% if request.user == user %}
-					<p class="profile-text-settings-rdv">
-						Si vous voulez modifier vos informations utilisateurs
-						rendez-vous dans les settings.
-					</p>
-					<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+				{% if request.user.is_authenticated %}
+					<div class="profile-user-info">
+						<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
+						<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
+						<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
+					</div>
 				{% else %}
-					<p class="other-profile-text-settings-rdv">
-						Vous pouvez ajouter {{profile_user.username}} en ami(e)
-						ou décider de le/la bloquer.
-					</p>
-				
-					<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
-					<button class="other-profile-block">BLOCK🖕</button>
+					<p>Vous n'êtes pas connecté.</p>
 				{% endif %}
 
+				<div class="profile-separator">
+					{% if request.user == user %}
+						<p class="profile-text-settings-rdv">
+							Si vous voulez modifier vos informations utilisateurs
+							rendez-vous dans les settings.
+						</p>
+						<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+					{% else %}
+						<p class="other-profile-text-settings-rdv">
+							Vous pouvez ajouter {{profile_user.username}} en ami(e)
+							ou décider de le/la bloquer.
+						</p>
+					
+						<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
+						<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
+					{% endif %}
+
+				</div>
+			</div>
+		</div>
+
+		<div class="game-history-container">
+			<h2>Historique des parties</h2>
+			
+			<div class="game-history-section">
+				<h3>Parties Pong</h3>
+				{% if games_P %}
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Adversaire</th>
+								<th>Score</th>
+								<th>Type</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for game in games_P %}
+							<tr>
+								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+								<td>
+									{% if game.is_bot_game %}
+										Bot (Niveau {{ game.difficulty }})
+									{% elif game.id_p1 == user.users %}
+										{{ game.id_p2.name }}
+									{% else %}
+										{{ game.id_p1.name }}
+									{% endif %}
+								</td>
+								<td>
+									{% if game.id_p1 == user.users %}
+										{{ game.score_p1 }} - {{ game.score_p2 }}
+									{% else %}
+										{{ game.score_p2 }} - {{ game.score_p1 }}
+									{% endif %}
+								</td>
+								<td>{% if game.is_bot_game %}Bot{% else %}Joueur{% endif %}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Aucune partie Pong jouée</p>
+				{% endif %}
+			</div>
+	
+			<div class="game-history-section">
+				<h3>Parties Solo Casse-Briques</h3>
+				{% if games_S_CB %}
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Carte</th>
+								<th>Score</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for game in games_S_CB %}
+							<tr>
+								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+								<td>{{ game.id_map }}</td>
+								<td>{{ game.score }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Aucune partie Solo Casse-Briques jouée</p>
+				{% endif %}
+			</div>
+	
+			<div class="game-history-section">
+				<h3>Parties Multi Casse-Briques</h3>
+				{% if games_M_CB %}
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Adversaire</th>
+								<th>Score</th>
+								<th>Carte</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for game in games_M_CB %}
+							<tr>
+								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+								<td>
+									{% if game.id_p1 == user.users %}
+										{{ game.id_p2.name }}
+									{% else %}
+										{{ game.id_p1.name }}
+									{% endif %}
+								</td>
+								<td>
+									{% if game.id_p1 == user.users %}
+										{{ game.score_p1 }} - {{ game.score_p2 }}
+									{% else %}
+										{{ game.score_p2 }} - {{ game.score_p1 }}
+									{% endif %}
+								</td>
+								<td>{{ game.map }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Aucune partie Multi Casse-Briques jouée</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>
 
 	<style>
+
+		.parent-container {
+        	display: flex;
+        	justify-content: space-between; /* Espace les éléments */
+        	align-items: flex-start; /* Aligne les éléments en haut */
+        	margin-top: 5%; /* Ajustez selon vos besoins */
+        	padding: 0 20px; /* Ajoute un peu d'espace sur les côtés */
+    	}
 
 		.other-profile-add-friend,
         .other-profile-block {
@@ -63,6 +186,7 @@
 
 		.profile-container {
 			display: flex;
+			flex: 1;
 			margin-top: 5%;
 			justify-content: center; /* Centre horizontalement */
 			align-items: center;
@@ -192,6 +316,58 @@
 
     <script>
 
+		// BLOCK BUTTON
+		const blockButton = document.querySelector(".other-profile-block");
+        
+		blockButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const username = encodeURIComponent(blockButton.getAttribute('data-username'));
+            if (!username) {
+                console.error("Username non trouvé !");
+                alert("Erreur : Utilisateur non trouvé.");
+                return;
+            }
+            console.log("Username récupéré :", username); // Debugging
+            // Construire l'URL correctement
+            const url = `/accounts/block_user/${username}/`;
+            // Récupérer le token CSRF
+            const csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error("CSRF token non trouvé !");
+                alert("Erreur : CSRF token manquant.");
+                return;
+            }
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                console.log("Réponse reçue:", response);
+                if (!response.ok) {
+                    throw new Error('Erreur réseau ou serveur');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Données reçues:", data);
+                switch (data.status) {
+                    case ('user_blocked'):
+                        alert('Cet Insolent a été bloqué ! 🫡​');
+                        break;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Une erreur s'est produite lors de l'ajout de l'ami. Veuillez réessayer.");
+            });
+        });
+
+		// ADD BUTTON
+
         const addButton = document.querySelector(".other-profile-add-friend");
 
         addButton.addEventListener('click', function(e) {
@@ -236,13 +412,28 @@
             })
             .then(data => {
                 console.log("Données reçues:", data);
-                if (data.status === 'friend_added') {
-                    alert('Ami ajouté avec succès !');
-                } else if (data.status === 'friend_request_sent') {
-                    alert('Demande d\'ami envoyée !');
-                } else {
-                    alert('Une erreur s\'est produite.');
-                }
+                switch (data.status) {
+                    case ('friend_added'):
+                        alert('Ami ajouté avec succès !');
+                        break;
+                        
+                    case ('friend_request_sent'):
+                        alert('Demande d\'ami envoyée !');
+                        break;
+                    case ('waiting'):
+                        alert('Demande déjà envoyée, en attente de réponse.');
+                        break;
+                    case ('friend'):
+                        alert('Vous êtes déjà amis.');
+                        break;
+                    case ('blocked'):
+                        alert('Vous êtes bloqué par cet utilisateur.');
+                        break;
+                    
+                    case ('unblockBefore'):
+                        alert('Débloquez cet utilisateur pour le demander en ami.');
+                        break;
+				}
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -268,124 +459,15 @@
     </script>
 
 
-	<div class="game-history-container">
-		<h2>Historique des parties</h2>
-		
-		<div class="game-history-section">
-			<h3>Parties Pong</h3>
-			{% if games_P %}
-				<table>
-					<thead>
-						<tr>
-							<th>Date</th>
-							<th>Adversaire</th>
-							<th>Score</th>
-							<th>Type</th>
-						</tr>
-					</thead>
-					<tbody>
-					{% for game in games_P %}
-						<tr>
-							<td>{{ game.date|date:"d/m/Y H:i" }}</td>
-							<td>
-								{% if game.is_bot_game %}
-									Bot (Niveau {{ game.difficulty }})
-								{% elif game.id_p1 == user.users %}
-									{{ game.id_p2.name }}
-								{% else %}
-									{{ game.id_p1.name }}
-								{% endif %}
-							</td>
-							<td>
-								{% if game.id_p1 == user.users %}
-									{{ game.score_p1 }} - {{ game.score_p2 }}
-								{% else %}
-									{{ game.score_p2 }} - {{ game.score_p1 }}
-								{% endif %}
-							</td>
-							<td>{% if game.is_bot_game %}Bot{% else %}Joueur{% endif %}</td>
-						</tr>
-					{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-				<p>Aucune partie Pong jouée</p>
-			{% endif %}
-		</div>
-
-		<div class="game-history-section">
-			<h3>Parties Solo Casse-Briques</h3>
-			{% if games_S_CB %}
-				<table>
-					<thead>
-						<tr>
-							<th>Date</th>
-							<th>Carte</th>
-							<th>Score</th>
-						</tr>
-					</thead>
-					<tbody>
-					{% for game in games_S_CB %}
-						<tr>
-							<td>{{ game.date|date:"d/m/Y H:i" }}</td>
-							<td>{{ game.id_map }}</td>
-							<td>{{ game.score }}</td>
-						</tr>
-					{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-				<p>Aucune partie Solo Casse-Briques jouée</p>
-			{% endif %}
-		</div>
-
-		<div class="game-history-section">
-			<h3>Parties Multi Casse-Briques</h3>
-			{% if games_M_CB %}
-				<table>
-					<thead>
-						<tr>
-							<th>Date</th>
-							<th>Adversaire</th>
-							<th>Score</th>
-							<th>Carte</th>
-						</tr>
-					</thead>
-					<tbody>
-					{% for game in games_M_CB %}
-						<tr>
-							<td>{{ game.date|date:"d/m/Y H:i" }}</td>
-							<td>
-								{% if game.id_p1 == user.users %}
-									{{ game.id_p2.name }}
-								{% else %}
-									{{ game.id_p1.name }}
-								{% endif %}
-							</td>
-							<td>
-								{% if game.id_p1 == user.users %}
-									{{ game.score_p1 }} - {{ game.score_p2 }}
-								{% else %}
-									{{ game.score_p2 }} - {{ game.score_p1 }}
-								{% endif %}
-							</td>
-							<td>{{ game.map }}</td>
-						</tr>
-					{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-				<p>Aucune partie Multi Casse-Briques jouée</p>
-			{% endif %}
-		</div>
-	</div>
-
 	<style>
 		.game-history-container {
-			margin-top: 20px;
+			flex: 1;
+			margin-top: 55px;
+			width: 300px;
 			padding: 20px;
 			background-color: #f4f4f4;
 			border-radius: 10px;
+			border: 2px solid black;
 			color: blackDF²;
 		}
 
