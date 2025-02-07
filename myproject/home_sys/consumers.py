@@ -98,7 +98,7 @@ class PongGame:
 			raise RuntimeError("There has been an error. Sorry for the invonviniance.")
 
 		for player in self.players.values():
-			print(f"player : {player['number']} coords are : {player['coords']}")
+			# print(f"player : {player['number']} coords are : {player['coords']}")
 			if player['coords'] is None:
 				raise RuntimeError("There has been an error. Sorry for the invonviniance.")
 			if player['number'] == 1:

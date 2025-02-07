@@ -155,18 +155,21 @@ svg {
 	width: 100%; height: 100%;
 }
 
-svg text {
+#svg-wrapper-player1, #text-p1{
 	fill: #121217; /* Pas de remplissage par défaut */
-	animation: stroke 2s alternate;
+	animation: stroke2 2s alternate;
 	stroke-width: 3;
+	font-size: 5vw;
 	stroke: #365FA0;
 	/* font-size: 100px; */
-	font-size: 5vw;
 }
 
 
-#svg-wrapper-player2 text {
-	/* animation: stroke2 2s alternate; */
+#svg-wrapper-player2, #text-p2 {
+	fill: #121217; /* Pas de remplissage par défaut */
+	animation: stroke 2s alternate;
+	stroke-width: 3;
+	font-size: 5vw;
 	stroke: #C42021;
 }
 
@@ -256,4 +259,28 @@ svg text {
 
 a {
 	text-decoration: none;
+}
+
+.game-mode span {
+    font-family: 'coolvetica-condensed-rg';
+}
+
+.game-mode {
+	justify-content: center;
+	align-items: center;
+    cursor: pointer;
+	display: flex;
+	width: 100px;
+	height: 30px;
+    border-radius: 10px;
+    outline: 3px solid #ED4EB0;
+	font-size: 16px;
+	background-color: #141418;
+    color: rgba(237, 78, 176, 0.9);
+	transition: all 0.3s ease-in-out;
+}
+
+.game-mode:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
 }

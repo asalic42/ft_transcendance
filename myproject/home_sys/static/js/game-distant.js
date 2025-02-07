@@ -2,9 +2,11 @@
 var table = document.getElementById("game");
 var	context = table.getContext("2d");
 var score_p1 = document.getElementById("scoreP1");
-var player1_name = document.getElementById("title-p1");
 var score_p2 = document.getElementById("scoreP2");
+var player1_name = document.getElementById("title-p1");
 var player2_name = document.getElementById("title-p2");
+var text_win_p1 = document.getElementById("text-p1");
+var text_win_p2 = document.getElementById("text-p2");
 var fps = document.getElementById("fps");
 var game = document.getElementById("game");
 var disconnected = document.getElementById("disconnected");
@@ -54,8 +56,16 @@ socket.onmessage = function(event) {
 		}
 
 		else if (data.type == "players_name") {
-			if (data.player1_name) player1_name.innerText = data.player1_name;
-			if (data.player2_name) player2_name.innerText = data.player2_name;
+			if (data.player1_name) {
+				player1_name.innerText = data.player1_name;
+				text_win_p1.textContent = player1_name.innerText + " wins !";
+			} 
+			
+			if (data.player2_name) {
+				player2_name.innerText = data.player2_name;
+				text_win_p2.textContent = player2_name.innerText + " wins !";
+			} 
+				
 		}
 
 		else if (data.type == "game_state") {
@@ -178,14 +188,14 @@ function drawInnerRectangle(color) {
 }
 
 function drawPlayer(player1Coords, player2Coords) {
-	console.log('player1Coords: ' + player1Coords);
-	console.log('player2Coords: ' + player2Coords);
+	// console.log('player1Coords: ' + player1Coords);
+	// console.log('player2Coords: ' + player2Coords);
 	if (!player1Coords || !player2Coords) return;
 	
 	context.fillStyle = "#ED4EB0";
 	context.beginPath();
-	console.log("player1Coords.x1 :" + player1Coords.x1 + " player1Coords.y1: " + player1Coords.y1);
-	console.log("player2Coords.x1 :" + player2Coords.x1 + " player2Coords.y1: " + player2Coords.y1);
+	// console.log("player1Coords.x1 :" + player1Coords.x1 + " player1Coords.y1: " + player1Coords.y1);
+	// console.log("player2Coords.x1 :" + player2Coords.x1 + " player2Coords.y1: " + player2Coords.y1);
 	
 	if (player1Coords) {
         context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
@@ -258,6 +268,9 @@ function winnerWindow(player) {
     
 	const winner1Text = document.getElementById("wrapper-player1");
 	const winner2Text = document.getElementById("wrapper-player2");
+
+	winner1Text.style.display = 'none';
+	winner2Text.style.display = 'none';
 	if (player == 1) {
         drawOuterRectangle("#365fa0");
         winner1Text.style.display = "block";

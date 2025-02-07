@@ -119,6 +119,11 @@
         </ul>
     </nav>
 
+	<main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+	
 	<script>
 		function getCookie(name) {
 			let cookieValue = null;
@@ -136,11 +141,6 @@
 		}
 		const csrftoken = getCookie('csrftoken');
 	</script>
-
-    <main class="main-content">
-        {% block content %}
-        {% endblock %}
-    </main>
 
 </body>
 </html>
