@@ -242,6 +242,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 			self.room_group_name,
 			self.channel_name
 		)
+		if len(self.game.players) == 0:
+			await self.delete_current_game()
 		print("Player disco")
 		await self.close()
 

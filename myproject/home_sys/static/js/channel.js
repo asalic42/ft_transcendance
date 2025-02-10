@@ -101,7 +101,7 @@ function addMessageListener() {
 
 		const msg = document.getElementById('message-input').value;
 		if (msg != "") {
-		postMessage(currentChan, msg);
+			postMessage(currentChan, msg, false);
 			document.getElementById('message-input').value = '';	// Vide le champ de saisie
 			// console.log("MESSAGE ENVOYE !");
 		}
@@ -114,6 +114,14 @@ function addMessageListener() {
 			event.preventDefault();	//Empeche le retour a la ligne !
 			sendButton.click();
 		}
+	});
+
+	const invite = document.getElementById('invite-button');
+	invite.addEventListener('click', async (event) => {
+		const msg = `https://transcendance.42.paris/accounts/game-distant/${cachedUserId}/`;
+		postMessage(currentChan, msg, true);
+		await invite_button();
+		window.open(`https://transcendance.42.paris/accounts/game-distant/${cachedUserId}/`, '_blank').focus();
 	});
 }
 
@@ -202,6 +210,7 @@ function createChatPage(nameChan) {
 		<div class="input-container">
 		<input id="message-input" type="text" placeholder="Message...">
 		<button id="send-button">Envoyer</button>
+		<button id="invite-button">Invite</button>
 		</div>
 	`;
 	return center;
@@ -269,7 +278,7 @@ function getPP(userId) {
 }
 
 // Add the message on the chat conv
-async function addMessage(mess, sender, id) {
+async function addMessage(mess, sender, id, is_link) {
 
 	const chatPage = document.getElementById('chat-page')
 
@@ -295,7 +304,14 @@ async function addMessage(mess, sender, id) {
 	usernameElement.innerHTML = `<img src='${pp}' id="caca">
 								 <p class="name">${sender}</p>`;
 
-	const messElement = document.createElement('p');
+	var messElement;
+	if (is_link) {
+		messElement = document.createElement('a');
+		messElement.href = mess;
+	}
+	else {
+		messElement = document.createElement('p');
+	}
 	messElement.classList.add('text')
 
 	if (blockedUsersList.includes(id)) { // Then user is blocked
@@ -399,7 +415,7 @@ async function liveChatFetch() {
 			// console.log(data.new_message);
 			for (var message of data.new_message) {
 				// console.log("Adding message with id = " + message.id);
-				await addMessage(message.message, message.sender, message.idSender);
+				await addMessage(message.message, message.sender, message.idSender, message.is_link);
 				lastMessageId = message.id;
 			}
 		}
@@ -508,7 +524,21 @@ async function	loadChannels() {
 	}
 }
 
-async function postMessage(currentChan, mess) {
+async function invite_button() {
+	fetch(`/accounts/create_current_game/${cachedUserId}/`)
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Erreur réseau');
+		}
+		console.log("tout est bien reçu");
+		return response.json();
+	})
+	.catch(error => {
+		console.error('Erreur lors de la récupération des données :', error);
+	});
+}
+
+async function postMessage(currentChan, mess, is_link) {
 	try {
 		const response = await fetch('/accounts/api/post_message/', {
 			method: 'POST',
@@ -522,6 +552,7 @@ async function postMessage(currentChan, mess) {
 				sender: username,
 				message: mess,
 				idSender: cachedUserId,
+				is_link : is_link,
 			})
 		});
 		if (!response.ok) {

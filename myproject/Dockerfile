@@ -9,7 +9,7 @@ COPY requirements.txt .
 
 # Ici on installe les dépendances bb
 RUN apt-get update && apt-get install -y libpq-dev gcc python3-dev
-RUN pip install -r --no-cache-dir requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # On copie tout le reste du code
 COPY . .

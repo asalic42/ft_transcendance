@@ -248,6 +248,7 @@ def live_chat(request):
 				'sender': msg.sender,
 				'idSender': msg.idSender,
 				'message': msg.message,
+				'is_link': msg.is_link,
 				'date':msg.date.isoformat()} for msg in new_message]
 		return JsonResponse({'new_message': data})
 	return JsonResponse({'new_message': None})
@@ -313,6 +314,7 @@ def post_message(request):
 			'sender': new_message.sender,
 			'idSender': new_message.idSender,
 			'message': new_message.message,
+			'is_link' : new_message.is_link,
 			'date':new_message.date.isoformat(),
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
@@ -695,3 +697,15 @@ def remove_blocked_user(request, username):
 		except Exception as e:
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+
+@login_required
+def create_current_game(request, sender_id):
+	try:
+		created = CurrentGame.objects.get_or_create(game_id=sender_id)
+		if created:
+			return (render(request, 'game-distant.html', {'game_id':sender_id}))
+		else:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	except Exception as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
