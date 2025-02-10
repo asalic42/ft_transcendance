@@ -54,4 +54,5 @@ urlpatterns = [
     path('block_user/<str:username>/', block_user, name='block_user'),
     path('remove_friend/<str:username>/', remove_friend, name="remove_friend"),
     path('remove_blocked_user/<str:username>/', remove_blocked_user, name="remove_blocked_user"),
+    path('api/user-status/', user_status, name='user-status'),
 ]

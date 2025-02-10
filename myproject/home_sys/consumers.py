@@ -381,4 +381,32 @@ class PongConsumer(AsyncWebsocketConsumer):
     #             except User.DoesNotExist:
     #                 return f"Player {player_number}"
     #     return f"Player {player_number}"
-        
+
+
+""" Pour le status utilisateur (online/offline) """
+
+import json
+import logging
+from channels.generic.websocket import AsyncWebsocketConsumer
+
+logger = logging.getLogger(__name__)
+
+class StatusConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            await self.accept()
+            await self.channel_layer.group_add("status_updates", self.channel_name)
+            logger.info(f"User {self.user.id} connected to WebSocket.")
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'user') and self.user.is_authenticated:
+            await self.channel_layer.group_discard("status_updates", self.channel_name)
+            logger.info(f"User {self.user.id} disconnected from WebSocket.")
+
+    async def user_status_update(self, event):
+        await self.send(text_data=json.dumps({
+            "user_id": event["user_id"],
+            "is_online": event["is_online"],
+        }))
+        logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")

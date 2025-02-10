@@ -30,3 +30,42 @@ def run_after_migrations(sender, **kwargs):
 			print(f"Erreur lors de l'importation des maps: {e}")
 	else:
 		print("Les maps sont déjà importées, aucune action nécessaire.")
+
+# signals.py
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.dispatch import receiver
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from .models import Users
+
+@receiver(user_logged_in)
+def on_user_logged_in(sender, request, user, **kwargs):
+    user_profile = Users.objects.get(user=user)
+    user_profile.is_online = True
+    user_profile.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "status_updates",
+        {
+            "type": "user_status_update",
+            "user_id": user.id,
+            "is_online": True,
+        },
+    )
+
+@receiver(user_logged_out)
+def on_user_logged_out(sender, request, user, **kwargs):
+    user_profile = Users.objects.get(user=user)
+    user_profile.is_online = False
+    user_profile.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "status_updates",
+        {
+            "type": "user_status_update",
+            "user_id": user.id,
+            "is_online": False,
+        },
+    )

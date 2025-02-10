@@ -706,3 +706,11 @@ def remove_blocked_user(request, username):
 		except Exception as e:
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+
+from django.http import JsonResponse
+from .models import Users
+
+def user_status(request):
+    users = Users.objects.all().values('id', 'is_online')
+    return JsonResponse(list(users), safe=False)
