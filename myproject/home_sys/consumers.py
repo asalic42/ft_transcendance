@@ -244,7 +244,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 		)
 		if len(self.game.players) == 0:
 			await self.delete_current_game()
-		print("Player disco")
+		elif len(self.game.players) == 1:
+			await self.create_current_game()
 		await self.close()
 
 	# Game win suite a une deconnexion de joueur

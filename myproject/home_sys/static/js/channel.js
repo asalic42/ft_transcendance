@@ -285,12 +285,8 @@ async function addMessage(mess, sender, id, is_link) {
 	const message = document.createElement('div');
 	message.classList.add('message');
 
-	if (sender === username) {
-		message.classList.add('sent');
-	}
-	else {
-		message.classList.add('received');
-	}
+	if (sender === username)	message.classList.add('sent');
+	else						message.classList.add('received');
 
 	let pp;
 	try {
@@ -306,19 +302,22 @@ async function addMessage(mess, sender, id, is_link) {
 
 	var messElement;
 	if (is_link) {
-		messElement = document.createElement('a');
-		messElement.href = mess;
+			messElement = document.createElement('a');
+			messElement.href = mess;
 	}
-	else {
-		messElement = document.createElement('p');
-	}
+	else	messElement = document.createElement('p');
+
 	messElement.classList.add('text')
 
 	if (blockedUsersList.includes(id)) { // Then user is blocked
-		messElement.textContent = "You blocked this user";
-		messElement.style.color = "red";
+			messElement.textContent = "You blocked this user";
+			messElement.style.color = "red";
 	}
-	else messElement.textContent = mess;
+	else if (is_link) {
+		messElement.textContent = "Invitation à jouer";
+		messElement.style.color = "#ee5fb7";
+	}
+	else	messElement.textContent = mess;
 
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
