@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function() {
 					if (data.status === 'error') {
 						throw new Error("Chan already exist"); // Channel exists
 					}
-					openCenter(nameChan);
+					openCenter(nameChan, nameChan);
 				}
 				catch (error) {
 					console.error(error);
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function() {
 					if (data.status === 'error') {
 						throw new Error("Chan already exist"); // Channel exists
 					}
-					openCenter((await getNameById(ami)).name);
+					openCenter((await getNameById(ami)).name, nameChan);
 				}
 				catch (error) {
 					console.error(error);
@@ -103,9 +103,9 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // Cliquer sur un channel deja creer
-function	clickToChannel(chanItem, nameChan) {
+function	clickToChannel(chanItem, printName, nameChan) {
 	chanItem.addEventListener('click', async () => {
-		openCenter(nameChan);
+		openCenter(printName, nameChan);
 	});
 }
 
@@ -168,12 +168,12 @@ async function	addChannelToList(nameChan, pv, idChan) {
 		else
 			titleChan.textContent = nameChan;
 		chanItem.appendChild(titleChan);
-		clickToChannel(chanItem, titleChan.textContent);
+		clickToChannel(chanItem, titleChan.textContent, nameChan);
 		chanList.appendChild(chanItem);
 	}
 }
 
-async function openCenter(nameChan) {
+async function openCenter(printName, nameChan) {
 	lastMessageId = 0;
 	popCenterChat(nameChan);
 	// document.getElementById('new-chan').textContent = '➙';
@@ -183,7 +183,7 @@ async function openCenter(nameChan) {
 	currentChan = nameChan;
 
 	const h2content = document.getElementById('chat-name');
-	h2content.textContent = currentChan;
+	h2content.textContent = printName;
 
 	const chatContainer = document.getElementById('chat-page');
 	chatContainer.innerHTML = ``;
