@@ -14,6 +14,7 @@ from .models import *
 import json
 import requests
 from .utils import add_pong_logic
+from django.db.models import Q
 
 """
 |
@@ -511,11 +512,33 @@ def doesUserHaveAccessToChan(request, idC, idU):
 		priv_chan = PrivateChan.objects.get(id_chan = idC)
 		# print(priv_chan)
 		# message_list = list(messages.values())
-		if priv_chan.id_u1 == idU or priv_chan.id_u2 == idU:
-			return JsonResponse({'status': 'success', 'allowed': 'True', 'idU': idU, 'priv_chan.id_u1': priv_chan.id_u1, 'priv_chan.id_u2':priv_chan.id_u2})
-		return JsonResponse({'status': 'success', 'allowed': 'False', 'idU': idU, 'priv_chan.id_u1': priv_chan.id_u1, 'priv_chan.id_u2':priv_chan.id_u2})
+		if priv_chan.id_u1 == idU:
+			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2':priv_chan.id_u2})
+		if priv_chan.id_u2 == idU:
+			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2': priv_chan.id_u1})
+		return JsonResponse({'status': 'success', 'allowed': 'False', 'id_u1': idU, 'id_u1': priv_chan.id_u1, 'id_u2':priv_chan.id_u2})
 	except:
 		return JsonResponse({'status': 'error'})
+
+def check_duplicate_private_channel(request, user1_id, user2_id):
+    """
+    Vérifie si un canal privé existe déjà entre deux utilisateurs
+    """
+    # Normalise les IDs (le plus petit en premier)
+    id_u1, id_u2 = sorted([int(user1_id), int(user2_id)])
+    
+    # Cherche un canal existant avec ces utilisateurs dans n'importe quel ordre
+    existing_channel = PrivateChan.objects.filter(
+        (Q(id_u1=id_u1) & Q(id_u2=id_u2)) |
+        (Q(id_u1=id_u2) & Q(id_u2=id_u1))
+    ).first()
+    
+    if existing_channel:
+        return JsonResponse({
+            'exists': True,
+            'channel_id': existing_channel.id_chan
+        })
+    return JsonResponse({'exists': False})
 
 @require_http_methods(["POST"])
 def	postPv(request):
@@ -524,17 +547,17 @@ def	postPv(request):
 		new_pv = PrivateChan.objects.create(**data)
 		return JsonResponse({'status': 'success', 'message': {
 			"id_chan": new_pv.id_chan, 
-			"id_u1": new_pv.id_u1, 
+			"id_u1": new_pv.id_u1,
 			"id_u2": new_pv.id_u2,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @require_GET
-def getNameById(request, nameU):
+def getNameById(request, idU):
 	try:
-		user = get_object_or_404(Users, name = nameU)  # pk = primary key
-		return JsonResponse({'status': 'success', 'pk': user.pk})  # Ensure 'image' is the correct field
+		user = get_object_or_404(Users, pk = idU)  # pk = primary key
+		return JsonResponse({'status': 'success', 'name': user.name})  # Ensure 'image' is the correct field
 	except User.DoesNotExist:
 		return JsonResponse({'error': 'User not found'}, status=404)
 

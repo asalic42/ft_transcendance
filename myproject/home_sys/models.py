@@ -24,7 +24,7 @@ class Users(models.Model):
 
 class Chans(models.Model):
 	id = models.AutoField(primary_key = True)
-	name = models.CharField(unique=True, max_length = 30)
+	name = models.CharField(unique = True, max_length = 30)
 	invite_link = models.CharField()
 	date = models.DateTimeField(auto_now_add = True)
 	private = models.BooleanField(default=False)
