@@ -603,6 +603,9 @@ def notification_page(request):
 	# Récupérer le profil de l'utilisateur connecté
 	current_user_profile = request.user.users
 
+	current_user_profile.has_unread_notifications = False
+	current_user_profile.save()
+
 	# Récupérer les demandes d'ami
 	friend_requests = current_user_profile.friends_request.all()
 
@@ -707,6 +710,37 @@ def remove_blocked_user(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@login_required
+def invite_friend(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			other_user.users.invite.add(current_user_profile)
+			# Supprimer la demande d'ami (si elle existe)
+
+			return JsonResponse({'status': 'game_invitation_send'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def invitation_declined(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.invite.remove(other_user.users)
+			# Supprimer la demande d'ami (si elle existe)
+
+			return JsonResponse({'status': 'game_invitation_declined'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
 from django.http import JsonResponse
 from .models import Users
@@ -714,3 +748,4 @@ from .models import Users
 def user_status(request):
     users = Users.objects.all().values('id', 'is_online')
     return JsonResponse(list(users), safe=False)
+

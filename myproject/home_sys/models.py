@@ -15,6 +15,9 @@ class Users(models.Model):
 	friends_request = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_friend_requests')
 	blocked = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_blocked')
 
+	invite = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_invite')
+	has_unread_notifications = models.BooleanField(default=False)
+
 	status = models.BooleanField(default=True)  # Ce champ semble déjà utilisé pour autre chose
 	is_online = models.BooleanField(default=False)  # Nouveau champ pour le statut de connexion
 

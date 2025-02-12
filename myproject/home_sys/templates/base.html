@@ -88,6 +88,11 @@
                         trigger="hover"
                         target=".nav-item">
                     </lord-icon>
+                    {% if request.user.users.has_unread_notifications %}
+                        <div class="notification-status active"></div>
+                    {% else %}
+                        <div class="notification-status"></div>
+                    {% endif %}
                     <span class="link-text">Notifications</span>
                 </a>
             </li>
@@ -124,6 +129,34 @@
         {% endblock %}
     </main>
 
+    <style>
+        .notification-status {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            scale: 0.1;
+            margin-left: -10px;
+            margin-top: 0px;
+            display: none;
+            transition: 0.5s all ease;
+        }
+
+        .notification-status.active {
+            display: block;
+            background-color: blueviolet;
+            animation: anim-notif-status 0.5s forwards;
+        }
+
+        @keyframes anim-notif-status {
+			0% {scale: 0.1}
+			30% {scale: 0.5}
+			40% {scale: 0.2}
+            100% {scale: 0.2}
+		}
+
+    </style>
+
     <script>
 		function getCookie(name) {
 			let cookieValue = null;
@@ -141,6 +174,49 @@
 		}
 		const csrftoken = getCookie('csrftoken');
 	</script>
+
+    <script>
+
+        const notificationSocket = new WebSocket(
+            'wss://' + window.location.host + '/ws/notifications/'
+        );
+
+        notificationSocket.onopen = function (e) {
+            console.log("WebSocket connecté avec succès !");
+        };
+
+
+        notificationSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+
+            if (data.type === 'notification') {
+                console.log("Data.type : [notification]");
+                // Afficher le point de notification
+                const notif = document.querySelector('.notification-status');
+                notif.classList.add("active");
+                console.log('Nouvelle notification :', data.message);
+            }
+
+            if (data.type === 'update_status') {
+                console.log("Data.type : [update_status]");
+                // Mettre à jour le statut des notifications
+                const notif = document.querySelector('.notification-status');
+                if (data.has_unread_notifications) {
+                    notif.classList.add("active");
+                } else {
+                    notif.classList.remove("active");
+                }
+            }
+        };
+
+        notificationSocket.onclose = function (e) {
+            console.error('WebSocket fermé de manière inattendue');
+        };
+
+        notificationSocket.onerror = function (e) {
+            console.error('Erreur WebSocket :', e);
+        };
+    </script>
 
 </body>
 </html>

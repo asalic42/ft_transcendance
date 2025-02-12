@@ -410,3 +410,71 @@ class StatusConsumer(AsyncWebsocketConsumer):
             "is_online": event["is_online"],
         }))
         logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
+
+
+from channels.generic.websocket import AsyncWebsocketConsumer
+import json
+
+class FriendRequestConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            # Associer l'utilisateur à un groupe unique basé sur son ID
+            await self.channel_layer.group_add(
+                f"user_{self.user.id}",  # Groupe basé sur l'ID de l'utilisateur récepteur
+                self.channel_name
+            )
+            await self.accept()
+        else:
+            await self.close()
+
+    async def disconnect(self, close_code):
+        if self.user.is_authenticated:
+            # Lorsque l'utilisateur se déconnecte, quitter le groupe
+            await self.channel_layer.group_discard(
+                f"user_{self.user.id}",
+                self.channel_name
+            )
+
+    async def send_friend_request(self, event):
+        """
+        Cette méthode reçoit un message du signal et envoie une notification WebSocket
+        pour signaler à l'utilisateur récepteur qu'il a une nouvelle demande d'ami.
+        """
+        # Envoi de la notification à l'utilisateur récepteur
+        await self.send(text_data=json.dumps({
+            'type': 'friend_request',  # Type de message, à gérer côté front-end
+            'message': 'Vous avez une nouvelle demande d\'ami!',
+            'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
+        }))
+
+
+from channels.generic.websocket import AsyncWebsocketConsumer
+import json
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            await self.accept()
+            await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
+            print(f"Utilisateur {self.user.id} ajouté au groupe notifications.")
+        else:
+            await self.close()
+
+    async def disconnect(self, close_code):
+        if self.user.is_authenticated:
+            await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'message': event['message'],
+        }))
+
+    async def update_notification_status(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'update_status',
+            'has_unread_notifications': event['has_unread_notifications'],
+        }))

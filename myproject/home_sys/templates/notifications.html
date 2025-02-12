@@ -70,6 +70,28 @@
     {% endfor %}
 </div>
 
+<div class="invitation_box">
+    <h2>GAME INVITATION</h2>
+
+    {% for other_user in users.invite.all %}
+    <div class="if_founded">
+        <!-- Afficher la photo de profil de l'utilisateur -->
+        <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+
+        <!-- Afficher le nom d'utilisateur -->
+        <p class="user-username">{{ other_user }} </p>
+
+        <!-- Boutons pour accepter, refuser ou bloquer -->
+        <button class="join-it" data-username="{{ other_user }}">Join</button>
+        <button class="decline-invitation" data-username="{{ other_user }}">Decline</button>
+    </div>
+    {% empty %}
+    <div class="if_not_founded">
+        <p>No game invitation</p>
+    </div>
+    {% endfor %}
+</div>
+
 <style>
     body {
         background-color: var(--bg-site);
@@ -115,7 +137,8 @@
         margin-left: 40px;
     }
 
-    .friend_request_box {
+    .friend_request_box,
+    .invitation_box {
         width: auto;
         height: auto;
         border: 2px solid black;
@@ -123,6 +146,7 @@
         align-items: center;
         justify-content: center;
         background-color: #23232e;
+        margin-bottom: 20px;
     }
 
     h2 {
@@ -163,12 +187,12 @@
         cursor: pointer;
     }
 
-    .add-it, .talk-friend {
+    .add-it, .talk-friend, .join-it {
         background-color: green;
         color: white;
     }
 
-    .decline-it, .invite-friend {
+    .decline-it, .invite-friend, .decline-invitation {
         background-color: orange;
         color: white;
     }
@@ -186,7 +210,9 @@
     .remove-friend,
     .remove-user-blocked,
     .talk-friend,
-    .invite-friend {
+    .invite-friend,
+    .join-it,
+    .decline-invitation {
         transition: all 0.1s ease;
     }
 
@@ -196,7 +222,9 @@
     .remove-friend:hover,
     .remove-user-blocked:hover,
     .talk-friend:hover,
-    .invite-friend:hover {
+    .invite-friend:hover,
+    .join-it:hover,
+    .decline-invitation {
         scale: 1.1;
     }
 
@@ -294,6 +322,9 @@
     getResponse(".block-it", "block_user", "user_blocked", "Utilisateur", "bloqué.");
     getResponse(".remove-friend", "remove_friend", "user_removed", "", "n'est désormait plus votre ami.");
     getResponse(".remove-user-blocked", "remove_blocked_user", "blocked_user_removed", "Le user", "est débloqué.");
+    getResponse(".invite-friend", "invite_friend", "game_invitation_send", "L'invitation envers le user", "a bien été envoyée.");
+    getResponse(".decline-invitation", "invitation_declined", "game_invitation_declined", "La demande du user", "a bien été refusée.");
+
 
     function getCookie(name) {
         const cookies = document.cookie.split(';');
