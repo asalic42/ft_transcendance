@@ -426,6 +426,7 @@ class CasseBriqueGame:
 		self.health = {'p1': 5, 'p2': 5}
 		self.block_array = self.create_blocks(block_array=[])
 		self.reset_game()
+		self.map = None
 		self.is_running = False
 
 	def reset_game(self):
@@ -531,14 +532,15 @@ class CasseBriqueGame:
 			'scores': self.scores
 		}
 
-class CasseBriqueConsumer:
+class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	game = defaultdict(CasseBriqueGame)
 
 	async def connect(self):
-		self.room_name = "pong"
+		self.room_name = self.scope['url_route']['kwargs']['game_id']
 		self.room_group_name = f"game_{self.room_name}"
 		self.game = self.games[self.room_group_name]
+
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
 		# try to add player
@@ -566,15 +568,28 @@ class CasseBriqueConsumer:
 			'scores': initial_state_game['scores']
 		}))
 
-		if len(self.game.players) == 2 and not self.game.is_running:
+		selected_map = self.game.map if hasattr(self.game, 'map') else None
+
+		if len(self.game.players) == 2 and selected_map and not self.game.is_running:
 			self.game.is_running = True
 
 			await self.send_game_state(0)
 			asyncio.create_task(self.start_game())
 		
-	# async def disconnect(self):
-# 
-	# async def receive(self):
+	async def disconnect(self):
+		await self.channel_layer.group_discard(
+			self.room_group_name,
+			self.channel_name
+		)
+
+	async def receive(self, text_data):
+		data = json.loads(text_data)
+
+		if data['type'] == "map_selected":
+			if not hasattr(self.game, 'map'):
+				self.game.map = data['map']
+				print("MAP choisie")
+				sys.stdout.flush()
 
 	""" """ """ """ """ """ """ """ """ """
 	""" Back ball concerns """
@@ -731,7 +746,15 @@ class CasseBriqueConsumer:
 			'player2_coords': event['player2_coords'],
 			'scores': event['scores']
 		}))
+	
+	async def game_over(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'game_over'
+		}))
 
+	""" """ """ """ """ """ """ """
+	""" Start the game """
+	""" """ """ """ """ """ """ """
 	async def start_game(self):
 		player1_name = await database_sync_to_async(get_player_name)(self.game.players.values(), 1)
 		player2_name = await database_sync_to_async(get_player_name)(self.game.players.values(), 2)
@@ -789,6 +812,11 @@ class CasseBriqueConsumer:
 
 				# End of the game
 				if time_left <= 0:
+					await self.channel_layer.group_send(
+						self.room_group_name, {
+							'type': 'game_over'
+						}
+					)
 					self.game.is_running = False
 				
 				try:

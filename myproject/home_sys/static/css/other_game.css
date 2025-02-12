@@ -218,3 +218,8 @@ h3 {
 	font-family: Namaku;
 	src: url("../fonts/Namaku.ttf");
 }
+
+#timer {
+	display: none;
+	justify-content: center;
+}

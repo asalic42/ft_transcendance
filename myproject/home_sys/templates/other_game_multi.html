@@ -16,7 +16,7 @@
 </div>
 
 <h3 class="game" id="fps">Fps : 0 | Avg Fps : </h3>
-<h3 class="timer" id="timer" display="none">Time left </h3>
+<h3 class="timer" id="timer" display="none">Time left: 60s</h3>
 
 <!-- Game Player 1  -->
 
@@ -59,6 +59,11 @@
 </div>
 
 <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
+
+<script>
+	var gameId = "{{game_id}}";
+	console.log("game id = ", gameId);
+</script>
 
 <script src="{% static 'js/other_game.js' %}"></script>
 

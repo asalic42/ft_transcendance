@@ -19,7 +19,7 @@ var gameOver = document.getElementById("gameOver");
 var mapSelection = document.querySelector('.mapSelection');
 var overlay = document.getElementById("overlay");
 var disconnected = document.getElementById("disconnected");
-// var timer = document.getElementById("timer"); A ajouter !!!
+var timer = document.getElementById("timer");
 
 const keys = {};
 let currentPlayer = null;
@@ -32,65 +32,82 @@ let gameState = {
 	scores: {
 		p1: 0,
 		p2: 0
-	}
+	},
+	timeLeft: 60
 };
+let start;
 
 // WebSocket concerns
 var socket;
 
-socket.onopen = function () {
-    console.log("Connexion au Socket !");
-}
+function connectToWebSocket() {
 
-let start = Date.now();
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    console.log("Message recu");
+	socket = new WebSocket('ws://transcendance.42.paris/ws/casse-brique/${gameId}');
+	
+	socket.onopen = function () {
+		console.log("Connexion au Socket !");
 
-	if (data.type == "countdown") {
-		countdownBeforeGame(data);
-	}
-	else if (data.type == "players_name") {
-		if (data.player1_name) playername1.innerText = data.player1_name;
-		if (data.player2_name) playername2.innerText = data.player2_name;
-	}
-	else if (data.type == "game_over") {
-		if (data.winner == 1)
-			winnerWindow(1);
-		else if (data.winner == 2)
-			winnerWindow(2);
-	}
-	else if (data.type == "game_won") {
-		if (data.loser == 1)
-			winnerWindow(2);
-		else if (data.loser == 2)
-			winnerWindow(1);
-		disconnected.style.display = "block";
-	}
+		socket.send(JSON.stringify({
+			type: "map_selected",
+			map: selectedMap
+		}));
+	};
 
-	// else if (data.type == "game_restarted")
-		// game_restarted(data);
+	start = Date.now();
+	socket.onmessage = function(event) {
+	    const data = JSON.parse(event.data);
+	    console.log("Message recu");
 
-	else if (data.type == "game_state") {
-		overlay.style.display = 'none';
-        launchAnim(data);
-    }
-}
+		if (data.type == "countdown") {
+			countdownBeforeGame(data);
+		}
+		else if (data.type == "players_name") {
+			if (data.player1_name) playername1.innerText = data.player1_name;
+			if (data.player2_name) playername2.innerText = data.player2_name;
+		}
+		else if (data.type == "game_over") {
+			if (data.winner == 1)
+				winnerWindow(1);
+			else if (data.winner == 2)
+				winnerWindow(2);
+		}
+		else if (data.type == "game_won") {
+			if (data.loser == 1)
+				winnerWindow(2);
+			else if (data.loser == 2)
+				winnerWindow(1);
+			disconnected.style.display = "block";
+		}
 
-socket.onerror = function(error) {
-    console.log("Erreur socket: ", error);
-}
+		// else if (data.type == "game_restarted")
+			// game_restarted(data);
 
-socket.onclose = function() {
-    console.log("Deconnexion du Socket...");
+		else if (data.type == "game_state") {
+			overlay.style.display = 'none';
+			timer.style.display = 'flex';
+	        launchAnim(data);
+	    }
+	};
+
+	socket.onerror = function(error) {
+	    console.log("Erreur socket: ", error);
+	};
+
+	socket.onclose = function() {
+	    console.log("Deconnexion du Socket...");
+	};
+
 }
 
 //! Init Map
 mapSelection.addEventListener('click', (event) => {
-	console.log("je suis LA");
+	console.log("bouton clique ?");
+
 	if (event.target.tagName === 'BUTTON') {
 	  selectedMap = event.target.dataset.map;
 	  console.log(selectedMap)
+	  mapSelection.style.display ='none';
+
 	  launch(selectedMap);
 	}
 });
@@ -101,8 +118,8 @@ async function launch(idMap) {
 	title1.style.display = 'flex';
 	title2.style.display = 'flex';
 	canvasContainer.style.display = 'flex';
-	mapSelection.style.display ='none';
-	socket = new WebSocket('ws://transcendance.42.paris/ws/casse-brique')
+
+	connectToWebSocket();
 }
 
 //! Players related stuff
@@ -166,6 +183,7 @@ function launchAnim(gameState) {
 	if (data.ball2_coords) gameState.ball2_coords = data.ball2_coords;
 	if (data.scores) gameState.scores = data.scores;
 	if (data.blocks) gameState.blocks = data.blocks;
+	if (data.time != 0) gameState.timeLeft = data.time;
 
 	requestAnimationFrame(function () {
 
@@ -181,6 +199,7 @@ function launchAnim(gameState) {
 		updateDrawing();
 		score1.innerText = "Score : " + gameState.scores.p1;
 		score1.innerText = "Score : " + gameState.scores.p2;
+		timer.textContent = "Time left: " + gameState.timeLeft + "s";
 	})
 }
 
