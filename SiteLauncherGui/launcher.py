@@ -98,10 +98,10 @@ class SiteLauncher(QMainWindow):
             return (subLayout)
 
         # Boutons
-        l_launch = addElmt("Emulate b-all rule.", "Launch", self.launch)
-        l_relaunch = addElmt("Emulate Ctrl+C && b-all rule.", "Relaunch", self.relaunch)
-        l_stop = addElmt("Emulate Ctrl+C.", "Stop", self.stop)
-        l_docker_stop = addElmt("Emulate Ctrl+C && docker-compose stop.", "Docker Stop", self.dockerStop)
+        l_launch = addElmt("Appelle la règle [b-all]", "Lancer", self.launch)
+        l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch)
+        l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop)
+        l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker-compose stop]", "Docker Stop", self.dockerStop)
 
         # Zone de texte pour les logs
         self.output = QTextBrowser()  # Utilisation de QTextBrowser
@@ -154,8 +154,8 @@ class SiteLauncher(QMainWindow):
             self.output.append(ansi_to_html("\033[1;31m [SIGNAL] ./log.sh as been stop.\033[0m"))
 
     def dockerStop(self):
-        self.stop()
         self.output.append(ansi_to_html("\033[1;34m [SIGNAL] Waiting to stop docker services.\033[0m"))
+        self.stop()
         self.run_command("sudo docker-compose stop")
 
         self.process.waitForFinished()
