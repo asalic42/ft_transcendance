@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
     QVBoxLayout,
+    QHBoxLayout,
     QPushButton,
     QTextBrowser,
     QLabel,
@@ -12,6 +13,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QProcess
 from dotenv import load_dotenv
 import signal
+import re
 
 def ansi_to_html(ansi_text):
     """Convertit les codes ANSI en HTML en utilisant un mappage personnalisé."""
@@ -54,6 +56,39 @@ def ansi_to_html(ansi_text):
 
     return ansi_text
 
+############################################################################
+
+import re
+
+# Fonction de remplacement avec couleur
+def replace(match, color, dot=True):
+    return (f"\x1b[1;{color}m\n● {match.group(0)}\x1b[0m" if dot else f"\x1b[1;{color}m{match.group(0)}\x1b[0m")
+
+# Fonction de remplacement simple
+def replace_simple_sub_instance(cstr, what_to_replace, color, dot=True):
+    return re.sub(what_to_replace, lambda match: replace(match, color, dot), cstr)
+
+# Fonction pour vérifier la présence d'un mot dans la chaîne
+def check_if_in(cstr, word):
+    return bool(re.search(word, cstr))
+
+# Fonction de remplacement pour tous les éléments dans un dictionnaire
+def replace_all_sub_instance(cstr, dico_word_color, pattern=None, dot=True):
+    if not dico_word_color:  # Si le dictionnaire est vide, on retourne la chaîne inchangée
+        return cstr
+    
+    for word, color in dico_word_color.items():
+        if pattern and check_if_in(cstr, word):  # Si pattern est défini, appliquer le remplacement conditionnel
+            cstr = replace_simple_sub_instance(cstr, pattern, color, dot)
+        else:
+            cstr = replace_simple_sub_instance(cstr, word, color, dot)
+    
+    return cstr
+
+
+############################################################################
+
+
 class SiteLauncher(QMainWindow):
 
     def __init__(self):
@@ -87,7 +122,7 @@ class SiteLauncher(QMainWindow):
             subLayout = QVBoxLayout()
 
             label = QLabel(f"┌ {labelText}")
-            label.setStyleSheet("font-weight: bold;")
+            label.setStyleSheet("font-weight: bold; font-size: 10px;")
             button = QPushButton(f"{buttonName}")
             styleButton(button)
             button.clicked.connect(buttonFunction)
@@ -118,7 +153,7 @@ class SiteLauncher(QMainWindow):
         layout.addLayout(l_launch)
         layout.addLayout(l_relaunch)
 
-        layout.addWidget(self.output)
+        """ layout.addWidget(self.output) """
         
         layout.addLayout(l_stop)
         layout.addLayout(l_docker_stop)
@@ -126,7 +161,12 @@ class SiteLauncher(QMainWindow):
         # Conteneur pour le layout
         container = QWidget()
         container.setStyleSheet("background-color: #e7e7e7;")
-        container.setLayout(layout)
+
+        ltmp = QHBoxLayout()
+
+        ltmp.addLayout(layout)
+        ltmp.addWidget(self.output)
+        container.setLayout(ltmp)
         self.setCentralWidget(container)
 
         # Processus pour exécuter les commandes
@@ -169,16 +209,39 @@ class SiteLauncher(QMainWindow):
         """Lit la sortie du processus et l'affiche dans la zone de texte."""
         # Lire la sortie standard
         output = self.process.readAllStandardOutput().data().decode()
+
         # Lire les erreurs
         error = self.process.readAllStandardError().data().decode()
+        #if len(error) != 0:
+        #    error = "\x1b[1;31m[STDERR]\x1b[0m " + error
 
-        # Convertir les codes ANSI en HTML
+        # Appliquer les remplacements de couleurs
+        output = replace_all_sub_instance(output, {'web ': '34', 'nginx ': '36'}, r'\[.*?\]', False)
+        output = replace_all_sub_instance(output, {'web': '34', 'db': '33', 'nginx': '36'}, r'\w+-\d+(?=\s+\|)', False)
+
+        error = replace_simple_sub_instance(error, 'Error', '31')
+        error = replace_all_sub_instance(error, {'Building': '33', 'Built': '32'}, None, False)
+        error = replace_all_sub_instance(error, {'web': '34', 'db': '33', 'nginx': '36'}, r'\w+-\d+(?=\s+\|)', False)
+
+        # Calculer la largeur du QTextBrowser
+        browser_width = self.output.viewport().width()
+
+        # Calculer le nombre de tirets en fonction de la largeur du QTextBrowser
+        separator_line = '└' + ('─' * (browser_width // 9))  # Diviser par 8 pour ajuster la taille des tirets
+
+        # Ajouter les séparateurs à la sortie et aux erreurs
         if output:
+            output = "\033[32m┌> \033[0m" + output
+            output += f"\033[32m{separator_line}(stdout)\033[0m\n"  # Ajouter une ligne de tirets après la sortie
             html_output = ansi_to_html(output)
             self.output.append(html_output)
+
         if error:
+            error = "\033[31m┌> \033[0m" + error
+            error += f"\033[31m{separator_line}(stderr)\033[0m\n"  # Ajouter une ligne de tirets après l'erreur
             html_error = ansi_to_html(error)
             self.output.append(html_error)
+
 
     def closeEvent(self, event):
         """Gère l'événement de fermeture de la fenêtre."""
@@ -189,5 +252,6 @@ class SiteLauncher(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv) if not QApplication.instance() else QApplication.instance()
     launcher = SiteLauncher()
+    launcher.resize(650, 250)
     launcher.show()
     sys.exit(app.exec_())
