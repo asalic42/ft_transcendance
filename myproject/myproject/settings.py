@@ -95,7 +95,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-   	 'django.contrib.messages.middleware.MessageMiddleware',
+   	'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',  # Ce middleware est utilisé par social-auth-app-django
     'corsheaders.middleware.CorsMiddleware',

@@ -20,7 +20,7 @@
 
 <!-- Game Player 1  -->
 
-<div class="player1">
+<div class="player1" id="player1">
 	<h3 class="playername1" id="playername1">Player 1</h3>
     <h3 class="game1" id="title1">Score : 0 </h3>
 
@@ -38,7 +38,7 @@
 
 <!-- Game Player 2  -->
 
-<div class="player2">
+<div class="player2" id="player2">
 	<h3 class="playername2" id="playername2">Player 2</h3>
     <h3 class="game2" id="title2">Score : 0 </h3>
 
@@ -54,17 +54,16 @@
     </div>
 </div>
 
-<div id="overlay">
+<div class="overlay" id="overlay">
 	<h1 id="countdown">3</h1>
 </div>
 
-<h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
+<h3 class="disconnected" id="disconnected" display="none">Un joueur s'est deconnecte</h3>
 
-<script>
-	var gameId = "{{game_id}}";
-	console.log("game id = ", gameId);
-</script>
+<!-- <script>
+	var gameId = "1";
+</script> -->
 
-<script src="{% static 'js/other_game.js' %}"></script>
+<script src="{% static 'js/other_game_distant.js' %}"></script>
 
 {% endblock %}

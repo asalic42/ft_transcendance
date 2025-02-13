@@ -424,7 +424,8 @@ class CasseBriqueGame:
 		self.players = {}
 		self.scores = {'p1': 0, 'p2': 0 }
 		self.health = {'p1': 5, 'p2': 5}
-		self.block_array = self.create_blocks(block_array=[])
+		self.mapTab = {}
+		self.block_array = []
 		self.reset_game()
 		self.map = None
 		self.is_running = False
@@ -502,11 +503,10 @@ class CasseBriqueGame:
 		y = start_y - 5
 		width = start_x - 5
 		height = start_y - 5
-		mapTab = []
 
 		for i in range(6):
 			for j in range(12):
-				block_array.appends(Block(x, y + start_y + start_y, width, height, mapTab[j][i]))
+				block_array.append(Block(x, y + start_y + start_y, width, height, self.mapTab[j][i]))
 				y += start_y
 			x += start_x
 			y = start_y - 5
@@ -534,10 +534,10 @@ class CasseBriqueGame:
 
 class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
-	game = defaultdict(CasseBriqueGame)
+	games = defaultdict(CasseBriqueGame)
 
 	async def connect(self):
-		self.room_name = self.scope['url_route']['kwargs']['game_id']
+		self.room_name = "casse-brique"
 		self.room_group_name = f"game_{self.room_name}"
 		self.game = self.games[self.room_group_name]
 
@@ -561,8 +561,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'type': 'game_state',
 			'number': player_number,
-			'ball_p1': initial_state_game['ball_coords'],
-			'ball_p2': initial_state_game['ball_coords'],
+			'ball_p1': initial_state_game['ball_p1'],
+			'ball_p2': initial_state_game['ball_p2'],
 			'player1_coords': initial_state_game['player1_coords'],
 			'player2_coords': initial_state_game['player2_coords'],
 			'scores': initial_state_game['scores']
@@ -576,11 +576,15 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			await self.send_game_state(0)
 			asyncio.create_task(self.start_game())
 		
-	async def disconnect(self):
+	async def disconnect(self, close_code):
+		self.game.is_running = False
+
 		await self.channel_layer.group_discard(
 			self.room_group_name,
 			self.channel_name
 		)
+
+		print("Player disconnected")
 
 	async def receive(self, text_data):
 		data = json.loads(text_data)
@@ -590,6 +594,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				self.game.map = data['map']
 				print("MAP choisie")
 				sys.stdout.flush()
+				self.game.mapTab = data['mapTab']
+				self.game.block_array = self.game.create_blocks(block_array=[])
 
 	""" """ """ """ """ """ """ """ """ """
 	""" Back ball concerns """

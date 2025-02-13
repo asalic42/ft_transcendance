@@ -1,9 +1,10 @@
 // Variables
 let mapTab = [];
 let compteur = 0;
-var context;
 var selectedMap;
 
+var	player1 = document.getElementById("player1");
+var	player2 = document.getElementById("player2");
 var table1 = document.getElementById("game1");
 var table2 = document.getElementById("game2");
 var context1 = table1.getContext("2d");
@@ -16,10 +17,10 @@ var playername2 = document.getElementById("playername2");
 var score1 = document.getElementById("title1");
 var score2 = document.getElementById("title2");
 var gameOver = document.getElementById("gameOver");
-var mapSelection = document.querySelector('.mapSelection');
 var overlay = document.getElementById("overlay");
 var disconnected = document.getElementById("disconnected");
 var timer = document.getElementById("timer");
+var mapSelection = document.querySelector('.mapSelection');
 
 const keys = {};
 let currentPlayer = null;
@@ -40,17 +41,20 @@ let start;
 // WebSocket concerns
 var socket;
 
-function connectToWebSocket() {
+function connectToWebSocket(selectedMap) {
 
-	socket = new WebSocket('ws://transcendance.42.paris/ws/casse-brique/${gameId}');
+	socket = new WebSocket("wss://transcendance.42.paris/ws/casse-brique/");
 	
 	socket.onopen = function () {
 		console.log("Connexion au Socket !");
 
-		socket.send(JSON.stringify({
-			type: "map_selected",
-			map: selectedMap
-		}));
+		if (selectedMap && mapTab) {
+			socket.send(JSON.stringify({
+				type: "map_selected",
+				mapTab: mapTab,
+				map: selectedMap
+			}));
+		}
 	};
 
 	start = Date.now();
@@ -110,16 +114,18 @@ mapSelection.addEventListener('click', (event) => {
 
 	  launch(selectedMap);
 	}
-});
+})
 
 async function launch(idMap) {
 	await fetchMap(idMap);
 	fps.style.display = 'flex';
+	player1.style.display = 'flex';
+	player2.style.display = 'flex';
 	title1.style.display = 'flex';
 	title2.style.display = 'flex';
 	canvasContainer.style.display = 'flex';
 
-	connectToWebSocket();
+	connectToWebSocket(idMap);
 }
 
 //! Players related stuff
@@ -157,24 +163,40 @@ function drawPlayer(player1Coords, player2Coords) {
 }
 
 //! Ball
-function drawBall(ball) {
-	context.beginPath();
-	context.fillStyle = 'white';
-	context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-	context.fill();
-	context.closePath();
+function dr1awBall(ball) {
+
+	// ball player 1
+	context1.beginPath();
+	context1.fillStyle = 'white';
+	context1.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
+	context1.fill();
+	context1.closePath();
 	
-	context.beginPath();
-	context.fillStyle = "#23232e";
-	context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
-	context.fill();
-	context.stroke();
-	context.closePath();
+	context1.beginPath();
+	context1.fillStyle = "#23232e";
+	context1.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
+	context1.fill();
+	context1.stroke();
+	context1.closePath();
+
+	// ball player 2
+	context2.beginPath();
+	context2.fillStyle = 'white';
+	context2.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
+	context2.fill();
+	context2.closePath();
+	
+	context2.beginPath();
+	context2.fillStyle = "#23232e";
+	context2.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
+	context2.fill();
+	context2.stroke();
+	context2.closePath();
 }
 
 //! Loop func
 let id=0;
-function launchAnim(gameState) {
+function launchAnim(data) {
 
 	if (data.number) currentPlayer = data.number;
 	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
@@ -195,7 +217,8 @@ function launchAnim(gameState) {
 			compteur = 0;
 			start = Date.now();
 		}
-		context.clearRect(0, 0, table.width, table.height);
+		context1.clearRect(0, 0, table1.width, table1.height);
+		context2.clearRect(0, 0, table2.width, table2.height);
 		updateDrawing();
 		score1.innerText = "Score : " + gameState.scores.p1;
 		score1.innerText = "Score : " + gameState.scores.p2;
@@ -204,7 +227,8 @@ function launchAnim(gameState) {
 }
 
 async function winnerWindow(player) {
-	context.clearRect(0, 0, table.width, table.height);
+	context1.clearRect(0, 0, table1.width, table1.height);
+	context2.clearRect(0, 0, table2.width, table2.height);
 	gameOver.style.display = "flex";
 	drawOuterRectangle("#C42021");
 	drawInnerRectangle("#23232e");
@@ -245,7 +269,7 @@ function getRandomArbitrary(min, max) {
 	return result;
 }
 
-function drawBlocks() {
+function drawBlocks(context) {
 	for (let k = 0; k < blocks.length; k++) {
 		if (blocks[k].state) {
 			context.beginPath();
@@ -273,19 +297,32 @@ function drawBlocks() {
 }
 
 function drawOuterRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(0, 0, table.width, table.height, 10);
-	context.fill();
-	context.closePath();
+	context1.fillStyle = color;
+	context1.beginPath();
+	context1.roundRect(0, 0, table1.width, table1.height, 10);
+	context1.fill();
+	context1.closePath();
+
+	context2.fillStyle = color;
+	context2.beginPath();
+	context2.roundRect(0, 0, table2.width, table2.height, 10);
+	context2.fill();
+	context2.closePath();
+
 }
 
 function drawInnerRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
-	context.fill();
-	context.closePath();
+	context1.fillStyle = color;
+	context1.beginPath();
+	context1.roundRect(5, 5, table1.width - 10, table1.height - 10, 8);
+	context1.fill();
+	context1.closePath();
+
+	context2.fillStyle = color;
+	context2.beginPath();
+	context2.roundRect(5, 5, table2.width - 10, table2.height - 10, 8);
+	context2.fill();
+	context2.closePath();
 }
 
 window.addEventListener("keydown", (event) => {
@@ -296,11 +333,12 @@ window.addEventListener("keyup", (event) => {
 	keys[event.key] = false;
 });
 
-function updateDrawing(player1Coords, blocks, ball) {
+function updateDrawing(player1Coords, ball) {
 	drawOuterRectangle("#ED4EB0");
 	drawInnerRectangle("#23232e");
     drawPlayer(player1Coords, );
-    drawBlocks(blocks);
+    drawBlocks(context1);
+    drawBlocks(context2);
 	drawBall(ball);
 }
 
