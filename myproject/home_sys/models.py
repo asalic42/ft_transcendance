@@ -61,13 +61,12 @@ class Pong(models.Model):
     
 
 class Tournaments(models.Model):
-	idTournaments = models.IntegerField()
+	id = models.AutoField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
-	nb_of_players = models.IntegerField()
 
 class MatchsTournaments(models.Model):
-	idTournaments = models.IntegerField()
-	idMatchs = models.IntegerField()
+	idTournaments = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='idTournaments')
+	idMatchs = models.ForeignKey(Pong, on_delete=models.CASCADE, related_name='idMatchs')
 
 class SoloCasseBrique(models.Model):
 	id = models.AutoField(primary_key = True)

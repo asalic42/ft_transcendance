@@ -121,6 +121,26 @@ class PongConsumer(AsyncWebsocketConsumer):
 	def add_pong_game(self, data):
 		return add_pong_logic(data)
 
+	@database_sync_to_async
+	def addTgame(self, pk):
+		try:
+			tournament = Tournaments.objects.get(id=self.id_t)
+			pong_game = Pong.objects.get(id=pk)
+			
+			new_game = MatchsTournaments.objects.create(
+				idTournaments=tournament,
+				idMatchs=pong_game
+			)
+			
+			return new_game
+	
+		except Exception as e:
+			print(f'ERROR in addTgame: {str(e)}')
+			print(f'Error type: {type(e).__name__}')
+			import traceback
+			print(traceback.format_exc())
+			sys.stdout.flush()	
+
 	async def add_pong_serializer(self):
 		print('adding game')
 		
@@ -143,12 +163,20 @@ class PongConsumer(AsyncWebsocketConsumer):
 			}
 
 			game_data = await self.add_pong_game(data)
+			# print(game_data)
+			print(f"self.id_t {self.id_t}")
+			sys.stdout.flush()
+			if (self.id_t != -1):
+				# print(f"launching T save, game_data.pk:{game_data['pk']}" )
+				# sys.stdout.flush()
+				await self.addTgame(game_data['pk'])
+
 			await self.send(text_data=json.dumps({
 				'type': 'game_created',
 				'game': game_data
 			}))
 		except Exception as e:
-			print('error')
+			print(str(e))
 			## Gère les erreurs (par exemple, envoyer une erreur au client)
 			#await self.send(text_data=json.dumps({
 			#	'type': 'error',
@@ -172,6 +200,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		# Récupération de l'ID de la partie depuis l'URL
 		self.game_id = self.scope['url_route']['kwargs']['game_id']
+		self.id_t = self.scope['url_route']['kwargs']['id_t']
 		self.room_group_name = f"game_{self.game_id}"
 		self.game = self.games[self.room_group_name]
 

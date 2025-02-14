@@ -142,6 +142,10 @@ def game_distant_page(request, game_id):
 	return (render(request, 'game-distant.html', {'game_id':game_id}))
 
 @login_required
+def game_distant_page_t(request, game_id, id_t):
+	return (render(request, 'game-distant-t.html', {'game_id':game_id, 'id_t':id_t}))
+
+@login_required
 def game_bot_page(request):
 	return (render(request, 'game-bot.html'))
 

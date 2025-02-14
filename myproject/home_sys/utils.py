@@ -17,6 +17,7 @@ def add_pong_logic(data):
 
     new_game = Pong.objects.create(**data)
     return {
+        'pk': new_game.pk,
         'id_p1': new_game.id_p1.id,
         'id_p2': new_game.id_p2.id if new_game.id_p2 else None,
         'is_bot_game': new_game.is_bot_game,

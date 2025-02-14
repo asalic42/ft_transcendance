@@ -27,7 +27,7 @@ let gameState = {
 };
 
 // WebSocket concerns
-const socket = new WebSocket(`wss://transcendance.42.paris/ws/pong/${gameId}/`);
+const socket = new WebSocket(`wss://transcendance.42.paris/ws/pong/${gameId}/${id_t}`);
 
 socket.onopen = function() {
 	console.log("Connexion réussie au WebSocket");

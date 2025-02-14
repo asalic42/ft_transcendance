@@ -14,6 +14,7 @@ urlpatterns = [
     path('game-type-pong/', game_type_pong_page, name="game-type-pong"),
     path('game-distant/', game_distant_page_choice, name="game-distant-choice"),
     path('game-distant/<int:game_id>/', game_distant_page, name="game-distant"),
+    path('game-distant/<int:game_id>/<int:id_t>', game_distant_page_t, name="game-distant_t"),
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),
     path('game/', game_page, name='game'),
     path('game-bot/', game_bot_page, name='game-bot'),
