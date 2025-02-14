@@ -262,7 +262,7 @@ function sendPlayerMove() {
     }
 }
 
-function winnerWindow(player) {
+async function winnerWindow(player) {
 	
 	context.clearRect(0, 0, table.width, table.height);
     
@@ -280,6 +280,10 @@ function winnerWindow(player) {
 		winner2Text.style.display = "block";
     }
     drawInnerRectangle("#23232e");
+	await new Promise(r => setTimeout(r, 2000));
+	if (id_t) {
+		window.close();
+	}
     newGame(player);
 }
 

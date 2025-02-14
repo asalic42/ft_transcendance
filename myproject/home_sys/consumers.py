@@ -131,9 +131,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 				idTournaments=tournament,
 				idMatchs=pong_game
 			)
-			
+
 			return new_game
-	
+
 		except Exception as e:
 			print(f'ERROR in addTgame: {str(e)}')
 			print(f'Error type: {type(e).__name__}')
@@ -170,6 +170,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 				# print(f"launching T save, game_data.pk:{game_data['pk']}" )
 				# sys.stdout.flush()
 				await self.addTgame(game_data['pk'])
+				tournament_group = f"tournament_{self.id_t}"
+				await self.channel_layer.group_send(
+					tournament_group,
+					{
+						'type': 'match_finished',  # Le type définit le nom de la méthode à appeler dans le consumer cible
+					}
+				)
 
 			await self.send(text_data=json.dumps({
 				'type': 'game_created',
@@ -535,3 +542,222 @@ class PongConsumer(AsyncWebsocketConsumer):
 		except User.DoesNotExist:
 			return f"Player {player_number}"
 		
+import random
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+
+import json
+import random
+import sys
+from channels.generic.websocket import AsyncWebsocketConsumer
+
+class TournamentConsumer(AsyncWebsocketConsumer):
+	
+	players = {}  # Dictionnaire partagé par tournoi (clé = tournament_id, valeur = liste de joueurs)
+	is_running = {}
+	gameFinished = {}
+	roundNb = {}
+	async def connect(self):
+		try:
+			self.tournament_id = self.scope['url_route']['kwargs']['id_t']
+			self.tournament_group = f"tournament_{self.tournament_id}"
+			
+			# Initialiser les structures si elles n'existent pas
+			if self.tournament_id not in TournamentConsumer.players:
+				TournamentConsumer.players[self.tournament_id] = []
+				
+			if self.tournament_id not in TournamentConsumer.is_running:
+				TournamentConsumer.is_running[self.tournament_id] = False
+				
+			if self.tournament_id not in TournamentConsumer.gameFinished:
+				TournamentConsumer.gameFinished[self.tournament_id] = 0
+				
+			if self.tournament_id not in TournamentConsumer.roundNb:
+				TournamentConsumer.roundNb[self.tournament_id] = 0
+			
+			if (len(TournamentConsumer.players[self.tournament_id]) >= 4 or 
+				TournamentConsumer.is_running[self.tournament_id]):
+				await self.close()
+				return
+			
+			# Ajouter le joueur au groupe
+			await self.channel_layer.group_add(self.tournament_group, self.channel_name)
+			await self.accept()
+			
+			# Ajouter ce joueur à la liste partagée
+			user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
+			TournamentConsumer.players[self.tournament_id].append({
+				'channel_name': self.channel_name,
+				'user_id': user_id
+			})
+			
+			print(f"Joueurs connectés au tournoi {self.tournament_id}: {len(TournamentConsumer.players[self.tournament_id])}")
+			sys.stdout.flush()
+			
+			# Si 4 joueurs sont connectés pour ce tournoi, lancer le tournoi
+			if len(TournamentConsumer.players[self.tournament_id]) == 4:
+				await self.start_tournament()
+			
+		except Exception as e:
+			print(f"Erreur lors de la connexion : {str(e)}")
+			sys.stdout.flush()
+			await self.close()
+	
+	async def start_tournament(self):
+		print("starting tournament")
+		sys.stdout.flush()
+		TournamentConsumer.is_running[self.tournament_id] = True
+	
+		players = TournamentConsumer.players[self.tournament_id]
+	
+		# Fixed pairing scheme for 4 players, 3 rounds
+		round_pairings = [
+			[(players[0], players[1]), (players[2], players[3])],  # Round 1
+			[(players[0], players[2]), (players[1], players[3])],  # Round 2
+			[(players[0], players[3]), (players[1], players[2])],  # Round 3
+		]
+	
+		game_id1 = random.randint(1000, 9999)
+		game_id2 = random.randint(1000, 9999)
+	
+		if TournamentConsumer.roundNb[self.tournament_id] < 3:
+			current_round_pairings = round_pairings[TournamentConsumer.roundNb[self.tournament_id]]
+	
+			for pair_index, pair in enumerate(current_round_pairings):
+				game_id = game_id1 if pair_index < 1 else game_id2
+				for player_in_pair in pair:
+					game_link = f"https://transcendance.42.paris/accounts/game-distant/{game_id}/{self.tournament_id}"
+					print(f'On envoie le lien "{game_link}" à {player_in_pair["channel_name"]} and round nb is at {TournamentConsumer.roundNb[self.tournament_id]}')
+					sys.stdout.flush()
+					await self.channel_layer.send(
+						player_in_pair['channel_name'],
+						{
+							'type': 'send_game_link',
+							'link': game_link,
+						}
+					)
+	
+		else:
+			print("Tournament finished!")
+			sys.stdout.flush()
+			TournamentConsumer.is_running[self.tournament_id] = False
+			# await self.tournament_ending()
+			return
+
+	async def send_game_link(self, event):
+		try:
+			link = event['link']
+			await self.send(text_data=json.dumps({
+				'type': 'game_link',
+				'link': link
+			}))
+		except 	Exception as e:
+			print(f"Erreur lors de l'envoi du lien de jeu : {e}")
+			sys.stdout.flush()
+
+	async def disconnect(self, close_code):
+		try:
+			# Supprimer le joueur de la liste partagée
+			if self.tournament_id in TournamentConsumer.players:
+				TournamentConsumer.players[self.tournament_id] = [
+					p for p in TournamentConsumer.players[self.tournament_id]
+					if p['channel_name'] != self.channel_name
+				]
+
+			# Retirer le joueur du groupe
+			await self.channel_layer.group_discard(self.tournament_group, self.channel_name)
+
+			print(f"Joueur déconnecté du tournoi {self.tournament_id}")
+			sys.stdout.flush()
+
+		except Exception as e:
+			print(f"Erreur lors de la déconnexion : {e}")
+			sys.stdout.flush()
+
+	async def match_finished(self, event):
+		TournamentConsumer.gameFinished[self.tournament_id] += 1
+		print(f"match finished: {TournamentConsumer.gameFinished[self.tournament_id]}")
+		sys.stdout.flush()
+		if (TournamentConsumer.gameFinished[self.tournament_id] == 8):
+			TournamentConsumer.gameFinished[self.tournament_id] = 0
+			TournamentConsumer.roundNb[self.tournament_id] += 1
+
+			if TournamentConsumer.roundNb[self.tournament_id] == 3:
+				print("Tournament finished!")
+				sys.stdout.flush()
+				TournamentConsumer.is_running[self.tournament_id] = False
+				await self.tournament_ending()  # Call tournament_ending
+				return
+
+			await self.start_tournament()
+
+	@database_sync_to_async
+	def get_tournament_results(self):
+		try:
+			tournament = Tournaments.objects.get(pk=self.tournament_id)
+			all_games = MatchsTournaments.objects.filter(idTournaments=tournament)
+
+			player_scores = {}
+			for game_entry in all_games:
+				game = game_entry.idMatchs  # Get the related Pong game
+				p1_id = game.id_p1_id
+				p2_id = game.id_p2_id
+
+				if p1_id not in player_scores:
+					player_scores[p1_id] = {'score': 0, 'name': None}  # Initialize name
+				if p2_id not in player_scores:
+					player_scores[p2_id] = {'score': 0, 'name': None}  # Initialize name
+
+				player_scores[p1_id]['score'] += game.score_p1
+				player_scores[p2_id]['score'] += game.score_p2
+
+				# Fetch names only once per player
+				if player_scores[p1_id]['name'] is None:
+					p1 = Users.objects.get(pk=p1_id)
+					player_scores[p1_id]['name'] = p1.name
+				if player_scores[p2_id]['name'] is None:
+					p2 = Users.objects.get(pk=p2_id)
+					player_scores[p2_id]['name'] = p2.name
+
+			return player_scores
+
+		except Tournaments.DoesNotExist:
+			print(f"Tournament {self.tournament_id} not found!")
+			return {}
+		except Exception as e:
+			print(f"Error in get_tournament_results: {e}")
+			return {}
+
+
+	async def tournament_ending(self):
+		try:
+			player_scores = await self.get_tournament_results()
+
+			if not player_scores:
+				print("No scores found for the tournament.")
+				sys.stdout.flush()
+				TournamentConsumer.is_running[self.tournament_id] = False
+				return
+
+			print("Tournament finished. Results:", player_scores)  # Log the results
+			sys.stdout.flush()
+			TournamentConsumer.is_running[self.tournament_id] = False
+
+			# Send results to all clients
+			for player_id, data in player_scores.items():
+				await self.channel_layer.group_send(
+					self.tournament_group,
+					{
+						"type": "result",
+						"score": data['score'],
+						"name": data['name'],
+						"player_id": player_id, # Include player ID for frontend use
+					}
+				)
+
+		except Exception as e:
+			print(f"Error in tournament_ending: {e}")
+			sys.stdout.flush()
+
+	async def result(self, event):  # New method to handle 'result' messages
+		await self.send(text_data=json.dumps(event))
