@@ -121,7 +121,7 @@ class SiteLauncher(QMainWindow):
             
             subLayout = QVBoxLayout()
 
-            label = QLabel(f"┌ {labelText}")
+            label = QLabel(f" ●  {labelText}")
             label.setStyleSheet("font-weight: bold; font-size: 10px;")
             button = QPushButton(f"{buttonName}")
             styleButton(button)
@@ -166,7 +166,9 @@ class SiteLauncher(QMainWindow):
 
         ltmp.addLayout(layout)
         ltmp.addWidget(self.output)
+
         container.setLayout(ltmp)
+        container.setStyleSheet("border: 1px solid;")
         self.setCentralWidget(container)
 
         # Processus pour exécuter les commandes
@@ -232,7 +234,7 @@ class SiteLauncher(QMainWindow):
         # Ajouter les séparateurs à la sortie et aux erreurs
         if output:
             output = "\033[32m┌> \033[0m" + output
-            output += f"\033[32m{separator_line}(stdout)\033[0m\n"  # Ajouter une ligne de tirets après la sortie
+            output += f"\033[32m{separator_line}(stdout)\033[0m\n"
             html_output = ansi_to_html(output)
             self.output.append(html_output)
 
@@ -252,6 +254,6 @@ class SiteLauncher(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv) if not QApplication.instance() else QApplication.instance()
     launcher = SiteLauncher()
-    launcher.resize(650, 250)
+    launcher.resize(650, 300)
     launcher.show()
     sys.exit(app.exec_())
