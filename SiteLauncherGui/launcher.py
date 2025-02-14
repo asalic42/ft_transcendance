@@ -110,7 +110,7 @@ class SiteLauncher(QMainWindow):
                 QPushButton {
                     background-color: #a71fb0;
                     padding: 2px;
-                    font-size: 14px;
+                    font-size: 28px;
                 }
                 QPushButton:hover {
                     background-color: darkviolet;
@@ -254,6 +254,6 @@ class SiteLauncher(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv) if not QApplication.instance() else QApplication.instance()
     launcher = SiteLauncher()
-    launcher.resize(650, 300)
+    launcher.resize(867, 400)
     launcher.show()
     sys.exit(app.exec_())
