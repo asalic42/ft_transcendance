@@ -578,7 +578,7 @@ def add_friend(request, username):
 			return JsonResponse({'status': 'waiting'})
 
 		if other_user.users in current_user.friends_request.all():
-				# logger.info(f"\033[33m #2 condition\033[0m")
+
 				# Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
 				current_user.friends.add(other_user)
 				other_user.users.friends.add(current_user)
@@ -666,6 +666,9 @@ def block_user(request, username):
 			other_user = get_object_or_404(User, username=username)
 
 			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			if (other_user.users in current_user_profile.friends.all()):
+				current_user_profile.friends.remove(other_user.users)
+				other_user.users.friends.remove(current_user_profile)
 			current_user_profile.blocked.add(other_user.users)
 
 			# Supprimer la demande d'ami (si elle existe)
@@ -716,6 +719,9 @@ def invite_friend(request, username):
 		try:
 			current_user_profile = request.user.users
 			other_user = get_object_or_404(User, username=username)
+
+			if (current_user_profile in other_user.users.blocked.all()):
+				return (JsonResponse({'status': 'blocked'}))
 
 			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
 			other_user.users.invite.add(current_user_profile)

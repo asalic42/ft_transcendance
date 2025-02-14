@@ -305,6 +305,10 @@
                 })
                 .then(response => response.json())
                 .then(data => {
+                    if (data.status === "blocked")
+                    {
+                        return (alert('Erreur: ' + "Impossible vous avez été bloqué. Rechargez la page."))
+                    }
                     if (data.status === `${dataStatus}`) {
                         alert(`${msgStart} ${username} ${msgEnd}`);
                         location.reload(); // Recharger la page pour mettre à jour la liste
