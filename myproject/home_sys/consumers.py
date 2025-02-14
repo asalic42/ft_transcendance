@@ -411,14 +411,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 """ CASSE BRIQUE GAME MULTIPLAYER """
 
-class Block:
-	def __init__(self, x, y, width, height, state):
-		self.x = x
-		self.y = y
-		self.width = width
-		self.height = height
-		self.state = state
-
 class CasseBriqueGame:
 	def __init__(self):
 		self.players = {}
@@ -429,11 +421,12 @@ class CasseBriqueGame:
 		self.reset_game()
 		self.map = None
 		self.is_running = False
+		self.multiplyer = 0
 
 	def reset_game(self):
 		self.ball = {
 			1:{
-				'coords' : {'x' : 500 / 2, 'y' : 800 - 70 },
+				'coords' : {'x' : 600 / 2, 'y' : 700 -50},
 				'const_vector' : {'vy' : 9, 'vx' : 9, 'speed': 9},
 				'vector' : {},
 				'radius' : 13,
@@ -442,7 +435,7 @@ class CasseBriqueGame:
 				'hit_player' : 0
 			},
 			2: {
-				'coords' : {'x' : 1500 / 2, 'y' : 800 - 70 },
+				'coords' : {'x' : 600 / 2, 'y' : 700 -50},
 				'const_vector' : {'vy' : 9, 'vx' : 9, 'speed': 9},
 				'vector' : {},
 				'radius' : 13,
@@ -467,10 +460,10 @@ class CasseBriqueGame:
 		for player in self.players.values():
 			player_number = player['number']
 			player['coords'] =  {
-				'x1': 690 if player_number == 1 else 1690,
-				'y1': 961,
-				'x2': 770 if player_number == 1 else 1770,
-				'y2': 976,
+				'x1': 240,
+				'y1': 700,
+				'x2': 320,
+				'y2': 715,
 				'vx': 20
 			}
 
@@ -481,10 +474,10 @@ class CasseBriqueGame:
 		
 		player_number = len(self.players) +1
 		initial_coords = {
-			'x1': 690 if player_number == 1 else 1690,
-			'y1': 961,
-			'x2': 770 if player_number == 1 else 1770,
-			'y2': 976,
+			'x1': 240,
+			'y1': 700,
+			'x2': 320,
+			'y2': 715,
 			'vx': 20
 		}
 
@@ -497,8 +490,11 @@ class CasseBriqueGame:
 
 	def create_blocks(self, block_array):
 
-		start_x = 500 / 8
-		start_y = 800 / 24
+		print("creation de la map")
+		sys.stdout.flush()
+
+		start_x = 600 / 8
+		start_y = 750 / 24
 		x = start_x - 5
 		y = start_y - 5
 		width = start_x - 5
@@ -506,7 +502,13 @@ class CasseBriqueGame:
 
 		for i in range(6):
 			for j in range(12):
-				block_array.append(Block(x, y + start_y + start_y, width, height, self.mapTab[j][i]))
+				block_array.append({
+						"x": x,
+						"y": y + start_y + start_y,
+						"width": width,
+						"height": height,
+						"state": self.mapTab[j][i]
+					})
 				y += start_y
 			x += start_x
 			y = start_y - 5
@@ -525,8 +527,8 @@ class CasseBriqueGame:
 
 		return {
 			'blocks': self.block_array,
-			'ball_p1': self.ball[1]['coords'],
-			'ball_p2': self.ball[2]['coords'],
+			'ball_p1': self.ball[1],
+			'ball_p2': self.ball[2],
 			'player1_coords': player1_coords,
 			'player2_coords': player2_coords,
 			'scores': self.scores
@@ -561,6 +563,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'type': 'game_state',
 			'number': player_number,
+			'blocks': initial_state_game['blocks'],
 			'ball_p1': initial_state_game['ball_p1'],
 			'ball_p2': initial_state_game['ball_p2'],
 			'player1_coords': initial_state_game['player1_coords'],
@@ -568,9 +571,10 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			'scores': initial_state_game['scores']
 		}))
 
-		selected_map = self.game.map if hasattr(self.game, 'map') else None
+		# selected_map = self.game.map if hasattr(self.game, 'map') else None
 
-		if len(self.game.players) == 2 and selected_map and not self.game.is_running:
+		if len(self.game.players) == 2 and not self.game.is_running:
+			sys.stdout.flush()
 			self.game.is_running = True
 
 			await self.send_game_state(0)
@@ -587,15 +591,21 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		print("Player disconnected")
 
 	async def receive(self, text_data):
-		data = json.loads(text_data)
+		try:
 
-		if data['type'] == "map_selected":
-			if not hasattr(self.game, 'map'):
+			data = json.loads(text_data)
+
+			if data['type'] == "map_selected":
+
+				# if not hasattr(self.game, 'map'):
 				self.game.map = data['map']
-				print("MAP choisie")
-				sys.stdout.flush()
+
 				self.game.mapTab = data['mapTab']
 				self.game.block_array = self.game.create_blocks(block_array=[])
+
+		except Exception as e:
+			print(f"Erreur inattendue: {str(e)}")
+
 
 	""" """ """ """ """ """ """ """ """ """
 	""" Back ball concerns """
@@ -604,26 +614,26 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 	# Increment the speed of the ball after a collision
 	def increment_ball_speed(self, ball_player):
 		ball_player['const_vector']['speed'] += 0.075
-		speed_ratio = ball_player['const_vector']['speed'] / math.sqrt	(ball_player['const_vector']['vx'] ** 2 + ball_player['const_vector']['vy'] ** 2)
+		speed_ratio = ball_player['const_vector']['speed'] / math.sqrt(ball_player['const_vector']['vx'] ** 2 + ball_player['const_vector']['vy'] ** 2)
 		ball_player['const_vector']['vx'] *= speed_ratio
 		ball_player['const_vector']['vy'] *= speed_ratio
-		ball_player['vector']['vx'] = ball_player['const_player']['vx']
-		ball_player['vector']['vy'] = ball_player['const_player']['vy']
+		ball_player['vector']['vx'] = ball_player['const_vector']['vx']
+		ball_player['vector']['vy'] = ball_player['const_vector']['vy']
 	
 	# Collision ball with walls and top
 	def collision_walls_top(self, ball_player):
 
 		# Collision walls right/left
-		if (ball_player['coords']['x'] - ball_player['radius'] <= 0 or ball_player['coords']['x'] + ball_player['radius'] >= 500) and ball_player['hit_horizontal'] == 0:
+		if (ball_player['coords']['x'] - ball_player['radius'] <= 0 or ball_player['coords']['x'] + ball_player['radius'] >= 600) and ball_player['hit_horizontal'] == 0:
 			ball_player['hit_horizontal'] = 1
 			ball_player['const_vector']['vx'] = -ball_player['const_vector']['vx']
-			ball_player['vector']['vx'] = -ball_player['vector']['vx']
+			ball_player['vector']['vx'] = ball_player['vector']['vx']
 			self.increment_ball_speed(ball_player)
 				# Ajuster la position pour que la balle ne colle pas au mur
 			if ball_player['coords']['x'] - ball_player['radius'] <= 0:
 				ball_player['coords']['x'] = ball_player['radius']
-			elif ball_player['coords']['x'] + ball_player['radius'] >= 500:
-				ball_player['coords']['x'] = 500 - ball_player['radius']
+			elif ball_player['coords']['x'] + ball_player['radius'] >= 600:
+				ball_player['coords']['x'] = 600 - ball_player['radius']
 		
 		# Collision avec le plafond
 		if ball_player['coords']['y'] - ball_player['radius'] <= 0 and ball_player['hit_vertical'] == 0:
@@ -635,20 +645,29 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			# Ajuster la position pour que la balle ne colle pas au plafond
 			ball_player['coords']['y'] = ball_player['radius']
 		
+		if ball_player['hit_horizontal'] > 0:
+			ball_player['hit_horizontal'] += 1
+		if ball_player['hit_vertical'] > 0:
+			ball_player['hit_vertical'] += 1
+		if ball_player['hit_horizontal'] > 5:
+			ball_player['hit_horizontal'] = 0
+		if ball_player['hit_vertical'] > 5:
+			ball_player['hit_vertical'] = 0
+		
 	# Collision ball with blocks
 	def collision_block(self, ball_player, number):
-		for block in range(self.game.block_array.length()):
-			if not block.state:
+		for block in self.game.block_array:
+			if not block["state"]:
 				continue
 			
 			ball_future_x = ball_player['coords']['x'] + ball_player['const_vector']['vx']
 			ball_future_y = ball_player['coords']['y'] + ball_player['const_vector']['vy']
 
 
-			if ball_future_x + ball_player['radius'] >= block.x and ball_future_x - ball_player['radius'] <= block.x + block.width and ball_future_y + ball_player['radius'] >= block.y and ball_future_y - ball_player['radius'] <= block.y + block.height: 
+			if ball_future_x + ball_player['radius'] >= block["x"] and ball_future_x - ball_player['radius'] <= block["x"] + block["width"] and ball_future_y + ball_player['radius'] >= block["y"] and ball_future_y - ball_player['radius'] <= block["y"] + block["height"]: 
 
-				hit_left_or_right = ball_player['coords']['x'] <= block.x or ball_player['coords']['x'] >= block.x + block.width
-				hit_top_or_bottom = ball_player['coords']['y'] <= block.y or ball_player['coords']['y'] >= block.y + block.height
+				hit_left_or_right = ball_player['coords']['x'] <= block["x"] or ball_player['coords']['x'] >= block["x"] + block["width"]
+				hit_top_or_bottom = ball_player['coords']['y'] <= block["y"] or ball_player['coords']['y'] >= block["y"] + block["height"]
 
 				if hit_left_or_right and hit_top_or_bottom:
 					# Collision sur un coin
@@ -658,28 +677,28 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 					# Collision sur les côtés gauche/droite
 					ball_player['const_vector']['vx'] = -ball_player['const_vector']['vx']
 					# Ajuster la position
-					if ball_player['coords']['x'] <= block.x:
-						ball_player['coords']['x'] = block.x - ball_player['radius']
+					if ball_player['coords']['x'] <= block["x"]:
+						ball_player['coords']['x'] = block["x"] - ball_player['radius']
 					else:
-						ball_player['coords']['x'] = block.x + block.width + ball_player['radius']
+						ball_player['coords']['x'] = block["x"] + block["width"] + ball_player['radius']
 				elif hit_top_or_bottom:
 					# Collision sur les côtés haut/bas
 					ball_player['const_vector']['vy'] = -ball_player['const_vector']['vy']
 					# Ajuster la position
-					if ball_player['coords']['y'] <= block.y:
-						ball_player['coords']['y'] = block.y - ball_player['radius']
+					if ball_player['coords']['y'] <= block["y"]:
+						ball_player['coords']['y'] = block["y"] - ball_player['radius']
 					else:
-						ball_player['coords']['y'] = block.y + block.height + ball_player['radius']
+						ball_player['coords']['y'] = block["y"] + block["height"] + ball_player['radius']
 
 				ball_player['vector']['vx'] = ball_player['const_vector']['vx']
 				ball_player['vector']['vy'] = ball_player['const_vector']['vy']
 
 				self.increment_ball_speed(ball_player)
-				block.state -= 1
+				block["state"] -= 1
 				if number == 1:
-					self.scores['p1'] += abs(5 - block.state)
+					self.scores['p1'] += abs(5 - block["state"])
 				elif number == 2:
-					self.scores['p2'] += abs(5 - block.state)
+					self.scores['p2'] += abs(5 - block["state"])
 				break
 
 	# look if there is a ball collision with player
@@ -711,15 +730,17 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	def move_ball(self, ball_player, number):
 		steps = 5
-		step_x = ball_player['vector']['x'] / steps
-		step_y = ball_player['vector']['y'] / steps
+		step_x = ball_player['vector']['vx'] / steps
+		step_y = ball_player['vector']['vy'] / steps
 		player_coords = self.game.players[self.channel_name]
 
-		for step in steps:
-			ball_player.coords.x += step_x
-			ball_player.coords.y += step_y
+		for step in range(steps):
+			ball_player['coords']['x'] += step_x
+			ball_player['coords']['y'] += step_y
 
 			if self.is_collision_player(ball_player, player_coords):
+				print(f"ball_coords x: {ball_player['coords']['x']} & y: {ball_player['coords']['y']} | player x1: {player_coords['coords']['x1']} & x2: {player_coords['coords']['x2']} & y1: {player_coords['coords']['y1']} & y2: {player_coords['coords']['y2']}")
+				sys.stdout.flush()
 				self.handle_player_collision(ball_player, player_coords)
 		
 			self.collision_walls_top(ball_player)
@@ -758,10 +779,24 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			'type': 'game_over'
 		}))
 
+	async def get_player_names(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'players_name',
+			'player1_name': event['player1_name'],
+			'player2_name': event['player2_name'],
+		}))
+
+	async def start_countdown(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'countdown',
+			'message': event['message']
+		}))
+
 	""" """ """ """ """ """ """ """
 	""" Start the game """
 	""" """ """ """ """ """ """ """
 	async def start_game(self):
+
 		player1_name = await database_sync_to_async(get_player_name)(self.game.players.values(), 1)
 		player2_name = await database_sync_to_async(get_player_name)(self.game.players.values(), 2)
 
@@ -792,7 +827,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			)
 			await asyncio.sleep(1)
 		
-		time_left = 60
+		# time_left = 60
 		while self.game.is_running and len(self.game.players) == 2:
 			update_interval = 0.016 # 60 FPS
 			current_time = asyncio.get_event_loop().time()
@@ -809,7 +844,6 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				ball_p2['coords']['x'] += ball_p2['vector']['vx'] * self.game.multiplyer
 				ball_p2['coords']['y'] += ball_p2['vector']['vy'] * self.game.multiplyer
 
-
 				self.move_ball(ball_p1, 1)
 				self.move_ball(ball_p2, 2)
 
@@ -817,16 +851,16 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				self.is_round_end(ball_p1, ball_p2)
 
 				# End of the game
-				if time_left <= 0:
-					await self.channel_layer.group_send(
-						self.room_group_name, {
-							'type': 'game_over'
-						}
-					)
-					self.game.is_running = False
+				# if time_left <= 0:
+					# await self.channel_layer.group_send(
+						# self.room_group_name, {
+							# 'type': 'game_over'
+						# }
+					# )
+					# self.game.is_running = False
 				
 				try:
-					await self.send_game_state(time_left)
+					await self.send_game_state(0)
 					elapsed = asyncio.get_event_loop().time() - current_time
 					remaining_time = update_interval - elapsed
 					self.game.multiplyer = remaining_time / update_interval
@@ -835,18 +869,18 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				except ChannelFull:
 					print("Channel full, skipping update")
 				
-				await asyncio.sleep(1)
-				time_left -= 1
+				# await asyncio.sleep(1)
+				# time_left -= 1
 				last_update = current_time
 
 
 	# Check si le round est fini pour chaque joueur et en demarre un autre
 	def is_round_end(self, ball_p1, ball_p2):
-		if ball_p1['coords']['y'] + ball_p1['radius'] >= 800:
+		if ball_p1['coords']['y'] + ball_p1['radius'] >= 700:
 			if self.game.scores['p1'] > 5:
 				self.game.scores['p1'] -= 5
 			self.game.reset_game()
-		if ball_p2['coords']['y'] + ball_p2['radius'] >= 800:
+		if ball_p2['coords']['y'] + ball_p2['radius'] >= 700:
 			if self.game.scores['p1'] > 5:
 				self.game.scores['p2'] -= 5
 			self.game.reset_game()

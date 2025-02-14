@@ -170,7 +170,7 @@ function drawInnerRectangle(color) {
 
 function drawPlayer(player1Coords, player2Coords) {
 	if (!player1Coords || !player2Coords) return;
-	
+
 	context.fillStyle = "#ED4EB0";
 	context.beginPath();
 	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);

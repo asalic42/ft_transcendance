@@ -11,13 +11,15 @@ var context1 = table1.getContext("2d");
 var context2 = table2.getContext("2d");
 
 var fps = document.getElementById("fps");
-var canvasContainer = document.getElementById("canvas-container");
-var playername1 = document.getElementById("playername1"); 
-var playername2 = document.getElementById("playername2"); 
+var canvas1 = document.getElementById("canvas-1");
+var canvas2 = document.getElementById("canvas-2");
+var playername1 = document.getElementById("playername1");
+var playername2 = document.getElementById("playername2");
 var score1 = document.getElementById("title1");
 var score2 = document.getElementById("title2");
 var gameOver = document.getElementById("gameOver");
-var overlay = document.getElementById("overlay");
+var overlay1 = document.getElementById("overlay1");
+var overlay2 = document.getElementById("overlay2");
 var disconnected = document.getElementById("disconnected");
 var timer = document.getElementById("timer");
 var mapSelection = document.querySelector('.mapSelection');
@@ -49,6 +51,7 @@ function connectToWebSocket(selectedMap) {
 		console.log("Connexion au Socket !");
 
 		if (selectedMap && mapTab) {
+			console.log("je selectionne la map");
 			socket.send(JSON.stringify({
 				type: "map_selected",
 				mapTab: mapTab,
@@ -60,7 +63,6 @@ function connectToWebSocket(selectedMap) {
 	start = Date.now();
 	socket.onmessage = function(event) {
 	    const data = JSON.parse(event.data);
-	    console.log("Message recu");
 
 		if (data.type == "countdown") {
 			countdownBeforeGame(data);
@@ -87,7 +89,8 @@ function connectToWebSocket(selectedMap) {
 			// game_restarted(data);
 
 		else if (data.type == "game_state") {
-			overlay.style.display = 'none';
+			overlay1.style.display = 'none';
+			overlay2.style.display = 'none';
 			timer.style.display = 'flex';
 	        launchAnim(data);
 	    }
@@ -105,7 +108,6 @@ function connectToWebSocket(selectedMap) {
 
 //! Init Map
 mapSelection.addEventListener('click', (event) => {
-	console.log("bouton clique ?");
 
 	if (event.target.tagName === 'BUTTON') {
 	  selectedMap = event.target.dataset.map;
@@ -121,9 +123,9 @@ async function launch(idMap) {
 	fps.style.display = 'flex';
 	player1.style.display = 'flex';
 	player2.style.display = 'flex';
-	title1.style.display = 'flex';
-	title2.style.display = 'flex';
-	canvasContainer.style.display = 'flex';
+	canvas1.style.display = 'flex';
+	canvas2.style.display = 'flex';
+
 
 	connectToWebSocket(idMap);
 }
@@ -142,56 +144,46 @@ function movePlayer() {
 	}
 	 // N'envoyer que si on a des données à envoyer
 	if (Object.keys(moveData).length > 0 && socket.readyState === WebSocket.OPEN) {
-		socket.send(JSON.stringify(moveData));
+		socket.send(JSON.stringify({
+			type: "move_player",
+			move: moveData
+		}));
 	}
 }
 
 function drawPlayer(player1Coords, player2Coords) {
 	if (!player1Coords || !player2Coords) return;
 
-	context1.fillStyle = "#ED4EB0";
 	context1.beginPath();
+	context1.fillStyle = "#ED4EB0";
 	context1.roundRect(player1Coords.x1, player1Coords.y1, 120, player1Coords.y2 - player1Coords.y1, 7);
 	context1.fill();
 	context1.closePath();
 
-	context2.fillStyle = "#ED4EB0";
 	context2.beginPath();
+	context2.fillStyle = "#ED4EB0";
 	context2.roundRect(player2Coords.x1, player2Coords.y1, 120, player2Coords.y2 - player2Coords.y1, 7);
 	context2.fill();
 	context2.closePath();
 }
 
 //! Ball
-function dr1awBall(ball) {
+function drawBall(ball, context) {
 
-	// ball player 1
-	context1.beginPath();
-	context1.fillStyle = 'white';
-	context1.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-	context1.fill();
-	context1.closePath();
-	
-	context1.beginPath();
-	context1.fillStyle = "#23232e";
-	context1.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
-	context1.fill();
-	context1.stroke();
-	context1.closePath();
+	if (!ball) return;
 
-	// ball player 2
-	context2.beginPath();
-	context2.fillStyle = 'white';
-	context2.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-	context2.fill();
-	context2.closePath();
+	context.beginPath();
+	context.fillStyle = 'white';
+	context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
+	context.fill();
+	context.closePath();
 	
-	context2.beginPath();
-	context2.fillStyle = "#23232e";
-	context2.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
-	context2.fill();
-	context2.stroke();
-	context2.closePath();
+	context.beginPath();
+	context.fillStyle = "#23232e";
+	context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
+	context.fill();
+	context.stroke();
+	context.closePath();
 }
 
 //! Loop func
@@ -201,8 +193,8 @@ function launchAnim(data) {
 	if (data.number) currentPlayer = data.number;
 	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
 	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
-	if (data.ball1_coords) gameState.ball1_coords = data.ball1_coords;
-	if (data.ball2_coords) gameState.ball2_coords = data.ball2_coords;
+	if (data.ball_p1) gameState.ball1_coords = data.ball_p1;
+	if (data.ball_p2) gameState.ball2_coords = data.ball_p2;
 	if (data.scores) gameState.scores = data.scores;
 	if (data.blocks) gameState.blocks = data.blocks;
 	if (data.time != 0) gameState.timeLeft = data.time;
@@ -220,8 +212,9 @@ function launchAnim(data) {
 		context1.clearRect(0, 0, table1.width, table1.height);
 		context2.clearRect(0, 0, table2.width, table2.height);
 		updateDrawing();
-		score1.innerText = "Score : " + gameState.scores.p1;
-		score1.innerText = "Score : " + gameState.scores.p2;
+
+		score1.innerText = gameState.scores.p1;
+		score1.innerText = gameState.scores.p2;
 		timer.textContent = "Time left: " + gameState.timeLeft + "s";
 	})
 }
@@ -255,7 +248,7 @@ function showReplayButton(player) {
 function resetGame() {
 	if (socket.readyState === WebSocket.OPEN) {
 		console.log("Demande de reset du jeu");
-		socket.send(JSON.stringify({action: "restart_game"}));
+		socket.send(JSON.stringify({type: "restart_game"}));
 	} else {
 		console.log("Echec");
 	}
@@ -270,10 +263,12 @@ function getRandomArbitrary(min, max) {
 }
 
 function drawBlocks(context) {
-	for (let k = 0; k < blocks.length; k++) {
-		if (blocks[k].state) {
+	if (!gameState.blocks) return ;
+
+	for (let k = 0; k < gameState.blocks.length; k++) {
+		if (gameState.blocks[k].state) {
 			context.beginPath();
-			switch (blocks[k].state) {
+			switch (gameState.blocks[k].state) {
 				case 5:
 					context.fillStyle = "green";
 					break;
@@ -290,7 +285,7 @@ function drawBlocks(context) {
 					context.fillStyle = "darkred";
 					break;
 			}
-			context.roundRect(blocks[k].x1, blocks[k].y1, blocks[k].width, blocks[k].height, 10);
+			context.roundRect(gameState.blocks[k].x, gameState.blocks[k].y, gameState.blocks[k].width, gameState.blocks[k].height, 7);
 			context.fill();
 		}
 	}
@@ -333,18 +328,22 @@ window.addEventListener("keyup", (event) => {
 	keys[event.key] = false;
 });
 
-function updateDrawing(player1Coords, ball) {
+function updateDrawing() {
 	drawOuterRectangle("#ED4EB0");
 	drawInnerRectangle("#23232e");
-    drawPlayer(player1Coords, );
+
+    drawPlayer(gameState.player1_coords, gameState.player2_coords);
     drawBlocks(context1);
     drawBlocks(context2);
-	drawBall(ball);
+	drawBall(gameState.ball1_coords, context1);
+	drawBall(gameState.ball2_coords, context2);
 }
 
 function countdownBeforeGame(data) {
-	overlay.style.display = 'block';
-	countdown.innerText = data.message;
+	overlay1.style.display = 'flex';
+	overlay2.style.display = 'flex';
+	document.getElementById("countdown1").innerText = data.message;
+	document.getElementById("countdown2").innerText = data.message;
 }
 
 function fetchMap(selectedMap) {
