@@ -29,7 +29,7 @@ class Users(models.Model):
 
 class Chans(models.Model):
 	id = models.AutoField(primary_key = True)
-	name = models.CharField(unique=True, max_length = 30)
+	name = models.CharField(unique = True, max_length = 30)
 	invite_link = models.CharField()
 	date = models.DateTimeField(auto_now_add = True)
 	private = models.BooleanField(default=False)
@@ -66,13 +66,12 @@ class Pong(models.Model):
     
 
 class Tournaments(models.Model):
-	idTournaments = models.IntegerField()
+	id = models.AutoField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
-	nb_of_players = models.IntegerField()
 
 class MatchsTournaments(models.Model):
-	idTournaments = models.IntegerField()
-	idMatchs = models.IntegerField()
+	idTournaments = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='idTournaments')
+	idMatchs = models.ForeignKey(Pong, on_delete=models.CASCADE, related_name='idMatchs')
 
 class SoloCasseBrique(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -105,9 +104,13 @@ class Messages(models.Model):
 	idSender = models.IntegerField()
 	message = models.CharField(max_length=1000)
 	date = models.DateTimeField(auto_now_add = True)
+	is_link = models.BooleanField(default = False)
 
 class PrivateChan(models.Model):
 	id = models.AutoField(primary_key = True)
 	id_chan = models.IntegerField(unique = True)
 	id_u1 = models.IntegerField()
 	id_u2 = models.IntegerField()
+
+class CurrentGame(models.Model):
+    game_id = models.IntegerField(unique=True)

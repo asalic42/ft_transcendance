@@ -90,3 +90,22 @@ a {
     outline: 3px solid #ED4EB0;
 	font-size: 20px;
 }
+
+#choice {
+	width: 150px;
+	height: 45px;
+	margin-bottom: 25px;
+	font-size: 24px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+#choice:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
+}
+
+#text {
+	color: var(--font-color);
+	font-size: 	32px;
+	margin: 0px;	
+}

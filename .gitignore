@@ -2,3 +2,4 @@ djenv
 myproject/.env
 myproject/home_sys/__pycache__
 myproject/loginpage/__pycache__
+myproject/debug.log

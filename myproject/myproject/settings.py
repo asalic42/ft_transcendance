@@ -213,10 +213,15 @@ LOGGING = {
         },
     },
     'loggers': {
-        '': {  # Racine de tous les loggers
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',  # Niveau de log (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-            'propagate': True,
+        'channels': {
+            'handlers': ['console'],
+            'level': 'INFO',  # or 'WARNING' if you want even less output
+            'propagate': False,
+        },
+        'daphne': {
+            'handlers': ['console'],
+            'level': 'INFO',  # set to WARNING if necessary
+            'propagate': False,
         },
     },
 }

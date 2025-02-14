@@ -13,6 +13,8 @@ from django.conf import settings
 from .models import *
 import json
 import requests
+from .utils import add_pong_logic
+from django.db.models import Q
 
 """
 |
@@ -131,8 +133,17 @@ def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 @login_required
-def game_distant_page(request):
-	return (render(request, 'game-distant.html'))
+def game_distant_page_choice(request):
+	all_games = CurrentGame.objects.all()
+	return (render(request, 'game-type-pong2.html', {'all_games': all_games}))
+
+@login_required
+def game_distant_page(request, game_id):
+	return (render(request, 'game-distant.html', {'game_id':game_id}))
+
+@login_required
+def game_distant_page_t(request, game_id, id_t):
+	return (render(request, 'game-distant-t.html', {'game_id':game_id, 'id_t':id_t}))
 
 @login_required
 def game_bot_page(request):
@@ -181,32 +192,15 @@ def add_solo_casse_brique(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-@require_http_methods(["POST"])
 def add_pong(request):
-	try:
-		data = json.loads(request.body)
-
-		user = Users.objects.get(user_id=data.get('id_p1'))
-		if data['id_p2'] is not None:
-			data['id_p2'] = Users.objects.get(user_id=data.get('id_p2'))
-
-		data['id_p1'] = user
-		
-		new_game = Pong.objects.create(**data)
-		return JsonResponse({'status': 'success', 'game': {
-			'id_p1': new_game.id_p1.id,
-			'id_p2': new_game.id_p2.id if new_game.id_p2 else None,
-			'is_bot_game': new_game.is_bot_game,
-			'score_p1': new_game.score_p1,
-			'score_p2': new_game.score_p2,
-			'date': new_game.date.isoformat(),
-			'difficulty': new_game.difficulty,
-			'bounce_nb': new_game.bounce_nb,
-		}}, status=201)
-	except Users.DoesNotExist:
-		return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
-	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    try:
+        data = json.loads(request.body)
+        game_data = add_pong_logic(data)
+        return JsonResponse({'status': 'success', 'game': game_data}, status=201)
+    except Users.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 """
 |
@@ -259,6 +253,7 @@ def live_chat(request):
 				'sender': msg.sender,
 				'idSender': msg.idSender,
 				'message': msg.message,
+				'is_link': msg.is_link,
 				'date':msg.date.isoformat()} for msg in new_message]
 		return JsonResponse({'new_message': data})
 	return JsonResponse({'new_message': None})
@@ -324,6 +319,7 @@ def post_message(request):
 			'sender': new_message.sender,
 			'idSender': new_message.idSender,
 			'message': new_message.message,
+			'is_link' : new_message.is_link,
 			'date':new_message.date.isoformat(),
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
@@ -520,11 +516,33 @@ def doesUserHaveAccessToChan(request, idC, idU):
 		priv_chan = PrivateChan.objects.get(id_chan = idC)
 		# print(priv_chan)
 		# message_list = list(messages.values())
-		if priv_chan.id_u1 == idU or priv_chan.id_u2 == idU:
-			return JsonResponse({'status': 'success', 'allowed': 'True', 'idU': idU, 'priv_chan.id_u1': priv_chan.id_u1, 'priv_chan.id_u2':priv_chan.id_u2})
-		return JsonResponse({'status': 'success', 'allowed': 'False', 'idU': idU, 'priv_chan.id_u1': priv_chan.id_u1, 'priv_chan.id_u2':priv_chan.id_u2})
+		if priv_chan.id_u1 == idU:
+			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2':priv_chan.id_u2})
+		if priv_chan.id_u2 == idU:
+			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2': priv_chan.id_u1})
+		return JsonResponse({'status': 'success', 'allowed': 'False', 'id_u1': idU, 'id_u1': priv_chan.id_u1, 'id_u2':priv_chan.id_u2})
 	except:
 		return JsonResponse({'status': 'error'})
+
+def check_duplicate_private_channel(request, user1_id, user2_id):
+    """
+    Vérifie si un canal privé existe déjà entre deux utilisateurs
+    """
+    # Normalise les IDs (le plus petit en premier)
+    id_u1, id_u2 = sorted([int(user1_id), int(user2_id)])
+    
+    # Cherche un canal existant avec ces utilisateurs dans n'importe quel ordre
+    existing_channel = PrivateChan.objects.filter(
+        (Q(id_u1=id_u1) & Q(id_u2=id_u2)) |
+        (Q(id_u1=id_u2) & Q(id_u2=id_u1))
+    ).first()
+    
+    if existing_channel:
+        return JsonResponse({
+            'exists': True,
+            'channel_id': existing_channel.id_chan
+        })
+    return JsonResponse({'exists': False})
 
 @require_http_methods(["POST"])
 def	postPv(request):
@@ -533,17 +551,17 @@ def	postPv(request):
 		new_pv = PrivateChan.objects.create(**data)
 		return JsonResponse({'status': 'success', 'message': {
 			"id_chan": new_pv.id_chan, 
-			"id_u1": new_pv.id_u1, 
+			"id_u1": new_pv.id_u1,
 			"id_u2": new_pv.id_u2,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @require_GET
-def getNameById(request, nameU):
+def getNameById(request, idU):
 	try:
-		user = get_object_or_404(Users, name = nameU)  # pk = primary key
-		return JsonResponse({'status': 'success', 'pk': user.pk})  # Ensure 'image' is the correct field
+		user = get_object_or_404(Users, pk = idU)  # pk = primary key
+		return JsonResponse({'status': 'success', 'name': user.name})  # Ensure 'image' is the correct field
 	except User.DoesNotExist:
 		return JsonResponse({'error': 'User not found'}, status=404)
 
@@ -755,3 +773,14 @@ def user_status(request):
     users = Users.objects.all().values('id', 'is_online')
     return JsonResponse(list(users), safe=False)
 
+
+@login_required
+def create_current_game(request, sender_id):
+	try:
+		created = CurrentGame.objects.get_or_create(game_id=sender_id)
+		if created:
+			return (render(request, 'game-distant.html', {'game_id':sender_id}))
+		else:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	except Exception as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
