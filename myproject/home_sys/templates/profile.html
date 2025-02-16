@@ -51,7 +51,42 @@
 			<div class="game-history-section">
 				<h3>Parties Pong</h3>
 				{% if games_P %}
-					<table>
+					{% for game in games_P %}
+						<!-- Tout ce qui est dates et heures -->
+						<div class="pong-date" style="width: auto; height: auto; background-color: black; color: white">{{ game.date|date:"d/m/Y H:i" }}</div>
+						
+						<!-- Container pour l'affichage des scores -->
+						<div class="pong-history" style="display: flex; align-items: center; border: 2px solid; background-color: {{ game.color }}; padding-left: 5px; padding-right: 5px; justify-content: space-between;">
+							
+							
+							<!-- Score du joueur à gauche -->
+							<span class="player-score" style="margin-left: 10px;">{{ game.score_p1 }}</span>
+							
+							<!-- Image du joueur à gauche -->
+							<img src="{{ user.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; border: 1px solid;">
+						
+							<!-- Image du "versus" au centre -->
+							<img src="{% static 'images/versus.png' %}" alt="" style="width: 50px; height: 50px; margin-right: 10px; margin-left: 10px;">
+						
+							<!-- Image de l'adversaire à droite de l'image "versus" -->
+							{% if game.is_bot_game %}
+								<!-- Si c'est contre un bot -->
+								<img src="{% static 'images/bot2.png' %}" style="width: 60px; height: 100px; border-radius: 50%; margin-left: 10px;">
+								<span class="player-score" style="margin-right: 10px;">{{ game.score_p2 }}</span>
+							{% elif game.id_p1 == user.users %}
+								<!-- Si l'utilisateur est le joueur 1 -->
+								<img src="{{ game.id_p2.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 10px; border: 1px solid;">
+								<span class="player-score" style="margin-right: 10px;">{{ game.score_p2 }}</span>
+							{% else %}
+								<!-- Si l'utilisateur est le joueur 2 -->
+								<img src="{{ game.id_p1.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 10px; border: 1px solid;">
+								<span class="player-score" style="margin-right: 10px;">{{ game.score_p1 }}</span>
+							{% endif %}
+						</div>
+					
+					
+					{% endfor %}
+					<!-- <table>
 						<thead>
 							<tr>
 								<th>Date</th>
@@ -84,7 +119,7 @@
 							</tr>
 						{% endfor %}
 						</tbody>
-					</table>
+					</table> -->
 				{% else %}
 					<p>Aucune partie Pong jouée</p>
 				{% endif %}

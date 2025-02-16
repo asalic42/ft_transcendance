@@ -62,7 +62,8 @@ class Pong(models.Model):
 	score_p2 = models.IntegerField()
 	date = models.DateTimeField(auto_now_add = True)
 	difficulty = models.IntegerField()
-	bounce_nb = models.IntegerField()    
+	bounce_nb = models.IntegerField()
+	color = models.CharField(max_length=50, default='yellow')
     
 
 class Tournaments(models.Model):

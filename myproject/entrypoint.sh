@@ -1,3 +1,5 @@
+#!/bin/bash
+
 PURPLE_N='\033[0;35m'
 NC='\033[0m'
 GREEN_N='\033[0;32m'
