@@ -62,6 +62,7 @@ main {
     flex-direction: column;             /* Dispose les éléments en colonne */
     align-items: center;                /* Centre les éléments horizontalement */
     height: 100%;                       /* Prend toute la hauteur disponible */
+	gap: 10px;
 }
 
 .nav-item {
@@ -174,7 +175,6 @@ main {
     
     font-weight: bold;                  /* Gras */
     text-transform: uppercase;          /* Met le texte en majuscules */
-    margin-bottom: 1rem;                /* Espace en bas */
     text-align: center;                 /* Centre le texte */
     color: var(--text-secondary);       /* Couleur du texte secondaire */
     background: var(--bg-secondary);    /* Couleur de fond secondaire */

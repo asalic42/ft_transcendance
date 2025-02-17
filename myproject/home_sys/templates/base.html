@@ -23,7 +23,7 @@
         
         <ul class="navbar-nav">
 
-            <li class="logo">
+            <li class="logo" style="margin-bottom: 10px;">
                 <a href="#" class="nav-icon">
                     <span class="link-text logo-text">42Project</span>
                     <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
@@ -33,6 +33,7 @@
             </li>
 
         <!-- HOME -->
+
             <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-icon">
                     <lord-icon
@@ -111,6 +112,11 @@
 
         <!-- SETTINGS -->
             <li class="nav-item">
+				<div id="top-border" style="
+					width: 80%;
+					MARGIN: 0 auto;
+					border-top: 2px solid rgba(128, 128, 128, 0.8);">
+				</div>
                 <a href="{% url 'settings_user' %}" class="nav-icon">
                     <lord-icon
                         src="https://cdn.lordicon.com/ifsxxxte.json"
