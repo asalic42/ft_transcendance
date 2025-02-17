@@ -211,6 +211,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 		self.room_group_name = f"game_{self.game_id}"
 		self.game = self.games[self.room_group_name]
 
+		if len(self.game.players) >= 2:
+			self.close()
+
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
 		# Ajout du joueur à la partie

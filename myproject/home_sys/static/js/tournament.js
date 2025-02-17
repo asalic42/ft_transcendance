@@ -6,6 +6,10 @@ socket.onopen = function() {
     console.log("Connexion réussie au WebSocket");
 }
 
+socket.onclose = function() {
+    alert("Tournament is full, running or there has been an error.")
+}
+
 function startButton(link) {
 	const button = document.createElement('button');
 	button.style.display = "none";
@@ -30,10 +34,8 @@ socket.onmessage = function(event) {
         console.log("Message reçu:", data);
 
         if (data.type === "game_link") {
-			console.log("Reçu un lien de jeu:", data.link);
-			if (!first_pass) {
+			if (!first_pass)
 				document.getElementById('bt').remove();
-			}		
 			startButton(data.link)
 		}
 		if (data.type === 'result') {

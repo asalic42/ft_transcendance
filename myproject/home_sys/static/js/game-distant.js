@@ -84,6 +84,7 @@ socket.onmessage = function(event) {
 
 socket.onclose = function() {
 	console.log("Deconnexion du socket");
+    alert("Game is full, or there has been an error.")
 };
 
 socket.onerror = function(error) {
