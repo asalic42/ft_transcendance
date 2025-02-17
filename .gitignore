@@ -1,5 +1,7 @@
-djenv
-myproject/.env
-myproject/home_sys/__pycache__
-myproject/loginpage/__pycache__
-myproject/debug.log
+.env
+myproject/djenv
+myproject/myproject/home_sys/migrations/__pycache__/
+myproject/myproject/loginpage/migrations/__pycache__/ 
+myproject/loginpage/__pycache__/
+SiteLauncherGui/sitelauncherenv/
+myproject/home_sys/__pycache__/

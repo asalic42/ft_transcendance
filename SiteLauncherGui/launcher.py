@@ -14,6 +14,11 @@ from PyQt5.QtCore import QProcess
 from dotenv import load_dotenv
 import signal
 import re
+from threading import Thread
+from time import sleep
+import subprocess
+
+
 
 def ansi_to_html(ansi_text):
     """Convertit les codes ANSI en HTML en utilisant un mappage personnalisé."""
@@ -134,6 +139,7 @@ class SiteLauncher(QMainWindow):
 
         # Boutons
         l_launch = addElmt("Appelle la règle [b-all]", "Lancer", self.launch)
+        l_static = addElmt("Collecte les statics", "Static", self.static)
         l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch)
         l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop)
         l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker-compose stop]", "Docker Stop", self.dockerStop)
@@ -151,6 +157,7 @@ class SiteLauncher(QMainWindow):
 
         # Ajout des widgets au layout
         layout.addLayout(l_launch)
+        layout.addLayout(l_static)
         layout.addLayout(l_relaunch)
 
         """ layout.addWidget(self.output) """
@@ -180,7 +187,18 @@ class SiteLauncher(QMainWindow):
         """Lance la commande 'launch'."""
         self.run_command(self.all_cmd["launch"])
 
-    def relaunch(self):
+    def static(self):
+        """Lance collectstatic.sh et affiche la sortie en temps réel."""
+        self.static_process = QProcess(self)  # Créer un nouveau QProcess
+        self.static_process.readyReadStandardOutput.connect(lambda: self.read_output(self.static_process))
+        self.static_process.readyReadStandardError.connect(lambda: self.read_output(self.static_process))
+            
+        command = ["sh", "../SiteLauncherGui/collectstatic.sh"]
+        self.static_process.start(command[0], command[1:])
+
+
+
+    def relaunch(self):	
         """Redémarre la commande en envoyant un SIGINT (Ctrl+C)."""
         self.stop()
         self.run_command(self.all_cmd["launch"])
@@ -207,13 +225,16 @@ class SiteLauncher(QMainWindow):
         """Exécute une commande système."""
         self.process.start(command)
 
-    def read_output(self):
+    def read_output(self, process = None):
         """Lit la sortie du processus et l'affiche dans la zone de texte."""
         # Lire la sortie standard
-        output = self.process.readAllStandardOutput().data().decode()
-
+        if (process == None):
+            output = self.process.readAllStandardOutput().data().decode()
+            error = self.process.readAllStandardError().data().decode()
+        else:
+            output = process.readAllStandardOutput().data().decode()
+            error = process.readAllStandardError().data().decode()
         # Lire les erreurs
-        error = self.process.readAllStandardError().data().decode()
         #if len(error) != 0:
         #    error = "\x1b[1;31m[STDERR]\x1b[0m " + error
 
