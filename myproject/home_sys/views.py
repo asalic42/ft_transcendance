@@ -453,11 +453,18 @@ def profile_view(request, username):
 			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
 		).order_by('-date')
 
+
 		for game in games_P:
-			if (game.score_p1 < game.score_p2):
+			s1, s2 = game.score_p1, game.score_p2
+
+			if (game.id_p1 != user.users):
+				s1, s2 = game.score_p2, game.score_p1
+
+			if (s1 < s2):
 				game.color = 'red'
 				continue
-			if (game.score_p1 > game.score_p2):
+			
+			if (s1 > s2):
 				game.color = 'green'
 				continue
 		
