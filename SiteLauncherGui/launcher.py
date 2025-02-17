@@ -103,7 +103,7 @@ class SiteLauncher(QMainWindow):
         script_root = os.getenv("SCRIPT_ROOT")
         os.chdir(script_root)
 
-        self.all_cmd = {"launch": "./log.sh b-all", "static": "sudo docker exec -it myproject-web-1 python3 manage.py collectstatic --noinput"}
+        self.all_cmd = {"launch": "./log.sh b-all"}
         self.initUI()
 
     def initUI(self):
@@ -188,14 +188,17 @@ class SiteLauncher(QMainWindow):
         self.run_command(self.all_cmd["launch"])
 
     def static(self):
-        """Lance la commande 'static'."""
-        command = "sh ../SiteLauncherGui/collectstatic.sh"
-        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        output, error = process.communicate()
-        print("Output:", output)
-        print("Error:", error)        # self.run_command(self.all_cmd["static"])
+        """Lance collectstatic.sh et affiche la sortie en temps réel."""
+        self.static_process = QProcess(self)  # Créer un nouveau QProcess
+        self.static_process.readyReadStandardOutput.connect(lambda: self.read_output(self.static_process))
+        self.static_process.readyReadStandardError.connect(lambda: self.read_output(self.static_process))
+            
+        command = ["sh", "../SiteLauncherGui/collectstatic.sh"]
+        self.static_process.start(command[0], command[1:])
 
-    def relaunch(self):
+
+
+    def relaunch(self):	
         """Redémarre la commande en envoyant un SIGINT (Ctrl+C)."""
         self.stop()
         self.run_command(self.all_cmd["launch"])
@@ -222,13 +225,16 @@ class SiteLauncher(QMainWindow):
         """Exécute une commande système."""
         self.process.start(command)
 
-    def read_output(self):
+    def read_output(self, process = None):
         """Lit la sortie du processus et l'affiche dans la zone de texte."""
         # Lire la sortie standard
-        output = self.process.readAllStandardOutput().data().decode()
-
+        if (process == None):
+            output = self.process.readAllStandardOutput().data().decode()
+            error = self.process.readAllStandardError().data().decode()
+        else:
+            output = process.readAllStandardOutput().data().decode()
+            error = process.readAllStandardError().data().decode()
         # Lire les erreurs
-        error = self.process.readAllStandardError().data().decode()
         #if len(error) != 0:
         #    error = "\x1b[1;31m[STDERR]\x1b[0m " + error
 
