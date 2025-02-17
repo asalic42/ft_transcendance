@@ -14,6 +14,11 @@ from PyQt5.QtCore import QProcess
 from dotenv import load_dotenv
 import signal
 import re
+from threading import Thread
+from time import sleep
+import subprocess
+
+
 
 def ansi_to_html(ansi_text):
     """Convertit les codes ANSI en HTML en utilisant un mappage personnalisé."""
@@ -98,7 +103,7 @@ class SiteLauncher(QMainWindow):
         script_root = os.getenv("SCRIPT_ROOT")
         os.chdir(script_root)
 
-        self.all_cmd = {"launch": "./log.sh b-all"}
+        self.all_cmd = {"launch": "./log.sh b-all", "static": "sudo docker exec -it myproject-web-1 python3 manage.py collectstatic --noinput"}
         self.initUI()
 
     def initUI(self):
@@ -134,6 +139,7 @@ class SiteLauncher(QMainWindow):
 
         # Boutons
         l_launch = addElmt("Appelle la règle [b-all]", "Lancer", self.launch)
+        l_static = addElmt("Collecte les statics", "Static", self.static)
         l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch)
         l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop)
         l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker-compose stop]", "Docker Stop", self.dockerStop)
@@ -151,6 +157,7 @@ class SiteLauncher(QMainWindow):
 
         # Ajout des widgets au layout
         layout.addLayout(l_launch)
+        layout.addLayout(l_static)
         layout.addLayout(l_relaunch)
 
         """ layout.addWidget(self.output) """
@@ -179,6 +186,14 @@ class SiteLauncher(QMainWindow):
     def launch(self):
         """Lance la commande 'launch'."""
         self.run_command(self.all_cmd["launch"])
+
+    def static(self):
+        """Lance la commande 'static'."""
+        command = "sh ../SiteLauncherGui/collectstatic.sh"
+        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        output, error = process.communicate()
+        print("Output:", output)
+        print("Error:", error)        # self.run_command(self.all_cmd["static"])
 
     def relaunch(self):
         """Redémarre la commande en envoyant un SIGINT (Ctrl+C)."""

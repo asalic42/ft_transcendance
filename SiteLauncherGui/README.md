@@ -24,6 +24,16 @@ Dans un `.env` si le script `log.sh` se trouve dans le répertoire "myproject" q
 SCRIPT_ROOT="../myproject/"
 ```
 
+Executez ensuite la commande 
+```
+sudo visudo
+```
+Et entrez ces deux lignes à la fin, en mettant votre username :
+```
+REPLACE_USERNAME ALL=(ALL) NOPASSWD: /usr/bin/docker ps --format='{{.Names}}'
+REPLACE_USERNAME ALL=(ALL) NOPASSWD: /usr/bin/docker exec -it * python3 manage.py collectstatic --noinput
+```
+Elles vont permettre au script de s'executer dans avoir besoin du mot de passe.
 
 Une fois cette lourde tâche accomplie, lancez le programme avec un simple :
 ```bash
