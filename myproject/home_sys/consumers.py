@@ -405,13 +405,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 		self.game.ball['vector'] = {'vx': direction, 'vy': get_random_arbitrary(-10, 10)}
 
 
-
 """ CASSE BRIQUE GAME MULTIPLAYER """
 
 class CasseBriqueGame:
 	def __init__(self):
 		self.players = {}
-		self.scores = {'p1': 0, 'p2': 0 }
 		self.health = {'p1': 5, 'p2': 5}
 		self.mapTab = {}
 		# self.block_array = []
@@ -421,6 +419,7 @@ class CasseBriqueGame:
 		self.multiplyer = 0
 
 	def reset_game(self):
+		self.scores = {'p1': 0, 'p2': 0 }
 		self.ball = {
 			1:{
 				'coords' : {'x' : 600 / 2, 'y' : 700 -13},
@@ -449,6 +448,7 @@ class CasseBriqueGame:
 				'y2': 715,
 				'vx': 20
 			}
+			player['block_array'] = []
 			
 
 	# Add player to the game if its possible
@@ -567,10 +567,12 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		# selected_map = self.game.map if hasattr(self.game, 'map') else None
 
 		if len(self.game.players) == 2 and not self.game.is_running:
-			self.game.is_running = True
-
-			await self.send_game_state(0)
-			asyncio.create_task(self.start_game())
+			if (1 in self.game.map and 2 in self.game.map) and self.game.map[1] == self.game.map[2]:
+	
+				self.game.is_running = True
+				await self.send_game_state(0)
+				asyncio.create_task(self.start_game())
+			# else affichage erreur: not same map
 		
 	async def disconnect(self, close_code):
 		self.game.is_running = False
@@ -589,30 +591,33 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 			if data['type'] == "map_selected":
 
-				# if not hasattr(self.game, 'map'):
-				self.game.map = data['map']
+				chosen_map = data['map']
+				self.game.map[self.game.players[self.channel_name]['number']] = chosen_map
 
 				self.game.mapTab = data['mapTab']
 				self.game.players[self.channel_name]['block_array'] = self.game.create_blocks(self.game.players[self.channel_name]['block_array'])
 			elif data['type'] == "move_player":
 				await self.move_player(data)
 
-			elif data['type'] == "game_restarted":
-				await self.receive_restarted(data)
+			elif data['type'] == "restart_game":
+				await self.receive_restarted()
 
 
 		except Exception as e:
 			print(f"Erreur inattendue: {str(e)}")
 
-	async def receive_restarted(self, data):
+	async def receive_restarted(self):
 		try:
 			self.game.reset_game()
+			for player in self.game.players.values():
+				player['block_array'] = self.game.create_blocks(player['block_array'])
 			self.game.is_running = True
 
 			game_state = self.game.get_game_state()
 			await self.channel_layer.group_send(
 				self.room_group_name, {
 				'type': 'new_game',
+				'time': 60,
 				**game_state
 			})
 
@@ -747,10 +752,10 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		if ball_player['hit_player'] >= 15:
 			ball_player['hit_player'] = 0
 
-		if (ball_player['coords']['x'] + ball_player['radius'] /2 >= player_coords['coords']['x1'] and
-			ball_player['coords']['x'] - ball_player['radius'] /2 <= player_coords['coords']['x2'] and
-			ball_player['coords']['y'] + ball_player['radius'] /2 >= player_coords['coords']['y1'] and
-			ball_player['coords']['y'] - ball_player['radius'] /2 <= player_coords['coords']['y2']):
+		if (ball_player['coords']['x'] + ball_player['radius'] >= player_coords['coords']['x1'] and
+			ball_player['coords']['x'] - ball_player['radius'] <= player_coords['coords']['x2'] and
+			ball_player['coords']['y'] + ball_player['radius'] >= player_coords['coords']['y1'] and
+			ball_player['coords']['y'] - ball_player['radius'] <= player_coords['coords']['y2']):
 				ball_player['hit_player'] = 1
 				self.increment_ball_speed(ball_player)
 				return True
@@ -768,11 +773,11 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		for player in self.game.players.values():
 			if player['number'] == number:
 				block_array = player['block_array']
+				player_coords = player
 
 		steps = 5
 		step_x = ball_player['vector']['vx'] * self.game.multiplyer / steps
 		step_y = ball_player['vector']['vy'] * self.game.multiplyer / steps
-		player_coords = self.game.players[self.channel_name]
 
 		for step in range(steps):
 
