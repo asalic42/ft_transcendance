@@ -31,7 +31,7 @@ sudo visudo
 Et entrez ces deux lignes à la fin, en mettant votre username :
 ```
 REPLACE_USERNAME ALL=(ALL) NOPASSWD: /usr/bin/docker ps --format='{{.Names}}'
-REPLACE_USERNAME ALL=(ALL) NOPASSWD: /usr/bin/docker exec -it * python3 manage.py collectstatic --noinput
+REPLACE_USERNAME ALL=(ALL) NOPASSWD: /usr/bin/docker exec * python3 manage.py collectstatic --noinput
 ```
 Elles vont permettre au script de s'executer dans avoir besoin du mot de passe.
 
