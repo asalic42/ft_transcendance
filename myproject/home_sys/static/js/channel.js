@@ -570,8 +570,8 @@ async function postMessage(currentChan, mess, is_link) {
 		console.error('Erreur: ', error);
 	}
 }
-let cachedUserId = null;
 
+let cachedUserId = null;
 async function getCurrentPlayerId() { // à lancer au chargement de la page;
 	if (cachedUserId !== null) {
 		return cachedUserId;
