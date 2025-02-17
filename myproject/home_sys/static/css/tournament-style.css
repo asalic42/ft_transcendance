@@ -1,122 +1,193 @@
 /* color pink: #ED4EB0 */
 
 @font-face {
-    font-family: Namaku;
-    src: url("../fonts/Namaku.ttf");
+	font-family: Namaku;
+	src: url("../fonts/Namaku.ttf");
 }
 
 body {
-    background-color: #23232e;
+	background-color: #23232e;
 }
 
 .container {
-    display: flex;
-    justify-content: center;
-    height: 90vh;
-    font-family: 'Namaku';
+	display: flex;
+	justify-content: center;
+	height: 90vh;
+	font-family: 'Namaku';
 }
 
 .square {
-    width: 90%;
-    height: auto;
-    max-height: 100vh;
-    background-color: #13131a;
-    border-radius: 3%;
-    color: white;
-    font-family: 'Namaku';
+	top: 50px;
+	position: relative;
+	width: 90%;
+	max-height: 90%;
+	background-color: #13131a;
+	border-radius: 3%;
+	color: white;
+	font-family: 'Namaku';
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	flex-wrap: wrap;
+	align-content: center;
+	gap: 50px;
 }
 
 .square h2 {
-    text-align: center;
-    padding-top: 15px;
+	text-align: center;
+	padding-top: 15px;
 }
 
 /* Ajustemnent du nombre de joueurs */
 .input-number {
-    position: relative;
-    margin: 0 10px;
-    height: 70px;
-    display: flex;
-    align-items: center;
+	position: relative;
+	margin: 0 10px;
+	height: 70px;
+	display: flex;
+	align-items: center;
 }
 
 .input-number #title {
-    color: #ED4EB0;
-    margin-right: 10px;
+	color: #ED4EB0;
+	margin-right: 10px;
 }
 
 .players-number {
-    color: black;
-    width: 40px;
-    height: 20px;
-    text-align: center;
-    font-size: 20px;
-    padding: 10px;
-    border-radius: 10%;
-    background-color: white;
+	color: black;
+	width: 40px;
+	height: 20px;
+	text-align: center;
+	font-size: 20px;
+	padding: 10px;
+	border-radius: 10%;
+	background-color: white;
 }
 
 .arrows {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
 button.arrow {
-    font-size: 10px;
-    cursor: pointer;
-    display: block;
-    height: 20px;
+	font-size: 10px;
+	cursor: pointer;
+	display: block;
+	height: 20px;
 }
 
 button.arrow:focus {
-    outline: none;
+	outline: none;
 }
 
 button.arrow:hover {
-    background-color: #23232e;
+	background-color: #23232e;
 }
 
 /* Formulaires joueurs */
 .forms {
-    padding: 50px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 20px;
-    justify-items: center;
-    grid-auto-flow: dense;
+	padding: 50px;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 20px;
+	justify-items: center;
+	grid-auto-flow: dense;
 }
 
 .form-player {
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 .forms h4 {
-    margin-bottom: 5px;
-    color: #ED4EB0;
+	margin-bottom: 5px;
+	color: #ED4EB0;
 }
 
 .forms input {
-    height: 30px;
-    font-family: 'Namaku';
-    margin-left: 30px;
-    font-size: 18px;
-    border: 2px solid #ED4EB0;
-    width: 90%;
+	height: 30px;
+	font-family: 'Namaku';
+	margin-left: 30px;
+	font-size: 18px;
+	border: 2px solid #ED4EB0;
+	width: 90%;
 }
 
 .button-play {
-    margin-left: 35%;
-    color: #ED4EB0;
-    font-family: 'Namaku';
-    font-size: 20px;
-    padding: 18px;
-    border-radius: 3%;
-    width: 200px;
-    background-color: #23232e;
+	margin-left: 35%;
+	color: #ED4EB0;
+	font-family: 'Namaku';
+	font-size: 20px;
+	padding: 18px;
+	border-radius: 3%;
+	width: 200px;
+	background-color: #23232e;
 }
 
 .button-play:hover {
-    background-color: #38384b;
+	background-color: #38384b;
 }
+
+#players-container {
+	display: flex; /* Pour afficher les joueurs côte à côte si l'écran est assez large */
+	flex-wrap: wrap; /* Pour permettre aux joueurs de passer à la ligne si nécessaire */
+	justify-content: center; /* Pour centrer les joueurs dans le conteneur */
+}
+
+.player-info {
+	margin: 10px; /* Espace autour de chaque joueur */
+	border: 1px solid #ccc; /* Bordure légère */
+	padding: 10px; /* Espace à l'intérieur de chaque joueur */
+	border-radius: 5px; /* Bords arrondis */
+	background-color: #f0f0f0; /* Couleur de fond claire */
+	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
+	text-align: center; /* Centrer le texte */
+}
+
+.player-info .name {
+	font-weight: bold; /* Nom en gras */
+	margin-right: 5px;
+	color: #333; /* Couleur de texte plus foncée */
+}
+
+.player-info .score {
+	color: #007bff; /* Couleur de score bleue (vous pouvez changer) */
+}
+
+/* Styles pour les écrans plus petits (par exemple, téléphones) */
+@media (max-width: 768px) {
+	#players-container {
+		flex-direction: column; /* Afficher les joueurs verticalement */
+		align-items: center; /* Centrer horizontalement */
+	}
+}
+
+/* HTML: <div class="loader"></div> */
+/* HTML: <div class="loader"></div> */
+.loader {
+	height: 60px;
+	aspect-ratio: 2;
+	border-bottom: 3px solid #0000;
+	background: 
+	  linear-gradient(90deg,#524656 50%,#0000 0)
+	  -25% 100%/50% 3px repeat-x border-box;
+	position: relative;
+	animation: l3-0 .75s linear infinite;
+  }
+  .loader:before {
+	content: "";
+	position: absolute;
+	inset: auto 42.5% 0;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: #CF4647;
+	animation: l3-1 .75s cubic-bezier(0,900,1,900) infinite;
+  }
+  @keyframes l3-0 {
+	to {background-position: -125% 100%}
+  }
+  @keyframes l3-1 {
+	0%,2% {bottom: 0%}
+	98%,to {bottom:.1%}
+  }

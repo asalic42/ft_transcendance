@@ -115,3 +115,6 @@ class PrivateChan(models.Model):
 
 class CurrentGame(models.Model):
     game_id = models.IntegerField(unique=True)
+
+class tournament_room(models.Model):
+    tournament_id = models.IntegerField(unique=True)

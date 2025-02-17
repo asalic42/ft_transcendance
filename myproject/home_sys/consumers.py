@@ -13,9 +13,7 @@ import random
 import json
 import sys
 from .utils import add_pong_logic
-
 from .models import *
-
 
 class PongGame:
 
@@ -654,17 +652,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         }))
 
 
-		
-		
-import random
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
-
-import json
-import random
-import sys
-from channels.generic.websocket import AsyncWebsocketConsumer
-
 class TournamentConsumer(AsyncWebsocketConsumer):
 	
 	players = {}  # Dictionnaire partagé par tournoi (clé = tournament_id, valeur = liste de joueurs)
@@ -702,12 +689,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 			TournamentConsumer.players[self.tournament_id].append({
 				'channel_name': self.channel_name,
-				'user_id': user_id
+				'user_id': user_id,
+				'username': self.scope['user'].username
 			})
 			
 			print(f"Joueurs connectés au tournoi {self.tournament_id}: {len(TournamentConsumer.players[self.tournament_id])}")
 			sys.stdout.flush()
 			
+			await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
+
 			# Si 4 joueurs sont connectés pour ce tournoi, lancer le tournoi
 			if len(TournamentConsumer.players[self.tournament_id]) == 4:
 				await self.start_tournament()
@@ -731,8 +721,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			[(players[0], players[3]), (players[1], players[2])],  # Round 3
 		]
 	
-		game_id1 = random.randint(1000, 9999)
-		game_id2 = random.randint(1000, 9999)
+		game_id1 = random.randint(10000, 19999)
+		game_id2 = random.randint(10000, 19999)
 	
 		if TournamentConsumer.roundNb[self.tournament_id] < 3:
 			current_round_pairings = round_pairings[TournamentConsumer.roundNb[self.tournament_id]]
@@ -771,22 +761,65 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		try:
-			# Supprimer le joueur de la liste partagée
+			# Vérifier si le tournament_id existe
 			if self.tournament_id in TournamentConsumer.players:
+				# Retirer le joueur de la liste
 				TournamentConsumer.players[self.tournament_id] = [
 					p for p in TournamentConsumer.players[self.tournament_id]
 					if p['channel_name'] != self.channel_name
 				]
+				
+				await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 
+				# Si le tournoi est en cours, l'arrêter
+				if TournamentConsumer.is_running[self.tournament_id]:
+					TournamentConsumer.is_running[self.tournament_id] = False
+					await self.channel_layer.group_send(
+						self.tournament_group,
+						{
+							'type': 'tournament_cancelled',
+							'message': 'Le tournoi a été annulé en raison d\'une déconnexion'
+						}
+					)
+				
+				# Nettoyer les données du tournoi si plus aucun joueur
+				if len(TournamentConsumer.players[self.tournament_id]) == 0:
+					TournamentConsumer.gameFinished.pop(self.tournament_id, None)
+					TournamentConsumer.roundNb.pop(self.tournament_id, None)
+					TournamentConsumer.is_running.pop(self.tournament_id, None)
+					TournamentConsumer.players.pop(self.tournament_id, None)
+	
 			# Retirer le joueur du groupe
 			await self.channel_layer.group_discard(self.tournament_group, self.channel_name)
-
+	
 			print(f"Joueur déconnecté du tournoi {self.tournament_id}")
 			sys.stdout.flush()
-
+	
 		except Exception as e:
 			print(f"Erreur lors de la déconnexion : {e}")
 			sys.stdout.flush()
+	
+	# Ajouter ces méthodes pour gérer les nouveaux types de messages
+	async def player_disconnected(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'player_disconnected',
+			'message': event['message']
+		}))
+	
+	async def tournament_cancelled(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'tournament_cancelled',
+			'message': event['message']
+		}))
+	
+	async def user_list(self, event):
+		data = []
+		for player in TournamentConsumer.players[self.tournament_id]:
+			data.append(player['username'])
+		await self.send(text_data=json.dumps({
+			'type': 'user_list',
+			'len': len(data),
+			'data': data,}))
 
 	async def match_finished(self, event):
 		TournamentConsumer.gameFinished[self.tournament_id] += 1
