@@ -17,12 +17,16 @@ var playername1 = document.getElementById("playername1");
 var playername2 = document.getElementById("playername2");
 var score1 = document.getElementById("title1");
 var score2 = document.getElementById("title2");
-var gameOver = document.getElementById("gameOver");
+var gameOverP1 = document.getElementById("gameOverP1");
+var gameOverP2 = document.getElementById("gameOverP2");
 var overlay1 = document.getElementById("overlay1");
 var overlay2 = document.getElementById("overlay2");
 var disconnected = document.getElementById("disconnected");
 var timer = document.getElementById("timer");
 var mapSelection = document.querySelector('.mapSelection');
+var buttonP1 = document.getElementById("replay-button-p1");
+var buttonP2 = document.getElementById("replay-button-p2");
+
 
 const keys = {};
 let currentPlayer = null;
@@ -31,7 +35,8 @@ let gameState = {
 	player2_coords: null,
 	ball1_coords: null,
 	ball2_coords: null,
-	blocks: null,
+	blocks_p1: null,
+	blocks_p2: null,
 	scores: {
 		p1: 0,
 		p2: 0
@@ -85,8 +90,8 @@ function connectToWebSocket(selectedMap) {
 			disconnected.style.display = "block";
 		}
 
-		// else if (data.type == "game_restarted")
-			// game_restarted(data);
+		else if (data.type == "game_restarted")
+			game_restarted(data);
 
 		else if (data.type == "game_state") {
 			overlay1.style.display = 'none';
@@ -103,7 +108,6 @@ function connectToWebSocket(selectedMap) {
 	socket.onclose = function() {
 	    console.log("Deconnexion du Socket...");
 	};
-
 }
 
 //! Init Map
@@ -125,7 +129,6 @@ async function launch(idMap) {
 	player2.style.display = 'flex';
 	canvas1.style.display = 'flex';
 	canvas2.style.display = 'flex';
-
 
 	connectToWebSocket(idMap);
 }
@@ -154,6 +157,7 @@ function movePlayer() {
 function drawPlayer(player1Coords, player2Coords) {
 	if (!player1Coords || !player2Coords) return;
 
+	console.log(`player x1: ${player2Coords.x1} et x2: ${player2Coords.x2}`);
 	context1.beginPath();
 	context1.fillStyle = "#ED4EB0";
 	context1.roundRect(player1Coords.x1, player1Coords.y1, 120, player1Coords.y2 - player1Coords.y1, 7);
@@ -186,6 +190,35 @@ function drawBall(ball, context) {
 	context.closePath();
 }
 
+// Remise a 0 pour une nouvelle game
+function game_restarted(data) {
+	context1.clearRect(0, 0, table1.width, table1.height);
+	context2.clearRect(0, 0, table2.width, table2.height);
+
+	if (disconnected.style.display === "block") {
+		disconnected.style.display = "none"; 
+	}
+
+    buttonP1.style.display = "none";
+    buttonP2.style.display = "none";
+	gameOverP1.style.display = "none";
+	gameOverP2.style.display = "none";
+
+	if (data.number) currentPlayer = data.number;
+	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
+	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
+	if (data.ball_p1) gameState.ball1_coords = data.ball_p1;
+	if (data.ball_p2) gameState.ball2_coords = data.ball_p2;
+	if (data.scores) gameState.scores = data.scores;
+	if (data.blocks_p1) gameState.blocks_p1 = data.blocks_p1;
+	if (data.blocks_p2) gameState.blocks_p2 = data.blocks_p2;
+	if (data.time != 0) gameState.timeLeft = data.time;
+
+	keys = {};
+	score1.innerText = 0;
+	score2.innerText = 0;
+}
+
 //! Loop func
 let id=0;
 function launchAnim(data) {
@@ -196,10 +229,11 @@ function launchAnim(data) {
 	if (data.ball_p1) gameState.ball1_coords = data.ball_p1;
 	if (data.ball_p2) gameState.ball2_coords = data.ball_p2;
 	if (data.scores) gameState.scores = data.scores;
-	if (data.blocks) gameState.blocks = data.blocks;
+	if (data.blocks_p1) gameState.blocks_p1 = data.blocks_p1;
+	if (data.blocks_p2) gameState.blocks_p2 = data.blocks_p2;
 	if (data.time != 0) gameState.timeLeft = data.time;
 
-	requestAnimationFrame(function () {
+	requestAnimationFrame(() => {
 
 		movePlayer();
     	compteur++;
@@ -211,10 +245,19 @@ function launchAnim(data) {
 		}
 		context1.clearRect(0, 0, table1.width, table1.height);
 		context2.clearRect(0, 0, table2.width, table2.height);
-		updateDrawing();
+		updateDrawing(gameState);
 
-		score1.innerText = gameState.scores.p1;
-		score1.innerText = gameState.scores.p2;
+		if (gameState.scores) {
+			score1.innerText = gameState.scores.p1;
+			score2.innerText = gameState.scores.p2;
+
+			if (gameState.scores.p1 >= 10) {
+				winnerWindow(1);
+			}
+			else if (gameState.scores.p2 >= 10) {
+				winnerWindow(2);
+			}
+		}
 		timer.textContent = "Time left: " + gameState.timeLeft + "s";
 	})
 }
@@ -222,27 +265,31 @@ function launchAnim(data) {
 async function winnerWindow(player) {
 	context1.clearRect(0, 0, table1.width, table1.height);
 	context2.clearRect(0, 0, table2.width, table2.height);
-	gameOver.style.display = "flex";
-	drawOuterRectangle("#C42021");
-	drawInnerRectangle("#23232e");
-
-	showReplayButton(player);
-}
-
-// Séparer l'affichage du bouton replay de son action
-function showReplayButton(player) {
-	const button = document.getElementById("replay-button");
-	button.style.display = "flex";
-	button.style.color = "#C42021";
-
+		
 	if (player == 1) {
-		// afficher anim player 1
+		drawOuterRectangle("#365fa0", "#C42021");
+		gameOverP1.innerText = "You won !!!";
+		gameOverP1.style.color = "#365fa0";
+		buttonP1.style.color = "#365fa0";
 	}
 	else {
-		// afficher anim player 2
+		drawOuterRectangle("#C42021", "#365fa0");
+		gameOverP2.innerText = "You won !!!";
+		gameOverP2.style.color = "#365fa0";
+		buttonP2.style.color = "#365fa0";
 	}
 
-	button.addEventListener("click", resetGame);
+	drawInnerRectangle("#23232e");
+	gameOverP1.style.display = "flex";
+	gameOverP2.style.display = "flex";
+	if (currentPlayer == 1) {
+		buttonP1.style.display = "flex";
+		buttonP1.addEventListener("click", resetGame);
+	}
+	else {
+		buttonP2.style.display = "flex";
+		buttonP2.addEventListener("click", resetGame);
+	}
 }
 
 function resetGame() {
@@ -262,13 +309,13 @@ function getRandomArbitrary(min, max) {
 	return result;
 }
 
-function drawBlocks(context) {
-	if (!gameState.blocks) return ;
+function drawBlocks(context, blocks) {
+	if (!blocks) return ;
 
-	for (let k = 0; k < gameState.blocks.length; k++) {
-		if (gameState.blocks[k].state) {
+	for (let k = 0; k < blocks.length; k++) {
+		if (blocks[k].state) {
 			context.beginPath();
-			switch (gameState.blocks[k].state) {
+			switch (blocks[k].state) {
 				case 5:
 					context.fillStyle = "green";
 					break;
@@ -285,25 +332,26 @@ function drawBlocks(context) {
 					context.fillStyle = "darkred";
 					break;
 			}
-			context.roundRect(gameState.blocks[k].x, gameState.blocks[k].y, gameState.blocks[k].width, gameState.blocks[k].height, 7);
+			context.roundRect(blocks[k].x, blocks[k].y, blocks[k].width, blocks[k].height, 7);
 			context.fill();
 		}
 	}
 }
 
-function drawOuterRectangle(color) {
-	context1.fillStyle = color;
+function drawOuterRectangle(color_p1, color_p2) {
+	context1.fillStyle = color_p1;
 	context1.beginPath();
 	context1.roundRect(0, 0, table1.width, table1.height, 10);
 	context1.fill();
 	context1.closePath();
 
-	context2.fillStyle = color;
-	context2.beginPath();
-	context2.roundRect(0, 0, table2.width, table2.height, 10);
-	context2.fill();
-	context2.closePath();
-
+	if (gameState.blocks_p2) {
+		context2.fillStyle = color_p2;
+		context2.beginPath();
+		context2.roundRect(0, 0, table2.width, table2.height, 10);
+		context2.fill();
+		context2.closePath();
+	}
 }
 
 function drawInnerRectangle(color) {
@@ -328,13 +376,13 @@ window.addEventListener("keyup", (event) => {
 	keys[event.key] = false;
 });
 
-function updateDrawing() {
-	drawOuterRectangle("#ED4EB0");
+function updateDrawing(gameState) {
+	drawOuterRectangle("#ED4EB0", "#ED4EB0");
 	drawInnerRectangle("#23232e");
 
     drawPlayer(gameState.player1_coords, gameState.player2_coords);
-    drawBlocks(context1);
-    drawBlocks(context2);
+    drawBlocks(context1, gameState.blocks_p1);
+    drawBlocks(context2, gameState.blocks_p2);
 	drawBall(gameState.ball1_coords, context1);
 	drawBall(gameState.ball2_coords, context2);
 }

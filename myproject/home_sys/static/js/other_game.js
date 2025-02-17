@@ -379,7 +379,7 @@ async function winnerWindow() {
 function showReplayButton() {
 	const button = document.getElementById("replay-button");
 	button.style.display = "flex";
-	button.style.color = "#C42021";
+	// button.style.color = "#C42021";
 	button.addEventListener("click", () => {
 		window.location.reload();
 	});

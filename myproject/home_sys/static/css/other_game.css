@@ -126,7 +126,6 @@ a {
 	transition: all 0.4s ease-in-out;
 }
 
-
 .mapButton:hover {
 	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
 				rgba(237, 78, 176, 0.3) -12px 10px,
@@ -186,25 +185,31 @@ h3 {
 
 #button-container {
 	position: absolute;
+	justify-content: center;
+	transform: translate(-50%, -50%);
 	margin-top: 200px; 
 }
 
-#replay-button {
-	display: flex;
+.replay-button {
+	/* display: flex; */
 	text-align: center;
 	background-color: #2B2B3B;
+	color: #C42021;
 	cursor: pointer;
 	font-family: 'coolvetica-condensed-rg';
 	font-size: 30px;
-	margin: 0%;
 }
 
-#gameOver {
+.gameOver {
 	font-family: "BungeeShade-Regular", sans-serif;
-	display: flex;
+	/* display: flex; */
 	font-size: 35px;
 	color: #C42021;
 	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+    text-align: center;
 }
 
 @font-face {
@@ -264,6 +269,10 @@ h3 {
 
 .game {
 	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 .player1 {
