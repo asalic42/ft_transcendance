@@ -26,8 +26,16 @@ from django.db.models import Q
 @login_required
 @never_cache
 def home(request):
-	users = User.objects.all()			  # > Ici on récupe tous les users
-	return (render(request, 'home.html', {'users': users}))
+    # Récupérer les utilisateurs et pré-calculer leur statut
+    users = Users.objects.all()
+    online_users = users.filter(is_online=True)
+    offline_users = users.filter(is_online=False)
+    
+    context = {
+        'online_users': online_users,
+        'offline_users': offline_users,
+    }
+    return render(request, 'home.html', context)
 
 """
 |
