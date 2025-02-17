@@ -61,7 +61,7 @@
 	justify-content: center; /* Centre le contenu verticalement */
 	align-items: center; /* Centre le contenu horizontalement */
 	text-align: center; /* Centre le texte à l'intérieur */
-	box-shadow: -10px 10px #14141e;
+	box-shadow: -10px 10px #23232e;
 	background: linear-gradient(to right, #aa3196, #9159c0);
 	transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
