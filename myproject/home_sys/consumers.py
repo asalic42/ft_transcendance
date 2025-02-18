@@ -367,7 +367,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 			)
 		except RuntimeError:
 			await self.send(text_data=json.dumps({'type': 'game_error'}))
-			
 		except ChannelFull:
 			print("Channel full in send_game_state")
 
@@ -652,13 +651,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'type': 'update_status',
             'has_unread_notifications': event['has_unread_notifications'],
         }))
-
-
-		
-		
-import random
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
 
 import json
 import random
