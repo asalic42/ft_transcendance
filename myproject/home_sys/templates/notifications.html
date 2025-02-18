@@ -10,17 +10,21 @@
         <h2>FRIENDS</h2>
 
         {% for other_user in users.friends.all %}
-        <div class="if_founded">
-            <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
-
-            <p class="user-username">{{ other_user }} </p>
-            <button class="remove-friend" data-username="{{ other_user }}">Remove</button>
-            <button class="talk-friend" data-username="{{ other_user }}">Talk 💬​</button>
-            <button class="invite-friend" data-username="{{ other_user }}">Invite 🫲</button>
-
-            <!-- Ajout du statut de connexion -->
-            <div class="online-status" id="user-{{ other_user.id }}"></div>
-        </div>
+			{% if forloop.last %}
+				<div class="if_founded last">
+			{% else %}
+				<div class="if_founded">
+			{% endif %}
+					<img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+		
+					<p class="user-username">{{ other_user }} </p>
+					<button class="remove-friend" data-username="{{ other_user }}">Remove</button>
+					<button class="talk-friend" data-username="{{ other_user }}">Talk 💬​</button>
+					<button class="invite-friend" data-username="{{ other_user }}">Invite 🫲</button>
+		
+					<!-- Ajout du statut de connexion -->
+					<div class="online-status" id="user-{{ other_user.id }}"></div>
+				</div>
         {% empty %}
         <div class="if_not_founded">
             <p>No friends</p>
@@ -33,12 +37,16 @@
         <h2>BLOCKED</h2>
 
         {% for other_user in users.blocked.all %}
-        <div class="if_founded">
-            <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
-
-            <p class="user-username">{{ other_user }} </p>
-            <button class="remove-user-blocked" data-username="{{ other_user }}">Remove</button>
-        </div>
+			{% if forloop.last %}
+				<div class="if_founded last">
+			{% else %}
+				<div class="if_founded">
+			{% endif %}
+					<img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+		
+					<p class="user-username">{{ other_user }} </p>
+					<button class="remove-user-blocked" data-username="{{ other_user }}">Remove</button>
+				</div>
         {% empty %}
         <div class="if_not_founded">
             <p>No user blocked</p>
@@ -51,18 +59,22 @@
     <h2>FRIENDS REQUEST</h2>
 
     {% for other_user in users.friends_request.all %}
-    <div class="if_founded">
-        <!-- Afficher la photo de profil de l'utilisateur -->
-        <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
-
-        <!-- Afficher le nom d'utilisateur -->
-        <p class="user-username">{{ other_user }} </p>
-
-        <!-- Boutons pour accepter, refuser ou bloquer -->
-        <button class="add-it" data-username="{{ other_user }}">Accept</button>
-        <button class="decline-it" data-username="{{ other_user }}">Decline</button>
-        <button class="block-it" data-username="{{ other_user }}">Block</button>
-    </div>
+		{% if forloop.last %}
+			<div class="if_founded last">
+		{% else %}
+			<div class="if_founded">
+		{% endif %}
+				<!-- Afficher la photo de profil de l'utilisateur -->
+				<img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+		
+				<!-- Afficher le nom d'utilisateur -->
+				<p class="user-username">{{ other_user }} </p>
+		
+				<!-- Boutons pour accepter, refuser ou bloquer -->
+				<button class="add-it" data-username="{{ other_user }}">Accept</button>
+				<button class="decline-it" data-username="{{ other_user }}">Decline</button>
+				<button class="block-it" data-username="{{ other_user }}">Block</button>
+			</div>
     {% empty %}
     <div class="if_not_founded">
         <p>No friends requests</p>
@@ -74,17 +86,20 @@
     <h2>GAME INVITATION</h2>
 
     {% for other_user in users.invite.all %}
-    <div class="if_founded">
-        <!-- Afficher la photo de profil de l'utilisateur -->
-        <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
-
-        <!-- Afficher le nom d'utilisateur -->
-        <p class="user-username">{{ other_user }} </p>
-
-        <!-- Boutons pour accepter, refuser ou bloquer -->
-        <button class="join-it" data-username="{{ other_user }}">Join</button>
-        <button class="decline-invitation" data-username="{{ other_user }}">Decline</button>
-    </div>
+		{% if forloop.last %}
+			<div class="if_founded last">
+		{% else %}
+			<div class="if_founded">
+		{% endif %}        <!-- Afficher la photo de profil de l'utilisateur -->
+				<img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+		
+				<!-- Afficher le nom d'utilisateur -->
+				<p class="user-username">{{ other_user }} </p>
+		
+				<!-- Boutons pour accepter, refuser ou bloquer -->
+				<button class="join-it" data-username="{{ other_user }}">Join</button>
+				<button class="decline-invitation" data-username="{{ other_user }}">Decline</button>
+			</div>
     {% empty %}
     <div class="if_not_founded">
         <p>No game invitation</p>
@@ -124,12 +139,9 @@
     .friends_box,
     .blocked_box {
         width: 550px;
-        height: auto;
+        height: fit-content;
         border: 2px solid black;
         border-radius: 10px;
-        align-items: center;
-        justify-content: center;
-        flex-direction: row;
         background-color: #23232e;
     }
 
@@ -160,9 +172,12 @@
         padding: 10px;
         border-top: 2px solid black;
         background-color: #141418;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
     }
+
+	.last {
+		border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+	}
 
     .if_not_founded {
         text-align: center;

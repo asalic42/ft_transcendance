@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 
+{% load custom_filters %}
+
 {% load static %}
 
 {% block content %}
 
 	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+	<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 
 	<div class="parent-container">
 
@@ -47,7 +50,36 @@
 
 		<div class="game-history-container">
 			<h2>Historique des parties</h2>
+
+			<div class="game-history-section">
+				<h3>Tournament</h3>
+				{% for T in games_T_CB %}
+				<div class="pong-date" style="width: auto; height: auto; background-color: black; color: white">{{ tournaments_date|get_item:T|date:"d/m/Y H:i" }}</div>
+
+				<div class="pong-history" style="background-color: {{ tournaments_colors|get_item:T }};">
+					<!-- Trophée et utilisateur principal -->
+					<div class="main-user-section">
+						<img src="{% static 'images/trophy.png' %}" alt="Trophy" class="trophy-img">
+						<img src="{{ user.users.image.url }}" alt="Main User" class="main-user-img">
+					</div>
 			
+					<!-- Barre centrale -->
+					<div class="center-bar"></div>
+			
+					<!-- Autres utilisateurs -->
+					<div class="other-users-section">
+						{% with t_user_imgs=tournaments_users|get_item:T %}
+							{% for t_user_img in t_user_imgs %}
+								<img src="{{ t_user_img }}" alt="Other User" class="other-user-img">
+							{% endfor %}
+						{% endwith %}
+					</div>
+				</div>
+				{% empty %}
+				<p>Vous n'avez pas encore joué de tournois</p>
+				{% endfor %}
+			</div>
+
 			<div class="game-history-section">
 				<h3>Parties Pong</h3>
 				{% if games_P %}
@@ -166,6 +198,68 @@
 	</div>
 
 	<style>
+
+				/* Conteneur principal pour chaque historique de tournoi */
+		.pong-history {
+			display: flex;
+			align-items: center;
+			border: 2px solid #000;
+			background-color: white;
+			padding: 10px;
+			position: relative; /* Pour positionner la barre centrale */
+		}
+
+		/* Section du trophée et de l'utilisateur principal */
+		.main-user-section {
+			display: flex;
+			align-items: center;
+			gap: 10px; /* Espace entre le trophée et l'image de l'utilisateur principal */
+		}
+
+		/* Image du trophée */
+		.trophy-img {
+			width: 50px;
+			height: 50px;
+		}
+
+		/* Image de l'utilisateur principal */
+		.main-user-img {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			border: 1px solid #000;
+		}
+
+		/* Barre centrale */
+		.center-bar {
+			width: 2px;
+			height: 60px; /* Ajustez la hauteur selon vos besoins */
+			background-color: #000;
+			margin: 0 20px; /* Espace entre la barre et les sections */
+		}
+
+		/* Section des autres utilisateurs */
+		.other-users-section {
+			display: flex;
+			align-items: center;
+		}
+
+		/* Image des autres utilisateurs */
+		.other-user-img {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			border: 1px solid #000;
+			margin-left: 20px;
+			margin-right: -30px; /* Chevauchement des images */
+			transition: transform 0.3s ease; /* Animation au survol */
+		}
+
+		/* Effet au survol pour les images des autres utilisateurs */
+		.other-user-img:hover {
+			transform: translateY(-5px); /* Légère élévation au survol */
+			z-index: 1; /* Pour s'assurer que l'image survolée est au-dessus */
+		}
 
 		.parent-container {
         	display: flex;
@@ -525,4 +619,5 @@
 		}
 
 	</style>
+
 {% endblock %}

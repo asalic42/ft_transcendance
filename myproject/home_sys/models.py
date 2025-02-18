@@ -81,15 +81,18 @@ class Pong(models.Model):
 	difficulty = models.IntegerField()
 	bounce_nb = models.IntegerField()
 	color = models.CharField(max_length=50, default='yellow')
-    
+
 
 class Tournaments(models.Model):
-	id = models.AutoField(primary_key = True)
+	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
+	winner = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='winner', null=True)
+
 
 class MatchsTournaments(models.Model):
 	idTournaments = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='idTournaments')
 	idMatchs = models.ForeignKey(Pong, on_delete=models.CASCADE, related_name='idMatchs')
+
 
 class SoloCasseBrique(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -132,3 +135,6 @@ class PrivateChan(models.Model):
 
 class CurrentGame(models.Model):
     game_id = models.IntegerField(unique=True)
+
+class tournament_room(models.Model):
+    tournament_id = models.IntegerField(unique=True)

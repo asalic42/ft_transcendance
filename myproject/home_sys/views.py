@@ -26,8 +26,16 @@ from django.db.models import Q
 @login_required
 @never_cache
 def home(request):
-	users = User.objects.all()			  # > Ici on récupe tous les users
-	return (render(request, 'home.html', {'users': users}))
+    # Récupérer les utilisateurs et pré-calculer leur statut
+    users = Users.objects.all()
+    online_users = users.filter(is_online=True)
+    offline_users = users.filter(is_online=False)
+    
+    context = {
+        'online_users': online_users,
+        'offline_users': offline_users,
+    }
+    return render(request, 'home.html', context)
 
 """
 |
@@ -154,8 +162,23 @@ def other_game(request):
 	return (render(request, 'other_game.html'))
 
 @login_required
+def tournament_choice(request):
+	tour = tournament_room.objects.all()
+	return render(request, 'tournament_choice.html', {'all_games':tour})
+
+@login_required
 def tournament_page(request):
-	return (render(request, 'tournament.html'))
+	existing_ids = set(Tournaments.objects.values_list('id', flat=True))
+	waiting_room = set(tournament_room.objects.values_list('tournament_id', flat=True))
+	next_id = 1
+	while next_id in existing_ids or next_id in waiting_room:
+		next_id += 1
+	
+	return (render(request, 'tournament.html', {'id_t': next_id}))
+
+@login_required
+def tournament_page_id(request, id_t):
+	return (render(request, 'tournament.html', {'id_t':id_t}))
 
 @login_required
 def button_test_page():
@@ -479,54 +502,103 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def get_users_of_one_tournament(user, id):
+	""" 
+		Avec un id on cible un tournois,
+		On parse chaque match de celui-ci,
+		Et on retourne chaque user trouvé autre que le principale.
+	"""
+
+	games_T_CB = MatchsTournaments.objects.filter(idTournaments=id)
+	logger.info(f"[GET USERS TOURNAMENT BY ID]: {games_T_CB}")
+
+	user_ids = set()
+	for game in games_T_CB:
+		pong_session = Pong.objects.get(id=game.idMatchs.id)
+
+		if (user.id == pong_session.id_p1.id):
+			user_ids.add(pong_session.id_p2.image.url)
+		else:
+			user_ids.add(pong_session.id_p1.image.url)
+	return list(user_ids)
+
 @login_required
 def profile_view(request, username):
-	# Si aucun username n'est fourni, utiliser l'utilisateur connecté
-	if not username:
-		return redirect('profile', username=request.user.username)
-		
-	try:
-		user = User.objects.get(username=username)
-		users_profile = Users.objects.get(user=user)
-		
-		games_P = Pong.objects.filter(
-			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
-		).order_by('-date')
+    # Si aucun username n'est fourni, utiliser l'utilisateur connecté
+    if not username:
+        return redirect('profile', username=request.user.username)
+    
+    try:
+        user = User.objects.get(username=username)
+        users_profile = Users.objects.get(user=user)
+        
+        # Récupérer les parties de Pong associées à l'utilisateur
+        games_P = Pong.objects.filter(
+            Q(id_p1=users_profile) | Q(id_p2=users_profile)
+        ).order_by('-date')
 
 
-		for game in games_P:
-			s1, s2 = game.score_p1, game.score_p2
+        # Attribuer une couleur aux matchs de Pong en fonction du score
+        for game in games_P:
+            s1, s2 = game.score_p1, game.score_p2
 
-			if (game.id_p1 != user.users):
-				s1, s2 = game.score_p2, game.score_p1
+            if game.id_p1 != users_profile:
+                s1, s2 = game.score_p2, game.score_p1
 
-			if (s1 < s2):
-				game.color = 'red'
-				continue
-			
-			if (s1 > s2):
-				game.color = 'green'
-				continue
+            if s1 < s2:
+                game.color = 'red'
+            elif s1 > s2:
+                game.color = 'green'
 
-			if MatchsTournaments.objects.filter(idMatchs=game).exists():
-				logger.info(f"{game.id} found in tournament!")
-		
-		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
-		games_M_CB = MultiCasseBrique.objects.filter(
-			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
-		).order_by('-date')
+        # Récupérer les autres jeux
+        games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+        games_M_CB = MultiCasseBrique.objects.filter(
+            Q(id_p1=users_profile) | Q(id_p2=users_profile)
+        ).order_by('-date')
+
+        # Dictionnaire pour stocker les données des tournois
+        games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True).distinct())
+
+        # Dictionnaire pour stocker les données des tournois
+        tournaments_users = {}
+        tournaments_colors = {}  # Nouveau dictionnaire pour stocker les couleurs
+        tournaments_date = {}
+
+        # Parcourir chaque tournoi
+        for tournament_id in games_T_CB:
+            # Récupérer le gagnant du tournoi
+            tournament = Tournaments.objects.get(id=tournament_id)
+            winner = tournament.winner
 
 
-		return render(request, 'profile.html', {
-			'user': user,
-			'games_P': games_P,
-			'games_S_CB': games_S_CB,
-			'games_M_CB': games_M_CB,
-		})
-		
-	except User.DoesNotExist:
-		return redirect('home')
+            # Déterminer la couleur du tournoi
+            if users_profile == winner:
+                tournament_color = 'green'  # L'utilisateur principal est le gagnant
+            else:
+                tournament_color = 'red'  # L'utilisateur principal n'est pas le gagnant
 
+            # Stocker la couleur dans le dictionnaire
+            tournaments_colors[tournament_id] = tournament_color
+            tournaments_date[tournament_id] = tournament.date
+
+            # Récupérer les images des autres utilisateurs du tournoi
+            users_img = get_users_of_one_tournament(users_profile, tournament_id)
+            tournaments_users[tournament_id] = users_img
+
+        return render(request, 'profile.html', {
+            'user': user,
+            'games_P': games_P,
+            'games_S_CB': games_S_CB,
+            'games_M_CB': games_M_CB,
+            'games_T_CB': games_T_CB,
+            'tournaments_users': tournaments_users,
+			'tournaments_colors': tournaments_colors,
+			'tournaments_date': tournaments_date,
+        })
+    
+    except User.DoesNotExist:
+        return redirect('home')
 
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):

@@ -9,6 +9,7 @@ class Command(BaseCommand):
 		maps = [
 			{"LinkMaps": "home_sys/static/maps/map1.txt"},
 			{"LinkMaps": "home_sys/static/maps/map2.txt"},
+			{"LinkMaps": "home_sys/static/maps/map3.txt"},
 		]
 
 		# Importation dans la base de données
