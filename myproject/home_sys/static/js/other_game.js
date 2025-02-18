@@ -9,8 +9,9 @@ var canvasContainer = document.getElementById("canvas-container");
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
-var score = document.getElementById("title");
 var fps = document.getElementById("fps");
+
+var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
 const mapSelection = document.querySelector('.mapSelection');
 const game = document.querySelector('.game');
@@ -27,7 +28,6 @@ class block {
 		this.state = state;
 	}
 }
-
 let cachedUserId = null;
 
 //! Init
@@ -50,6 +50,7 @@ async function launch (idMap) {
 	title.style.display = 'flex';
 	canvasContainer.style.display = 'flex';
 	mapSelection.style.display ='none';
+
 	createBlocks();
 	createBall();
 }
@@ -63,8 +64,6 @@ function createBlocks() {
 	var width = start_x - 5;
 	var height = start_y - 5;
 
-	console.log("maptab");
-	console.log(mapTab);
 	for (var i = 0; i < 6; i++) {
 		for (var j = 0; j < 12; j++) {
 			block_arr.push(new block(x, y + start_y + start_y, width, height, mapTab[j][i]))
@@ -312,6 +311,7 @@ function launchAnim(ball, player1Coords, start) {
 	adaptVectorsToFps(ball, player1Coords);
 	start = Date.now();
 	context.clearRect(0, 0, table.width, table.height);
+	
 	update();
 	drawPlayer(player1Coords, "#ED4EB0");
 	if (isEnd(ball))
@@ -379,7 +379,7 @@ async function winnerWindow() {
 function showReplayButton() {
 	const button = document.getElementById("replay-button");
 	button.style.display = "flex";
-	button.style.color = "#C42021";
+	// button.style.color = "#C42021";
 	button.addEventListener("click", () => {
 		window.location.reload();
 	});

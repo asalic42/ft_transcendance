@@ -8,12 +8,81 @@
 	src: url("../fonts/Thunder-SemiBoldLC.otf");
 }
 
+@font-face {
+	font-family: Namaku;
+	src: url('../fonts/Namaku.ttf');
+}
+
 body{
 	background-color: var(--bg-site) ;
 }
 
+/* Other game choice */
+
+.page {
+	font-family: 'Thunder-SemiBold';
+	text-align: center;
+	position: relative;	
+	box-sizing: border-box;
+	top: 250px;
+	width: 70%;
+	border: 3px solid #ED4EB0;
+	border-radius: 50px;
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+	background: linear-gradient(to bottom right, #232330, #14141e);
+}
+
+.title {
+	color: var(--font-color);
+	font-size: 	70px;
+}
+
+.mode-choices {
+	margin: 50px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	gap: 100px;				  /* Espace entre les deux liens */
+}
+
+.game-mode {
+	justify-content: center;
+	align-items: center;
+    cursor: pointer;
+	display: flex;
+	width: 200px;
+	height: 60px;
+    border-radius: 10px;
+    outline: 3px solid #ED4EB0;
+	font-size: 32px;
+	background-color: #141418;
+    color: rgba(237, 78, 176, 0.9);
+	transition: all 0.3s ease-in-out;
+}
+
+.game-mode span {
+    font-family: 'Thunder-SemiBold';
+}
+
+.game-mode:hover {
+	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
+				rgba(237, 78, 176, 0.3) -12px 10px,
+				rgba(237, 78, 176, 0.2) -16px 14px,
+				rgba(237, 78, 176, 0.1) -20px 18px;
+				background-color: #2E2E38;
+	transform: translateX(10px) translateY(-9px);
+}
+
+a {
+	text-decoration: none;
+}
+
+/* Map choice */
+
 .mapSelection {
-	font-family: 'Thunder-VF';
+	font-family: 'Thunder-SemiBold';
 	text-align: center;
 	position: relative;	
 	box-sizing: border-box;
@@ -61,7 +130,6 @@ body{
 	transition: all 0.4s ease-in-out;
 }
 
-
 .mapButton:hover {
 	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
 				rgba(237, 78, 176, 0.3) -12px 10px,
@@ -70,6 +138,9 @@ body{
 	background-color: #2E2E38;
 	transform: translateX(10px) translateY(-9px);
 }
+
+
+/* Other Game */
 
 .game {
 	display: none;
@@ -92,7 +163,7 @@ h3 {
 }
 
 #fps {
-	font-family: 'Thunder-VF';
+	font-family:'Thunder-SemiBold';
 	gap: 30px;
 	justify-content: center;
 	font-size: 30px;
@@ -104,7 +175,7 @@ h3 {
 }
 
 #title {
-    font-family: 'Thunder-VF'; /* Police demandée */
+    font-family:'Namaku'; /* Police demandée */
 	font-size: 30px;
     position: absolute; /* Permet un positionnement précis */
     top: 10%; /* Position verticale dans le tiers supérieur (ajustez selon vos préférences) */
@@ -118,25 +189,31 @@ h3 {
 
 #button-container {
 	position: absolute;
+	justify-content: center;
+	transform: translate(-50%, -50%);
 	margin-top: 200px; 
 }
 
-#replay-button {
-	display: flex;
+.replay-button {
+	/* display: flex; */
 	text-align: center;
 	background-color: #2B2B3B;
+	color: #C42021;
 	cursor: pointer;
 	font-family: 'coolvetica-condensed-rg';
 	font-size: 30px;
-	margin: 0%;
 }
 
-#gameOver {
+.gameOver {
 	font-family: "BungeeShade-Regular", sans-serif;
-	display: flex;
+	/* display: flex; */
 	font-size: 35px;
 	color: #C42021;
 	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+    text-align: center;
 }
 
 @font-face {
@@ -154,6 +231,75 @@ h3 {
 @font-face {
 	font-family: Namaku;
 	src: url("../fonts/Namaku.ttf");
+}
+
+#timer {
+	display: none;
+	justify-content: center;
+}
+
+/* Multiplayer Casse-Brique */
+
+.games {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	gap: 50px;
+	font-family: 'Namaku';
+	color: white;
+}
+
+.overlay1 {
+	display: none;
+	color: white;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	z-index: 10;
+	text-align: center;
+}
+
+.overlay2 {
+	display: none;
+	color: white;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	top: 50%;
+	left: 50%;
+	z-index: 10;
+	text-align: center;
+}
+
+.game {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.player1 {
+	display: none;
+	flex-direction: column;
+	align-items: center;
+}
+
+.box-scores {
+	display: flex;
+	justify-content: space-between;
+	width: 500px;
+}
+
+.timer {
+	font-family: 'Thunder-SemiBold';
+	color: white;
+}
+
+.player2 {
+	display: none;
+	flex-direction: column;
+	align-items: center;
 }
 
 .retour {

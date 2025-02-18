@@ -166,6 +166,13 @@ def tournament_choice(request):
 	tour = tournament_room.objects.all()
 	return render(request, 'tournament_choice.html', {'all_games':tour})
 
+def other_game_choice(request):
+	return (render(request, 'other_game_choice.html'))
+
+@login_required
+def other_game_multi(request):
+	return (render(request, 'other_game_multi.html'))
+
 @login_required
 def tournament_page(request):
 	existing_ids = set(Tournaments.objects.values_list('id', flat=True))
