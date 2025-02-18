@@ -85,12 +85,13 @@ class Maps(models.Model):
 	LinkMaps = models.CharField()
 
 class MultiCasseBrique(models.Model):
-	id = models.AutoField(primary_key = True)
+	id = models.AutoField(primary_key=True)
 	id_p1 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_games_as_p1')
 	id_p2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_games_as_p2')
+	winner = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_winner')
 	score_p1 = models.IntegerField()
 	score_p2 = models.IntegerField()
-	date = models.DateTimeField(auto_now_add = True)
+	date = models.DateTimeField(auto_now_add=True)
 	map = models.IntegerField()
 
 class BlockUsers(models.Model):
@@ -113,7 +114,11 @@ class PrivateChan(models.Model):
 	id_u2 = models.IntegerField()
 
 class CurrentGame(models.Model):
-    game_id = models.IntegerField(unique=True)
+	game_id = models.IntegerField(unique=True)
 
 class tournament_room(models.Model):
-    tournament_id = models.IntegerField(unique=True)
+	tournament_id = models.IntegerField(unique=True)
+
+class casse_brique_room(models.Model):
+	game_id = models.IntegerField(unique=True)
+	map_id = models.IntegerField(unique=True)

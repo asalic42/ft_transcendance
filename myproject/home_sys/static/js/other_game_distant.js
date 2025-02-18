@@ -23,10 +23,10 @@ var overlay1 = document.getElementById("overlay1");
 var overlay2 = document.getElementById("overlay2");
 var disconnected = document.getElementById("disconnected");
 var timer = document.getElementById("timer");
-var mapSelection = document.querySelector('.mapSelection');
 var buttonP1 = document.getElementById("replay-button-p1");
 var buttonP2 = document.getElementById("replay-button-p2");
-
+var countdown1 = document.getElementById("countdown1");
+var countdown2 = document.getElementById("countdown2");
 
 let keys = {};
 let currentPlayer = null;
@@ -46,89 +46,73 @@ let gameState = {
 let start;
 
 // WebSocket concerns
-var socket;
 
-function connectToWebSocket(selectedMap) {
+const socket = new WebSocket(`wss://transcendance.42.paris/ws/casse-brique/${game_id}/${map_id}`);
 
-	socket = new WebSocket("wss://transcendance.42.paris/ws/casse-brique/");
-	
-	socket.onopen = function () {
-		console.log("Connexion au Socket !");
+socket.onopen = function () {
+	console.log("Connexion au Socket !");
+};
 
-		if (selectedMap && mapTab) {
-			socket.send(JSON.stringify({
-				type: "map_selected",
-				mapTab: mapTab,
-				map: selectedMap
-			}));
-		}
-	};
+start = Date.now();
 
-	start = Date.now();
-	socket.onmessage = function(event) {
-	    const data = JSON.parse(event.data);
+socket.onmessage = function(event) {
+	const data = JSON.parse(event.data);
+	console.log(`Message : ${data.type}`)
 
-		if (data.type == "countdown") {
-			countdownBeforeGame(data);
-		}
-		else if (data.type == "players_name") {
-			if (data.player1_name) playername1.innerText = data.player1_name;
-			if (data.player2_name) playername2.innerText = data.player2_name;
-		}
-		else if (data.type == "game_over") {
-			if (data.winner == 1)
-				winnerWindow(1);
-			else if (data.winner == 2)
-				winnerWindow(2);
-		}
-		else if (data.type == "game_won") {
-			if (data.loser == 1)
-				winnerWindow(2);
-			else if (data.loser == 2)
-				winnerWindow(1);
-			disconnected.style.display = "block";
-		}
-
-		else if (data.type == "game_restarted")
-			game_restarted(data);
-
-		else if (data.type == "game_state") {
-			overlay1.style.display = 'none';
-			overlay2.style.display = 'none';
-			timer.style.display = 'flex';
-	        launchAnim(data);
-	    }
-	};
-
-	socket.onerror = function(error) {
-	    console.log("Erreur socket: ", error);
-	};
-
-	socket.onclose = function() {
-	    console.log("Deconnexion du Socket...");
-	};
-}
-
-//! Init Map
-mapSelection.addEventListener('click', (event) => {
-
-	if (event.target.tagName === 'BUTTON') {
-	  selectedMap = event.target.dataset.map;
-	  mapSelection.style.display ='none';
-
-	  launch(selectedMap);
+	if (data.type == "countdown") {
+		countdownBeforeGame(data);
 	}
-})
+	else if (data.type == "players_name") {
+		if (data.player1_name) playername1.innerText = data.player1_name;
+		if (data.player2_name) playername2.innerText = data.player2_name;
+	}
+	else if (data.type == "game_over") {
+		winnerWindow(data.winner);
+	}
+	if (data.type == "game_won") {
+        if (data.disconnected) {
+            disconnected.style.display = "block"; // Affiche le message de déconnexion
+            winnerWindow(data.loser);
+        } else {
+            winnerWindow(data.loser);
+        }
+    }
 
-async function launch(idMap) {
-	await fetchMap(idMap);
-	fps.style.display = 'flex';
-	player1.style.display = 'flex';
-	player2.style.display = 'flex';
-	canvas1.style.display = 'flex';
-	canvas2.style.display = 'flex';
+	else if (data.type == "game_restarted")
+		game_restarted(data);
 
-	connectToWebSocket(idMap);
+	if (data.type === "game_start") {
+		player1.style.display = 'flex';
+		player2.style.display = 'flex';
+		canvas1.style.display = 'flex';
+		canvas2.style.display = 'flex';
+		fps.style.display = 'flex';
+	}
+
+	if (data.type === "game_state") {
+		// Stocker la map si elle est présente dans les données
+		if (data.mapData) {
+			mapTab = data.mapData;
+			console.log("Map received from server:", mapTab);
+		}
+		
+		overlay1.style.display = 'none';
+		overlay2.style.display = 'none';
+		timer.style.display = 'flex';
+		launchAnim(data);
+	}
+	if (data.type === "close_connection") {
+		alert(data.message);
+		socket.close();
+		window.location.reload(); // Rafraîchit la page pour revenir au lobby
+	}
+};
+socket.onerror = function(error) {
+	console.log("Erreur socket: ", error);
+};
+
+socket.onclose = function() {
+	console.log("Deconnexion du Socket...");
 }
 
 //! Players related stuff
@@ -197,8 +181,8 @@ function game_restarted(data) {
 		disconnected.style.display = "none"; 
 	}
 
-    buttonP1.style.display = "none";
-    buttonP2.style.display = "none";
+	buttonP1.style.display = "none";
+	buttonP2.style.display = "none";
 	gameOverP1.style.display = "none";
 	gameOverP2.style.display = "none";
 
@@ -221,8 +205,8 @@ function game_restarted(data) {
 let id=0;
 function launchAnim(data) {
 
-	console.log("je suis ici !!");
-	console.log("gameState.scores before: ", gameState.scores);
+	// console.log("je suis ici !!");
+	// console.log("gameState.scores before: ", gameState.scores);
 
 	if (data.number) currentPlayer = data.number;
 	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
@@ -232,35 +216,28 @@ function launchAnim(data) {
 	if (data.scores) gameState.scores = data.scores;
 	if (data.blocks_p1) gameState.blocks_p1 = data.blocks_p1;
 	if (data.blocks_p2) gameState.blocks_p2 = data.blocks_p2;
-	if (data.time != 0) gameState.timeLeft = data.time;
+	if (data.time != 0) gameState.timeLeft = 60 - data.time.toPrecision(2);
 
-	console.log("gameState.scores AFTER: ", gameState.scores);
-
+	// console.log("gameState.scores AFTER: ", gameState.scores);
 	requestAnimationFrame(() => {
 
 		movePlayer();
-    	compteur++;
-		let end = Date.now();
-		if (end - start > 1000) {
-			fps.innerText = "Fps: " + compteur;
-			compteur = 0;
-			start = Date.now();
-		}
+		compteur++;
 		context1.clearRect(0, 0, table1.width, table1.height);
 		context2.clearRect(0, 0, table2.width, table2.height);
 		updateDrawing(gameState);
 
-		if (gameState.scores) {
-			score1.innerText = gameState.scores.p1;
-			score2.innerText = gameState.scores.p2;
+		// if (gameState.scores) {
+			// score1.innerText = gameState.scores.p1;
+			// score2.innerText = gameState.scores.p2;
 
-			if (gameState.scores.p1 >= 10 && gameState.scores.p1 == gameState.scores.p2)
-				winnerWindow(0);
-			if (gameState.scores.p1 >= 10)
-				winnerWindow(1);
-			else if (gameState.scores.p2 >= 10)
-				winnerWindow(2);
-		}
+			// if (gameState.scores.p1 >= 10 && gameState.scores.p1 == gameState.scores.p2)
+				// winnerWindow(0);
+			// if (gameState.scores.p1 >= 10)
+				// winnerWindow(1);
+			// else if (gameState.scores.p2 >= 10)
+				// winnerWindow(2);
+		// }
 		timer.textContent = "Time left: " + gameState.timeLeft + "s";
 	})
 }
@@ -317,12 +294,13 @@ function getRandomArbitrary(min, max) {
 }
 
 function drawBlocks(context, blocks) {
-	if (!blocks) return ;
+	if (!blocks) return;
 
-	for (let k = 0; k < blocks.length; k++) {
-		if (blocks[k].state) {
+	blocks.forEach(block => {
+		if (block.state) {
 			context.beginPath();
-			switch (blocks[k].state) {
+			// Définir la couleur en fonction de l'état
+			switch (block.state) {
 				case 5:
 					context.fillStyle = "green";
 					break;
@@ -339,10 +317,10 @@ function drawBlocks(context, blocks) {
 					context.fillStyle = "darkred";
 					break;
 			}
-			context.roundRect(blocks[k].x, blocks[k].y, blocks[k].width, blocks[k].height, 7);
+			context.roundRect(block.x, block.y, block.width, block.height, 7);
 			context.fill();
 		}
-	}
+	});
 }
 
 function drawOuterRectangle(color_p1, color_p2) {
@@ -387,9 +365,9 @@ function updateDrawing(gameState) {
 	drawOuterRectangle("#ED4EB0", "#ED4EB0");
 	drawInnerRectangle("#23232e");
 
-    drawPlayer(gameState.player1_coords, gameState.player2_coords);
-    drawBlocks(context1, gameState.blocks_p1);
-    drawBlocks(context2, gameState.blocks_p2);
+	drawPlayer(gameState.player1_coords, gameState.player2_coords);
+	drawBlocks(context1, gameState.blocks_p1);
+	drawBlocks(context2, gameState.blocks_p2);
 	drawBall(gameState.ball1_coords, context1);
 	drawBall(gameState.ball2_coords, context2);
 }
@@ -397,19 +375,37 @@ function updateDrawing(gameState) {
 function countdownBeforeGame(data) {
 	overlay1.style.display = 'flex';
 	overlay2.style.display = 'flex';
-	document.getElementById("countdown1").innerText = data.message;
-	document.getElementById("countdown2").innerText = data.message;
+	countdown1.innerText = data.message;
+	countdown2.innerText = data.message;
 }
 
-function fetchMap(selectedMap) {
-	return fetch(`/accounts/api/map/${selectedMap}/`)
-	.then(response => response.text())
-	.then(mapData => {
-		const mapLines = mapData.split('\n');
-		mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
-	})
-	.catch(error => {
-		console.error('Erreur lors de la récupération des données de la carte:', error);
-	});
-	
+let frames = 0;
+let lastTime = performance.now();
+let fpsElement = document.getElementById('fps');
+let avgFpsElement = document.getElementById('avg-fps');
+let fpsHistory = [];
+
+function updateFPS() {
+    const now = performance.now();
+    const delta = now - lastTime;
+    const fps = Math.round(1000 / delta);
+    
+    fpsHistory.push(fps);
+    if (fpsHistory.length > 60) { // Garder l'historique des 60 dernières valeurs
+        fpsHistory.shift();
+    }
+    
+    const avgFps = Math.round(fpsHistory.reduce((a, b) => a + b) / fpsHistory.length);
+    
+    fpsElement.textContent = `Fps : ${fps} | Avg Fps : ${avgFps}`;
+    lastTime = now;
+    
+    // requestAnimationFrame(updateFPS);
 }
+
+const interval = setInterval(function() {
+	updateFPS()
+}, 1000);
+ 
+
+requestAnimationFrame(updateFPS);

@@ -6,17 +6,8 @@
 
 <link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
-<div class="mapSelection">
-    <h1 class="title">Choix de la map</h1>
-    <div class="map-choice">
-		<button class="mapButton" data-map="1">Map 1</button>
-		<button class="mapButton" data-map="2">Map 2</button>
-		<button class="mapButton" data-map="3">Map 3</button>
-	</div>
-</div>
-
-<h3 class="game" id="fps">Fps : 0 | Avg Fps : </h3>
-<h3 class="timer" id="timer" display="none">Time left: 60s</h3>
+<h3 class="game" id="fps">Fps : 0 | Avg Fps : <span id="avg-fps">0</span></h3>
+<h3 class="timer" id="timer" style="display: none;">Time left: 60s</h3>
 
 <!-- Game Player 1  -->
 <div class="games">
@@ -65,11 +56,30 @@
 	</div>
 </div>
 
-<h3 class="disconnected" id="disconnected" display="none">Un joueur s'est deconnecte</h3>
+<h3 class="disconnected" id="disconnected" style="display: none;">Un joueur s'est déconnecté</h3>
 
-<!-- <script>
-	var gameId = "1";
-</script> -->
+<script>
+	var game_id = {{game_id}};
+	var map_id = {{map_id}};
+</script>
+
+<style>
+    .game {
+        margin: 10px 0;
+        font-size: 1.2em;
+    }
+    
+    .timer {
+        color: #333;
+        margin: 10px 0;
+    }
+    
+    .disconnected {
+        color: red;
+        margin: 10px 0;
+        text-align: center;
+    }
+</style>
 
 <script src="{% static 'js/other_game_distant.js' %}"></script>
 

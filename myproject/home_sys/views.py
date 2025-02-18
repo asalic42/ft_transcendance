@@ -162,16 +162,25 @@ def other_game(request):
 	return (render(request, 'other_game.html'))
 
 @login_required
+def map_choice(request):
+	return (render(request, 'map_choice.html'))
+
+@login_required
 def tournament_choice(request):
 	tour = tournament_room.objects.all()
 	return render(request, 'tournament_choice.html', {'all_games':tour})
+
+@login_required
+def casse_brique_room_choice(request):
+	tour = casse_brique_room.objects.all()
+	return render(request, 'other_game_multi_room.html', {'all_games':tour})
 
 def other_game_choice(request):
 	return (render(request, 'other_game_choice.html'))
 
 @login_required
-def other_game_multi(request):
-	return (render(request, 'other_game_multi.html'))
+def other_game_multi(request, game_id, map_id):
+	return (render(request, 'other_game_multi.html', {'game_id':game_id, 'map_id':map_id}))
 
 @login_required
 def tournament_page(request):
