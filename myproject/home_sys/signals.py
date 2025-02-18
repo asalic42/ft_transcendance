@@ -2,7 +2,7 @@ from django.db.models.signals import *
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.core.management import *
-from .models import Users
+from .models import *
 from django.db import connection
 
 
@@ -32,6 +32,7 @@ def run_after_migrations(sender, **kwargs):
 			print(f"Erreur lors de l'importation des maps: {e}")
 	else:
 		print("Les maps sont déjà importées, aucune action nécessaire.")
+	tournament_room.objects.all().delete()
 
 # signals.py
 from django.contrib.auth.signals import user_logged_in, user_logged_out

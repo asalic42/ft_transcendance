@@ -658,6 +658,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	is_running = {}
 	gameFinished = {}
 	roundNb = {}
+	tournament_ended = {}
 	async def connect(self):
 		try:
 			self.tournament_id = self.scope['url_route']['kwargs']['id_t']
@@ -676,11 +677,14 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			if self.tournament_id not in TournamentConsumer.roundNb:
 				TournamentConsumer.roundNb[self.tournament_id] = 0
 			
+			if self.tournament_id not in TournamentConsumer.tournament_ended:
+				TournamentConsumer.tournament_ended[self.tournament_id] = False
+			
 			if (len(TournamentConsumer.players[self.tournament_id]) >= 4 or 
 				TournamentConsumer.is_running[self.tournament_id]):
 				await self.close()
 				return
-			
+
 			# Ajouter le joueur au groupe
 			await self.channel_layer.group_add(self.tournament_group, self.channel_name)
 			await self.accept()
@@ -698,15 +702,62 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			
 			await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 
+			# Si 1 joueur est connecté pour ce tournoi, ajouter à la listes des rooms
+			if len(TournamentConsumer.players[self.tournament_id]) == 1:
+				try : 
+					if (await self.add_t_room()): # si le tournois est déjà fini
+						await self.send(json.dumps({"type": "already"})) #envoyer message pour notif
+						await self.disconnect(0) #deco proprement
+						await self.close() #close le socket
+						return 
+					sys.stdout.flush()
+				except Exception as e:
+					print(f"Erreur lors de l'ajout du tournois dans les rooms disponibles : {str(e)}")
+					sys.stdout.flush()
+					await self.close()
+					return 
+	
 			# Si 4 joueurs sont connectés pour ce tournoi, lancer le tournoi
 			if len(TournamentConsumer.players[self.tournament_id]) == 4:
+				try : 
+					await self.delete_current_tournament()
+					await self.create_t()
+				except Exception as e:
+					print(f"Erreur lors de la supression du tournoi dans les rooms disponibles : {str(e)}")
+					sys.stdout.flush()
 				await self.start_tournament()
-			
 		except Exception as e:
 			print(f"Erreur lors de la connexion : {str(e)}")
 			sys.stdout.flush()
 			await self.close()
+			return 
 	
+	
+	@database_sync_to_async
+	def create_t(self):
+		created = Tournaments.objects.create(pk=self.tournament_id)
+		if created:
+			print("game has been added into the database")
+
+	@database_sync_to_async
+	def add_t_room(self):
+		created = tournament_room.objects.create(tournament_id=self.tournament_id)
+		if created:
+			print("game has been added into the database")
+		try:
+			check = Tournaments.objects.get(pk=self.tournament_id)
+		except Exception as e:
+			print("returning false")
+			sys.stdout.flush()
+			return False
+		print("returning true")
+		sys.stdout.flush()
+		return True
+			
+	@database_sync_to_async
+	def delete_current_tournament(self):
+		tournament_room.objects.filter(tournament_id=self.tournament_id).delete()
+
 	async def start_tournament(self):
 		print("starting tournament")
 		sys.stdout.flush()
@@ -769,7 +820,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 					if p['channel_name'] != self.channel_name
 				]
 				
-				await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 
 				# Si le tournoi est en cours, l'arrêter
 				if TournamentConsumer.is_running[self.tournament_id]:
@@ -788,7 +838,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 					TournamentConsumer.roundNb.pop(self.tournament_id, None)
 					TournamentConsumer.is_running.pop(self.tournament_id, None)
 					TournamentConsumer.players.pop(self.tournament_id, None)
-	
+					try : 
+						await self.delete_current_tournament()
+					except Exception as e:
+						print(f"Erreur lors de la supression du tournoi dans les rooms disponibles : {str(e)}")
+						sys.stdout.flush()
+				else:
+					await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 			# Retirer le joueur du groupe
 			await self.channel_layer.group_discard(self.tournament_group, self.channel_name)
 	
@@ -814,12 +870,23 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	
 	async def user_list(self, event):
 		data = []
-		for player in TournamentConsumer.players[self.tournament_id]:
-			data.append(player['username'])
-		await self.send(text_data=json.dumps({
-			'type': 'user_list',
-			'len': len(data),
-			'data': data,}))
+		if self.tournament_id in TournamentConsumer.players:  # Vérifier si la clé existe
+			for player in TournamentConsumer.players[self.tournament_id]:
+				data.append(player['username'])
+			print(f'sending user_list to {data}')
+			sys.stdout.flush()
+			await self.send(text_data=json.dumps({
+				'type': 'user_list',
+				'len': len(data),
+				'data': data,
+			}))
+		else:
+			# Gérer le cas où le tournoi n'existe plus
+			await self.send(text_data=json.dumps({
+				'type': 'user_list',
+				'len': 0,
+				'data': [],
+			}))
 
 	async def match_finished(self, event):
 		TournamentConsumer.gameFinished[self.tournament_id] += 1
@@ -901,7 +968,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 						"player_id": player_id, # Include player ID for frontend use
 					}
 				)
-
+			TournamentConsumer.tournament_ended[self.tournament_id] = True
 		except Exception as e:
 			print(f"Error in tournament_ending: {e}")
 			sys.stdout.flush()

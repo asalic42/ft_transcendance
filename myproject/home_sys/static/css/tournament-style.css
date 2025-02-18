@@ -1,8 +1,8 @@
 /* color pink: #ED4EB0 */
 
 @font-face {
-	font-family: Namaku;
-	src: url("../fonts/Namaku.ttf");
+	font-family: Thunder-VF;
+	src: url("../fonts/Thunder-VF.ttf");
 }
 
 body {
@@ -13,7 +13,7 @@ body {
 	display: flex;
 	justify-content: center;
 	height: 90vh;
-	font-family: 'Namaku';
+	font-family: 'Thunder-VF';
 }
 
 .square {
@@ -24,7 +24,7 @@ body {
 	background-color: #13131a;
 	border-radius: 3%;
 	color: white;
-	font-family: 'Namaku';
+	font-family: 'Thunder-VF';
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -37,6 +37,7 @@ body {
 .square h2 {
 	text-align: center;
 	padding-top: 15px;
+	font-size: 36px;
 }
 
 /* Ajustemnent du nombre de joueurs */
@@ -58,7 +59,7 @@ body {
 	width: 40px;
 	height: 20px;
 	text-align: center;
-	font-size: 20px;
+	font-size: 36px;
 	padding: 10px;
 	border-radius: 10%;
 	background-color: white;
@@ -107,9 +108,9 @@ button.arrow:hover {
 
 .forms input {
 	height: 30px;
-	font-family: 'Namaku';
+	
 	margin-left: 30px;
-	font-size: 18px;
+	font-size: 26px;
 	border: 2px solid #ED4EB0;
 	width: 90%;
 }
@@ -117,9 +118,9 @@ button.arrow:hover {
 .button-play {
 	margin-left: 35%;
 	color: #ED4EB0;
-	font-family: 'Namaku';
+	
 	font-size: 20px;
-	padding: 18px;
+	padding: 26px;
 	border-radius: 3%;
 	width: 200px;
 	background-color: #23232e;
@@ -143,6 +144,8 @@ button.arrow:hover {
 	background-color: #f0f0f0; /* Couleur de fond claire */
 	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
 	text-align: center; /* Centrer le texte */
+	height: fit-content;
+    font-size: 24px;
 }
 
 .player-info .name {
@@ -163,8 +166,6 @@ button.arrow:hover {
 	}
 }
 
-/* HTML: <div class="loader"></div> */
-/* HTML: <div class="loader"></div> */
 .loader {
 	height: 60px;
 	aspect-ratio: 2;
@@ -191,3 +192,7 @@ button.arrow:hover {
 	0%,2% {bottom: 0%}
 	98%,to {bottom:.1%}
   }
+
+.player_list {
+	font-size: 24px;
+}

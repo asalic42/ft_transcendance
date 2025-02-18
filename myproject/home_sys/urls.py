@@ -20,6 +20,8 @@ urlpatterns = [
     path('game-bot/', game_bot_page, name='game-bot'),
     path('other_game/', other_game, name='other_game'),
     path('tournament/', tournament_page, name='tournament'),
+    path('tournament_choice/', tournament_choice, name='tournament_choice'),
+    path('tournament/<int:id_t>', tournament_page_id, name='tournament_page_id'),
     path('api/button-test/', button_test_page, name="button_test_page"),
     # Game URLs
 	path('api/current-user/', get_current_user_id, name='current_user_id'),

@@ -1,9 +1,9 @@
-var id_t = 1;
 const socket = new WebSocket(`wss://transcendance.42.paris/ws/tournament/${id_t}`);
 
 socket.onopen = function() {
     console.log("Connexion réussie au WebSocket");
 	span = document.createElement('span');
+	span.classList.add('player_list');
 	document.getElementById('square').appendChild(span);
 }
 
@@ -42,6 +42,8 @@ socket.onmessage = function(event) {
 			startButton(data.link)
 		}
 		if (data.type === 'result') {
+			document.getElementById('bt').display = 'none';
+			document.getElementById('title').innerText = "Le tournois est fini, voici les résultats :"
 			const playerId = data.player_id;
 			const score = data.score;
 			const name = data.name;
@@ -70,12 +72,21 @@ socket.onmessage = function(event) {
 		}
 		if (data.type === "user_list") {
 			span.textContent = "";
-			data.data.forEach(function (item, index) {
-				span.textContent += item + "\n";
+			data.data.forEach(function (name, index) {
+				span.textContent += name + "\n";
 			  });
 			console.log(span);
 
 			// document.getElementById('players-container').appendChild(list);
+		}
+		if (data.type === "already") {
+			alert("This tournament already ran.")
+			function sleep(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			sleep(1000);
+			window.location.href = "https://transcendance.42.paris/accounts/game-mode-pong/"
 		}
     } catch (error) {
         console.error("Erreur de parsing des données du WebSocket :", error);

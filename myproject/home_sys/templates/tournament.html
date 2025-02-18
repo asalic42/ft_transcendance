@@ -5,14 +5,16 @@
 {% block content %}
 
 <link rel="stylesheet" href="{% static 'css/tournament-style.css' %}">
-
+	<script>
+	var id_t = "{{id_t}}";
+	</script>
 <div class="container">
 
     <div class="square" id="square">
-        <h2>Bienvenue dans le systeme de tournois</h2>
-		<div class="loader"></div>
+        <h2 id="title">Bienvenue dans le systeme de tournois ! Vous êtes dans la salle {{id_t}} </h2>
+		<div class="loader" id="loader"></div>
+		<div id="players-container">
 	</div>
-	<div id="players-container">
 	</div>
 <script src="{% static 'js/tournament.js' %}"></script>
 {% endblock %}
