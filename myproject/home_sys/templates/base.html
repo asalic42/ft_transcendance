@@ -77,6 +77,11 @@
                         trigger="hover"
                         target=".nav-item">
                     </lord-icon>
+                    {% if request.user.users.has_unread_notifications %}
+                        <div class="notification-status active"></div>
+                    {% else %}
+                        <div class="notification-status"></div>
+                    {% endif %}
                     <span class="link-text">ChatRoom</span>
                 </a>
             </li>
@@ -89,11 +94,6 @@
                         trigger="hover"
                         target=".nav-item">
                     </lord-icon>
-                    {% if request.user.users.has_unread_notifications %}
-                        <div class="notification-status active"></div>
-                    {% else %}
-                        <div class="notification-status"></div>
-                    {% endif %}
                     <span class="link-text">Notifications</span>
                 </a>
             </li>
@@ -113,7 +113,7 @@
         <!-- SETTINGS -->
             <li class="nav-item">
 				<div id="top-border" style="
-					width: 80%;
+					width: 85%;
 					MARGIN: 0 auto;
 					border-top: 2px solid rgba(128, 128, 128, 0.8);">
 				</div>
@@ -191,27 +191,12 @@
             console.log("WebSocket connecté avec succès !");
         };
 
-
         notificationSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
 
-            if (data.type === 'notification') {
-                console.log("Data.type : [notification]");
-                // Afficher le point de notification
-                const notif = document.querySelector('.notification-status');
-                notif.classList.add("active");
-                console.log('Nouvelle notification :', data.message);
-            }
-
             if (data.type === 'update_status') {
-                console.log("Data.type : [update_status]");
-                // Mettre à jour le statut des notifications
                 const notif = document.querySelector('.notification-status');
-                if (data.has_unread_notifications) {
-                    notif.classList.add("active");
-                } else {
-                    notif.classList.remove("active");
-                }
+                notif.classList.toggle("active", data.has_unread_notifications);
             }
         };
 

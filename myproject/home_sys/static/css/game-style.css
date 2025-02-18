@@ -1,30 +1,6 @@
 /* Creation de polices */
-@font-face {
-	/*  Creation d'un font externe */
-	font-family: 'BungeeShade-Regular';
-	src: url(../fonts/BungeeShade-Regular.ttf);
-}
 
-@font-face {
-	/*  Creation d'un font externe */
-	font-family: 'coolvetica-condensed-rg';
-	src: url(../fonts/coolvetica-condensed-rg.otf);
-}
 
-@font-face {
-	font-family: Namaku;
-	src: url("../fonts/Namaku.ttf");
-}
-
-@font-face {
-	font-family: Thunder-VF;
-	src: url("../fonts/Thunder-VF.ttf");
-}
-
-@font-face {
-	font-family: Thunder-SemiBold;
-	src: url("../fonts/Thunder-SemiBoldLC.otf");
-}
 
 #page {
 	font-family: 'Thunder-VF';

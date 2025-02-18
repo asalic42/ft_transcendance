@@ -8,46 +8,11 @@
 
 <div class="container">
 
-    <div class="square">
-        <h2>Bienvenue dans le systeme de tournois</h3>
-		</div>
+    <div class="square" id="square">
+        <h2>Bienvenue dans le systeme de tournois</h2>
+		<div class="loader"></div>
 	</div>
 	<div id="players-container">
-	</div>	
+	</div>
 <script src="{% static 'js/tournament.js' %}"></script>
-<style>
-	#players-container {
-		display: flex; /* Pour afficher les joueurs côte à côte si l'écran est assez large */
-		flex-wrap: wrap; /* Pour permettre aux joueurs de passer à la ligne si nécessaire */
-		justify-content: center; /* Pour centrer les joueurs dans le conteneur */
-	}
-	
-	.player-info {
-		margin: 10px; /* Espace autour de chaque joueur */
-		border: 1px solid #ccc; /* Bordure légère */
-		padding: 10px; /* Espace à l'intérieur de chaque joueur */
-		border-radius: 5px; /* Bords arrondis */
-		background-color: #f0f0f0; /* Couleur de fond claire */
-		box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Ombre légère */
-		text-align: center; /* Centrer le texte */
-	}
-	
-	.player-info .name {
-		font-weight: bold; /* Nom en gras */
-		margin-right: 5px;
-		color: #333; /* Couleur de texte plus foncée */
-	}
-	
-	.player-info .score {
-		color: #007bff; /* Couleur de score bleue (vous pouvez changer) */
-	}
-	
-	/* Styles pour les écrans plus petits (par exemple, téléphones) */
-	@media (max-width: 768px) {
-		#players-container {
-			flex-direction: column; /* Afficher les joueurs verticalement */
-			align-items: center; /* Centrer horizontalement */
-		}
-	}
-<style/>
 {% endblock %}

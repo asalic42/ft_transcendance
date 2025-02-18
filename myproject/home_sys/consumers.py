@@ -12,8 +12,8 @@ import asyncio
 import random
 import json
 import sys
+import logging
 from .utils import add_pong_logic
-
 from .models import *
 import math
 
@@ -37,6 +37,7 @@ def get_random_arbitrary(min, max):
 		return get_random_arbitrary(min, max)
 	return result
 
+""" Jeu du Pong """
 class PongGame:
 
 	# Define default variables
@@ -1116,10 +1117,6 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 """ Pour le status utilisateur (online/offline) """
 
-import json
-import logging
-from channels.generic.websocket import AsyncWebsocketConsumer
-
 logger = logging.getLogger(__name__)
 
 class StatusConsumer(AsyncWebsocketConsumer):
@@ -1141,10 +1138,6 @@ class StatusConsumer(AsyncWebsocketConsumer):
             "is_online": event["is_online"],
         }))
         logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
-
-
-from channels.generic.websocket import AsyncWebsocketConsumer
-import json
 
 class FriendRequestConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -1179,45 +1172,98 @@ class FriendRequestConsumer(AsyncWebsocketConsumer):
             'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
         }))
 
-
-from channels.generic.websocket import AsyncWebsocketConsumer
-import json
+""" """ """ """ """ """ """ """
+""" NOTIFICATIONS PUSH """
+""" Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     
-    async def connect(self):
-        self.user = self.scope['user']
-        if self.user.is_authenticated:
-            await self.accept()
-            await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
-            print(f"Utilisateur {self.user.id} ajouté au groupe notifications.")
-        else:
-            await self.close()
+	async def connect(self):
+		self.user = self.scope['user']
+		if not self.user.is_authenticated:
+			await self.close()
+			return
+		
+		await self.accept()
+		await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
 
-    async def disconnect(self, close_code):
-        if self.user.is_authenticated:
-            await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
+		# Envoie l'etat initial des notifs non lues
+		has_unread = await self.get_unread_notif()
+		await self.send(text_data=json.dumps({
+			'type': 'update_status',
+			'has_unread_notifications': has_unread
+		}))
 
-    async def send_notification(self, event):
-        await self.send(text_data=json.dumps({
-            'type': 'notification',
-            'message': event['message'],
-        }))
+	async def receive(self, text_data):
+		data = json.loads(text_data)
 
-    async def update_notification_status(self, event):
-        await self.send(text_data=json.dumps({
-            'type': 'update_status',
-            'has_unread_notifications': event['has_unread_notifications'],
-        }))
+		if data.get('type') == 'mark_as_read':
+			channel_name = data.get('channel_name')
+			await self.mark_as_read(channel_name)
+			await self.update_unread_status()
+		elif data.get('type') == 'channel_opened':
+			channel_name = data.get('channel_name')
+			await self.mark_channel_as_opened(channel_name)
+			await self.update_unread_status()
 
-import random
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
+	async def disconnect(self, close_code):
+		if self.user.is_authenticated:
+			await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
+			print("user disconnected")
+			sys.stdout.flush()
 
-import json
-import random
-import sys
-from channels.generic.websocket import AsyncWebsocketConsumer
+	""" Send messages to client """
+
+	async def new_message_notif(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'update_status',
+			'has_unread_notifications': True
+		}))
+
+	async def update_unread_status(self):
+		has_unread = await self.get_unread_notif()
+		await self.send_status_update(has_unread)
+
+	async def send_status_update(self, has_unread):
+		await self.send(text_data=json.dumps({
+			'type': 'update_status',
+			'has_unread_notifications': has_unread
+		}))
+
+	""" Connection with database """
+	@database_sync_to_async
+	def get_unread_notif(self):
+		return Messages.objects.filter(
+			read=False
+		).exists()
+	
+	@database_sync_to_async
+	def mark_as_read(self, channel_name):
+		Messages.objects.filter(
+			channel_name=channel_name,
+			read=False
+		).update(read=True)
+	
+	@database_sync_to_async
+	def mark_channel_as_opened(self, channel_name):
+		user = Users.objects.get(user=self.user)
+		UserOpenedChannel.objects.get_or_create(
+			user=user,
+			channel_name=channel_name
+		)
+
+	@database_sync_to_async
+	def get_unread_notif(self):
+		user = Users.objects.get(user=self.user)
+		opened_chan = UserOpenedChannel.objects.filter(
+			user=user
+		).values_list('channel_name', flat=True)
+		return Messages.objects.filter(
+			read=False
+		).exclude(channel_name__in=opened_chan).exists()
+
+
+""" TOURNOIS CONCERNS """
 
 class TournamentConsumer(AsyncWebsocketConsumer):
 	
@@ -1256,12 +1302,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 			TournamentConsumer.players[self.tournament_id].append({
 				'channel_name': self.channel_name,
-				'user_id': user_id
+				'user_id': user_id,
+				'username': self.scope['user'].username
 			})
 			
 			print(f"Joueurs connectés au tournoi {self.tournament_id}: {len(TournamentConsumer.players[self.tournament_id])}")
 			sys.stdout.flush()
 			
+			await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
+
 			# Si 4 joueurs sont connectés pour ce tournoi, lancer le tournoi
 			if len(TournamentConsumer.players[self.tournament_id]) == 4:
 				await self.start_tournament()
@@ -1285,8 +1334,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			[(players[0], players[3]), (players[1], players[2])],  # Round 3
 		]
 	
-		game_id1 = random.randint(1000, 9999)
-		game_id2 = random.randint(1000, 9999)
+		game_id1 = random.randint(10000, 19999)
+		game_id2 = random.randint(10000, 19999)
 	
 		if TournamentConsumer.roundNb[self.tournament_id] < 3:
 			current_round_pairings = round_pairings[TournamentConsumer.roundNb[self.tournament_id]]
@@ -1324,22 +1373,65 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		try:
-			# Supprimer le joueur de la liste partagée
+			# Vérifier si le tournament_id existe
 			if self.tournament_id in TournamentConsumer.players:
+				# Retirer le joueur de la liste
 				TournamentConsumer.players[self.tournament_id] = [
 					p for p in TournamentConsumer.players[self.tournament_id]
 					if p['channel_name'] != self.channel_name
 				]
+				
+				await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 
+				# Si le tournoi est en cours, l'arrêter
+				if TournamentConsumer.is_running[self.tournament_id]:
+					TournamentConsumer.is_running[self.tournament_id] = False
+					await self.channel_layer.group_send(
+						self.tournament_group,
+						{
+							'type': 'tournament_cancelled',
+							'message': 'Le tournoi a été annulé en raison d\'une déconnexion'
+						}
+					)
+				
+				# Nettoyer les données du tournoi si plus aucun joueur
+				if len(TournamentConsumer.players[self.tournament_id]) == 0:
+					TournamentConsumer.gameFinished.pop(self.tournament_id, None)
+					TournamentConsumer.roundNb.pop(self.tournament_id, None)
+					TournamentConsumer.is_running.pop(self.tournament_id, None)
+					TournamentConsumer.players.pop(self.tournament_id, None)
+	
 			# Retirer le joueur du groupe
 			await self.channel_layer.group_discard(self.tournament_group, self.channel_name)
-
+	
 			print(f"Joueur déconnecté du tournoi {self.tournament_id}")
 			sys.stdout.flush()
-
+	
 		except Exception as e:
 			print(f"Erreur lors de la déconnexion : {e}")
 			sys.stdout.flush()
+	
+	# Ajouter ces méthodes pour gérer les nouveaux types de messages
+	async def player_disconnected(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'player_disconnected',
+			'message': event['message']
+		}))
+	
+	async def tournament_cancelled(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'tournament_cancelled',
+			'message': event['message']
+		}))
+	
+	async def user_list(self, event):
+		data = []
+		for player in TournamentConsumer.players[self.tournament_id]:
+			data.append(player['username'])
+		await self.send(text_data=json.dumps({
+			'type': 'user_list',
+			'len': len(data),
+			'data': data,}))
 
 	async def match_finished(self, event):
 		TournamentConsumer.gameFinished[self.tournament_id] += 1

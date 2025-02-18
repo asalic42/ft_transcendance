@@ -5,51 +5,133 @@
 {% block content %}
 
 {% comment %} <link rel="stylesheet" href="{% static 'css/home-style.css' %}"> {% endcomment %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
-<h1>Bienvenue à toi fils !</h1>
-<p>Tu fais maintenant parti de la guild, voici tous les membres :</p>
-<ul>
-    <!-- home.html -->
-    {% for other_user in users %}
-    <li class="li-test">
-        {% if user.username != other_user.username %}
-            <button class="see-profile" onclick="window.location.href='{% url 'profile' username=other_user.username %}'">Voir le profil</button>
-        {% endif %}
-        {{ other_user.username }}
-    </li>
-    {% empty %}
-    <li>Le Monastère vient d'ouvrir, il n'y a encore aucun fidèle...</li>
-    {% endfor %}
-</ul>
-
-<style>
-
-    #status {
-        width: auto;
-        height: auto;
-        padding: 10px;
-        background-color: blue;
-        border-radius: 10px;
-    }
-
-    .li-test {
-        width: 150px;
-        border: 1px solid black;
-    }
-
-    .see-profile {
-        width: auto;
-        height: auto;
-        padding: 2px;
-        border: 1px solid black;
-    }
-
-    .see-profile:hover {
-        cursor: pointer;
-        background-color: blueviolet;
-    }
-</style>
 
 
+<div class="title">
+	<h1>Bienvenue mon enfant !</h1>
+	<h3>Je te présente tes freres et soeurs :</h3>
+</div>
+
+<div class="users-status-container">
+	<div class="profile-container">
+
+		<div class="profile-box">
+			<img class="profile-img" src="{{ user.users.image.url }}" alt="">
+			<!-- <button class="profile-img-upload">➕</button> -->
+	
+			{% if request.user.is_authenticated %}
+				<div class="profile-user-info">
+					<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
+					<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
+					<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
+				</div>
+			{% else %}
+				<p>Vous n'êtes pas connecté.</p>
+			{% endif %}
+	
+			<div class="profile-separator">
+				{% if request.user == user %}
+					<p class="profile-text-settings-rdv">
+						Si vous voulez modifier vos informations utilisateurs
+						rendez-vous dans les settings.
+					</p>
+					<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+				{% else %}
+					<p class="other-profile-text-settings-rdv">
+						Vous pouvez ajouter {{profile_user.username}} en ami(e)
+						ou décider de le/la bloquer.
+					</p>
+				
+					<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
+					<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
+				{% endif %}
+	
+			</div>
+		</div>
+	</div>
+	
+    <!-- Online Users -->
+    <div class="online-users">
+        <h2>Online</h2>
+        {% for user in online_users %}
+			{% if forloop.last %}
+				<div class="user-card last">
+			{% else %}
+				<div class="user-card">
+			{% endif %}
+					<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
+					<p class="user-name">{{ user }}</p>
+					{% if request.user != user %}
+						<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
+							Voir le profil
+						</button>
+					{% endif %}
+					<div class="online-status" id="user-{{ user.id }}"></div>
+				</div>
+        {% empty %}
+            <div class="empty-state">
+                <p>Looks like no one's online.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Offline Users -->
+    <div class="offline-users">
+        <h2>Offline</h2>
+        {% for user in offline_users %}
+			{% if forloop.last %}
+				<div class="user-card last">
+			{% else %}
+				<div class="user-card">
+			{% endif %}
+					<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
+					<p class="user-name">{{ user }}</p>
+					<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
+						Voir le profil
+					</button>
+					<div class="online-status" id="user-{{ user.id }}"></div>
+				</div>
+        {% empty %}
+            <div class="empty-state">
+                <p>Looks like no one's offline.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="{% static 'js/home.js' %}"></script>
+{% comment %} <script>
+	function createRandomShape() {
+		// Creer un element qu'on ajoute a la liste class html (pour les styliser en CSS)
+		const shape = document.createElement('div');
+		shape.classList.add('shape');
+	
+		// Choisi une taille aleatoire entre 50px et 250px
+		const size = Math.floor(Math.random() * 200) + 50;
+		shape.style.width = `${size}px`;
+		shape.style.height = `${size}px`;
+	
+		// Position aleatoire sur la page
+		shape.style.top = `${Math.random() * 100}vh`;
+		shape.style.left = `${Math.random() * 100}vw`;
+	
+		// Definir une vitesse d'animation aleatoire
+		shape.style.animationDuration = `${Math.floor(Math.random() * 5) + 3}s`;
+	
+		// Couleur aleatoire
+		const colors = ['#048399', '#005067', '#B96B85', '#5f73b3', '#a32048'];
+		const choosen_color = colors[Math.floor(Math.random() * colors.length)];
+		shape.style.background = `radial-gradient(circle, ${choosen_color}, white)`;
+	
+		// Ajouter la classe changee au body html
+		document.body.appendChild(shape);
+	
+	}   
+	
+	for (let i=0; i < 10; i++) {
+		createRandomShape(); }
+</script>{% endcomment %}
 {% endblock %}

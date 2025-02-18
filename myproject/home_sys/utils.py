@@ -1,6 +1,8 @@
 # utils.py
 import json
+from channels.layers import get_channel_layer
 from django.http import JsonResponse
+from asgiref.sync import async_to_sync
 from .models import Users, Pong
 
 def add_pong_logic(data):
@@ -27,3 +29,15 @@ def add_pong_logic(data):
         'difficulty': new_game.difficulty,
         'bounce_nb': new_game.bounce_nb,
     }
+
+""" Envoie les notifications aux utilisateurs d'un channel public ou pv. """
+def send_notification_to_user(user_id, channel_name):
+    
+	# Envoie de la notif au websocket
+	channel_layer = get_channel_layer()
+	async_to_sync(channel_layer.group_send)(
+		f'notifications_{user_id}', {
+			'type': 'new_message_notif',
+            'channel_name': channel_name
+		}
+	)
