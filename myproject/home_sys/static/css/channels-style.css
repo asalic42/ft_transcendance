@@ -286,7 +286,7 @@ h1 {
 	align-items: center;
 }
 
-#send-button {
+#send-button, #invite-button {
 	margin: 22px;
 	cursor: pointer;
 	font-size: 32px;
@@ -298,6 +298,10 @@ h1 {
 	border: none;
 	background-color: #23232e;
 	color: var(--font-color);
+}
+
+#invite-button {
+	font-size: 20px;
 }
 
 #message-input {

@@ -388,12 +388,15 @@ async function addNewGame(id_player) {
 	try {
 		const response = await fetch('/accounts/api/add_pong/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
+				'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({  // Convertit les données en JSON
 				id_p1: id_player,
-				id_p2: -1,
+				id_p2: null,
+				is_bot_game: true,
 				score_p1: count_p1,
 				score_p2: count_p2,
 				difficulty: user_option,
@@ -402,8 +405,8 @@ async function addNewGame(id_player) {
 		});
 
 		if (!response.ok) {
-			throw new Error('Erreur lors de l\'ajout du jeu');
-		}
+			const text = await response.text();
+			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);		}
 
 		const result = await response.json();
 		console.log('Nouveau jeu ajouté:', result);

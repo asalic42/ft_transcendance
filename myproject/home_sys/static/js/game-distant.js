@@ -2,9 +2,11 @@
 var table = document.getElementById("game");
 var	context = table.getContext("2d");
 var score_p1 = document.getElementById("scoreP1");
-var player1_name = document.getElementById("title-p1");
 var score_p2 = document.getElementById("scoreP2");
+var player1_name = document.getElementById("title-p1");
 var player2_name = document.getElementById("title-p2");
+var text_win_p1 = document.getElementById("text-p1");
+var text_win_p2 = document.getElementById("text-p2");
 var fps = document.getElementById("fps");
 var game = document.getElementById("game");
 var disconnected = document.getElementById("disconnected");
@@ -25,7 +27,7 @@ let gameState = {
 };
 
 // WebSocket concerns
-const socket = new WebSocket("wss://transcendance.42.paris/ws/pong/");
+const socket = new WebSocket(`wss://transcendance.42.paris/ws/pong/${gameId}/${id_t}`);
 
 socket.onopen = function() {
 	console.log("Connexion réussie au WebSocket");
@@ -35,7 +37,8 @@ let start = Date.now();
 let compteur = 0;
 socket.onmessage = function(event) {
 	try {
-        const data = JSON.parse(event.data);
+		const data = JSON.parse(event.data);
+		console.log(data.type);
 
 		if (data.type == "countdown") {
 			countdownBeforeGame(data);
@@ -53,13 +56,25 @@ socket.onmessage = function(event) {
 		}
 
 		else if (data.type == "players_name") {
-			if (data.player1_name) player1_name.innerText = data.player1_name;
-			if (data.player2_name) player2_name.innerText = data.player2_name;
+			if (data.player1_name) {
+				player1_name.innerText = data.player1_name;
+				text_win_p1.textContent = player1_name.innerText + " wins !";
+			} 
+			
+			if (data.player2_name) {
+				player2_name.innerText = data.player2_name;
+				text_win_p2.textContent = player2_name.innerText + " wins !";
+			} 
+				
 		}
 
 		else if (data.type == "game_state") {
 			overlay.style.display = 'none';
 			startGame(data);
+		}
+		else if (data.type == "game_error") {
+			cancelAnimationFrame(animation_id);
+			alert("Sorry, there has been a server side error. Please, change rooms.");
 		}
 
     } catch (error) {
@@ -69,6 +84,7 @@ socket.onmessage = function(event) {
 
 socket.onclose = function() {
 	console.log("Deconnexion du socket");
+    alert("Game is full, or there has been an error.")
 };
 
 socket.onerror = function(error) {
@@ -81,6 +97,8 @@ window.onload = function() {
 	document.getElementById('canvas-container').style.display = 'flex';
 }
 
+var animation_id;
+
 function startGame(data) {
 
 	if (data.number) currentPlayer = data.number;
@@ -89,7 +107,7 @@ function startGame(data) {
 	if (data.ball_coords) gameState.ball_coords = data.ball_coords;
 	if (data.scores) gameState.scores = data.scores;
 
-	requestAnimationFrame(() => {
+	animation_id = requestAnimationFrame(() => {
 		sendPlayerMove();
 		compteur++;
 
@@ -101,16 +119,17 @@ function startGame(data) {
 		}
 
 		context.clearRect(0, 0, table.width, table.height);
+		console.log('gameState : ' + gameState);
 		update(gameState);
 		
 		if (gameState.scores) {
 			score_p1.innerText = gameState.scores.p1;
 			score_p2.innerText = gameState.scores.p2;
 
-			if (gameState.scores.p1 >= 5) {
+			if (gameState.scores.p1 >= 1) {
 				winnerWindow(1);
 			}
-			else if (gameState.scores.p2 >= 5) {
+			else if (gameState.scores.p2 >= 1) {
 				winnerWindow(2);
 			}
 		}
@@ -127,13 +146,13 @@ function game_restarted(data) {
 	const winner1Text = document.getElementById("wrapper-player1");
 	const winner2Text = document.getElementById("wrapper-player2");
 
-	if (gameState.scores.p1 >= 5) {
+	winner1Text.style.display = "none";
+	winner2Text.style.display = "none";
+	if (gameState.scores.p1 >= 1) {
 		drawOuterRectangle("#365fa0");
-		winner1Text.style.display = "none";
 	}
 	else {
 		drawOuterRectangle("#C42021");
-		winner2Text.style.display = "none";
 	}
 
 	if (data.number) currentPlayer = data.number;
@@ -169,12 +188,21 @@ function drawInnerRectangle(color) {
 }
 
 function drawPlayer(player1Coords, player2Coords) {
+	// console.log('player1Coords: ' + player1Coords);
+	// console.log('player2Coords: ' + player2Coords);
 	if (!player1Coords || !player2Coords) return;
 
 	context.fillStyle = "#ED4EB0";
 	context.beginPath();
-	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
-	context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+	// console.log("player1Coords.x1 :" + player1Coords.x1 + " player1Coords.y1: " + player1Coords.y1);
+	// console.log("player2Coords.x1 :" + player2Coords.x1 + " player2Coords.y1: " + player2Coords.y1);
+	
+	if (player1Coords) {
+        context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
+    }
+    if (player2Coords) {
+        context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+    }
 	context.fill();
 	context.closePath();
 }
@@ -204,6 +232,7 @@ function update(gameState) {
     context.fillStyle = '#ED4EB0';
     context.fillRect(table.width / 2, 0, 5, table.height);
 
+	console.log('drawing player');
 	drawPlayer(gameState.player1_coords, gameState.player2_coords);
 	drawBall(gameState.ball_coords);
 }
@@ -233,12 +262,15 @@ function sendPlayerMove() {
     }
 }
 
-function winnerWindow(player) {
+async function winnerWindow(player) {
 	
 	context.clearRect(0, 0, table.width, table.height);
     
 	const winner1Text = document.getElementById("wrapper-player1");
 	const winner2Text = document.getElementById("wrapper-player2");
+
+	winner1Text.style.display = 'none';
+	winner2Text.style.display = 'none';
 	if (player == 1) {
         drawOuterRectangle("#365fa0");
         winner1Text.style.display = "block";
@@ -248,6 +280,10 @@ function winnerWindow(player) {
 		winner2Text.style.display = "block";
     }
     drawInnerRectangle("#23232e");
+	await new Promise(r => setTimeout(r, 2000));
+	if (id_t) {
+		window.close();
+	}
     newGame(player);
 }
 

@@ -1,75 +1,97 @@
-const increaseButton = document.getElementById('increase');
-const decreaseButton = document.getElementById('decrease');
-const numberInput = document.getElementById('numberInput');
-const forms = document.querySelector('.forms');
+var id_t = 1;
 
-// Modifie le nombre de joueurs a participer au tournoi
-function arrowClick(incr) {
-    let currentValue = parseInt(numberInput.textContent);
-    currentValue += incr;
-    
-    if (currentValue >= 3 && currentValue <= 10) {
-        if (currentValue > parseInt(numberInput.textContent)) {
-            addForm();
-        }
-        else
-            removeForm();
-        numberInput.textContent = currentValue;
+const socket = new WebSocket(`wss://transcendance.42.paris/ws/tournament/${id_t}`);
+
+socket.onopen = function() {
+    console.log("Connexion réussie au WebSocket");
+}
+
+socket.onclose = function() {
+    alert("Tournament is full, running or there has been an error.")
+}
+
+function startButton(link) {
+	const button = document.createElement('button');
+	button.style.display = "none";
+	button.id = "bt";
+	document.body.appendChild(button);
+	button.textContent = 'Ouvrir le jeu dans un nouvel onglet';
+	button.style = "position: absolute; left: 200px; top: 100px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;";
+	button.onclick = function() {
+		window.open(link, '_blank');
+		button.textContent = "Everyone needs to finish their game first.";
+		button.style.background = "red";
+		button.disabled = "disabled";
+		first_pass = false;
+	};
+}
+
+var first_pass = true;
+
+socket.onmessage = function(event) {
+    try {
+        const data = JSON.parse(event.data);
+        console.log("Message reçu:", data);
+
+        if (data.type === "game_link") {
+			if (!first_pass)
+				document.getElementById('bt').remove();
+			startButton(data.link)
+		}
+		if (data.type === 'result') {
+			const playerId = data.player_id;
+			const score = data.score;
+			const name = data.name;
+	
+			// Create or update player element
+			let playerElement = document.getElementById(`player-${playerId}`);
+			if (!playerElement) {  // Create if it doesn't exist
+				playerElement = document.createElement('div');
+				playerElement.id = `player-${playerId}`;
+				playerElement.classList.add('player-info'); // Add a class for styling
+				document.getElementById('players-container').appendChild(playerElement); // Add to the container
+			}
+	
+			// Update name and score
+			let nameElement = playerElement.querySelector('.name');
+			if (!nameElement) {
+				nameElement = document.createElement('span');
+				nameElement.classList.add('name');
+				playerElement.appendChild(nameElement);
+			}
+	
+			let scoreElement = playerElement.querySelector('.score');
+			if (!scoreElement) {
+				scoreElement = document.createElement('span');
+				scoreElement.classList.add('score');
+				playerElement.appendChild(scoreElement);
+			}
+			nameElement.textContent = playerId === cachedUserId ? "You" : name; // "You" for current user
+			scoreElement.textContent = ": " + score;
+		}
+    } catch (error) {
+        console.error("Erreur de parsing des données du WebSocket :", error);
     }
-    checkInputs();
 }
 
-// Check si les inputs sont remplis auquel cas on affiche le boutton play
-function    checkInputs() {
-    const inputs = document.querySelectorAll(".input-alias");
-    const aliases = [];
-
-    for (let input of inputs) {
-        if (input.value.trim() === '' || aliases.includes(input.value.trim())) {
-            document.getElementById('play').style.display = 'none';
-            return;
-        }
-        aliases.push(input.value.trim());
-    }
-    document.getElementById('play').style.display = 'inline-block';
-}
-
-// Ajoute un formulaire de joueur pour le tournoi
-function addForm() {
-    const newNumber = parseInt(numberInput.textContent) + 1;
-    // creation de la div
-    const formPlayer = document.createElement('div');
-    if (newNumber > 5)
-        formPlayer.classList.add('form-player');
-    // creation du titre
-    const titlePlayer = document.createElement('h4');
-    titlePlayer.id = 'player';
-    titlePlayer.textContent = 'Player ' + newNumber + ':' ;
-
-    // creation de l'input pour l'alias du joueur
-    const aliasPlayer = document.createElement('input');
-    aliasPlayer.classList.add('input-alias');
-    aliasPlayer.title = 'Alias';
-
-    formPlayer.appendChild(titlePlayer);
-    formPlayer.appendChild(aliasPlayer);
-
-    forms.appendChild(formPlayer);
-
-    aliasPlayer.addEventListener('input', checkInputs);
-}
-
-// Supprime un formulaire de joueur pour le tournoi
-function removeForm() {
-    const lastFormAdd = forms.lastChild;
-    if (lastFormAdd)
-        forms.removeChild(lastFormAdd);
-}
-
-// Check a chaque modif si tous les formulaires sont remplis
-document.querySelectorAll('.input-alias').forEach(input => {
-    input.addEventListener('input', checkInputs);
+document.addEventListener("DOMContentLoaded", function() {
+	getCurrentPlayerId()
 });
 
-increaseButton.addEventListener('click', () => arrowClick(1));
-decreaseButton.addEventListener('click', () => arrowClick(-1));
+let cachedUserId = null;
+async function getCurrentPlayerId() { // à lancer au chargement de la page;
+	if (cachedUserId !== null) {
+		return cachedUserId;
+	}
+	try {
+		const response = await fetch('/accounts/api/current-user/', {
+			credentials: 'same-origin'
+		});
+		const data = await response.json();
+		cachedUserId = data.userId;
+		return cachedUserId;
+	} catch (error) {
+		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		return null;
+	}
+}

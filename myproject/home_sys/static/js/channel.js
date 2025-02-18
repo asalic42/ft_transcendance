@@ -15,22 +15,53 @@ let blockedUsersList = null;
 // Recup l'user courant
 const userElement = document.getElementById('current-username');
 const username = userElement.getAttribute('data-username');
-console.log(`Current username is ${username}`);
+// console.log(`Current username is ${username}`);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/* MONITORING CHANNELS */
 
+//! MONITORING
+
+let liveChanTimeout;
+
+async function checkChannels() {
+	await loadChannels();
+		
+	liveChanTimeout = setTimeout(checkChannels, 2000);
+}
 
 document.addEventListener("DOMContentLoaded", function() {
 
-	if (liveChan) clearInterval(liveChan);
+	checkChannels();
 
-	liveChan = setInterval(() => {
-		loadChannels();
-	}, 100);
 	const newChan = document.getElementById('new-chan');
 	const newFren = document.getElementById('add-friend-chan');
-	// const inviteButton = document.getElementById('add-friend-chan');
+	const sendForm = document.getElementById('sendForm');
+	const friendSelect = document.getElementById('input-add-friend-chan');
+	const overlay = document.getElementById('overlay');
+	const inputContainerDM = document.getElementById('input-dm');
+
+	sendForm.addEventListener('click', async function(event) {
+		event.preventDefault();
+		if (!currentPVCallback) return;
+
+		const selectedFriendId = friendSelect.value;
+		const channelName = "TestValue" + cachedUserId + selectedFriendId; // Générer le nom du canal
+
+		// Validation
+		if (!selectedFriendId) {
+			alert('Veuillez sélectionner un ami');
+			return;
+		}
+
+		// Masquer le modal
+		overlay.style.display = 'none';
+		inputContainerDM.classList.remove('show');
+
+		// Appeler le callback et réinitialiser
+		currentPVCallback(channelName, selectedFriendId);
+		currentPVCallback = null;
+	});
+
 	newChan.addEventListener('click', () => {
 		// Creation de chan + ouverture
 			setChannelName(async function(nameChan) {
@@ -40,18 +71,9 @@ document.addEventListener("DOMContentLoaded", function() {
 					const data = await response.json();
 
 					if (data.status === 'error') {
-						throw new Error("Chan doesn't exist"); // Channel exists
+						throw new Error("Chan already exist"); // Channel exists
 					}
-					console.log('data :' + data);
-					if (data.private) {
-						const result = await doesUserHaveAccessToChan(data.id, cachedUserId);
-						if (result)
-							openCenter(nameChan);
-						else
-							alert("Not allowed");
-					}
-					else 
-						openCenter(nameChan);
+					openCenter(nameChan, nameChan);
 				}
 				catch (error) {
 					console.error(error);
@@ -60,25 +82,18 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 
 	newFren.addEventListener('click', () => {
-		// Creation de chan + ouverture
+		// Creation de chan pv + ouverture
 			setChannelNamePV(async function(nameChan, ami) {
-				addChannelToDb(nameChan, 1,ami)
+				const result = await addChannelToDb(nameChan, 1, ami);
+				if (!result) return;
 				try {
 					const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 					const data = await response.json();
 
 					if (data.status === 'error') {
-						throw new Error("Chan doesn't exist"); // Channel exists
+						throw new Error("Chan already exist"); // Channel exists
 					}
-					if (data.private) {
-						const result = await doesUserHaveAccessToChan(data.id, cachedUserId);
-						if (result)
-							openCenter(nameChan);
-						else
-							alert("Not allowed");
-					}
-					else 
-						openCenter(nameChan);
+					openCenter((await getNameById(ami)).name, nameChan);
 				}
 				catch (error) {
 					console.error(error);
@@ -87,32 +102,54 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
 });
 
-//////////////////////////////////////////////////////////////////////////////////////////
-/* RIGHT CHANNELS PART */
-	// Add channel to the right channel's list
+// Cliquer sur un channel deja creer
+function	clickToChannel(chanItem, printName, nameChan) {
+	chanItem.addEventListener('click', async () => {
+		openCenter(printName, nameChan);
+	});
+}
 
-async function doesUserHaveAccessToChan(idC, idU) {
-	return fetch(`/accounts/api/doesUserHaveAccessToChan/${idC}/${idU}`)
-		.then(response => {
-			if (response.status === 404) throw new Error('User not found');
-			return response.json(); // Parse JSON first
-		})
-		.then(data => {
-			if (data.allowed == 'True')
-				return true;
-			return false;
-		})
-		.catch(error => {
-			console.log(error);
-			return false;
-		});
-}	
+// Check if a message is send by a click or an ENTER, and send it
+function addMessageListener() {
+	const sendButton = document.getElementById('send-button');
+	sendButton.addEventListener('click', () => {
+
+		const msg = document.getElementById('message-input').value;
+		if (msg != "") {
+			postMessage(currentChan, msg, false);
+			document.getElementById('message-input').value = '';	// Vide le champ de saisie
+			// console.log("MESSAGE ENVOYE !");
+		}
+	});
+
+	const messageInput = document.getElementById('message-input');
+	messageInput.addEventListener('keydown', (event) => {
+
+		if (event.key === 'Enter') {
+			event.preventDefault();	//Empeche le retour a la ligne !
+			sendButton.click();
+		}
+	});
+
+	const invite = document.getElementById('invite-button');
+	invite.addEventListener('click', async (event) => {
+		const msg = `https://transcendance.42.paris/accounts/game-distant/${cachedUserId}/`;
+		postMessage(currentChan, msg, true);
+		await invite_button();
+		window.open(`https://transcendance.42.paris/accounts/game-distant/${cachedUserId}/`, '_blank').focus();
+	});
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 	
 async function	addChannelToList(nameChan, pv, idChan) {
 	var chanList;
+	const existingChannel = document.querySelector(`#channel-${nameChan}`);
+	if (existingChannel) return;
 	if (pv) {
-		const result = await doesUserHaveAccessToChan(idChan, cachedUserId);
-		if (!result)
+
+		var result = await doesUserHaveAccessToChan(idChan, cachedUserId);
+		if (!result.success)
 			return;
 		chanList = document.getElementById('friends');
 	}
@@ -126,16 +163,17 @@ async function	addChannelToList(nameChan, pv, idChan) {
 
 		const titleChan = document.createElement('h2');
 		titleChan.id = 'title-chan';
-		titleChan.textContent = nameChan;
+		if (pv)
+			titleChan.textContent = (await getNameById(result.data.id_u2)).name;
+		else
+			titleChan.textContent = nameChan;
 		chanItem.appendChild(titleChan);
-
-		clickToChannel(chanItem, nameChan);
-
+		clickToChannel(chanItem, titleChan.textContent, nameChan);
 		chanList.appendChild(chanItem);
 	}
 }
 
-async function openCenter(nameChan) {
+async function openCenter(printName, nameChan) {
 	lastMessageId = 0;
 	popCenterChat(nameChan);
 	// document.getElementById('new-chan').textContent = '➙';
@@ -145,7 +183,7 @@ async function openCenter(nameChan) {
 	currentChan = nameChan;
 
 	const h2content = document.getElementById('chat-name');
-	h2content.textContent = currentChan;
+	h2content.textContent = printName;
 
 	const chatContainer = document.getElementById('chat-page');
 	chatContainer.innerHTML = ``;
@@ -154,18 +192,11 @@ async function openCenter(nameChan) {
 
 	liveChat = setInterval(() => {
 		liveChatFetch();
-	}, 100);
-}
-
-	// Cliquer sur un channel deja creer
-function	clickToChannel(chanItem, nameChan) {
-	chanItem.addEventListener('click', async () => {
-		openCenter(nameChan);
-	});
+	}, 500);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/* CENTER CHANNELS PART */
+//! CENTER CHANNELS PART
 	// Main monitor for the center column and message listener
 function	popCenterChat(nameChan) {
 	const page = document.querySelector('.page');
@@ -198,42 +229,11 @@ function createChatPage(nameChan) {
 		<div class="input-container">
 		<input id="message-input" type="text" placeholder="Message...">
 		<button id="send-button">Envoyer</button>
+		<button id="invite-button">Inviter à jouer</button>
 		</div>
 	`;
 	return center;
 }
-
-function setChannelNamePV(callback) {
-	const inputContainer = document.getElementById('input-dm');
-	const inputChannel = document.getElementById('name-input-add-friend-chan');
-	const inputAmi = document.getElementById('input-add-friend-chan');
-	const overlay = document.getElementById('overlay');
-
-	overlay.style.display = 'block';
-	inputContainer.classList.add('show');
-
-	function handleInputName(event) {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			const name = inputChannel.value;
-			const ami = inputAmi.value;
-			const pattern = /^[a-zA-Z0-9_-]+$/;
-
-			if (name !== '' && pattern.test(name)) {
-				overlay.style.display = 'none';
-				inputContainer.classList.remove('show');
-				document.getElementById('channel-name').value = '';
-				inputChannel.removeEventListener('keydown', handleInputName);
-				callback(name, ami);
-			}
-			else {
-				alert(`Enter a name !`);
-			}
-		}
-	}
-	inputChannel.addEventListener('keydown', handleInputName);
-}
-
 
 	// Set un nom de channel a sa creation
 function setChannelName(callback) {
@@ -280,29 +280,6 @@ function reversePopCenterChat() {
 	}
 }
 
-	// Check if a message is send by a click or an ENTER, and send it
-function addMessageListener() {
-	const sendButton = document.getElementById('send-button');
-	sendButton.addEventListener('click', () => {
-
-		const msg = document.getElementById('message-input').value;
-		if (msg != "") {
-		postMessage(currentChan, msg);
-			document.getElementById('message-input').value = '';	// Vide le champ de saisie
-			console.log("MESSAGE ENVOYE !");
-		}
-	});
-
-	const messageInput = document.getElementById('message-input');
-	messageInput.addEventListener('keydown', (event) => {
-
-		if (event.key === 'Enter') {
-			event.preventDefault();	//Empeche le retour a la ligne !
-			sendButton.click();
-		}
-	});
-}
-
 function getPP(userId) {
 	return fetch(`/accounts/user-settings/check_pp/${userId}/`)
 		.then(response => {
@@ -310,7 +287,7 @@ function getPP(userId) {
 			return response.json(); // Parse JSON first
 		})
 		.then(data => {
-			console.log("User data:", data); // Now data is defined
+			// console.log("User data:", data); // Now data is defined
 			return data; // Return for downstream use
 		})
 		.catch(error => {
@@ -319,21 +296,16 @@ function getPP(userId) {
 		});
 }
 
-	// Add the message on the chat conv
-async function addMessage(mess, sender, id) {
-	console.log("sender id: " + id);
+// Add the message on the chat conv
+async function addMessage(mess, sender, id, is_link) {
 
 	const chatPage = document.getElementById('chat-page')
 
 	const message = document.createElement('div');
 	message.classList.add('message');
 
-	if (sender === username) {
-		message.classList.add('sent');
-	}
-	else {
-		message.classList.add('received');
-	}
+	if (sender === username)	message.classList.add('sent');
+	else						message.classList.add('received');
 
 	let pp;
 	try {
@@ -347,14 +319,24 @@ async function addMessage(mess, sender, id) {
 	usernameElement.innerHTML = `<img src='${pp}' id="caca">
 								 <p class="name">${sender}</p>`;
 
-	const messElement = document.createElement('p');
+	var messElement;
+	if (is_link) {
+			messElement = document.createElement('a');
+			messElement.href = mess;
+	}
+	else	messElement = document.createElement('p');
+
 	messElement.classList.add('text')
 
 	if (blockedUsersList.includes(id)) { // Then user is blocked
-		messElement.textContent = "You blocked this user";
-		messElement.style.color = "red";
+			messElement.textContent = "You blocked this user";
+			messElement.style.color = "red";
 	}
-	else messElement.textContent = mess;
+	else if (is_link) {
+		messElement.textContent = "Invitation à jouer";
+		messElement.style.color = "#ee5fb7";
+	}
+	else	messElement.textContent = mess;
 
 	message.appendChild(usernameElement);
 	message.appendChild(messElement);
@@ -362,14 +344,43 @@ async function addMessage(mess, sender, id) {
 
 	const messImage = document.getElementById('caca');
 	usernameElement.addEventListener('click', async function() {
-		alert('Image clicked!');
-		window.location.href = `/accounts/profile-user/${sender}`;
+		window.location.href = `/accounts/profile/${sender}`;
 	});
 
 	chatPage.scrollTop = chatPage.scrollHeight;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+//! LEFT CHAN PART
 
+// Add channel to the right channel's list
+async function doesUserHaveAccessToChan(idC, idU) {
+	return fetch(`/accounts/api/doesUserHaveAccessToChan/${idC}/${idU}`)
+		.then(response => {
+			if (response.status === 404) throw new Error('User not found');
+			return response.json(); // Parse JSON first
+		})
+		.then(data => {
+			if (data.allowed == 'True')
+				return { success: true, data };
+			return { success: false, data };
+		})
+		.catch(error => {
+			console.log(error);
+			return { success: false, data: null };
+		});
+}	
+	
+
+function setChannelNamePV(callback) {
+	const inputContainer = document.getElementById('input-dm');
+	const overlay = document.getElementById('overlay');
+
+	overlay.style.display = 'block';
+	inputContainer.classList.add('show');
+
+	currentPVCallback = callback;
+}
 ////////////////////////////////////////////////
 		/* Function API fetch */
 ///////////////////////////////////////////////
@@ -379,7 +390,7 @@ async function liveChatFetch() {
 	try {
 		const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
 			headers: {
-			'Content-Type': 'application/json',
+				'Content-Type': 'application/json',
 			},
 		});
 
@@ -389,20 +400,20 @@ async function liveChatFetch() {
 
 		const data = await response.json();
 		if (data.new_message && data.new_message.length > 0) {
-			console.log(data.new_message);
-			data.new_message.forEach(message => {
-				console.log("Adding message with id = " + message.id);
-				addMessage(message.message, message.sender, message.idSender);
+			// console.log(data.new_message);
+			for (var message of data.new_message) {
+				// console.log("Adding message with id = " + message.id);
+				await addMessage(message.message, message.sender, message.idSender, message.is_link);
 				lastMessageId = message.id;
-			});
+			}
 		}
 	} catch (error) {
 		console.error('Erreur: ', error);
 	}
 }
 
-function getIdByName(name) {
-	return fetch(`/accounts/api/getNameById/${name}/`)
+function getNameById(id) {
+	return fetch(`/accounts/api/getNameById/${id}/`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
 			return response.json(); // Parse JSON first
@@ -416,13 +427,15 @@ function getIdByName(name) {
 }
 
 async function addPvChan(chanId, amiName) {
-	const userData = await getIdByName(amiName);
-	pk = userData.pk;
+	// const userData = await getIdByName(amiName);
+	pk = amiName;
 
 	const response = await fetch('/accounts/api/postPv/', {
 		method: 'POST',
+		credentials: 'same-origin',
 		headers: {
-		'Content-Type': 'application/json',
+			'X-CSRFToken': csrftoken,  // Use the function directly
+			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
 			id_chan: chanId,
@@ -439,42 +452,55 @@ async function addPvChan(chanId, amiName) {
 // Add a new channel to the db
 async function addChannelToDb(currentChan, pv, ami) {
 	try {
+		// Si c'est un canal privé, vérifie d'abord s'il en existe déjà un
+		if (pv) {
+			const checkResponse = await fetch(`/accounts/api/check_private_channel/${cachedUserId}/${ami}/`);
+			const checkData = await checkResponse.json();
+			
+			if (checkData.exists) {
+				alert("Un canal privé existe déjà entre ces utilisateurs!");
+				return 0;
+			}
+		}
+
+		// Continue avec la création du canal si aucun doublon n'est trouvé
 		const response = await fetch('/accounts/api/post_chan/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
-			'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-			name: currentChan,
-			private: pv
-			// invite_link: null
+				name: currentChan,
+				private: pv
 			})
 		});
 
-		if (!response.ok) {
+		if (!response.ok)
 			throw new Error('Erreur lors de l\'ajout du chan');
-		}
 
-		console.log("nouveau chan ADD a la bdd");
-		
 		const data = await response.json();
-		console.log(data);
 		var chanId = data.chan.id;
 
-		if (pv) {
-			addPvChan(chanId, ami);
-		}
+		if (pv)
+			await addPvChan(chanId, ami);
+			
 		addChannelToList(currentChan, pv, chanId);
+		return 1;
 	} catch (error) {
 		console.error('Erreur: ', error);
-		return 0
+		return 0;
 	}
-	return 1
 }
 
 // Load channels that already exists and get them from db
 // When UserChan table created, use it
+let isLoadingChannels = false;
+
 async function	loadChannels() {
+	if (isLoadingChannels) return; // Si déjà en cours de chargement, ne rien faire
+
 	try {
 		await getCurrentPlayerId();
 		await getBlocked();
@@ -494,21 +520,40 @@ async function	loadChannels() {
 		}
 	} catch(error) {
 		console.error('Erreur: ', error);
+	} finally {
+		isLoadingChannels = false;
 	}
 }
 
-async function postMessage(currentChan, mess) {
+async function invite_button() {
+	fetch(`/accounts/create_current_game/${cachedUserId}/`)
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Erreur réseau');
+		}
+		console.log("tout est bien reçu");
+		return response.json();
+	})
+	.catch(error => {
+		console.error('Erreur lors de la récupération des données :', error);
+	});
+}
+
+async function postMessage(currentChan, mess, is_link) {
 	try {
 		const response = await fetch('/accounts/api/post_message/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
-			'Content-Type': 'application/json',
+				'X-CSRFToken': csrftoken,  // Use the function directly
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-			channel_name: currentChan,
-			sender: username,
-			message: mess,
-			idSender: cachedUserId,
+				channel_name: currentChan,
+				sender: username,
+				message: mess,
+				idSender: cachedUserId,
+				is_link : is_link,
 			})
 		});
 		if (!response.ok) {
@@ -518,15 +563,15 @@ async function postMessage(currentChan, mess) {
 
 		// Accéder à idSender
 		const idSender = data.message.idSender;
-		console.log('idSender:', idSender);
+		// console.log('idSender:', idSender);
 
 	} catch(error) {
 		alert("Wow ! That's a long message. It should work better if it shrinks down.");
 		console.error('Erreur: ', error);
 	}
 }
-let cachedUserId = null;
 
+let cachedUserId = null;
 async function getCurrentPlayerId() { // à lancer au chargement de la page;
 	if (cachedUserId !== null) {
 		return cachedUserId;
@@ -575,6 +620,7 @@ function	getBlocked() {
 	})
 	.then(data => {
 		blockedUsersList = data.blocked_users_ids;
+		console.log("blockedUsersList:" + blockedUsersList);
 	})
 	.catch(error => {
 		console.error('Erreur lors de la récupération des données :', error);

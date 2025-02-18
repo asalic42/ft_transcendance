@@ -31,18 +31,24 @@
 	text-align: center;
 	position: relative;	
 	box-sizing: border-box;
-	top: 250px;
+	top: 200px;
 	width: 70%;
 	border: 3px solid #ED4EB0;
 	border-radius: 50px;
 	display: block;
 	margin-left: auto;
-    margin-right: auto;
-	background-color: #23232e;
+	margin-right: auto;
+	
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	background: linear-gradient(to bottom right, #232330, #14141e);
 }
 
 .title {
 	color: var(--font-color);
+	width: 100%;
 	font-size: 	70px;
 }
 
@@ -59,15 +65,15 @@
 	text-align: center;
 	justify-content: center;
 	align-items: center;
-    cursor: pointer;
+	cursor: pointer;
 	display: flex;
 	width: 200px;
 	height: 60px;
-    border-radius: 10px;
-    outline: 3px solid #ED4EB0;
+	border-radius: 10px;
+	outline: 3px solid #ED4EB0;
 	font-size: 32px;
 	background-color: #141418;
-    color: rgba(237, 78, 176, 0.9);
+	color: rgba(237, 78, 176, 0.9);
 	border: none;
 }
 
@@ -85,9 +91,6 @@
 }
 
 /* Stylisation du jeu */
-body{
-	background-color: var(--bg-site) ;
-}
 
 #game {
 	width: 100%;
@@ -97,6 +100,7 @@ body{
 #canvas-container {
 	border-radius: 1%;
 	position: relative;
+    z-index: 5;
 	display: none;
 	align-items: center;
 	justify-content: center;
@@ -151,19 +155,21 @@ svg {
 	width: 100%; height: 100%;
 }
 
-svg text {
+#svg-wrapper-player1, #text-p1{
 	fill: #121217; /* Pas de remplissage par défaut */
-	animation: stroke 2s alternate;
-	width: 1920; height: 1080;
+	animation: stroke2 2s alternate;
 	stroke-width: 3;
+	font-size: 5vw;
 	stroke: #365FA0;
 	/* font-size: 100px; */
-	font-size: 5vw;
 }
 
 
-#svg-wrapper-player2 text {
-	/* animation: stroke2 2s alternate; */
+#svg-wrapper-player2, #text-p2 {
+	fill: #121217; /* Pas de remplissage par défaut */
+	animation: stroke 2s alternate;
+	stroke-width: 3;
+	font-size: 5vw;
 	stroke: #C42021;
 }
 
@@ -227,4 +233,54 @@ svg text {
 #disconnected {
 	display: none;
 	color: white;
+};
+
+.retour {
+	height: 10%;
+	padding-right: 85%;
+	top: 30px;
+	position: relative;
+}
+
+#retour {
+	width: 100px;
+	height: 30px;
+	border-radius: 5px;
+	outline: 3px solid #ED4EB0;
+	font-size: 20px;
+}
+
+.retour {
+	height: 10%;
+	padding-right: 85%;
+	top: 30px;
+	position: relative;
+}
+
+a {
+	text-decoration: none;
+}
+
+.game-mode span {
+    font-family: 'coolvetica-condensed-rg';
+}
+
+.game-mode {
+	justify-content: center;
+	align-items: center;
+    cursor: pointer;
+	display: flex;
+	width: 100px;
+	height: 30px;
+    border-radius: 10px;
+    outline: 3px solid #ED4EB0;
+	font-size: 16px;
+	background-color: #141418;
+    color: rgba(237, 78, 176, 0.9);
+	transition: all 0.3s ease-in-out;
+}
+
+.game-mode:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
 }

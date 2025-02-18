@@ -16,7 +16,6 @@
         {% if user.username != other_user.username %}
             <button class="see-profile" onclick="window.location.href='{% url 'profile' username=other_user.username %}'">Voir le profil</button>
         {% endif %}
-
         {{ other_user.username }}
     </li>
     {% empty %}
@@ -25,6 +24,14 @@
 </ul>
 
 <style>
+
+    #status {
+        width: auto;
+        height: auto;
+        padding: 10px;
+        background-color: blue;
+        border-radius: 10px;
+    }
 
     .li-test {
         width: 150px;
@@ -43,5 +50,6 @@
         background-color: blueviolet;
     }
 </style>
+
 
 {% endblock %}

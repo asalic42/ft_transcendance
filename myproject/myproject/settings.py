@@ -80,7 +80,7 @@ SOCIAL_AUTH_42_SCOPE = ['public']  # Vous pouvez ajuster les scopes selon vos be
 OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
 
 # L'URL de redirection après autorisation
-OAUTH2_REDIRECT_URL = 'http://127.0.0.1:8000/oauth/callback/complete/42/'
+OAUTH2_REDIRECT_URL = 'https://transcendance.42.paris/oauth/callback/complete/42/'
 
 # Pour le petit délire de la map avec la localisation ip
 IP_LOCALISATION= env('MAP_IP_LOCALISATION')
@@ -200,3 +200,28 @@ MEDIA_URL = '/media/'
 # Répertoire physique sur le disque où les fichiers médias seront stockés
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',  # Chemin vers le fichier de logs
+        },
+    },
+    'loggers': {
+        'channels': {
+            'handlers': ['console'],
+            'level': 'INFO',  # or 'WARNING' if you want even less output
+            'propagate': False,
+        },
+        'daphne': {
+            'handlers': ['console'],
+            'level': 'INFO',  # set to WARNING if necessary
+            'propagate': False,
+        },
+    },
+}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
+
+<div class="page">
+	<div class="rectangle"></div>
+	<a href="{% url 'game-mode-pong' %}" class="retour">
+		<span class="game-mode" id="retour" >Retour</span>
+	</a>
+	<h1 class="title">Choix de la room</h1>
+	<div class="mode-choices">
+
+		<a href="{% url 'game-distant' request.user.id %}" class="game-distant">
+			<span class="game-mode">New game</span>
+		</a>
+		{% comment %} <a href="{% url 'game-distant' request.user.id %}" class="game-distant"> {% endcomment %}
+			{% comment %} <span class="game-mode">join game</span> {% endcomment %}
+		{% comment %} </a> {% endcomment %}
+		<div id="test">
+			{% if all_games %}
+				<h2 id='text'> Join room : </h2>²
+				{% for room in all_games %}
+				<a href="{% url 'game-distant' room.game_id %}" class="game-distant" id="choice">
+					<span class="game-mode" id='choice'>Room {{ room.game_id }}</span>
+				</a>
+				{% endfor %}
+			{% else %}
+				<p>Aucune Room </p>
+			{% endif %}
+		</div>
+	</div>
+
+</div>
+
+
+{% endblock %}

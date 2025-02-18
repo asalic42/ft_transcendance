@@ -16,6 +16,9 @@
 </div>
 
 <div id="page">
+	<a href="{% url 'game-mode-pong' %}" class="retour">
+		<span class="inputs" id="retour" >Retour</span>
+	</a>
     <h1 class="title">Choix de la difficulté du bot (1-4)</h1>
 	<div id="input">
 		<form id="LevelForm" action="javascript:levelinput()" method="get" name="LevelForm">
@@ -26,20 +29,20 @@
 </div>
 
 <div id="canvas-container">
-	<canvas width="1920" height="950" id="game"></canvas>
+	<canvas width="1920" height="850" id="game"></canvas>
 	<div id="button-container">
 		<button id="replay-button" style="display: none;">Play again !</button>
 	</div>
 	<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-		<svg width="1100" height="150">
-			<text x="50%" y="50%" dy=".35em" text-anchor="middle">
+		<svg width="1100" height="150" id="svg-wrapper-player1">
+			<text x="50%" y="50%" dy=".35em" text-anchor="middle" id="svg-wrapper-player1">
 				Player 1 Wins !
 			</text>
 		</svg>
 	</div>
 	<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
 		<svg width="1100" height="150" id="svg-wrapper-player2">
-			<text x="50%" y="50%" dy=".35em" text-anchor="middle">
+			<text x="50%" y="50%" dy=".35em" text-anchor="middle" id="svg-wrapper-player2">
 				BOT Wins !
 			</text>
 		</svg>

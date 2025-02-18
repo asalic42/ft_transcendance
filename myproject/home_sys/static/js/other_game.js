@@ -32,11 +32,12 @@ let cachedUserId = null;
 
 //! Init
 
+var selectedMap;
 mapSelection.addEventListener('click', (event) => {
 	if (event.target.tagName === 'BUTTON') {
-	  const selectedMap = event.target.dataset.map;
-	  console.log(selectedMap)
-	  launch(selectedMap);
+		selectedMap = event.target.dataset.map
+		console.log(selectedMap)
+		launch(selectedMap);
 	}
 });
 
@@ -279,7 +280,7 @@ function isBallHittingblock(ball) {
 			incrementBallSpeed(ball);
 
 			block_arr[k].state--;
-			count += Math.abs(4 - block_arr[k].state);
+			count += Math.abs(5 - block_arr[k].state);
 			break;
 		}
 	}
@@ -363,11 +364,10 @@ async function winnerWindow() {
 			return;
 		}
 		
-		var mapId = 1;
-		console.log(playerId, count, mapId);
+		console.log(playerId, count);
 
 		// Attendre que l'ajout du score soit terminé
-		await addNewGame(playerId, mapId, count);
+		await addNewGame(playerId, count);
 		
 	} catch (error) {
 		console.error('Erreur lors de la sauvegarde du score:', error);
@@ -471,23 +471,26 @@ async function getCurrentPlayerId() {
 	}
 }
 
-async function addNewGame(id_player, id_map, score) {
+async function addNewGame(id_player, score) {
 	console.log("Appel de addnewgame");
 	try {
 		const response = await fetch('/accounts/api/add_solo_casse_brique/', {
 			method: 'POST',
+			credentials: 'same-origin',
 			headers: {
+				'X-CSRFToken': csrftoken,  // Use the function directly
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({  // Convertit les données en JSON
+			body: JSON.stringify({
 				id_player: id_player,
-				id_map: id_map,
+				id_map: selectedMap,
 				score: score
 			})
 		});
 
 		if (!response.ok) {
-			throw new Error('Erreur lors de l\'ajout du jeu');
+			const text = await response.text();
+			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
 		}
 
 		const result = await response.json();

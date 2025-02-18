@@ -4,142 +4,538 @@
 
 {% block content %}
 
-    <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
+	<div class="parent-container">
 
-    <div class="profile-container">
+		<div class="profile-container">
 
-        <div class="profile-box">
-            <img class="profile-img" src="{{ user.users.image.url }}" alt="">
-            <!-- <button class="profile-img-upload">➕</button> -->
+			<div class="profile-box">
+				<img class="profile-img" src="{{ user.users.image.url }}" alt="">
+				<!-- <button class="profile-img-upload">➕</button> -->
 
-            {% if request.user.is_authenticated %}
-                <div class="profile-user-info">
-                    <span class="profile-username" style="color: black">👩‍🦲 : {{ request.user.username }}</span>
-                    <span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }}</span>
-                    <span class="profile-email" style="color: black">📧 : {{ request.user.email }}</span>
-                </div>
-            {% else %}
-                <p>Vous n'êtes pas connecté.</p>
-            {% endif %}
+				{% if request.user.is_authenticated %}
+					<div class="profile-user-info">
+						<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
+						<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
+						<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
+					</div>
+				{% else %}
+					<p>Vous n'êtes pas connecté.</p>
+				{% endif %}
 
-            <div class="profile-separator">
+				<div class="profile-separator">
+					{% if request.user == user %}
+						<p class="profile-text-settings-rdv">
+							Si vous voulez modifier vos informations utilisateurs
+							rendez-vous dans les settings.
+						</p>
+						<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+					{% else %}
+						<p class="other-profile-text-settings-rdv">
+							Vous pouvez ajouter {{profile_user.username}} en ami(e)
+							ou décider de le/la bloquer.
+						</p>
+					
+						<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
+						<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
+					{% endif %}
 
-                <p class="profile-text-settings-rdv">
-                    Si vous voulez modifier vos informations utilisateurs
-                    rendez-vous dans les settings.
-                </p>
+				</div>
+			</div>
+		</div>
 
-                <button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
-            </div>
-        </div>
-    </div>
+		<div class="game-history-container">
+			<h2>Historique des parties</h2>
+			
+			<div class="game-history-section">
+				<h3>Parties Pong</h3>
+				{% if games_P %}
+					{% for game in games_P %}
+						<!-- Tout ce qui est dates et heures -->
+						<div class="pong-date" style="width: auto; height: auto; background-color: black; color: white">{{ game.date|date:"d/m/Y H:i" }}</div>
+						
+						<!-- Container pour l'affichage des scores -->
+						<div class="pong-history" style="display: flex; align-items: center; border: 2px solid; background-color: {{ game.color }}; padding-left: 5px; padding-right: 5px; justify-content: space-between;">
+							
+							
+							<!-- Score du joueur à gauche -->
+							<span class="player-score" style="margin-left: 10px;">{{ game.score_p1 }}</span>
+							
+							<!-- Image du joueur à gauche -->
+							<img src="{{ user.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; border: 1px solid;">
+						
+							<!-- Image du "versus" au centre -->
+							<img src="{% static 'images/versus.png' %}" alt="" style="width: 50px; height: 50px; margin-right: 10px; margin-left: 10px;">
+						
+							<!-- Image de l'adversaire à droite de l'image "versus" -->
+							{% if game.is_bot_game %}
+								<!-- Si c'est contre un bot -->
+								<img src="{% static 'images/bot2.png' %}" style="width: 60px; height: 100px; border-radius: 50%; margin-left: 10px;">
+								<span class="player-score" style="margin-right: 10px;">{{ game.score_p2 }}</span>
+							{% elif game.id_p1 == user.users %}
+								<!-- Si l'utilisateur est le joueur 1 -->
+								<img src="{{ game.id_p2.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 10px; border: 1px solid;">
+								<span class="player-score" style="margin-right: 10px;">{{ game.score_p2 }}</span>
+							{% else %}
+								<!-- Si l'utilisateur est le joueur 2 -->
+								<img src="{{ game.id_p1.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 10px; border: 1px solid;">
+								<span class="player-score" style="margin-right: 10px;">{{ game.score_p1 }}</span>
+							{% endif %}
+						</div>
+					
+					
+					{% endfor %}
+					<!-- <table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Adversaire</th>
+								<th>Score</th>
+								<th>Type</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for game in games_P %}
+							<tr>
+								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+								<td>
+									{% if game.is_bot_game %}
+										Bot (Niveau {{ game.difficulty }})
+									{% elif game.id_p1 == user.users %}
+										{{ game.id_p2.name }}
+									{% else %}
+										{{ game.id_p1.name }}
+									{% endif %}
+								</td>
+								<td>
+									{% if game.id_p1 == user.users %}
+										{{ game.score_p1 }} - {{ game.score_p2 }}
+									{% else %}
+										{{ game.score_p2 }} - {{ game.score_p1 }}
+									{% endif %}
+								</td>
+								<td>{% if game.is_bot_game %}Bot{% else %}Joueur{% endif %}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table> -->
+				{% else %}
+					<p>Aucune partie Pong jouée</p>
+				{% endif %}
+			</div>
+	
+			<div class="game-history-section">
+				<h3>Parties Solo Casse-Briques</h3>
+				{% if games_S_CB %}
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Carte</th>
+								<th>Score</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for game in games_S_CB %}
+							<tr>
+								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+								<td>{{ game.id_map }}</td>
+								<td>{{ game.score }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Aucune partie Solo Casse-Briques jouée</p>
+				{% endif %}
+			</div>
+	
+			<div class="game-history-section">
+				<h3>Parties Multi Casse-Briques</h3>
+				{% if games_M_CB %}
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Adversaire</th>
+								<th>Score</th>
+								<th>Carte</th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for game in games_M_CB %}
+							<tr>
+								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+								<td>
+									{% if game.id_p1 == user.users %}
+										{{ game.id_p2.name }}
+									{% else %}
+										{{ game.id_p1.name }}
+									{% endif %}
+								</td>
+								<td>
+									{% if game.id_p1 == user.users %}
+										{{ game.score_p1 }} - {{ game.score_p2 }}
+									{% else %}
+										{{ game.score_p2 }} - {{ game.score_p1 }}
+									{% endif %}
+								</td>
+								<td>{{ game.map }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Aucune partie Multi Casse-Briques jouée</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 
-    <style>
+	<style>
 
-        .profile-container {
-            display: flex;
-            margin-top: 5%;
-            justify-content: center; /* Centre horizontalement */
-            align-items: center;
-        }
+		.parent-container {
+        	display: flex;
+        	justify-content: space-between; /* Espace les éléments */
+        	align-items: flex-start; /* Aligne les éléments en haut */
+        	margin-top: 5%; /* Ajustez selon vos besoins */
+        	padding: 0 20px; /* Ajoute un peu d'espace sur les côtés */
+    	}
 
-        .profile-box {
-            display: flex;
-            width: 400px;
-            height: 480px;
-            background-color: #888888;
-            border-radius: 10px;
-            border: 2px solid black;
-            flex-direction: column; /* Permet d'empiler les éléments */
-            justify-content: center; /* Centre le contenu verticalement */
-            align-items: center; /* Centre le contenu horizontalement */
-            text-align: center; /* Centre le texte à l'intérieur */
-            box-shadow: -10px 10px black;
-            transform: translateX(5px) translateY(-5px);
-            background: linear-gradient(to right, #aa3196, #9159c0);
-        }
-
-        .profile-separator {
-            position: absolute;
-            width: 400px;
-            height: 160px;
-            margin-top: 320px;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
-            border: 2px solid black;
-            background-color: #d8d8d8;
-        }
-
-        .profile-img {
-            width: 150px;
-            height: 150px;
-            border: 2px solid black;
-            border-radius: 50%;
-            margin-top: -140px;
-            margin-bottom: 15px; /* Ajouté pour espacer l'image du texte */
-        }
-
-        /* .profile-img-upload {
-            position: absolute;
+		.other-profile-add-friend,
+        .other-profile-block {
             width: auto;
             height: auto;
-            padding: 5px;
-            border: 2px solid rgb(0, 0, 0);
-            border-radius: 50px;
-            margin-top: -375px;
-            margin-left: 110px;
-            transition: all 0.3s ease;
-        }
-
-        .profile-img-upload:hover {
-            background-color: rgb(69, 224, 22);
-            cursor: pointer;
-        }
-        */
-
-        .profile-user-info {
-            flex-direction: column;
-            display: flex; /* Assure que les éléments sont empilés verticalement */
-            justify-content: center;
-            background-color: white;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            border-radius: 10px;
+            margin-right: 10px;
+            margin-left: 10px;
             border: 1px solid black;
-            border-radius: 10px;
-            padding: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
         }
 
-        .profile-user-info span {
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            text-align: left;
-            align-items: left;
-            font-size: 20px;
-        }
+		.profile-container {
+			display: flex;
+			flex: 1;
+			margin-top: 5%;
+			justify-content: center; /* Centre horizontalement */
+			align-items: center;
+		}
 
-        .profile-text-settings-rdv {
-            color: black;
-            margin-top: 10px; /* Ajouté pour espacer le texte du bas */
-            padding: 20px;
+		.other-profile-add-friend {
+            padding-left: 16px;
+            padding-right: 16px;
         }
-
-        .profile-go-to-settings {
-            width: 200px;
-            height: auto;
-            padding: 10px;
-            color: black;
-            margin-top: -20px;
-            background: linear-gradient(to right, #aa3196, #721bb9);
-            border-radius: 10px;
-            transition: all 0.2s ease-out;
-        }
-
-        .profile-go-to-settings:hover {
+        
+        .other-profile-add-friend:hover {
+            background-color: rgb(0, 179, 0);
+            scale: 1.15;
+            box-shadow: 0px 0px 10px 2px rgba(0, 194, 0, 0.74);
             cursor: pointer;
-            box-shadow: -5px 5px ;
-            transform: translateX(5px) translateY(-5px);
         }
 
+        .other-profile-block:hover {
+            background-color: red;
+            scale: 1.15;
+            box-shadow: 0px 0px 10px 2px rgba(194, 0, 0, 0.74);
+            cursor: pointer;
+        }
 
-    </style>
+		.profile-box {
+			display: flex;
+			width: 400px;
+			height: 480px;
+			background-color: #888888;
+			border-radius: 10px;
+			border: 2px solid black;
+			flex-direction: column; /* Permet d'empiler les éléments */
+			justify-content: center; /* Centre le contenu verticalement */
+			align-items: center; /* Centre le contenu horizontalement */
+			text-align: center; /* Centre le texte à l'intérieur */
+			box-shadow: -10px 10px #14141e;
+			background: linear-gradient(to right, #aa3196, #9159c0);
+			transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+		}
 
+		.profile-box:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
+		}
+
+		.profile-separator {
+			position: absolute;
+			width: 400px;
+			height: 160px;
+			margin-top: 320px;
+			border-bottom-left-radius: 10px;
+			border-bottom-right-radius: 10px;
+			border: 2px solid black;
+			background-color: #d8d8d8;
+		}
+
+		.profile-img {
+			width: 150px;
+			height: 150px;
+			border: 2px solid black;
+			border-radius: 50%;
+			margin-top: -140px;
+			margin-bottom: 15px; /* Ajouté pour espacer l'image du texte */
+		}
+
+		/* .profile-img-upload {
+			position: absolute;
+			width: auto;
+			height: auto;
+			padding: 5px;
+			border: 2px solid rgb(0, 0, 0);
+			border-radius: 50px;
+			margin-top: -375px;
+			margin-left: 110px;
+			transition: all 0.3s ease;
+		}
+
+		.profile-img-upload:hover {
+			background-color: rgb(69, 224, 22);
+			cursor: pointer;
+		}
+		*/
+
+		.profile-user-info {
+			flex-direction: column;
+			display: flex; /* Assure que les éléments sont empilés verticalement */
+			justify-content: center;
+			background-color: white;
+			border: 1px solid black;
+			border-radius: 10px;
+			padding: 10px;
+		}
+
+		.profile-user-info span {
+			font-family: 'Courier New', Courier, monospace;
+			display: flex;
+			text-align: left;
+			align-items: left;
+			font-size: 20px;
+		}
+
+		.profile-text-settings-rdv {
+			color: black;
+			margin-top: 10px; /* Ajouté pour espacer le texte du bas */
+			padding: 20px;
+		}
+
+		.profile-go-to-settings {
+			width: 200px;
+			height: auto;
+			padding: 10px;
+			color: black;
+			margin-top: -20px;
+			background: linear-gradient(to right, #aa3196, #721bb9);
+			border-radius: 10px;
+			{% comment %} transition: all 0.2s ease-out; {% endcomment %}
+		}
+
+		.profile-go-to-settings:hover {
+			cursor: pointer;
+			{% comment %} box-shadow: -5px 5px ; {% endcomment %}
+			{% comment %} transform: translateX(5px) translateY(-5px); {% endcomment %}
+		}
+
+
+	</style>
+
+    <script>
+
+		// BLOCK BUTTON
+		const blockButton = document.querySelector(".other-profile-block");
+        
+		blockButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const username = encodeURIComponent(blockButton.getAttribute('data-username'));
+            if (!username) {
+                console.error("Username non trouvé !");
+                alert("Erreur : Utilisateur non trouvé.");
+                return;
+            }
+            console.log("Username récupéré :", username); // Debugging
+            // Construire l'URL correctement
+            const url = `/accounts/block_user/${username}/`;
+            // Récupérer le token CSRF
+            const csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error("CSRF token non trouvé !");
+                alert("Erreur : CSRF token manquant.");
+                return;
+            }
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                console.log("Réponse reçue:", response);
+                if (!response.ok) {
+                    throw new Error('Erreur réseau ou serveur');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Données reçues:", data);
+                switch (data.status) {
+                    case ('user_blocked'):
+                        alert('Cet Insolent a été bloqué ! 🫡​');
+                        break;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Une erreur s'est produite lors de l'ajout de l'ami. Veuillez réessayer.");
+            });
+        });
+
+		// ADD BUTTON
+
+        const addButton = document.querySelector(".other-profile-add-friend");
+
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Récupérer et encoder le username
+            const username = encodeURIComponent(addButton.getAttribute('data-username'));
+
+            if (!username) {
+                console.error("Username non trouvé !");
+                alert("Erreur : Utilisateur non trouvé.");
+                return;
+            }
+
+            console.log("Username récupéré :", username); // Debugging
+
+            // Construire l'URL correctement
+            const url = `/accounts/add_friend/${username}/`;
+
+            // Récupérer le token CSRF
+            const csrfToken = getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error("CSRF token non trouvé !");
+                alert("Erreur : CSRF token manquant.");
+                return;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                console.log("Réponse reçue:", response);
+                if (!response.ok) {
+                    throw new Error('Erreur réseau ou serveur');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Données reçues:", data);
+                switch (data.status) {
+                    case ('friend_added'):
+                        alert('Ami ajouté avec succès !');
+                        break;
+                        
+                    case ('friend_request_sent'):
+                        alert('Demande d\'ami envoyée !');
+                        break;
+                    case ('waiting'):
+                        alert('Demande déjà envoyée, en attente de réponse.');
+                        break;
+                    case ('friend'):
+                        alert('Vous êtes déjà amis.');
+                        break;
+                    case ('blocked'):
+                        alert('Vous êtes bloqué par cet utilisateur.');
+                        break;
+                    
+                    case ('unblockBefore'):
+                        alert('Débloquez cet utilisateur pour le demander en ami.');
+                        break;
+				}
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Une erreur s'est produite lors de l'ajout de l'ami. Veuillez réessayer.");
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+
+
+	<style>
+		.game-history-container {
+			
+			max-height: 400px;
+			margin-top: 55px;
+			width: 30%;
+			padding: 20px;
+			background-color: #d9d9d9;
+			border-radius: 10px;
+			border: 2px solid black;
+			color: black;
+			overflow-y: auto;
+			
+			display: block;         /* On garde le mode block pour le conteneur */
+			text-align: center;     /* Centre le texte du conteneur */
+		}
+
+		.game-history-section {
+			margin-bottom: 20px;
+		}
+
+		.game-history-section table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 0 auto;         /* Centre le tableau horizontalement */
+		}
+
+		.game-history-section table th, 
+		.game-history-section table td {
+			background-color: #ca70ca;
+			border: 1px solid #ddd;
+			padding: 8px;
+			text-align: center;     /* Centre le texte dans les cellules */
+		}
+
+		.game-history-section table thead th {
+			background-color: #2d2fbb;
+		}
+
+		body {
+			color: #000000;
+		}
+
+	</style>
 {% endblock %}

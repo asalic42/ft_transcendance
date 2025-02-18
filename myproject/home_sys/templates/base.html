@@ -6,7 +6,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home space</title>
+	<title>Transcendence</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base-styles.css' %}">
@@ -17,14 +17,15 @@
 
 </head>
 <body>
-
+	{% csrf_token %}
+	<meta name="csrf-token" content="{{ csrf_token }}">	
     <nav class="navbar">
         
         <ul class="navbar-nav">
 
-            <li class="logo">
+            <li class="logo" style="margin-bottom: 10px;">
                 <a href="#" class="nav-icon">
-                    <span class="link-text logo-text">TotoBar</span>
+                    <span class="link-text logo-text">42Project</span>
                     <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
                         <path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/>
                     </svg>
@@ -32,6 +33,7 @@
             </li>
 
         <!-- HOME -->
+
             <li class="nav-item">
                 <a href="{% url 'home' %}" class="nav-icon">
                     <lord-icon
@@ -57,7 +59,7 @@
 
         <!-- PROFILE -->
             <li class="nav-item">
-                <a href="{% url 'profile' %}" class="nav-icon">
+				<a href="{% url 'profile' request.user.username %}" class="nav-icon">
                     <lord-icon
                         src="https://cdn.lordicon.com/hrjifpbq.json"
                         trigger="hover"
@@ -79,20 +81,25 @@
                 </a>
             </li>
 
-        <!-- CALENDAR -->
-            <!-- <li class="nav-item">
-                <a href="{% url 'unavailable' %}" class="nav-icon">
+        <!-- NOTIFICATION(S) -->
+            <li class="nav-item">
+                <a href="{% url 'notifications' %}" class="nav-icon">
                     <lord-icon
-                        src="https://cdn.lordicon.com/wmlleaaf.json"
+                        src="https://cdn.lordicon.com/lznlxwtc.json"
                         trigger="hover"
                         target=".nav-item">
                     </lord-icon>
-                    <span class="link-text">Calendrier</span>
+                    {% if request.user.users.has_unread_notifications %}
+                        <div class="notification-status active"></div>
+                    {% else %}
+                        <div class="notification-status"></div>
+                    {% endif %}
+                    <span class="link-text">Notifications</span>
                 </a>
-            </li> -->
+            </li>
 
         <!--- STATISTICS -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="{% url 'unavailable' %}" class="nav-icon">
                     <lord-icon
                         src="https://cdn.lordicon.com/uwinmnkh.json"
@@ -101,10 +108,15 @@
                     </lord-icon>
                     <span class="link-text">Statistiques</span>
                 </a>
-            </li>
+            </li> -->
 
         <!-- SETTINGS -->
             <li class="nav-item">
+				<div id="top-border" style="
+					width: 80%;
+					MARGIN: 0 auto;
+					border-top: 2px solid rgba(128, 128, 128, 0.8);">
+				</div>
                 <a href="{% url 'settings_user' %}" class="nav-icon">
                     <lord-icon
                         src="https://cdn.lordicon.com/ifsxxxte.json"
@@ -118,12 +130,99 @@
         </ul>
     </nav>
 
-
-
-    <main class="main-content">
+	<main class="main-content">
         {% block content %}
         {% endblock %}
     </main>
+
+    <style>
+        .notification-status {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            scale: 0.1;
+            margin-left: -10px;
+            margin-top: 0px;
+            display: none;
+            transition: 0.5s all ease;
+        }
+
+        .notification-status.active {
+            display: block;
+            background-color: blueviolet;
+            animation: anim-notif-status 0.5s forwards;
+        }
+
+        @keyframes anim-notif-status {
+			0% {scale: 0.1}
+			30% {scale: 0.5}
+			40% {scale: 0.2}
+            100% {scale: 0.2}
+		}
+
+    </style>
+
+    <script>
+		function getCookie(name) {
+			let cookieValue = null;
+			if (document.cookie && document.cookie !== '') {
+				const cookies = document.cookie.split(';');
+				for (let i = 0; i < cookies.length; i++) {
+					const cookie = cookies[i].trim();
+					if (cookie.substring(0, name.length + 1) === (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+		}
+		const csrftoken = getCookie('csrftoken');
+	</script>
+
+    <script>
+
+        const notificationSocket = new WebSocket(
+            'wss://' + window.location.host + '/ws/notifications/'
+        );
+
+        notificationSocket.onopen = function (e) {
+            console.log("WebSocket connecté avec succès !");
+        };
+
+
+        notificationSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+
+            if (data.type === 'notification') {
+                console.log("Data.type : [notification]");
+                // Afficher le point de notification
+                const notif = document.querySelector('.notification-status');
+                notif.classList.add("active");
+                console.log('Nouvelle notification :', data.message);
+            }
+
+            if (data.type === 'update_status') {
+                console.log("Data.type : [update_status]");
+                // Mettre à jour le statut des notifications
+                const notif = document.querySelector('.notification-status');
+                if (data.has_unread_notifications) {
+                    notif.classList.add("active");
+                } else {
+                    notif.classList.remove("active");
+                }
+            }
+        };
+
+        notificationSocket.onclose = function (e) {
+            console.error('WebSocket fermé de manière inattendue');
+        };
+
+        notificationSocket.onerror = function (e) {
+            console.error('Erreur WebSocket :', e);
+        };
+    </script>
 
 </body>
 </html>

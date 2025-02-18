@@ -49,6 +49,11 @@ if [ $# -ne 1 ]; then
 fi
 
 
+scriptmanNotify () {
+    notify-send -r 1000 -i $PWD/script_img/script_pp.png "ScriptMan" "$1" -t 27000
+}
+
+
 # FULL REMOVE + BUILD + LAUNCH
 if [ "$1" == "ev" ];then
     ./log.sh r-all
@@ -58,17 +63,29 @@ fi
 
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
+    scriptmanNotify "C'est parti mon build le projet"
+
 	rm -rf static/;
 	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
 
+    scriptmanNotify "[1/3] J'installe les requirements..."
+
+	pip install --no-cache-dir -r requirements.txt
 	LINE='127.0.0.1	transcendance.42.paris'
 	FILE='/etc/hosts'
 	sudo grep -qF "$LINE" "$FILE" ||  echo "$LINE" | sudo tee -a "$FILE"
 
+    scriptmanNotify "[2/3] Je build les images docker..."
+
     echo -e "${BLUE}> Building docker image... ${NC}"
     sudo docker-compose build
+
+    scriptmanNotify "[3/3] Lancement des services rien que pour toi mon cochon. Refresh quand je disparaitrais."
+    
     echo -e "${PURPLE}> Launching services...${NC}"
     sudo docker-compose up # démarre en arrière-plan
+
+    scriptmanNotify "Fin de la règle b-all bb !"
 
     echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://transcendance.42.paris"
 fi

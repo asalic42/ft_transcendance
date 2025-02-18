@@ -1,5 +1,5 @@
 import os
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
@@ -7,13 +7,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.http import require_http_methods, require_GET
+from django.conf import settings
 from .models import *
 import json
-from django.shortcuts import get_object_or_404
-
-from django.views.decorators.http import require_http_methods
-
+import requests
+from .utils import add_pong_logic
+from django.db.models import Q
 
 """
 |
@@ -49,7 +50,6 @@ def signout(request):
 |   Ici on gère la suppression d'un compte utilisateur de la BDD.
 |   Une fois effacé, on redirige sur la page de "compte effacé avec succès"
 |
-|
 """
 @login_required
 def delete_account(request):
@@ -67,7 +67,6 @@ def delete_account(request):
 """
 |
 |   Redirige sur la page correspondante quand le compte est effacé avec succès.
-|
 |
 """
 
@@ -91,11 +90,31 @@ def profile_page(request):
 def service_unavailable(request):
 	return (render(request, 'service_unavailable.html'))
 
+"""
+|
+|	Charge la page des channels avec les informations necessaires (ami, profil)
+|	On aurait pu passer le currentuser differement, via des cookies, mais flemmee : c'était implémenté comme ça, pourquoi changer une équipe qui gagne?
+|
+"""
+
 @login_required
 def channels_page(request):
-	curr_user = request.user
-	users = User.objects.all()
-	return (render(request, 'channels.html', {'current_user': curr_user, 'users': users}))
+    # Récupérer le profil de l'utilisateur connecté
+    current_user_profile = request.user.users
+
+    # Récupérer les demandes d'ami
+    friends = current_user_profile.friends.all()
+
+    # Passer les ami au template
+    context = {
+        'users': {
+            'friends': friends
+        },
+        'current_user': request.user,
+        'all_users': User.objects.all()
+    }
+
+    return render(request, 'channels.html', context)
 
 @login_required
 def game_page(request):
@@ -114,8 +133,17 @@ def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 @login_required
-def game_distant_page(request):
-	return (render(request, 'game-distant.html'))
+def game_distant_page_choice(request):
+	all_games = CurrentGame.objects.all()
+	return (render(request, 'game-type-pong2.html', {'all_games': all_games}))
+
+@login_required
+def game_distant_page(request, game_id):
+	return (render(request, 'game-distant.html', {'game_id':game_id}))
+
+@login_required
+def game_distant_page_t(request, game_id, id_t):
+	return (render(request, 'game-distant-t.html', {'game_id':game_id, 'id_t':id_t}))
 
 @login_required
 def game_bot_page(request):
@@ -147,11 +175,20 @@ def get_current_user_id(request):
 	"""Renvoie l'ID de l'utilisateur actuellement connecté"""
 	return JsonResponse({'userId': request.user.id})
 
-@csrf_exempt
+"""
+|
+|	Add la partie dans la database. id_player n'est pas vraiment un id, c'est un "pointeur"
+|
+"""
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def add_solo_casse_brique(request):
 	try:
 		data = json.loads(request.body)
+
+		user = Users.objects.get(user_id=data.get('id_player'))
+		data['id_player'] = user
+
 		new_game = SoloCasseBrique.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
 			'id': new_game.id,
@@ -163,43 +200,44 @@ def add_solo_casse_brique(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-@csrf_exempt
-@require_http_methods(["POST"])
 def add_pong(request):
-	try:
-		data = json.loads(request.body)
-		new_game = Pong.objects.create(**data)
-		return JsonResponse({'status': 'success', 'game': {
-			'id_p1': new_game.id_p1,
-			'id_p2': new_game.id_p2,
-			'score_p1': new_game.score_p1,
-			'score_p2': new_game.score_p2,
-			'date': new_game.date.isoformat(),
-			'difficulty': new_game.difficulty,
-			'bounce_nb': new_game.bounce_nb,
-		}}, status=201)
-	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    try:
+        data = json.loads(request.body)
+        game_data = add_pong_logic(data)
+        return JsonResponse({'status': 'success', 'game': game_data}, status=201)
+    except Users.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-
+"""
+|
+|	Ici on va aller cherche la map demandé dans la database, où est stocké le chemin pour y acceder.
+|	On lit le fichier, et on renvoie le texte brut, il sera traité côté client.
+|
+"""
 def map_view(request, map_id):
-	# Spécifiez le chemin de votre fichier .txt
 	selected_map = get_object_or_404(Maps, id=map_id)
-	# Lire le fichier .txt
 
+	# Lire le fichier .txt
 	try:
 		with open(selected_map.LinkMaps, 'r') as file:
 			map_data = file.read()
 	except FileNotFoundError:
 		return HttpResponse("Carte non trouvée", status=404)
 
-	# Retourner le contenu du fichier en tant que réponse https
+	# Retourner le contenu du fichier en tant que réponse http
 	return HttpResponse(map_data, content_type="text/plain")
 
 
 # """ CHANNELS VIEWS """ #
 
-@csrf_exempt
+"""
+|
+|	La view qui va être appellée en boucle dans le fetch côté client
+|	Pas très propre, on aurait pu utiliser des websockets. Dommage.
+|
+"""
 @require_http_methods(["GET"])
 def live_chat(request):
 	channel = request.GET.get('channel_name', None)
@@ -208,7 +246,7 @@ def live_chat(request):
 	if not channel:
 		return JsonResponse({'status': 'error', 'message': 'Channel name is required'}, status=400)
 
-	new_message = Messages.objects.filter(channel_name=channel)
+	new_message = Messages.objects.filter(channel_name=channel).order_by('id')
 	if last_message and last_message != "0":
 		try:
 			last_message = int(last_message)
@@ -223,12 +261,11 @@ def live_chat(request):
 				'sender': msg.sender,
 				'idSender': msg.idSender,
 				'message': msg.message,
+				'is_link': msg.is_link,
 				'date':msg.date.isoformat()} for msg in new_message]
 		return JsonResponse({'new_message': data})
 	return JsonResponse({'new_message': None})
 
-
-@csrf_exempt
 @require_http_methods(["GET"])
 def does_channel_exist(request, asked_name):
 	try:
@@ -237,7 +274,6 @@ def does_channel_exist(request, asked_name):
 	except Chans.DoesNotExist:
 		return JsonResponse({'status': 'error'})
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def post_chan(request):
 	try:
@@ -253,9 +289,6 @@ def post_chan(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-
-
-@csrf_exempt
 @require_http_methods(["GET"])
 def get_chans(request):
 	try:
@@ -265,7 +298,6 @@ def get_chans(request):
 		print(f"Erreur serveur: {str(e)}")
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	
-@csrf_exempt
 @require_http_methods(["GET"])
 def get_messages(request):
 	channel_name = request.GET.get('channel_name', None)
@@ -284,7 +316,6 @@ def get_messages(request):
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des messages'}, status=500)
 
-@csrf_exempt
 @require_http_methods(["POST"])
 def post_message(request):
 	try:
@@ -296,24 +327,16 @@ def post_message(request):
 			'sender': new_message.sender,
 			'idSender': new_message.idSender,
 			'message': new_message.message,
+			'is_link' : new_message.is_link,
 			'date':new_message.date.isoformat(),
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-	
-
-import requests
-from django.conf import settings
-from django.http import JsonResponse
 
 def get_ip_info(request):
 	url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
 	response = requests.get(url)
 	return JsonResponse(response.json())
-
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
 
 @require_GET
 def check_username(request):
@@ -343,7 +366,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Users
 
 @login_required
-@csrf_exempt
 def update_user_info(request):
 	if request.method == 'POST':
 		user = request.user  # Récupère l'utilisateur connecté
@@ -387,7 +409,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Users
 
 @login_required
-@csrf_exempt
 def upload_avatar(request):
 	if request.method == 'POST':
 		try:
@@ -424,23 +445,56 @@ def upload_avatar(request):
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 
+from django.shortcuts import redirect
+
 @login_required
 def profile_view(request, username):
-	user = get_object_or_404(User, username=username)
-	return render(request, 'profile-other-user.html', {'profile_user': user})
-@csrf_exempt
+	# Si aucun username n'est fourni, utiliser l'utilisateur connecté
+	if not username:
+		return redirect('profile', username=request.user.username)
+		
+	try:
+		user = User.objects.get(username=username)
+		users_profile = Users.objects.get(user=user)
+		
+		games_P = Pong.objects.filter(
+			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
+		).order_by('-date')
+
+		for game in games_P:
+			if (game.score_p1 < game.score_p2):
+				game.color = 'red'
+				continue
+			if (game.score_p1 > game.score_p2):
+				game.color = 'green'
+				continue
+		
+		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+		games_M_CB = MultiCasseBrique.objects.filter(
+			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
+		).order_by('-date')
+
+		return render(request, 'profile.html', {
+			'user': user,
+			'games_P': games_P,
+			'games_S_CB': games_S_CB,
+			'games_M_CB': games_M_CB
+		})
+		
+	except User.DoesNotExist:
+		return redirect('home')
+
+
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):
 	# Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
-	blocked_users_ids = BlockUsers.objects.filter(idUser=idPlayer).values_list('idBlocked', flat=True).distinct()
-
-	# Convertir le QuerySet en liste pour la réponse JSON
-	blocked_users_ids_list = list(blocked_users_ids)
-
+	current_user_profile = request.user.users
+	
+	all_users_id = [elmt.id for elmt in current_user_profile.blocked.all()]
 	# Retourner la réponse JSON
-	return JsonResponse({'blocked_users_ids': blocked_users_ids_list})
+	return JsonResponse({'blocked_users_ids': all_users_id})
 
-@csrf_exempt
+""" @csrf_exempt
 @require_http_methods(["POST"])
 def post_blocked(request):
 	try:
@@ -451,10 +505,10 @@ def post_blocked(request):
 			"idBlocked": new_blocked.idBlocked,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400) """
 	
 
-@csrf_exempt
+""" @csrf_exempt
 @require_http_methods(["POST"])
 def post_deblock(request):
 	try:
@@ -462,7 +516,7 @@ def post_deblock(request):
 		BlockUsers.objects.filter(idUser=data["idUser"], idBlocked=data["idBlocked"]).delete()
 		return JsonResponse({'status': 'success'})
 	except (KeyError, json.JSONDecodeError) as e:
-		return JsonResponse({'status': 'error'})
+		return JsonResponse({'status': 'error'}) """
 
 @require_GET
 def check_pp(request, idU):
@@ -478,13 +532,34 @@ def doesUserHaveAccessToChan(request, idC, idU):
 		priv_chan = PrivateChan.objects.get(id_chan = idC)
 		# print(priv_chan)
 		# message_list = list(messages.values())
-		if priv_chan.id_u1 == idU or priv_chan.id_u2 == idU:
-			return JsonResponse({'status': 'success', 'allowed': 'True', 'idU': idU, 'priv_chan.id_u1': priv_chan.id_u1, 'priv_chan.id_u2':priv_chan.id_u2})
-		return JsonResponse({'status': 'success', 'allowed': 'False', 'idU': idU, 'priv_chan.id_u1': priv_chan.id_u1, 'priv_chan.id_u2':priv_chan.id_u2})
+		if priv_chan.id_u1 == idU:
+			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2':priv_chan.id_u2})
+		if priv_chan.id_u2 == idU:
+			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2': priv_chan.id_u1})
+		return JsonResponse({'status': 'success', 'allowed': 'False', 'id_u1': idU, 'id_u1': priv_chan.id_u1, 'id_u2':priv_chan.id_u2})
 	except:
 		return JsonResponse({'status': 'error'})
 
-@csrf_exempt
+def check_duplicate_private_channel(request, user1_id, user2_id):
+    """
+    Vérifie si un canal privé existe déjà entre deux utilisateurs
+    """
+    # Normalise les IDs (le plus petit en premier)
+    id_u1, id_u2 = sorted([int(user1_id), int(user2_id)])
+    
+    # Cherche un canal existant avec ces utilisateurs dans n'importe quel ordre
+    existing_channel = PrivateChan.objects.filter(
+        (Q(id_u1=id_u1) & Q(id_u2=id_u2)) |
+        (Q(id_u1=id_u2) & Q(id_u2=id_u1))
+    ).first()
+    
+    if existing_channel:
+        return JsonResponse({
+            'exists': True,
+            'channel_id': existing_channel.id_chan
+        })
+    return JsonResponse({'exists': False})
+
 @require_http_methods(["POST"])
 def	postPv(request):
 	try:
@@ -492,17 +567,236 @@ def	postPv(request):
 		new_pv = PrivateChan.objects.create(**data)
 		return JsonResponse({'status': 'success', 'message': {
 			"id_chan": new_pv.id_chan, 
-			"id_u1": new_pv.id_u1, 
+			"id_u1": new_pv.id_u1,
 			"id_u2": new_pv.id_u2,
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 @require_GET
-def getNameById(request, nameU):
+def getNameById(request, idU):
 	try:
-		user = get_object_or_404(Users, name = nameU)  # pk = primary key
-		return JsonResponse({'status': 'success', 'pk': user.pk})  # Ensure 'image' is the correct field
+		user = get_object_or_404(Users, pk = idU)  # pk = primary key
+		return JsonResponse({'status': 'success', 'name': user.name})  # Ensure 'image' is the correct field
 	except User.DoesNotExist:
 		return JsonResponse({'error': 'User not found'}, status=404)
+
+# import logging
+
+# Configurez le logger
+# logger = logging.getLogger(__name__)
+
+@login_required
+def add_friend(request, username):
+	if request.method == 'POST':
+		current_user = request.user.users
+		other_user = get_object_or_404(User, username=username)
+
+		# logger.info(f"\033[31mUtilisateur actuel : {current_user}\033[0m")
+		# logger.info(f"\033[31mAutre utilisateur : {other_user}\033[0m")
+		# logger.info(f"\033[31mALL F.REQUEST From User : {current_user} : {current_user.friends_request.all()}\033[0m")
+		
+		if (other_user.users in current_user.blocked.all()):
+			return JsonResponse({'status': 'unblockBefore'})
+        
+		# Si Current User in OtherUser Friend list
+		if (current_user in other_user.users.friends.all()):
+			return JsonResponse({'status': 'friend'})
+        
+		# Si Current User in OtherUser Blocked list
+		if (current_user in other_user.users.blocked.all()):
+			return JsonResponse({'status': 'blocked'})
+        
+        # Si Current User in OtherUser Friends_request list
+		if (current_user in other_user.users.friends_request.all()):
+			return JsonResponse({'status': 'waiting'})
+
+		if other_user.users in current_user.friends_request.all():
+
+				# Si l'utilisateur visité est dans la liste des demandes d'ami de l'utilisateur actuel
+				current_user.friends.add(other_user)
+				other_user.users.friends.add(current_user)
+				current_user.friends_request.remove(other_user)
+				return JsonResponse({'status': 'friend_added'})
+		else:
+			# logger.info(f"\033[33m #3 condition\033[0m")
+			# Sinon, ajouter l'utilisateur actuel dans la liste des demandes d'ami de l'utilisateur visité
+			other_user.users.friends_request.add(current_user)
+			return JsonResponse({'status': 'friend_request_sent'})
+
+	return JsonResponse({'status': 'error'}, status=400)
+
+
+# --------------------------------------------------------------------------------------#
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def notification_page(request):
+	# Récupérer le profil de l'utilisateur connecté
+	current_user_profile = request.user.users
+
+	current_user_profile.has_unread_notifications = False
+	current_user_profile.save()
+
+	# Récupérer les demandes d'ami
+	friend_requests = current_user_profile.friends_request.all()
+
+	# Passer les demandes d'ami au template
+	context = {
+		'users': current_user_profile,  # Passer le profil de l'utilisateur
+		'friend_requests': friend_requests,  # Passer les demandes d'ami
+	}
+
+	return render(request, 'notifications.html', context)
+
+@login_required
+def accept_friend_request(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			if (other_user.users in current_user_profile.blocked.all()):
+				return JsonResponse({'status': 'unblockBefore'})
+            
+			# Si Current User in OtherUser Blocked list
+			if (current_user_profile in other_user.users.blocked.all()):
+				return JsonResponse({'status': 'blocked'})
 	
+			# Ajouter l'utilisateur à la liste d'amis
+			current_user_profile.friends.add(other_user.users)
+			other_user.users.friends.add(current_user_profile)
+
+			# Supprimer la demande d'ami
+			current_user_profile.friends_request.remove(other_user.users)
+
+			return JsonResponse({'status': 'friend_added'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def decline_friend_request(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Supprimer la demande d'ami
+			current_user_profile.friends_request.remove(other_user.users)
+
+			return JsonResponse({'status': 'friend_request_declined'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def block_user(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			if (other_user.users in current_user_profile.friends.all()):
+				current_user_profile.friends.remove(other_user.users)
+				other_user.users.friends.remove(current_user_profile)
+			current_user_profile.blocked.add(other_user.users)
+
+			# Supprimer la demande d'ami (si elle existe)
+			current_user_profile.friends_request.remove(other_user.users)
+
+			return JsonResponse({'status': 'user_blocked'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def remove_friend(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.friends.remove(other_user.users)
+			other_user.users.friends.remove(current_user_profile)
+
+			# Supprimer la demande d'ami (si elle existe)
+
+			return JsonResponse({'status': 'user_removed'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def remove_blocked_user(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.blocked.remove(other_user.users)
+			# Supprimer la demande d'ami (si elle existe)
+
+			return JsonResponse({'status': 'blocked_user_removed'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def invite_friend(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			if (current_user_profile in other_user.users.blocked.all()):
+				return (JsonResponse({'status': 'blocked'}))
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			other_user.users.invite.add(current_user_profile)
+			# Supprimer la demande d'ami (si elle existe)
+
+			return JsonResponse({'status': 'game_invitation_send'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def invitation_declined(request, username):
+	if request.method == 'POST':
+		try:
+			current_user_profile = request.user.users
+			other_user = get_object_or_404(User, username=username)
+
+			# Ajouter l'utilisateur à la liste des utilisateurs bloqués
+			current_user_profile.invite.remove(other_user.users)
+			# Supprimer la demande d'ami (si elle existe)
+
+			return JsonResponse({'status': 'game_invitation_declined'})
+		except Exception as e:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
+
+from django.http import JsonResponse
+from .models import Users
+
+def user_status(request):
+    users = Users.objects.all().values('id', 'is_online')
+    return JsonResponse(list(users), safe=False)
+
+
+@login_required
+def create_current_game(request, sender_id):
+	try:
+		created = CurrentGame.objects.get_or_create(game_id=sender_id)
+		if created:
+			return (render(request, 'game-distant.html', {'game_id':sender_id}))
+		else:
+			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+	except Exception as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
