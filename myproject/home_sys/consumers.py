@@ -54,6 +54,7 @@ class PongGame:
 		self.is_over = False
 		self.multiplyer = 0
 		self.bounce = 0
+		self.reported_to_tournament = False  # <-- Nouveau drapeau
 
 	def reset_game(self):
 		self.ball = {
@@ -191,12 +192,14 @@ class PongConsumer(AsyncWebsocketConsumer):
 				# sys.stdout.flush()
 				await self.addTgame(game_data['pk'])
 				tournament_group = f"tournament_{self.id_t}"
-				await self.channel_layer.group_send(
-					tournament_group,
-					{
-						'type': 'match_finished',  # Le type définit le nom de la méthode à appeler dans le consumer cible
-					}
-				)
+				if self.game.reported_to_tournament is False:
+					self.game.reported_to_tournament = True  # Bloquer les doubles envois
+					await self.channel_layer.group_send(
+						tournament_group,
+						{
+							'type': 'match_finished',  # Le type définit le nom de la méthode à appeler dans le consumer cible
+						}
+					)
 
 			await self.send(text_data=json.dumps({
 				'type': 'game_created',
@@ -279,20 +282,28 @@ class PongConsumer(AsyncWebsocketConsumer):
 	
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
+			
+			# Marquer le perdant
 			if player_number == 1:
 				self.game.scores['p2'] = 1
-			elif player_number == 2:
+			else:
 				self.game.scores['p1'] = 1
 	
-			loser = player_number
-			
-			await self.send_game_state()
+			# Envoyer game_won aux joueurs
 			await self.channel_layer.group_send(
-				self.room_group_name, {
-					'type': 'game_won',
-					'loser': loser 
-				}
+				self.room_group_name,
+				{"type": "game_won", "loser": player_number}
 			)
+	
+			# Envoyer match_finished au tournoi UNE FOIS SEULEMENT
+			if self.id_t != 0 and not self.game.reported_to_tournament:
+				self.game.reported_to_tournament = True  # Bloquer les doubles envois
+				tournament_group = f"tournament_{self.id_t}"
+				await self.channel_layer.group_send(
+					tournament_group,
+					{"type": "match_finished"}
+				)
+	
 			self.game.remove_player(self.channel_name)
 		else:
 			print(f"Channel {self.channel_name} already removed from players.")
@@ -1437,6 +1448,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	tournament_ended = {}
 	async def connect(self):
 		try:
+			print("starting connection process")
+			sys.stdout.flush()
 			self.tournament_id = self.scope['url_route']['kwargs']['id_t']
 			self.tournament_group = f"tournament_{self.tournament_id}"
 			
@@ -1458,6 +1471,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			
 			if (len(TournamentConsumer.players[self.tournament_id]) >= 4 or 
 				TournamentConsumer.is_running[self.tournament_id]):
+				print("closing at len(TournamentConsumer.players[self.tournament_id]")
+				sys.stdout.flush()
 				await self.close()
 				return
 
@@ -1490,9 +1505,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				except Exception as e:
 					print(f"Erreur lors de l'ajout du tournois dans les rooms disponibles : {str(e)}")
 					sys.stdout.flush()
-					await self.close()
+					await self.close()	
 					return 
-	
+			if (TournamentConsumer.tournament_ended[self.tournament_id]):
+				await self.send(json.dumps({"type": "already"})) #envoyer message pour notif
+				await self.disconnect(0) #deco proprement
+				await self.close() #close le socket
+				return 
 			# Si 4 joueurs sont connectés pour ce tournoi, lancer le tournoi
 			if len(TournamentConsumer.players[self.tournament_id]) == 4:
 				try : 
@@ -1547,7 +1566,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			[(players[0], players[2]), (players[1], players[3])],  # Round 2
 			[(players[0], players[3]), (players[1], players[2])],  # Round 3
 		]
-	
+		message = f"The matches will be : \n \
+		Round 1: {round_pairings[0][0][0]['username']} against {round_pairings[0][0][1]['username']} and {round_pairings[0][1][0]['username']} against {round_pairings[0][1][1]['username']} \n \
+		Round 2: {round_pairings[1][0][0]['username']} against {round_pairings[1][0][1]['username']} and {round_pairings[1][1][0]['username']} against {round_pairings[1][1][1]['username']} \n \
+		Round 3: {round_pairings[2][0][0]['username']} against {round_pairings[2][0][1]['username']} and {round_pairings[2][1][0]['username']} against {round_pairings[2][1][1]['username']}"
+
+		print(message)
+		sys.stdout.flush()
 		game_id1 = random.randint(10000, 19999)
 		game_id2 = random.randint(10000, 19999)
 	
@@ -1556,17 +1581,24 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	
 			for pair_index, pair in enumerate(current_round_pairings):
 				game_id = game_id1 if pair_index < 1 else game_id2
+				name = [pair[0]['username'], pair[1]['username']]
+				index = 0
 				for player_in_pair in pair:
 					game_link = f"https://transcendance.42.paris/accounts/game-distant/{game_id}/{self.tournament_id}"
 					print(f'On envoie le lien "{game_link}" à {player_in_pair["channel_name"]} and round nb is at {TournamentConsumer.roundNb[self.tournament_id]}')
+					print(f'name: {name}')
+					print(f'name[index]: {name[index]}')
 					sys.stdout.flush()
 					await self.channel_layer.send(
 						player_in_pair['channel_name'],
 						{
 							'type': 'send_game_link',
 							'link': game_link,
+							'name_op': name[index],
+							'message': message
 						}
-					)
+					)	
+					index += 1
 		else:
 			print("Tournament finished!")
 			sys.stdout.flush()
@@ -1579,7 +1611,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			link = event['link']
 			await self.send(text_data=json.dumps({
 				'type': 'game_link',
-				'link': link
+				'link': link,
+				'name_op': event['name_op'],
+				'message': event['message']
 			}))
 		except 	Exception as e:
 			print(f"Erreur lors de l'envoi du lien de jeu : {e}")
@@ -1664,21 +1698,23 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			}))
 
 	async def match_finished(self, event):
-		TournamentConsumer.gameFinished[self.tournament_id] += 1
-		print(f"match finished: {TournamentConsumer.gameFinished[self.tournament_id]}")
-		sys.stdout.flush()
-		if (TournamentConsumer.gameFinished[self.tournament_id] == 8):
-			TournamentConsumer.gameFinished[self.tournament_id] = 0
-			TournamentConsumer.roundNb[self.tournament_id] += 1
-
-			if TournamentConsumer.roundNb[self.tournament_id] == 3:
-				print("Tournament finished!")
-				sys.stdout.flush()
-				TournamentConsumer.is_running[self.tournament_id] = False
-				await self.tournament_ending()  # Call tournament_ending
-				return
-
-			await self.start_tournament()
+		if self.tournament_id not in self.gameFinished:
+			return  # Sécurité
+	
+		self.gameFinished[self.tournament_id] += 1
+		print(f"Matchs terminés : {self.gameFinished[self.tournament_id]}/2")
+	
+		# Si 2 matches terminés dans ce round
+		if self.gameFinished[self.tournament_id] == 8:
+			self.gameFinished[self.tournament_id] = 0  # Réinitialiser
+			self.roundNb[self.tournament_id] += 1
+	
+			# Si 3 rounds terminés, fin du tournoi
+			if self.roundNb[self.tournament_id] == 3:
+				print("Fin du tournoi !")
+				await self.tournament_ending()
+			else:
+				await self.start_tournament()  # Lancer le round suivant
 
 	@database_sync_to_async
 	def get_tournament_results(self):
