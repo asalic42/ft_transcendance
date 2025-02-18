@@ -26,6 +26,23 @@ class Users(models.Model):
 
 	def __str__(self):
 		return self.name
+	
+	def print_info(self):
+		return {
+            'name': self.name,
+            'pseudo': self.pseudo,
+            'date': self.date.strftime('%Y-%m-%d %H:%M:%S'),
+            'image': self.image.url if self.image else 'No image',
+            'friends': [friend.name for friend in self.friends.all()],
+            'friends_request': [request.name for request in self.friends_request.all()],
+            'blocked': [blocked.name for blocked in self.blocked.all()],
+            'invite': [invite.name for invite in self.invite.all()],
+            'has_unread_notifications': self.has_unread_notifications,
+            'status': self.status,
+            'is_online': self.is_online,
+            'win_nb': self.win_nb,
+            'lose_nb': self.lose_nb,
+        }
 
 class Chans(models.Model):
 	id = models.AutoField(primary_key = True)

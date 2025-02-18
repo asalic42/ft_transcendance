@@ -89,44 +89,12 @@
 					
 					
 					{% endfor %}
-					<!-- <table>
-						<thead>
-							<tr>
-								<th>Date</th>
-								<th>Adversaire</th>
-								<th>Score</th>
-								<th>Type</th>
-							</tr>
-						</thead>
-						<tbody>
-						{% for game in games_P %}
-							<tr>
-								<td>{{ game.date|date:"d/m/Y H:i" }}</td>
-								<td>
-									{% if game.is_bot_game %}
-										Bot (Niveau {{ game.difficulty }})
-									{% elif game.id_p1 == user.users %}
-										{{ game.id_p2.name }}
-									{% else %}
-										{{ game.id_p1.name }}
-									{% endif %}
-								</td>
-								<td>
-									{% if game.id_p1 == user.users %}
-										{{ game.score_p1 }} - {{ game.score_p2 }}
-									{% else %}
-										{{ game.score_p2 }} - {{ game.score_p1 }}
-									{% endif %}
-								</td>
-								<td>{% if game.is_bot_game %}Bot{% else %}Joueur{% endif %}</td>
-							</tr>
-						{% endfor %}
-						</tbody>
-					</table> -->
+
 				{% else %}
 					<p>Aucune partie Pong jouée</p>
 				{% endif %}
 			</div>
+
 	
 			<div class="game-history-section">
 				<h3>Parties Solo Casse-Briques</h3>
@@ -193,6 +161,7 @@
 					<p>Aucune partie Multi Casse-Briques jouée</p>
 				{% endif %}
 			</div>
+			<div class="blur-overlay"></div>
 		</div>
 	</div>
 
@@ -200,10 +169,9 @@
 
 		.parent-container {
         	display: flex;
-        	justify-content: space-between; /* Espace les éléments */
-        	align-items: flex-start; /* Aligne les éléments en haut */
-        	margin-top: 5%; /* Ajustez selon vos besoins */
-        	padding: 0 20px; /* Ajoute un peu d'espace sur les côtés */
+        	justify-content: center;
+        	align-items: center;
+        	margin-top: 5%;
     	}
 
 		.other-profile-add-friend,
@@ -226,7 +194,7 @@
 			display: flex;
 			flex: 1;
 			margin-top: 5%;
-			justify-content: center; /* Centre horizontalement */
+			justify-content: center;
 			align-items: center;
 		}
 
@@ -499,19 +467,35 @@
 
 	<style>
 		.game-history-container {
-			
+			/* margin-top: 5%; */
+			position: relative;
+			display: block;         /* On garde le mode block pour le conteneur */
+			justify-content: center;
+			align-items: center;
 			max-height: 400px;
 			margin-top: 55px;
-			width: 30%;
+			max-width: 400px;
 			padding: 20px;
 			background-color: #d9d9d9;
+			box-shadow: -10px 10px #14141e;
+			border: 4px solid black;
 			border-radius: 10px;
-			border: 2px solid black;
 			color: black;
 			overflow-y: auto;
-			
-			display: block;         /* On garde le mode block pour le conteneur */
+			overflow-x: hidden;
 			text-align: center;     /* Centre le texte du conteneur */
+		}
+
+		.blur-overlay {
+			position: sticky;
+			bottom: -50px;
+			left: -25px;
+			width: 450px;
+			height: 50px;
+			background-color: rgba(217, 217, 217, 0.39);
+			filter: blur(20px);
+			z-index: 1;
+			pointer-events: none; /* Permet juste de cliquer à travers le flou */
 		}
 
 		.game-history-section {

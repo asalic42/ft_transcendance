@@ -208,6 +208,7 @@ def add_pong(request):
 |	On lit le fichier, et on renvoie le texte brut, il sera traité côté client.
 |
 """
+
 def map_view(request, map_id):
 	selected_map = get_object_or_404(Maps, id=map_id)
 
@@ -230,6 +231,8 @@ def map_view(request, map_id):
 |	Pas très propre, on aurait pu utiliser des websockets. Dommage.
 |
 """
+
+
 @require_http_methods(["GET"])
 def live_chat(request):
 	channel = request.GET.get('channel_name', None)
@@ -247,7 +250,7 @@ def live_chat(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid last_message value'}, status=400)
 
 	if new_message.exists():
-		data = [{ 
+		data = [{
 				'id': msg.id,
 				'channel_name': msg.channel_name,
 				'sender': msg.sender,
@@ -260,6 +263,7 @@ def live_chat(request):
 
 @require_http_methods(["GET"])
 def does_channel_exist(request, asked_name):
+
 	try:
 		listing = Chans.objects.get(name=asked_name)
 		return JsonResponse({'status': 'success', 'private' : listing.private, 'id': listing.id})
@@ -271,6 +275,7 @@ def post_chan(request):
 	try:
 		data = json.loads(request.body)
 		new_chan = Chans.objects.create(**data)
+
 		return JsonResponse({'status': 'success', 'chan': {
 			'id': new_chan.id,
 			'name': new_chan.name,
@@ -285,6 +290,7 @@ def post_chan(request):
 def get_chans(request):
 	try:
 		channels = list(Chans.objects.values('id', 'name', 'private'))
+		
 		return JsonResponse({'status': 'success', 'channels': channels}, status=200)
 	except Exception as e:
 		print(f"Erreur serveur: {str(e)}")
@@ -361,6 +367,7 @@ from .models import Users
 def update_user_info(request):
 	if request.method == 'POST':
 		user = request.user  # Récupère l'utilisateur connecté
+		logger.info(f"[UPDATE USER INFO][TYPE]: {type(user)}")
 		
 		# Récupère les nouvelles données depuis la requête
 		new_email = request.POST.get('email')
@@ -376,13 +383,42 @@ def update_user_info(request):
 				user.email = new_email
 			if new_username:
 				user.username = new_username
+				user.users.name = new_username
+				user_profile.name = new_username
 			if new_pseudo:
 				user_profile.pseudo = new_pseudo  # Met à jour le pseudo
 
 			# Sauvegarde les changements
 			user.save()
 			user_profile.save()  # Sauvegarde le profil utilisateur avec la nouvelle image
-			
+
+			# En gros, vu qu'on a modifié le profil il faut aussi modifier ceux enregistrés dans blocked et friend etc
+			all_users = Users.objects.all()
+			for other_user in all_users:
+				if other_user.blocked.filter(pk=user_profile.pk).exists():
+					logger.info(f"\t[UPDATE][BLOCKED]: removing {user_profile}, adding {user}")
+					other_user.blocked.remove(user_profile.pk)
+					other_user.blocked.add(user.users)
+
+				if (other_user.friends.filter(pk=user_profile.pk).exists()):
+					if other_user.friends.filter(pk=user_profile.pk).exists():
+						logger.info(f"\t[UPDATE][FRIENDS]: removing {user_profile}, adding {user}")
+						other_user.friends.remove(user_profile.pk)
+						other_user.friends.add(user.users)
+
+				if (other_user.friends_request.filter(pk=user_profile.pk).exists()):
+					if other_user.friends_request.filter(pk=user_profile.pk).exists():
+						logger.info(f"\t[UPDATE][FRIENDS REQUEST]: removing {user_profile}, adding {user}")
+						other_user.friends_request.remove(user_profile.pk)
+						other_user.friends_request.add(user.users)
+
+				if (other_user.invite.filter(pk=user_profile.pk).exists()):
+					if other_user.invite.filter(pk=user_profile.pk).exists():
+						logger.info(f"\t[UPDATE][INVITE]: removing {user_profile}, adding {user}")
+						other_user.invite.remove(user_profile.pk)
+						other_user.invite.add(user.users)
+
+
 			return JsonResponse({
 				"status": "success",
 				"message": "Informations mises à jour.",
@@ -439,6 +475,10 @@ from django.contrib.auth.models import User
 
 from django.shortcuts import redirect
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 @login_required
 def profile_view(request, username):
 	# Si aucun username n'est fourni, utiliser l'utilisateur connecté
@@ -467,17 +507,21 @@ def profile_view(request, username):
 			if (s1 > s2):
 				game.color = 'green'
 				continue
+
+			if MatchsTournaments.objects.filter(idMatchs=game).exists():
+				logger.info(f"{game.id} found in tournament!")
 		
 		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
 		games_M_CB = MultiCasseBrique.objects.filter(
 			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
 		).order_by('-date')
 
+
 		return render(request, 'profile.html', {
 			'user': user,
 			'games_P': games_P,
 			'games_S_CB': games_S_CB,
-			'games_M_CB': games_M_CB
+			'games_M_CB': games_M_CB,
 		})
 		
 	except User.DoesNotExist:
@@ -702,6 +746,15 @@ def block_user(request, username):
 			if (other_user.users in current_user_profile.friends.all()):
 				current_user_profile.friends.remove(other_user.users)
 				other_user.users.friends.remove(current_user_profile)
+			
+			if (other_user.users in current_user_profile.friends_request.all()):
+				current_user_profile.friends_request.remove(other_user.users)
+				other_user.users.friends_request.remove(current_user_profile)
+
+			if (other_user.users in current_user_profile.invite.all()):
+				current_user_profile.invite.remove(other_user.users)
+				other_user.users.invite.remove(current_user_profile)
+
 			current_user_profile.blocked.add(other_user.users)
 
 			# Supprimer la demande d'ami (si elle existe)
