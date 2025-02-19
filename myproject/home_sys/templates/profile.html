@@ -100,14 +100,15 @@
 
 								<!-- Score du joueur à gauche -->
 								{% if game.id_p1 == user.users %}
-									<span class="player-score" style="margin-left: 10px;">{{ game.score_p1 }}</span>
+									<span class="player-score" style="margin-left: 10px; padding: 10px;">{{ game.score_p1 }}</span>
 								{% else %}
-									<span class="player-score" style="margin-left: 10px;">{{ game.score_p2 }}</span>
+									<span class="player-score" style="margin-left: 10px; padding: 10px;">{{ game.score_p2 }}</span>
 								{% endif %}
 							
 								<!-- Image du joueur à gauche -->
 								<img src="{{ user.users.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px; border: 1px solid;">
-						
+								<span style="padding: 10px;">{{ user.users.name}}</span>
+
 								<!-- Image du "versus" au centre -->
 								<img src="{% static 'images/versus.png' %}" alt="" style="width: 50px; height: 50px; margin-right: 10px; margin-left: 10px;">
 						
@@ -118,11 +119,13 @@
 									<span class="player-score" style="margin-right: 10px;">{{ game.score_p2 }}</span>
 								{% else %}
 									{% if game.id_p1 == user.users %}
+										<span style="padding: 10px;">{{ game.id_p2.name}}</span>
 										<img src="{{ game.id_p2.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 10px; border: 1px solid;">
-										<span class="player-score" style="margin-right: 10px;">{{ game.score_p2 }}</span>
+										<span class="player-score" style="margin-right: 10px; padding: 10px;">{{ game.score_p2 }}</span>
 									{% else %}
+										<span style="padding: 10px;">{{ game.id_p1.name}}</span>
 										<img src="{{ game.id_p1.image.url }}" style="width: 50px; height: 50px; border-radius: 50%; margin-left: 10px; border: 1px solid;">
-										<span class="player-score" style="margin-right: 10px;">{{ game.score_p1 }}</span>
+										<span class="player-score" style="margin-right: 10px; padding: 10px;">{{ game.score_p1 }}</span>
 									{% endif %}
 								{% endif %}
 							</div>

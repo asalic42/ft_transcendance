@@ -1,4 +1,5 @@
 .parent-of-parent-container {
+	margin-top: -80px;
     position: relative; /* Nécessaire pour positionner .parent-container */
     width: 100%; /* Assurez-vous que le parent a une largeur définie */
     height: 100vh; /* Exemple de hauteur */
@@ -369,121 +370,217 @@
 
 /* --------------------------------- */
 
+/* Conteneur principal */
 .game-history-container {
-	/* margin-top: 5%; */
-	position: relative;
-	display: block;         /* On garde le mode block pour le conteneur */
-	justify-content: center;
-	align-items: center;
-	max-height: 400px;
-	margin-top: 55px;
-	max-width: 400px;
-	padding: 20px;
-	background-color: rgb(44, 44, 59); /* #d9d9d9 */;
-	box-shadow: -10px 10px #14141e ;
-	border: 4px solid black;
-	border-radius: 10px;
-	overflow-y: auto;
-	overflow-x: hidden;
-	text-align: center;     /* Centre le texte du conteneur */
+    max-height: 430px; /* Limite la hauteur pour rendre la section scrollable */
+    overflow-y: auto; /* Active le défilement vertical */
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1a1a, #4b1248); /* Dégradé violet foncé */
+    color: rgb(0, 0, 0);
+    border-radius: 15px;
+	margin-top: 60px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    font-family: 'Arial', sans-serif;
 }
 
-.game-history-container h2,
-.game-history-container h3 {
-	color: white;
+.game-history-container::-webkit-scrollbar {
+    display: none; /* Masquer la barre de défilement pour Chrome, Safari et Opera */
 }
 
-.game-history-container .if-no-game {
-	color: white;
+/* Titre principal */
+.game-history-container h2 {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
 }
 
-.blur-overlay {
-	position: sticky;
-	bottom: -50px;
-	left: -25px;
-	width: 450px;
-	height: 50px;
-	background-color: rgb(31, 31, 43, 0.39); /* rgba(217, 217, 217, 0.39); */
-	filter: blur(20px);
-	z-index: 1;
-	pointer-events: none; /* Permet juste de cliquer à travers le flou */
-}
-
+/* Sections d'historique */
 .game-history-section {
-	margin-bottom: 20px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.game-history-section table {
-	width: 100%;
-	border-collapse: collapse;
-	margin: 0 auto;         /* Centre le tableau horizontalement */
+.game-history-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #fff;
 }
 
-.game-history-section table th, 
-.game-history-section table td {
-	background-color: #ca70ca;
-	border: 1px solid #000000;
-	padding: 8px;
-	text-align: center;     /* Centre le texte dans les cellules */
+.game-history-section span {
+	color: white;
 }
 
-.game-history-section table thead th {
-	background-color: #2d2fbb;
+/* Dates des parties */
+.pong-date {
+    font-size: 0.9rem;
+    background-color: #000;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: inline-block;
 }
 
-body {
-	color: #000000;
+/* Conteneur des parties */
+.pong-history {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
+.pong-history:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Images des utilisateurs */
+.main-user-img, .other-user-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #000000;
+    margin: 0 10px;
+}
+
+.trophy-img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.versus-img {
+    width: 40px;
+    height: 40px;
+    margin: 0 20px;
+}
+
+/* Barre centrale */
+.center-bar {
+    width: 2px;
+    height: 50px;
+    background-color: #000000;
+    margin: 0 20px;
+}
+
+/* Tableaux */
+.game-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.game-table th, .game-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-table th {
+    background-color: rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+}
+
+/* Message si aucune partie */
+.if-no-game {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
 
 /* -------------------------------------------- */
 
+/* Style général pour le conteneur */
 .page-title {
-	background-color: #1a1a1a;
-	border-radius: 15px;
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	padding: 10px;
-	margin-bottom: -80px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	transition: all 0.3s ease-in-out;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ff00c8, #fc4a1a);
+	border-radius: 15px;
+    color: white;
+	height: auto;
+    font-family: 'Thunder-VF';
+    text-align: center;
 }
 
 .sub-container {
-	color: white;
-	max-width: 800px;
+    padding-bottom: 20px;
+	width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+	align-items: center;
+	justify-content: center;
 	text-align: center;
-	margin-top: -40px;
 }
 
-h1 {
-	font-size: 2.5rem;
-	letter-spacing: 2px;
-	margin-bottom: 15px;
+/* Style pour le titre */
+.sub-container h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: slideIn 1s ease-in-out;
 }
 
 .emoji-in-title {
-	display: inline-block;
-	animation: rotateEmoji 4s infinite alternate;
+    display: inline-block;
+    animation: floatEmoji 3s infinite ease-in-out;
 }
 
-p {
-	font-size: 1.2rem;
-	line-height: 1.5;
-	color: #b0b0b0;
+@keyframes floatEmoji {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
-@keyframes rotateEmoji {
-	0% {
-		transform: rotate(-10deg);
-	}
-	50% {
-		transform: rotate(10deg);
-	}
-	100% {
-		transform: rotate(-10deg);
-	}
+/* Style pour le paragraphe */
+.sub-container p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin: 0;
+    animation: fadeInUp 1.5s ease-in-out;
 }
 
-/* ----------------------------------- */
+/* Animations */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

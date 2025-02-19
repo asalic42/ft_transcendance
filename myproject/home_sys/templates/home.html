@@ -4,15 +4,16 @@
 
 {% block content %}
 
-{% comment %} <link rel="stylesheet" href="{% static 'css/home-style.css' %}"> {% endcomment %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
-
-
-<div class="title">
-	<h1>Bienvenue mon enfant !</h1>
-	<h3>Je te présente tes freres et soeurs :</h3>
+<div class="page-title-home">
+    <div class="sub-container-home">
+        <h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance ! <span class="emoji-in-title-home2">👋</span></h1>
+        <ul class="feature-list">
+            <li><span class="feature-icon">📝</span> One rule, do what you want. </li>
+        </ul>
+    </div>
 </div>
 
 <div class="users-status-container">
@@ -66,7 +67,7 @@
 					<p class="user-name">{{ user }}</p>
 					{% if request.user != user %}
 						<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
-							Voir le profil
+							profile
 						</button>
 					{% endif %}
 					<div class="online-status" id="user-{{ user.id }}"></div>
@@ -90,7 +91,7 @@
 					<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
 					<p class="user-name">{{ user }}</p>
 					<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
-						Voir le profil
+						profile
 					</button>
 					<div class="online-status" id="user-{{ user.id }}"></div>
 				</div>

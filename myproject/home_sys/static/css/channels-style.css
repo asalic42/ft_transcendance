@@ -362,50 +362,89 @@ button:hover {
 /* ------------------------------ */
 /* TITLE */
 
+/* Style général pour le conteneur */
 .page-title {
-	background-color: #1a1a1a;
-	border-radius: 15px;
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	padding: 10px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	transition: all 0.3s ease-in-out;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #c84e89, #6a11cb);
+	border-radius: 15px;
+    color: white;
+	height: auto;
+    font-family: 'Thunder-VF';
+    text-align: center;
 }
 
 .sub-container {
-	color: white;
-	max-width: 800px;
+    padding-bottom: 20px;
+	width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+	align-items: center;
+	justify-content: center;
 	text-align: center;
-	margin-top: -40px;
 }
 
+/* Style pour le titre */
 h1 {
-	font-size: 2.5rem;
-	letter-spacing: 2px;
-	margin-bottom: 15px;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: slideIn 1s ease-in-out;
 }
 
 .emoji-in-title {
-	display: inline-block;
-	animation: rotateEmoji 4s infinite alternate;
+    display: inline-block;
+    animation: floatEmoji 3s infinite ease-in-out;
 }
 
+@keyframes floatEmoji {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Style pour le paragraphe */
 p {
-	font-size: 1.2rem;
-	line-height: 1.5;
-	color: #b0b0b0;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin: 0;
+    animation: fadeInUp 1.5s ease-in-out;
 }
 
-@keyframes rotateEmoji {
-	0% {
-		transform: rotate(-10deg);
-	}
-	50% {
-		transform: rotate(10deg);
-	}
-	100% {
-		transform: rotate(-10deg);
-	}
+/* Animations */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
