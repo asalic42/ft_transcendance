@@ -104,9 +104,9 @@ if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Stopping docker services...${NC}"
     docker compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    docker system prune --volumes -a
+    docker system prune --volumes --force
     echo -e "${BLUE}> Removing django cache...${NC}"
-    sudo find . -type d -name "__pycache__" -exec rm -r {} +
+    find . -type d -name "__pycache__" -exec rm -r {} +
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
