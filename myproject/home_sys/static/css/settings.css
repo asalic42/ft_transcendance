@@ -7,8 +7,8 @@
 
 .settings-box {
 	display: flex;
-	width: 450px;
-	height: 530px;
+	width: 400px;
+	height: 480px;
 	background-color: #888888;
 	border-radius: 10px;
 	border: 2px solid black;
@@ -16,21 +16,16 @@
 	justify-content: center; /* Centre le contenu verticalement */
 	align-items: center; /* Centre le contenu horizontalement */
 	text-align: center; /* Centre le texte à l'intérieur */
-	box-shadow: -10px 10px #23232e;
+	box-shadow: -10px 10px black;
+	transform: translateX(5px) translateY(-5px);
 	background: linear-gradient(to right, #aa3196, #9159c0);
-	transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
-}
-
-.settings-box:hover {
-	transform: translateY(-5px);
-	box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
 }
 
 /* Ugrade/Save button */
 
 .update-or-save {
 	font-family: 'Courier New', Courier, monospace;
-	scale: 0.9;
+	scale: 0.85;
 	position: absolute;
 	width: auto;
 	height: auto;
@@ -39,23 +34,22 @@
 	padding-top: 5px;
 	padding-bottom: 5px;
 	border-radius: 5px;
-	border: none;
 	margin-top: 135px;
-	transition: all 0.3s ease;
+	transition: all 0.2s ease;
 }
 
 .update-or-save:hover {
 	cursor: pointer;
-	scale: 1;
+	scale: 0.89;
 }
 
 /* Separator box */
 
 .settings-separator {
 	position: absolute;
-	width: 450px;
-	height: 188px;
-	margin-top: 377px;
+	width: 400px;
+	height: 140px;
+	margin-top: 340px;
 	border-bottom-left-radius: 10px;
 	border-bottom-right-radius: 10px;
 	border: 2px solid black;
@@ -163,7 +157,7 @@
 	margin-top: -60px;
 	margin-left: 0px;
 	border-radius: 10px;
-	transition: all 0.3s ease-out;
+	transition: all 0.2s ease-out;
 }
 
 /* Delete svg */
@@ -188,7 +182,7 @@
 	border-radius: 10px;
 	padding-left: 35px;
 	font-weight: bold;
-	transition: all 0.3s ease-out;
+	transition: all 0.2s ease-out;
 }
 
 .custom-file-upload:hover {
@@ -197,12 +191,65 @@
 
 .settings-logout:hover,
 .settings-delete-account:hover {
-	transform: translateY(-5px);
 	cursor: pointer;
-	scale: 1.05;
-	/* box-shadow: 0px 2px ; */
+	scale: 1.1;
+	border-radius: 0;
+	box-shadow: -5px 5px ;
 }
 
 .settings-delete-account:hover {
 	background-color: red;
 }
+
+/* -------------------------------------------- */
+
+.page-title {
+	background-color: #1a1a1a;
+	border-radius: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 10px;
+	margin-bottom: 0px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease-in-out;
+}
+
+.sub-container {
+	color: white;
+	max-width: 800px;
+	text-align: center;
+	margin-top: -40px;
+}
+
+h1 {
+	font-size: 2.5rem;
+	letter-spacing: 2px;
+	margin-bottom: 15px;
+}
+
+.emoji-in-title {
+	display: inline-block;
+	animation: rotateEmoji 4s infinite alternate;
+}
+
+p {
+	font-size: 1.2rem;
+	line-height: 1.5;
+	color: #b0b0b0;
+}
+
+@keyframes rotateEmoji {
+	0% {
+		transform: rotate(-10deg);
+	}
+	50% {
+		transform: rotate(10deg);
+	}
+	100% {
+		transform: rotate(-10deg);
+	}
+}
+
+/* ----------------------------------- */

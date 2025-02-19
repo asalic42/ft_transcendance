@@ -4,6 +4,16 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="{% static 'css/notifications.css' %}">
+<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+
+<div class="page-title">
+    <div class="sub-container">
+        <h1><span class="emoji-in-title">🔔</span> Notifications</h1>
+        <p>Here you can see your friends, friend requests, and users that you have blocked.</p>
+    </div>
+</div>	
+
 <div class="friends_and_blocked_user">
     <!-- FRIENDS -->
     <div class="friends_box">
@@ -20,7 +30,7 @@
 					<p class="user-username">{{ other_user }} </p>
 					<button class="remove-friend" data-username="{{ other_user }}">Remove</button>
 					<button class="talk-friend" data-username="{{ other_user }}">Talk 💬​</button>
-					<button class="invite-friend" data-username="{{ other_user }}">Invite 🫲</button>
+					<!-- <button class="invite-friend" data-username="{{ other_user }}">Invite 🫲</button> -->
 		
 					<!-- Ajout du statut de connexion -->
 					<div class="online-status" id="user-{{ other_user.id }}"></div>
@@ -82,7 +92,7 @@
     {% endfor %}
 </div>
 
-<div class="invitation_box">
+<!-- <div class="invitation_box">
     <h2>GAME INVITATION</h2>
 
     {% for other_user in users.invite.all %}
@@ -90,185 +100,20 @@
 			<div class="if_founded last">
 		{% else %}
 			<div class="if_founded">
-		{% endif %}        <!-- Afficher la photo de profil de l'utilisateur -->
-				<img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
+		{% endif %}
+		    <img class="user-pp" src="{{ other_user.image.url }}" alt="{{ other_user }}">
 		
-				<!-- Afficher le nom d'utilisateur -->
-				<p class="user-username">{{ other_user }} </p>
+		    <p class="user-username">{{ other_user }} </p>
 		
-				<!-- Boutons pour accepter, refuser ou bloquer -->
-				<button class="join-it" data-username="{{ other_user }}">Join</button>
-				<button class="decline-invitation" data-username="{{ other_user }}">Decline</button>
-			</div>
+		    <button class="join-it" data-username="{{ other_user }}">Join</button>
+		    <button class="decline-invitation" data-username="{{ other_user }}">Decline</button>
+		</div>
     {% empty %}
     <div class="if_not_founded">
         <p>No game invitation</p>
     </div>
     {% endfor %}
-</div>
-
-<style>
-    body {
-        background-color: var(--bg-site);
-        color: #d8d8d8;
-    }
-
-    .online-status {
-        position: absolute;
-        border-radius: 50px;
-        width: 20px;
-        height: 20px;
-        background-color: rgb(109, 109, 109);
-        border: 1px solid #131317;
-        scale: 0.8;
-        margin-left: 35px;
-        margin-top: 40px;
-    }
-
-    .online-status.active {
-        background-color: rgb(1, 201, 1); /* Couleur verte pour indiquer "en ligne" */
-    }
-
-    .friends_and_blocked_user {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        margin-bottom: 20px
-    }
-
-    .friends_box,
-    .blocked_box {
-        width: 550px;
-        height: fit-content;
-        border: 2px solid black;
-        border-radius: 10px;
-        background-color: #23232e;
-    }
-
-    .blocked_box {
-        margin-left: 40px;
-    }
-
-    .friend_request_box,
-    .invitation_box {
-        width: auto;
-        height: auto;
-        border: 2px solid black;
-        border-radius: 10px;
-        align-items: center;
-        justify-content: center;
-        background-color: #23232e;
-        margin-bottom: 20px;
-    }
-
-    h2 {
-        text-align: center;
-    }
-
-    .if_founded {
-        display: flex; /* Afficher les éléments en ligne */
-        align-items: center; /* Centrer verticalement les éléments */
-        gap: 10px; /* Espacement entre les éléments */
-        padding: 10px;
-        border-top: 2px solid black;
-        background-color: #141418;
-    }
-
-	.last {
-		border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
-	}
-
-    .if_not_founded {
-        text-align: center;
-    }
-
-    .user-pp {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: 2px solid black;
-    }
-
-    .user-username {
-        font-size: 18px;
-        margin: 0; /* Supprimer la marge pour un meilleur alignement */
-    }
-
-    button {
-        padding: 5px 10px;
-        border: 1px solid black;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .add-it, .talk-friend, .join-it {
-        background-color: green;
-        color: white;
-    }
-
-    .decline-it, .invite-friend, .decline-invitation {
-        background-color: orange;
-        color: white;
-    }
-
-    .block-it,
-    .remove-friend,
-    .remove-user-blocked {
-        background-color: red;
-        color: white;
-    }
-
-    .add-it,
-    .decline-it,
-    .block-it,
-    .remove-friend,
-    .remove-user-blocked,
-    .talk-friend,
-    .invite-friend,
-    .join-it,
-    .decline-invitation {
-        transition: all 0.1s ease;
-    }
-
-    .add-it:hover,
-    .decline-it:hover,
-    .block-it:hover,
-    .remove-friend:hover,
-    .remove-user-blocked:hover,
-    .talk-friend:hover,
-    .invite-friend:hover,
-    .join-it:hover,
-    .decline-invitation {
-        scale: 1.1;
-    }
-
-    .status {
-        font-weight: bold;
-        padding: 5px;
-        border-radius: 5px;
-        display: inline-block;
-    }
-
-    .status.online {
-        color: green;
-        background-color: #e8f5e9; /* Vert clair */
-    }
-
-    .status.offline {
-        color: red;
-        background-color: #ffebee; /* Rouge clair */
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .status {
-        animation: fadeIn 0.5s ease-in-out;
-    }
-</style>
+</div> -->
 
 <script>
     function getAddFriendResponse(baliseName, url, dataStatus) {
@@ -341,7 +186,7 @@
     getResponse(".block-it", "block_user", "user_blocked", "Utilisateur", "bloqué.");
     getResponse(".remove-friend", "remove_friend", "user_removed", "", "n'est désormait plus votre ami.");
     getResponse(".remove-user-blocked", "remove_blocked_user", "blocked_user_removed", "Le user", "est débloqué.");
-    getResponse(".invite-friend", "invite_friend", "game_invitation_send", "L'invitation envers le user", "a bien été envoyée.");
+    /* getResponse(".invite-friend", "invite_friend", "game_invitation_send", "L'invitation envers le user", "a bien été envoyée."); */
     getResponse(".decline-invitation", "invitation_declined", "game_invitation_declined", "La demande du user", "a bien été refusée.");
 
 
@@ -416,6 +261,7 @@
     }
 
     connectWebSocket();
+
 
 </script>
 
