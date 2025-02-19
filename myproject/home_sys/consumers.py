@@ -1377,7 +1377,8 @@ class FriendRequestConsumer(AsyncWebsocketConsumer):
 """ NOTIFICATIONS PUSH """
 """ Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """
 
-class NotificationConsumer(AsyncWebsocketConsumer):
+# Notif Chat
+class NotificationChatConsumer(AsyncWebsocketConsumer):
     
 	async def connect(self):
 		self.user = self.scope['user']
@@ -1398,11 +1399,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data):
 		data = json.loads(text_data)
 
-		if data.get('type') == 'mark_as_read':
-			channel_name = data.get('channel_name')
-			await self.mark_as_read(channel_name)
-			await self.update_unread_status()
-		elif data.get('type') == 'channel_opened':
+		# if data.get('type') == 'mark_as_read':
+		# 	channel_name = data.get('channel_name')
+		# 	await self.mark_as_read(channel_name)
+		# 	await self.update_unread_status()
+		if data.get('type') == 'channel_opened':
 			channel_name = data.get('channel_name')
 			await self.mark_channel_as_opened(channel_name)
 			await self.update_unread_status()
@@ -1434,16 +1435,16 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 	""" Connection with database """
 	@database_sync_to_async
 	def get_unread_notif(self):
-		return Messages.objects.filter(
-			read=False
+		return Users.objects.filter(
+			has_unread_chat=False
 		).exists()
 	
-	@database_sync_to_async
-	def mark_as_read(self, channel_name):
-		Messages.objects.filter(
-			channel_name=channel_name,
-			read=False
-		).update(read=True)
+	# @database_sync_to_async
+	# def mark_as_read(self, channel_name):
+	# 	Messages.objects.filter(
+	# 		channel_name=channel_name,
+	# 		read=False
+	# 	).update(read=True)
 	
 	@database_sync_to_async
 	def mark_channel_as_opened(self, channel_name):
@@ -1463,6 +1464,33 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 			read=False
 		).exclude(channel_name__in=opened_chan).exists()
 
+# Notif toto
+class NotificationConsumer(AsyncWebsocketConsumer):
+    
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            await self.accept()
+            await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
+            print(f"Utilisateur {self.user.id} ajouté au groupe notifications.")
+        else:
+            await self.close()
+
+    async def disconnect(self, close_code):
+        if self.user.is_authenticated:
+            await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'message': event['message'],
+        }))
+
+    async def update_notification_status(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'update_status',
+            'has_unread_notifications': event['has_unread_notifications'],
+        }))
 
 """ TOURNOIS CONCERNS """
 
