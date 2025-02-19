@@ -558,7 +558,7 @@ def profile_view(request, username):
         ).order_by('-date')
 
         # Dictionnaire pour stocker les données des tournois
-        games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True).distinct())
+        games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True).distinct().order_by("-idTournaments__date"))
 
         # Dictionnaire pour stocker les données des tournois
         tournaments_users = {}
@@ -570,7 +570,6 @@ def profile_view(request, username):
             # Récupérer le gagnant du tournoi
             tournament = Tournaments.objects.get(id=tournament_id)
             winner = tournament.winner
-
 
             # Déterminer la couleur du tournoi
             if users_profile == winner:
