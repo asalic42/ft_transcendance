@@ -22,12 +22,13 @@ function startButton(link, name) {
 	sleep(4000)
 	button.removeAttribute("disabled");
 	button.textContent = 'Ouvrir le jeu dans un nouvel onglet';
-	button.style = "position: absolute; left: 200px; top: 100px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;";
+	button.style = "position: relative; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;";
 	button.onclick = function() {
 		window.open(link, '_blank');
 		button.textContent = "Everyone needs to finish their game first.";
 		button.style.background = "red";
 		button.disabled = "disabled";
+		document.getElementById("loader").style.display = 'block';
 	};
 }
 
@@ -37,10 +38,9 @@ socket.onmessage = function(event) {
         console.log("Message reçu:", data);
 
         if (data.type === "game_link") {
-			document.getElementById("loader").display = 'none';
+			document.getElementById("loader").style.display = 'none';
 			startButton(data.link, data.name_op)
-			document.getElementById("message").innerText = data.message;
-			
+			document.getElementById("message").innerHTML = data.message;
 		}
 		if (data.type === 'result') {
 			document.getElementById('bt').style.display = "none";

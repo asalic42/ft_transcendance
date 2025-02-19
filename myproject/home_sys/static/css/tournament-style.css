@@ -131,9 +131,12 @@ button.arrow:hover {
 }
 
 #players-container {
-	display: flex; /* Pour afficher les joueurs côte à côte si l'écran est assez large */
-	flex-wrap: wrap; /* Pour permettre aux joueurs de passer à la ligne si nécessaire */
-	justify-content: center; /* Pour centrer les joueurs dans le conteneur */
+	display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
 }
 
 .player-info {
@@ -195,4 +198,8 @@ button.arrow:hover {
 
 .player_list {
 	font-size: 24px;
+}
+
+.username {
+	color: lightpink
 }
