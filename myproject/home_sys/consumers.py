@@ -1649,8 +1649,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 							'message': 'Le tournoi a été annulé en raison d\'une déconnexion'
 						}
 					)
-				if (not TournamentConsumer.tournament_ended[self.tournament_id]):
-					Tournaments.objects.filter(pk=self.tournament_id).delete()
+				# if (not TournamentConsumer.tournament_ended[self.tournament_id]):
+					# Tournaments.objects.filter(pk=self.tournament_id).delete()
 					
 				# Nettoyer les données du tournoi si plus aucun joueur
 				if len(TournamentConsumer.players[self.tournament_id]) == 0:
