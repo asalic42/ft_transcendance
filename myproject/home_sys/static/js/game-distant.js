@@ -26,70 +26,123 @@ let gameState = {
 	}
 };
 
-// WebSocket concerns
-const socket = new WebSocket(`wss://transcendance.42.paris/ws/pong/${gameId}/${id_t}`);
+document.addEventListener("DOMContentLoaded", function() {
 
-socket.onopen = function() {
-	console.log("Connexion réussie au WebSocket");
-}
+    function loadRooms() {
+        fetch("/api/rooms/")
+            .then(response => response.json())
+            .then(data => {
+                const roomList = document.getElementById("room-list");
+                roomList.innerHTML = ""; // Vide la liste pour éviter les doublons
 
-let start = Date.now();
-let compteur = 0;
-socket.onmessage = function(event) {
-	try {
-		const data = JSON.parse(event.data);
-		console.log(data.type);
+                if (data.rooms.length === 0) {
+                    roomList.innerHTML = "<p>Aucune Room disponible</p>";
+                } else {
+                    data.rooms.forEach(room => {
+                        const roomElement = document.createElement("a");
+                        roomElement.href = "#"; // Empêche le rechargement de la page
+                        roomElement.classList.add("game-distant");
+                        roomElement.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
 
-		if (data.type == "countdown") {
-			countdownBeforeGame(data);
-		}
-		else if (data.type == "game_won"){
-			if (data.loser == 2)
-				winnerWindow(1);
-			else 
-				winnerWindow(2);
-			disconnected.style.display = "block";
-		}
-		
-		else if (data.type == "game_restarted") {
-			game_restarted(data);
-		}
+                        roomElement.addEventListener("click", function() {
+                            joinGame(room.game_id);
+                        });
 
-		else if (data.type == "players_name") {
-			if (data.player1_name) {
-				player1_name.innerText = data.player1_name;
-				text_win_p1.textContent = player1_name.innerText + " wins !";
-			} 
-			
-			if (data.player2_name) {
-				player2_name.innerText = data.player2_name;
-				text_win_p2.textContent = player2_name.innerText + " wins !";
-			} 
-				
-		}
-
-		else if (data.type == "game_state") {
-			overlay.style.display = 'none';
-			startGame(data);
-		}
-		else if (data.type == "game_error") {
-			cancelAnimationFrame(animation_id);
-			alert("Sorry, there has been a server side error. Please, change rooms.");
-		}
-
-    } catch (error) {
-        console.error("Erreur de parsing des données du WebSocket :", error);
+                        roomList.appendChild(roomElement);
+                    });
+                }
+            })
+            .catch(error => console.error("Erreur lors du chargement des rooms :", error));
     }
-};
 
-socket.onclose = function() {
-	console.log("Deconnexion du socket");
-    alert("Game is full, or there has been an error.")
-};
+    function joinGame(gameId) {
+        console.log(`Rejoindre la room ${gameId}`);
+        
+        // Mettre à jour l'interface sans recharger
+        document.getElementById("content").innerHTML = `<h2>Connexion à la Room ${gameId}...</h2>`;
 
-socket.onerror = function(error) {
-    console.error("Erreur WebSocket:", error);
-};
+		game(gameId, 0)
+        // Lancer le WebSocket
+    	//     const socket = new WebSocket(`wss://transcendance.42.paris/ws/pong/${gameId}/${userId}`);
+		
+    	//     socket.onopen = () => console.log(`Connecté à la room ${gameId}`);
+    	//     socket.onmessage = (event) => console.log("Message reçu:", event.data);
+    	//     socket.onclose = () => console.log(`Déconnecté de la room ${gameId}`);
+    	// }
+	}
+
+    loadRooms(); // Charge les rooms au chargement de la page
+});
+
+
+let start;
+let compteur;
+// WebSocket concerns
+function	game(gameId, id_t) {
+	const socket = new WebSocket(`wss://transcendance.42.paris/ws/pong/${gameId}/${id_t}`);
+
+	socket.onopen = function() {
+		console.log("Connexion réussie au WebSocket");
+	}
+
+	start = Date.now();
+	compteur = 0;
+	socket.onmessage = function(event) {
+		try {
+			const data = JSON.parse(event.data);
+			console.log(data.type);
+
+			if (data.type == "countdown") {
+				countdownBeforeGame(data);
+			}
+			else if (data.type == "game_won"){
+				if (data.loser == 2)
+					winnerWindow(1);
+				else 
+					winnerWindow(2);
+				disconnected.style.display = "block";
+			}
+
+			else if (data.type == "game_restarted") {
+				game_restarted(data);
+			}
+
+			else if (data.type == "players_name") {
+				if (data.player1_name) {
+					player1_name.innerText = data.player1_name;
+					text_win_p1.textContent = player1_name.innerText + " wins !";
+				} 
+
+				if (data.player2_name) {
+					player2_name.innerText = data.player2_name;
+					text_win_p2.textContent = player2_name.innerText + " wins !";
+				} 
+
+			}
+
+			else if (data.type == "game_state") {
+				overlay.style.display = 'none';
+				startGame(data);
+			}
+			else if (data.type == "game_error") {
+				cancelAnimationFrame(animation_id);
+				alert("Sorry, there has been a server side error. Please, change rooms.");
+			}
+
+	    } catch (error) {
+	        console.error("Erreur de parsing des données du WebSocket :", error);
+	    }
+	};
+
+	socket.onclose = function() {
+		console.log("Deconnexion du socket");
+	    alert("Game is full, or there has been an error.")
+	};
+
+	socket.onerror = function(error) {
+	    console.error("Erreur WebSocket:", error);
+	};
+}
   
 window.onload = function() {
     document.getElementById('scores').style.display = 'flex';

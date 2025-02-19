@@ -991,3 +991,8 @@ def create_current_game(request, sender_id):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+def get_rooms(request):
+	rooms = CurrentGame.objects.values("game_id")
+	return JsonResponse({"rooms": list(rooms)})

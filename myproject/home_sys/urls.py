@@ -17,6 +17,7 @@ urlpatterns = [
     path('game-distant/<int:game_id>/', game_distant_page, name="game-distant"),
     path('game-distant/<int:game_id>/<int:id_t>', game_distant_page_t, name="game-distant_t"),
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),
+    path('api/rooms/', get_rooms, name="get_rooms"),
     # path('game/', game_page, name='game'),
     # path('game-bot/', game_bot_page, name='game-bot'),
     path('map_choice/', map_choice, name='map_choice'),
