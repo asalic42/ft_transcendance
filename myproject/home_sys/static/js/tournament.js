@@ -12,11 +12,15 @@ socket.onclose = function socket_close() {
 	window.location.href = "https://transcendance.42.paris/accounts/game-mode-pong/"
 }
 
-function startButton(link) {
-	const button = document.createElement('button');
-	button.style.display = "none";
-	button.id = "bt";
-	document.body.appendChild(button);
+function startButton(link, name) {
+	const button = document.getElementById('bt');
+	// button.style.display = "none";
+	document.getElementById('opponant').innerText = `You are going to face ${name}`
+	function sleep(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+	sleep(4000)
+	button.removeAttribute("disabled");
 	button.textContent = 'Ouvrir le jeu dans un nouvel onglet';
 	button.style = "position: absolute; left: 200px; top: 100px; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;";
 	button.onclick = function() {
@@ -24,11 +28,8 @@ function startButton(link) {
 		button.textContent = "Everyone needs to finish their game first.";
 		button.style.background = "red";
 		button.disabled = "disabled";
-		first_pass = false;
 	};
 }
-
-var first_pass = true;
 
 socket.onmessage = function(event) {
     try {
@@ -37,12 +38,12 @@ socket.onmessage = function(event) {
 
         if (data.type === "game_link") {
 			document.getElementById("loader").display = 'none';
-			if (!first_pass)
-				document.getElementById('bt').remove();
-			startButton(data.link)
+			startButton(data.link, data.name_op)
+			document.getElementById("message").innerText = data.message;
+			
 		}
 		if (data.type === 'result') {
-			document.getElementById('bt').display = 'none';
+			document.getElementById('bt').style.display = "none";
 			document.getElementById('title').innerText = "Le tournois est fini, voici les résultats :"
 			const playerId = data.player_id;
 			const score = data.score;
@@ -71,13 +72,11 @@ socket.onmessage = function(event) {
 			window.location.href = "https://transcendance.42.paris/accounts/game-mode-pong/"
 		}
 		if (data.type === "user_list") {
-			span.textContent = "";
+			span.textContent = "Users connected to tournament: ";
 			data.data.forEach(function (name, index) {
 				span.textContent += name + "\n";
 			  });
 			console.log(span);
-
-			// document.getElementById('players-container').appendChild(list);
 		}
 		if (data.type === "already") {
 			alert("This tournament already ran.")

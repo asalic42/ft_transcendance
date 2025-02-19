@@ -97,11 +97,16 @@ window.onload = function() {
 	document.getElementById('canvas-container').style.display = 'flex';
 }
 
+window.addEventListener("beforeunload", function() {
+    if (socket.readyState === WebSocket.OPEN && id_t !== 0) {  // <-- Vérifier id_t
+        socket.send(JSON.stringify({ action: "window_closed" }));
+    }
+});
+
 var animation_id;
 
 function startGame(data) {
 
-	
 	if (data.number) currentPlayer = data.number;
 	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
 	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
@@ -192,7 +197,7 @@ function drawPlayer(player1Coords, player2Coords) {
 	// console.log('player1Coords: ' + player1Coords);
 	// console.log('player2Coords: ' + player2Coords);
 	if (!player1Coords || !player2Coords) return;
-	
+
 	context.fillStyle = "#ED4EB0";
 	context.beginPath();
 	// console.log("player1Coords.x1 :" + player1Coords.x1 + " player1Coords.y1: " + player1Coords.y1);

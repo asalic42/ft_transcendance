@@ -53,9 +53,9 @@ class Chans(models.Model):
 	def __str__(self):
 		return self.name
 
-class UserChan(models.Model):
-	idChan = models.IntegerField()
-	idUser = models.IntegerField()
+# class UserChan(models.Model):
+# 	idChan = models.IntegerField()
+# 	idUser = models.IntegerField()
 
 class Achievements(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -82,7 +82,6 @@ class Pong(models.Model):
 	bounce_nb = models.IntegerField()
 	color = models.CharField(max_length=50, default='yellow')
 
-
 class Tournaments(models.Model):
 	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
@@ -106,12 +105,13 @@ class Maps(models.Model):
 	LinkMaps = models.CharField()
 
 class MultiCasseBrique(models.Model):
-	id = models.AutoField(primary_key = True)
+	id = models.AutoField(primary_key=True)
 	id_p1 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_games_as_p1')
 	id_p2 = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_games_as_p2')
+	winner = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='M_CB_winner')
 	score_p1 = models.IntegerField()
 	score_p2 = models.IntegerField()
-	date = models.DateTimeField(auto_now_add = True)
+	date = models.DateTimeField(auto_now_add=True)
 	map = models.IntegerField()
 
 class BlockUsers(models.Model):
@@ -126,6 +126,7 @@ class Messages(models.Model):
 	message = models.CharField(max_length=1000)
 	date = models.DateTimeField(auto_now_add = True)
 	is_link = models.BooleanField(default = False)
+	read = models.BooleanField(null=True)
 
 class PrivateChan(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -134,7 +135,17 @@ class PrivateChan(models.Model):
 	id_u2 = models.IntegerField()
 
 class CurrentGame(models.Model):
-    game_id = models.IntegerField(unique=True)
+	game_id = models.IntegerField(unique=True)
 
 class tournament_room(models.Model):
     tournament_id = models.IntegerField(unique=True)
+
+class UserOpenedChannel(models.Model):
+	user = models.ForeignKey(Users, on_delete=models.CASCADE)
+	channel_name = models.CharField(max_length=30)
+	opened_at = models.DateTimeField(auto_now_add=True)
+	tournament_id = models.IntegerField(unique=True)
+
+class casse_brique_room(models.Model):
+	game_id = models.IntegerField(unique=True)
+	map_id = models.IntegerField(unique=True)

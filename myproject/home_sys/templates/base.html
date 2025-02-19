@@ -77,6 +77,11 @@
                         trigger="hover"
                         target=".nav-item">
                     </lord-icon>
+                    <!-- {% if request.user.users.has_unread_notifications %}
+                        <div class="notification-status active"></div>
+                    {% else %}
+                        <div class="notification-status"></div>
+                    {% endif %} -->
                     <span class="link-text">ChatRoom</span>
                 </a>
             </li>
@@ -179,27 +184,12 @@
             console.log("WebSocket connecté avec succès !");
         };
 
-
         notificationSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
 
-            if (data.type === 'notification') {
-                console.log("Data.type : [notification]");
-                // Afficher le point de notification
-                const notif = document.querySelector('.notification-status');
-                notif.classList.add("active");
-                console.log('Nouvelle notification :', data.message);
-            }
-
             if (data.type === 'update_status') {
-                console.log("Data.type : [update_status]");
-                // Mettre à jour le statut des notifications
                 const notif = document.querySelector('.notification-status');
-                if (data.has_unread_notifications) {
-                    notif.classList.add("active");
-                } else {
-                    notif.classList.remove("active");
-                }
+                notif.classList.toggle("active", data.has_unread_notifications);
             }
         };
 

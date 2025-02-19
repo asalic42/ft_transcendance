@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
+
+<h3 class="game" id="fps">Fps : 0 | Avg Fps : <span id="avg-fps">0</span></h3>
+<h3 class="timer" id="timer" style="display: none;">Time left: 60s</h3>
+
+<!-- Game Player 1  -->
+<div class="games">
+	<div class="player1" id="player1">
+		<div class="box-scores">
+			<h3 class="playername" id="playername1">Player 1</h3>
+	    	<h3 class="title-game" id="title1"> 0 </h3>
+		</div>
+
+	    <div class="game" id="canvas-1">
+	    	<canvas width="600" height="750" id="game1"></canvas>
+
+	    	<div id="button-container">
+	    		<button class="replay-button" id="replay-button-p1" style="display: none;">Play again !</button>
+	    	</div>
+	    	<text style="display: none;" text-anchor="middle" class="gameOver" id="gameOverP1">
+	    		You lost...
+	    	</text>
+			<div class="overlay1" id="overlay1">
+				<h1 id="countdown1">3</h1>
+			</div>
+	    </div>
+	</div>
+
+<!-- Game Player 2  -->
+
+	<div class="player2" id="player2">
+		<div class="box-scores">
+	    	<h3 class="title-game" id="title2"> 0 </h3>
+			<h3 class="playername" id="playername2">Player 2</h3>
+		</div>
+
+	    <div class="game" id="canvas-2">
+	    	<canvas width="600" height="750" id="game2"></canvas>
+
+	    	<div id="button-container">
+	    		<button class="replay-button" id="replay-button-p2" style="display: none;">Play again !</button>
+	    	</div>
+	    	<text style="display: none;" text-anchor="middle" class="gameOver" id="gameOverP2">
+	    		You lost...
+	    	</text>
+			<div class="overlay2" id="overlay2">
+				<h1 id="countdown2">3</h1>
+			</div>
+	    </div>
+	</div>
+</div>
+
+<h3 class="disconnected" id="disconnected" style="display: none;">Un joueur s'est déconnecté</h3>
+
+<script>
+	var game_id = {{game_id}};
+	var map_id = {{map_id}};
+</script>
+
+<style>
+    .game {
+        margin: 10px 0;
+        font-size: 1.2em;
+    }
+    
+    .timer {
+        color: #333;
+        margin: 10px 0;
+    }
+    
+    .disconnected {
+        color: red;
+        margin: 10px 0;
+        text-align: center;
+    }
+</style>
+
+<script src="{% static 'js/other_game_distant.js' %}"></script>
+
+{% endblock %}

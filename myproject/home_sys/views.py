@@ -15,6 +15,7 @@ import json
 import requests
 from .utils import add_pong_logic
 from django.db.models import Q
+from .utils import send_notification_to_user
 
 """
 |
@@ -162,9 +163,25 @@ def other_game(request):
 	return (render(request, 'other_game.html'))
 
 @login_required
+def map_choice(request):
+	return (render(request, 'map_choice.html'))
+
+@login_required
 def tournament_choice(request):
 	tour = tournament_room.objects.all()
 	return render(request, 'tournament_choice.html', {'all_games':tour})
+
+@login_required
+def casse_brique_room_choice(request):
+	tour = casse_brique_room.objects.all()
+	return render(request, 'other_game_multi_room.html', {'all_games':tour})
+
+def other_game_choice(request):
+	return (render(request, 'other_game_choice.html'))
+
+@login_required
+def other_game_multi(request, game_id, map_id):
+	return (render(request, 'other_game_multi.html', {'game_id':game_id, 'map_id':map_id}))
 
 @login_required
 def tournament_page(request):
@@ -341,7 +358,26 @@ def get_messages(request):
 def post_message(request):
 	try:
 		data = json.loads(request.body)
-		new_message = Messages.objects.create(**data)
+		new_message = Messages.objects.create(
+			channel_name = data.get('channel_name'),
+			sender = data.get('sender'),
+			idSender = data.get('idSender'),
+			message = data.get('message'),
+			is_link = data.get('is_link'),
+			read =  data.get('read')
+		)
+
+		if data.get('user2'):
+			if data.get('user2') != new_message.idSender:
+				recipient = Users.objects.get(id=data.get('user2'))
+				# if not UserOpenedChannel.objects.filter(user=recipient, channel_name=new_message.channel_name).exists():
+				send_notification_to_user(data.get('user2'), data.get('channel_name'))
+		else:
+			for user in Users.objects.all():
+				if user.id != new_message.idSender:
+					# if not UserOpenedChannel.objects.filter(user=user, channel_name=data.get('channel_name')).exists():
+					send_notification_to_user(user.id, data.get('channel_name'))
+
 		return JsonResponse({'status': 'success', 'message': {
 			'id': new_message.id,
 			'channel_name': new_message.channel_name,
@@ -349,6 +385,7 @@ def post_message(request):
 			'idSender': new_message.idSender,
 			'message': new_message.message,
 			'is_link' : new_message.is_link,
+			'read': False,
 			'date':new_message.date.isoformat(),
 		}}, status=201)
 	except (KeyError, json.JSONDecodeError) as e:
@@ -446,7 +483,6 @@ def update_user_info(request):
 				"status": "success",
 				"message": "Informations mises à jour.",
 			})
-
 
 		except Users.DoesNotExist:
 			return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
@@ -599,9 +635,12 @@ def profile_view(request, username):
     except User.DoesNotExist:
         return redirect('home')
 
+@login_required
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):
 	# Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
+	if not request.user.is_authenticated:
+		return JsonResponse({'error': 'User not authenticated'}, status=401)
 	current_user_profile = request.user.users
 	
 	all_users_id = [elmt.id for elmt in current_user_profile.blocked.all()]
@@ -640,12 +679,25 @@ def check_pp(request, idU):
 	except User.DoesNotExist:
 		return JsonResponse({'error': 'User not found'}, status=404)
 	
+
+@require_GET
+def is_chan_private(request, idChan):
+		chan = get_object_or_404(Chans, id = idChan)
+		return JsonResponse({'is_private': chan.private})
+
+@require_GET
+def get_chan_id(request, chanName):
+	try:
+		chan = get_object_or_404(Chans, name = chanName)
+		return JsonResponse({'status': 'success', 'id': chan.id})
+	except Chans.DoesNotExist:
+		return JsonResponse({'error': 'Chans not found'}, status=404)
+
+
 @require_GET
 def doesUserHaveAccessToChan(request, idC, idU):
 	try :
 		priv_chan = PrivateChan.objects.get(id_chan = idC)
-		# print(priv_chan)
-		# message_list = list(messages.values())
 		if priv_chan.id_u1 == idU:
 			return JsonResponse({'status': 'success', 'allowed': 'True', 'id_u1': idU, 'id_u2':priv_chan.id_u2})
 		if priv_chan.id_u2 == idU:

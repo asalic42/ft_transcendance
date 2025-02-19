@@ -5,7 +5,7 @@ function fetchAllUsersStatus() {
 	fetch("/accounts/api/user-status/") // Remplacez par l'URL de votre endpoint Django
 		.then(response => response.json())
 		.then(users => {
-			console.log("Users status fetched:", users);
+			// console.log("Users status fetched:", users);
 			users.forEach(user => {
 				const userElement = document.getElementById(`user-${user.id}`);
 				if (userElement) {
@@ -31,10 +31,10 @@ function connectWebSocket() {
 	};
 
 	statusSocket.onmessage = function(e) {
-		console.log("WebSocket message received:", e.data);
+		// console.log("WebSocket message received:", e.data);
 		const data = JSON.parse(e.data);
 		const userElement = document.getElementById(`user-${data.user_id}`);
-		console.log("User Element : ", userElement);
+		// console.log("User Element : ", userElement);
 		if (userElement) {
 			if (data.is_online) {
 				userElement.classList.add("active");

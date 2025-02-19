@@ -33,6 +33,8 @@ def run_after_migrations(sender, **kwargs):
 	else:
 		print("Les maps sont déjà importées, aucune action nécessaire.")
 	tournament_room.objects.all().delete()
+	CurrentGame.objects.all().delete()
+	casse_brique_room.objects.all().delete()
 
 # signals.py
 from django.contrib.auth.signals import user_logged_in, user_logged_out
