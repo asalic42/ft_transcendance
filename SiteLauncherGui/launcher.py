@@ -115,7 +115,7 @@ class SiteLauncher(QMainWindow):
                 QPushButton {
                     background-color: #a71fb0;
                     padding: 2px;
-                    font-size: 28px;
+                    font-size: 15px;
                 }
                 QPushButton:hover {
                     background-color: darkviolet;

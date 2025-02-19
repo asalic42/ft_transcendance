@@ -278,3 +278,111 @@ function button_update_save_status() {
 }
 
 setInterval(button_update_save_status, 1);
+
+
+/* --------------------------------------------- */
+
+let update_var = {value: false};
+
+        const buttonUpdateSave = document.querySelector(".update-or-save");
+
+        const inputUsername = document.querySelector(".settings-username");
+        const inputPseudo = document.querySelector(".settings-pseudo");
+        const inputEmail = document.querySelector(".settings-email");
+
+        const allInputs = document.querySelectorAll(".settings-user-info input");
+
+        buttonUpdateSave.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            update_var.value = !update_var.value;
+
+            if (update_var.value === true) {
+                buttonUpdateSave.textContent = "Save";
+                allInputs.forEach(input => {
+                    input.style.backgroundColor = "white";
+                    input.disabled = false;
+                    input.style.color = "black";
+                });
+            } else {
+                buttonUpdateSave.textContent = "Update";
+                allInputs.forEach(input => {
+                    input.style.backgroundColor = "#212121";
+                    input.disabled = true;
+                    input.style.color = "#888888";
+                });
+                
+                // On envoie les nouvelles données quand on clique sur "Save"
+                var new_username = $('#s-username').val(); // Récupère la valeur de l'input username
+                var new_pseudo = $('#s-pseudo').val(); // Récupère la valeur de l'input pseudo
+                var new_email = $('#s-email').val(); // Récupère la valeur de l'input email
+
+                // Crée un objet FormData pour envoyer les données
+                var formData = new FormData();
+                formData.append('username', new_username);
+                formData.append('pseudo', new_pseudo);
+                formData.append('email', new_email);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour sécuriser la requête
+
+                // On envoie les données via AJAX
+				$.ajaxSetup({
+					headers: {
+						'X-CSRFToken': csrftoken
+					}
+				});
+				
+                $.ajax({
+                    url: '{% url "update_user_info" %}',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // Important : ne pas traiter les données (surtout pour les fichiers)
+                    contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Vos informations ont été mises à jour. ✅');
+                        } else {
+                            alert('❌ Erreur : ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('❌ Erreur lors de la mise à jour des informations.');
+                    }
+                });
+        }});
+
+                // Lorsque l'utilisateur choisit un fichier, on déclenche l'upload via AJAX
+        $('#s-avatar').on('change', function(event) {
+            // Récupère le fichier choisi
+            var avatar_file = event.target.files[0];  // Le premier fichier choisi
+
+            // Vérifie si un fichier a bien été sélectionné
+            if (!avatar_file) {
+                alert('Veuillez choisir un fichier d\'avatar.');
+                return;
+            }
+
+            // Crée un objet FormData pour envoyer le fichier
+            var formData = new FormData();
+            formData.append('avatar', avatar_file);  // Ajoute le fichier avatar
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour la sécurité
+
+            // On envoie les données via AJAX
+            $.ajax({
+                url: '{% url "upload_avatar" %}',  // URL de la vue pour uploader l'avatar
+                type: 'POST',
+                data: formData,
+                processData: false,  // Important : ne pas traiter les données
+                contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Met à jour l'image de profil sur la page immédiatement
+                        $('#avatar-img').attr('src', response.new_avatar_url);
+                    } else {
+                        alert('❌ Erreur : ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('❌ Erreur lors du téléchargement de l\'avatar.');
+                }
+            });
+        });
