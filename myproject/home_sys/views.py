@@ -17,6 +17,22 @@ from .utils import add_pong_logic
 from django.db.models import Q
 from .utils import send_notification_to_user
 
+""" 
+|
+|	Pour toutes les pages HTML
+|	redirection vers le bon .html au lieu des redirections (mode SPA)
+|
+"""
+import sys
+@login_required
+@never_cache
+def	load_template(request, page):
+	template_path = os.path.join(settings.BASE_DIR, 'home_sys', 'templates', f"{page}.html")
+
+	if os.path.exists(template_path):
+		return render(request, f"{page}.html")
+	return JsonResponse({"error": 'Page not found'}, status=404)
+
 """
 |
 |	Pour la page home,
@@ -95,9 +111,9 @@ def settings_user(request):
 def profile_page(request):
 	return (render(request, 'profile.html'))
 
-@login_required
-def service_unavailable(request):
-	return (render(request, 'service_unavailable.html'))
+# @login_required
+# def service_unavailable(request):
+	# return (render(request, 'service_unavailable.html'))
 
 """
 |
@@ -248,6 +264,7 @@ def add_pong(request):
 |	On lit le fichier, et on renvoie le texte brut, il sera traité côté client.
 |
 """
+
 def map_view(request, map_id):
 	selected_map = get_object_or_404(Maps, id=map_id)
 
@@ -270,6 +287,8 @@ def map_view(request, map_id):
 |	Pas très propre, on aurait pu utiliser des websockets. Dommage.
 |
 """
+
+
 @require_http_methods(["GET"])
 def live_chat(request):
 	channel = request.GET.get('channel_name', None)
@@ -287,7 +306,7 @@ def live_chat(request):
 			return JsonResponse({'status': 'error', 'message': 'Invalid last_message value'}, status=400)
 
 	if new_message.exists():
-		data = [{ 
+		data = [{
 				'id': msg.id,
 				'channel_name': msg.channel_name,
 				'sender': msg.sender,
@@ -300,6 +319,7 @@ def live_chat(request):
 
 @require_http_methods(["GET"])
 def does_channel_exist(request, asked_name):
+
 	try:
 		listing = Chans.objects.get(name=asked_name)
 		return JsonResponse({'status': 'success', 'private' : listing.private, 'id': listing.id})
@@ -326,6 +346,7 @@ def post_chan(request):
 def get_chans(request):
 	try:
 		channels = list(Chans.objects.values('id', 'name', 'private'))
+		
 		return JsonResponse({'status': 'success', 'channels': channels}, status=200)
 	except Exception as e:
 		print(f"Erreur serveur: {str(e)}")
@@ -422,6 +443,7 @@ from .models import Users
 def update_user_info(request):
 	if request.method == 'POST':
 		user = request.user  # Récupère l'utilisateur connecté
+		logger.info(f"[UPDATE USER INFO][TYPE]: {type(user)}")
 		
 		# Récupère les nouvelles données depuis la requête
 		new_email = request.POST.get('email')
@@ -437,13 +459,42 @@ def update_user_info(request):
 				user.email = new_email
 			if new_username:
 				user.username = new_username
+				user.users.name = new_username
+				user_profile.name = new_username
 			if new_pseudo:
 				user_profile.pseudo = new_pseudo  # Met à jour le pseudo
 
 			# Sauvegarde les changements
 			user.save()
 			user_profile.save()  # Sauvegarde le profil utilisateur avec la nouvelle image
-			
+
+			# En gros, vu qu'on a modifié le profil il faut aussi modifier ceux enregistrés dans blocked et friend etc
+			all_users = Users.objects.all()
+			for other_user in all_users:
+				if other_user.blocked.filter(pk=user_profile.pk).exists():
+					logger.info(f"\t[UPDATE][BLOCKED]: removing {user_profile}, adding {user}")
+					other_user.blocked.remove(user_profile.pk)
+					other_user.blocked.add(user.users)
+
+				if (other_user.friends.filter(pk=user_profile.pk).exists()):
+					if other_user.friends.filter(pk=user_profile.pk).exists():
+						logger.info(f"\t[UPDATE][FRIENDS]: removing {user_profile}, adding {user}")
+						other_user.friends.remove(user_profile.pk)
+						other_user.friends.add(user.users)
+
+				if (other_user.friends_request.filter(pk=user_profile.pk).exists()):
+					if other_user.friends_request.filter(pk=user_profile.pk).exists():
+						logger.info(f"\t[UPDATE][FRIENDS REQUEST]: removing {user_profile}, adding {user}")
+						other_user.friends_request.remove(user_profile.pk)
+						other_user.friends_request.add(user.users)
+
+				if (other_user.invite.filter(pk=user_profile.pk).exists()):
+					if other_user.invite.filter(pk=user_profile.pk).exists():
+						logger.info(f"\t[UPDATE][INVITE]: removing {user_profile}, adding {user}")
+						other_user.invite.remove(user_profile.pk)
+						other_user.invite.add(user.users)
+
+
 			return JsonResponse({
 				"status": "success",
 				"message": "Informations mises à jour.",
@@ -499,43 +550,106 @@ from django.contrib.auth.models import User
 
 from django.shortcuts import redirect
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def get_users_of_one_tournament(user, id):
+	""" 
+		Avec un id on cible un tournois,
+		On parse chaque match de celui-ci,
+		Et on retourne chaque user trouvé autre que le principale.
+	"""
+
+	games_T_CB = MatchsTournaments.objects.filter(idTournaments=id)
+	logger.info(f"[GET USERS TOURNAMENT BY ID]: {games_T_CB}")
+
+	user_ids = set()
+	for game in games_T_CB:
+		pong_session = Pong.objects.get(id=game.idMatchs.id)
+
+		if (user.id == pong_session.id_p1.id):
+			user_ids.add(pong_session.id_p2.image.url)
+		else:
+			user_ids.add(pong_session.id_p1.image.url)
+	return list(user_ids)
+
 @login_required
 def profile_view(request, username):
-	# Si aucun username n'est fourni, utiliser l'utilisateur connecté
-	if not username:
-		return redirect('profile', username=request.user.username)
-		
-	try:
-		user = User.objects.get(username=username)
-		users_profile = Users.objects.get(user=user)
-		
-		games_P = Pong.objects.filter(
-			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
-		).order_by('-date')
+    # Si aucun username n'est fourni, utiliser l'utilisateur connecté
+    if not username:
+        return redirect('profile', username=request.user.username)
+    
+    try:
+        user = User.objects.get(username=username)
+        users_profile = Users.objects.get(user=user)
+        
+        # Récupérer les parties de Pong associées à l'utilisateur
+        games_P = Pong.objects.filter(
+            Q(id_p1=users_profile) | Q(id_p2=users_profile)
+        ).order_by('-date')
 
-		for game in games_P:
-			if (game.score_p1 < game.score_p2):
-				game.color = 'red'
-				continue
-			if (game.score_p1 > game.score_p2):
-				game.color = 'green'
-				continue
-		
-		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
-		games_M_CB = MultiCasseBrique.objects.filter(
-			models.Q(id_p1=users_profile) | models.Q(id_p2=users_profile)
-		).order_by('-date')
 
-		return render(request, 'profile.html', {
-			'user': user,
-			'games_P': games_P,
-			'games_S_CB': games_S_CB,
-			'games_M_CB': games_M_CB
-		})
-		
-	except User.DoesNotExist:
-		return redirect('home')
+        # Attribuer une couleur aux matchs de Pong en fonction du score
+        for game in games_P:
+            s1, s2 = game.score_p1, game.score_p2
 
+            if game.id_p1 != users_profile:
+                s1, s2 = game.score_p2, game.score_p1
+
+            if s1 < s2:
+                game.color = 'red'
+            elif s1 > s2:
+                game.color = 'green'
+
+        # Récupérer les autres jeux
+        games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+        games_M_CB = MultiCasseBrique.objects.filter(
+            Q(id_p1=users_profile) | Q(id_p2=users_profile)
+        ).order_by('-date')
+
+        # Dictionnaire pour stocker les données des tournois
+        games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True).distinct().order_by("-idTournaments__date"))
+
+        # Dictionnaire pour stocker les données des tournois
+        tournaments_users = {}
+        tournaments_colors = {}  # Nouveau dictionnaire pour stocker les couleurs
+        tournaments_date = {}
+
+        # Parcourir chaque tournoi
+        for tournament_id in games_T_CB:
+            # Récupérer le gagnant du tournoi
+            tournament = Tournaments.objects.get(id=tournament_id)
+            winner = tournament.winner
+
+            # Déterminer la couleur du tournoi
+            if users_profile == winner:
+                tournament_color = 'green'  # L'utilisateur principal est le gagnant
+            else:
+                tournament_color = 'red'  # L'utilisateur principal n'est pas le gagnant
+
+            # Stocker la couleur dans le dictionnaire
+            tournaments_colors[tournament_id] = tournament_color
+            tournaments_date[tournament_id] = tournament.date
+
+            # Récupérer les images des autres utilisateurs du tournoi
+            users_img = get_users_of_one_tournament(users_profile, tournament_id)
+            tournaments_users[tournament_id] = users_img
+
+        return render(request, 'profile.html', {
+            'user': user,
+            'games_P': games_P,
+            'games_S_CB': games_S_CB,
+            'games_M_CB': games_M_CB,
+            'games_T_CB': games_T_CB,
+            'tournaments_users': tournaments_users,
+			'tournaments_colors': tournaments_colors,
+			'tournaments_date': tournaments_date,
+        })
+    
+    except User.DoesNotExist:
+        return redirect('home')
 
 @login_required
 @require_http_methods(["GET"])
@@ -771,6 +885,15 @@ def block_user(request, username):
 			if (other_user.users in current_user_profile.friends.all()):
 				current_user_profile.friends.remove(other_user.users)
 				other_user.users.friends.remove(current_user_profile)
+			
+			if (other_user.users in current_user_profile.friends_request.all()):
+				current_user_profile.friends_request.remove(other_user.users)
+				other_user.users.friends_request.remove(current_user_profile)
+
+			if (other_user.users in current_user_profile.invite.all()):
+				current_user_profile.invite.remove(other_user.users)
+				other_user.users.invite.remove(current_user_profile)
+
 			current_user_profile.blocked.add(other_user.users)
 
 			# Supprimer la demande d'ami (si elle existe)

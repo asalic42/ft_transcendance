@@ -400,7 +400,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 			)
 		except RuntimeError:
 			await self.send(text_data=json.dumps({'type': 'game_error'}))
-			
 		except ChannelFull:
 			print("Channel full in send_game_state")
 
@@ -1378,91 +1377,94 @@ class FriendRequestConsumer(AsyncWebsocketConsumer):
 """ Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """
 
 # Notif Chat
-class NotificationChatConsumer(AsyncWebsocketConsumer):
+# class NotificationChatConsumer(AsyncWebsocketConsumer):
     
-	async def connect(self):
-		self.user = self.scope['user']
-		if not self.user.is_authenticated:
-			await self.close()
-			return
+# 	async def connect(self):
+# 		self.user = self.scope['user']
+# 		if not self.user.is_authenticated:
+# 			await self.close()
+# 			return
 		
-		await self.accept()
-		await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
+# 		await self.accept()
+# 		await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
 
-		# Envoie l'etat initial des notifs non lues
-		has_unread = await self.get_unread_notif()
-		await self.send(text_data=json.dumps({
-			'type': 'update_status',
-			'has_unread_notifications': has_unread
-		}))
+# 		# Envoie l'etat initial des notifs non lues
+# 		has_unread = await self.get_unread_notif()
+# 		await self.send(text_data=json.dumps({
+# 			'type': 'update_status',
+# 			'has_unread_notifications': has_unread
+# 		}))
 
-	async def receive(self, text_data):
-		data = json.loads(text_data)
+# 	async def receive(self, text_data):
+# 		data = json.loads(text_data)
 
-		# if data.get('type') == 'mark_as_read':
-		# 	channel_name = data.get('channel_name')
-		# 	await self.mark_as_read(channel_name)
-		# 	await self.update_unread_status()
-		if data.get('type') == 'channel_opened':
-			channel_name = data.get('channel_name')
-			await self.mark_channel_as_opened(channel_name)
-			await self.update_unread_status()
+# 		# if data.get('type') == 'mark_as_read':
+# 		# 	channel_name = data.get('channel_name')
+# 		# 	await self.mark_as_read(channel_name)
+# 		# 	await self.update_unread_status()
+# 		if data.get('type') == 'channel_opened':
+# 			channel_name = data.get('channel_name')
+# 			# await self.mark_channel_as_opened(channel_name)
+# 			await self.update_unread_status()
 
-	async def disconnect(self, close_code):
-		if self.user.is_authenticated:
-			await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
-			print("user disconnected")
-			sys.stdout.flush()
+# 	async def disconnect(self, close_code):
+# 		if self.user.is_authenticated:
+# 			await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
+# 			print("user disconnected")
+# 			sys.stdout.flush()
 
-	""" Send messages to client """
+# 	""" Send messages to client """
 
-	async def new_message_notif(self, event):
-		await self.send(text_data=json.dumps({
-			'type': 'update_status',
-			'has_unread_notifications': True
-		}))
+# 	async def new_message_notif(self, event):
+# 		await self.send(text_data=json.dumps({
+# 			'type': 'update_status',
+# 			'has_unread_notifications': True
+# 		}))
 
-	async def update_unread_status(self):
-		has_unread = await self.get_unread_notif()
-		await self.send_status_update(has_unread)
+# 	async def update_unread_status(self):
+# 		user = Users.objects.get(user=self.user)
+# 		user.has_unread_chat = await self.get_unread_notif()
+# 		user.save()
+# 		await self.send_status_update(user.has_unread_chat)
 
-	async def send_status_update(self, has_unread):
-		await self.send(text_data=json.dumps({
-			'type': 'update_status',
-			'has_unread_notifications': has_unread
-		}))
+# 	async def send_status_update(self, has_unread):
+# 		await self.send(text_data=json.dumps({
+# 			'type': 'update_status',
+# 			'has_unread_notifications': has_unread
+# 		}))
 
-	""" Connection with database """
-	@database_sync_to_async
-	def get_unread_notif(self):
-		return Users.objects.filter(
-			has_unread_chat=False
-		).exists()
+# 	""" Connection with database """
+# 	# @database_sync_to_async
+# 	# def get_unread_notif(self):
+# 	# 	return Users.objects.filter(
+# 	# 		has_unread_chat=False
+# 	# 	).exists()
 	
-	# @database_sync_to_async
-	# def mark_as_read(self, channel_name):
-	# 	Messages.objects.filter(
-	# 		channel_name=channel_name,
-	# 		read=False
-	# 	).update(read=True)
+# 	# @database_sync_to_async
+# 	# def mark_as_read(self, channel_name):
+# 	# 	Messages.objects.filter(
+# 	# 		channel_name=channel_name,
+# 	# 		read=False
+# 	# 	).update(read=True)
 	
-	@database_sync_to_async
-	def mark_channel_as_opened(self, channel_name):
-		user = Users.objects.get(user=self.user)
-		UserOpenedChannel.objects.get_or_create(
-			user=user,
-			channel_name=channel_name
-		)
+# 	# @database_sync_to_async
+# 	# def mark_channel_as_opened(self, channel_name):
+# 	# 	user = Users.objects.get(user=self.user)
+# 	# 	chan = UserOpenedChannel.objects.get_or_create(
+# 	# 		user=user,
+# 	# 		channel_name=channel_name
+# 	# 	)
+		
 
-	@database_sync_to_async
-	def get_unread_notif(self):
-		user = Users.objects.get(user=self.user)
-		opened_chan = UserOpenedChannel.objects.filter(
-			user=user
-		).values_list('channel_name', flat=True)
-		return Messages.objects.filter(
-			read=False
-		).exclude(channel_name__in=opened_chan).exists()
+# 	@database_sync_to_async
+# 	def get_unread_notif(self):
+# 		user = Users.objects.get(user=self.user)
+# 		opened_chan = UserOpenedChannel.objects.filter(
+# 			user=user
+# 		).values_list('channel_name', flat=True)
+# 		return Messages.objects.filter(
+# 			read=False
+# 		).exclude(channel_name__in=opened_chan).exists()
 
 # Notif toto
 class NotificationConsumer(AsyncWebsocketConsumer):
@@ -1798,6 +1800,21 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				if player_scores[p2_id]['name'] is None:
 					p2 = Users.objects.get(pk=p2_id)
 					player_scores[p2_id]['name'] = p2.name
+
+			top_player_id = max(player_scores, key=lambda x: player_scores[x]['score'])
+			top_player_score = player_scores[top_player_id]['score']
+			top_player_name = player_scores[top_player_id]['name']
+
+			# Récupérer l'objet Users du meilleur joueur
+			top_player = Users.objects.get(pk=top_player_id)
+
+			# Et on sauvegarde le coco dans le champs winner
+			tournament.winner = top_player
+			tournament.save()
+
+			print("TOURNAMENT TOP PLAYER >>>> ", tournament.winner)
+			print("TOURNAMENT ID:", tournament.id)
+			print("TOURNAMENT:", tournament)
 
 			return player_scores
 

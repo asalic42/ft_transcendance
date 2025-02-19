@@ -2,212 +2,264 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Transcendence</title>
+    <head>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<title>Transcendence</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/base-styles.css' %}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/base-styles.css' %}">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
-    <script src="https://cdn.lordicon.com/lordicon.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.lordicon.com/lordicon.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-</head>
-<body>
-	{% csrf_token %}
-	<meta name="csrf-token" content="{{ csrf_token }}">	
-    <nav class="navbar">
-        
-        <ul class="navbar-nav">
+    </head>
+    <body>
+    	{% csrf_token %}
+    	<meta name="csrf-token" content="{{ csrf_token }}">	
+        <nav class="navbar">
 
-            <li class="logo" style="margin-bottom: 10px;">
-                <a href="#" class="nav-icon">
-                    <span class="link-text logo-text">42Project</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
-                        <path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/>
-                    </svg>
-                </a>
-            </li>
+            <ul class="navbar-nav">
 
-        <!-- HOME -->
+                <li class="logo" style="margin-bottom: 10px;">
+                    <a href="#" class="nav-icon">
+                        <span class="link-text logo-text">42Project</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
+                            <path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/>
+                        </svg>
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a href="{% url 'home' %}" class="nav-icon">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/wmwqvixz.json"
-                        trigger="hover"
-                        target=".nav-item">
-                    </lord-icon>
-                    <span class="link-text">Accueil</span>
-                </a>
-            </li>
+            <!-- HOME -->
+                <li class="nav-item">
+                    <a href="{% url 'home' %}" class="nav-icon">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/wmwqvixz.json"
+                            trigger="hover"
+                            target=".nav-item">
+                        </lord-icon>
+                        <span class="link-text">Accueil</span>
+                    </a>
+                </li>
 
-		<!-- GAME -->
-			<li class="nav-item">
-				<a href="{% url 'game-choice' %}" class="nav-icon">
-					<lord-icon
-						src="https://cdn.lordicon.com/caxgkjgi.json"
-						trigger="hover"
-                        target=".nav-item">
-					</lord-icon>
-					<span class="link-text">Game</span>
-				</a>
-			</li>
+    		<!-- GAME -->
+    			<li class="nav-item">
+    				<a href="game-choice/" class="nav-icon">
+    					<lord-icon
+    						src="https://cdn.lordicon.com/caxgkjgi.json"
+    						trigger="hover"
+                            target=".nav-item">
+    					</lord-icon>
+    					<span class="link-text">Game</span>
+    				</a>
+    			</li>
 
-        <!-- PROFILE -->
-            <li class="nav-item">
-				<a href="{% url 'profile' request.user.username %}" class="nav-icon">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/hrjifpbq.json"
-                        trigger="hover"
-                        target=".nav-item">
-                    </lord-icon>
-                    <span class="link-text">Utilisateur</span>
-                </a>
-            </li>
+            <!-- PROFILE -->
+                <li class="nav-item">
+    				<a href="{% url 'profile' request.user.username %}" class="nav-icon">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/hrjifpbq.json"
+                            trigger="hover"
+                            target=".nav-item">
+                        </lord-icon>
+                        <span class="link-text">Utilisateur</span>
+                    </a>
+                </li>
 
-        <!-- CHATROOM -->
-            <li class="nav-item">
-                <a href="{% url 'channels' %}" class="nav-icon">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/ayhtotha.json"
-                        trigger="hover"
-                        target=".nav-item">
-                    </lord-icon>
-                    {% if request.user.users.has_unread_notifications %}
-                        <div class="notification-status active"></div>
-                    {% else %}
-                        <div class="notification-status"></div>
-                    {% endif %}
-                    <span class="link-text">ChatRoom</span>
-                </a>
-            </li>
+            <!-- CHATROOM -->
+                <li class="nav-item">
+                    <a href="{% url 'channels' %}" class="nav-icon">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/ayhtotha.json"
+                            trigger="hover"
+                            target=".nav-item">
+                        </lord-icon>
+                        {% comment %} {% if request.user.users.has_unread_chat %} {% endcomment %}
+                            {% comment %} <div class="notification-chat active"></div> {% endcomment %}
+                        {% comment %} {% else %} {% endcomment %}
+                            {% comment %} <div class="notification-chat"></div> {% endcomment %}
+                        {% comment %} {% endif %} {% endcomment %}
+                        <span class="link-text">ChatRoom</span>
+                    </a>
+                </li>
 
-        <!-- NOTIFICATION(S) -->
-            <li class="nav-item">
-                <a href="{% url 'notifications' %}" class="nav-icon">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/lznlxwtc.json"
-                        trigger="hover"
-                        target=".nav-item">
-                    </lord-icon>
-                    <span class="link-text">Notifications</span>
-                </a>
-            </li>
+            <!-- NOTIFICATION(S) -->
+                <li class="nav-item">
+                    <a href="{% url 'notifications' %}" class="nav-icon">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/lznlxwtc.json"
+                            trigger="hover"
+                            target=".nav-item">
+                        </lord-icon>
+                        {% if request.user.users.has_unread_notifications %}
+                            <div class="notification-status active"></div>
+                        {% else %}
+                            <div class="notification-status"></div>
+                        {% endif %}
+                        <span class="link-text">Notifications</span>
+                    </a>
+                </li>
 
-        <!--- STATISTICS -->
-            <!-- <li class="nav-item">
-                <a href="{% url 'unavailable' %}" class="nav-icon">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/uwinmnkh.json"
-                        trigger="hover"
-                        target=".nav-item">
-                    </lord-icon>
-                    <span class="link-text">Statistiques</span>
-                </a>
-            </li> -->
+            <!-- SETTINGS -->
+                <li class="nav-item">
+    				<div id="top-border" style="
+    					width: 85%;
+    					MARGIN: 0 auto;
+    					border-top: 2px solid rgba(128, 128, 128, 0.8);">
+    				</div>
+                    <a href="{% url 'settings_user' %}" class="nav-icon">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/ifsxxxte.json"
+                            trigger="hover"
+                            target=".nav-item"
+                            state="hover-cog-4">
+                        </lord-icon>
+                        <span class="link-text">Paramètres</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <!-- SETTINGS -->
-            <li class="nav-item">
-				<div id="top-border" style="
-					width: 85%;
-					MARGIN: 0 auto;
-					border-top: 2px solid rgba(128, 128, 128, 0.8);">
-				</div>
-                <a href="{% url 'settings_user' %}" class="nav-icon">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/ifsxxxte.json"
-                        trigger="hover"
-                        target=".nav-item"
-                        state="hover-cog-4">
-                    </lord-icon>
-                    <span class="link-text">Paramètres</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+    	<main class="main-content" id="content">
+            {% block content %}
+            {% endblock %}
+        </main>
 
-	<main class="main-content">
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <style>
-        .notification-status {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            scale: 0.1;
-            margin-left: -10px;
-            margin-top: 0px;
-            display: none;
-            transition: 0.5s all ease;
-        }
-
-        .notification-status.active {
-            display: block;
-            background-color: blueviolet;
-            animation: anim-notif-status 0.5s forwards;
-        }
-
-        @keyframes anim-notif-status {
-			0% {scale: 0.1}
-			30% {scale: 0.5}
-			40% {scale: 0.2}
-            100% {scale: 0.2}
-		}
-
-    </style>
-
-    <script>
-		function getCookie(name) {
-			let cookieValue = null;
-			if (document.cookie && document.cookie !== '') {
-				const cookies = document.cookie.split(';');
-				for (let i = 0; i < cookies.length; i++) {
-					const cookie = cookies[i].trim();
-					if (cookie.substring(0, name.length + 1) === (name + '=')) {
-						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-						break;
-					}
-				}
-			}
-			return cookieValue;
-		}
-		const csrftoken = getCookie('csrftoken');
-	</script>
-
-    <script>
-
-        const notificationSocket = new WebSocket(
-            'wss://' + window.location.host + '/ws/notifications/'
-        );
-
-        notificationSocket.onopen = function (e) {
-            console.log("WebSocket connecté avec succès !");
-        };
-
-        notificationSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-
-            if (data.type === 'update_status') {
-                const notif = document.querySelector('.notification-status');
-                notif.classList.toggle("active", data.has_unread_notifications);
+        <style>
+            .notification-status {
+                position: absolute;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                scale: 0.1;
+                margin-left: -10px;
+                margin-top: 0px;
+                display: none;
+                transition: 0.5s all ease;
             }
-        };
 
-        notificationSocket.onclose = function (e) {
-            console.error('WebSocket fermé de manière inattendue');
-        };
+            .notification-status.active {
+                display: block;
+                background-color: blueviolet;
+                animation: anim-notif-status 0.5s forwards;
+            }
 
-        notificationSocket.onerror = function (e) {
-            console.error('Erreur WebSocket :', e);
-        };
-    </script>
+            @keyframes anim-notif-status {
+    			0% {scale: 0.1}
+    			30% {scale: 0.5}
+    			40% {scale: 0.2}
+                100% {scale: 0.2}
+    		}
 
-</body>
+        </style>
+
+        <script>
+    		function getCookie(name) {
+    			let cookieValue = null;
+    			if (document.cookie && document.cookie !== '') {
+    				const cookies = document.cookie.split(';');
+    				for (let i = 0; i < cookies.length; i++) {
+    					const cookie = cookies[i].trim();
+    					if (cookie.substring(0, name.length + 1) === (name + '=')) {
+    						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+    						break;
+    					}
+    				}
+    			}
+    			return cookieValue;
+    		}
+    		const csrftoken = getCookie('csrftoken');
+    	</script>
+{% comment %} 
+        <script>
+
+            const notificationSocket = new WebSocket(
+                'wss://' + window.location.host + '/ws/notifications/'
+            );
+
+            notificationSocket.onopen = function (e) {
+                console.log("WebSocket connecté avec succès !");
+            };
+
+            notificationSocket.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+
+                if (data.type === 'update_status') {
+                    const notif = document.querySelector('.notification-status');
+                    notif.classList.toggle("active", data.has_unread_notifications);
+                }
+            };
+
+            notificationSocket.onclose = function (e) {
+                console.error('WebSocket fermé de manière inattendue');
+            };
+
+            notificationSocket.onerror = function (e) {
+                console.error('Erreur WebSocket :', e);
+            }; {% endcomment %}
+
+            {% comment %} // Notif Channels {% endcomment %}
+            {% comment %} const notificationChatSocket = new WebSocket(
+                'wss://' + window.location.host + '/ws/notifications-chat/'
+            );
+
+            notificationChatSocket.onopen = function (e) {
+                console.log("WebSocket connecté avec succès !");
+            };
+
+            notificationChatSocket.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+
+                if (data.type === 'update_status') {
+                    const notif = document.querySelector('.notification-chat');
+                    notif.classList.toggle("active", data.has_unread_chat);
+                }
+            };
+
+            notificationChatSocket.onclose = function (e) {
+                console.error('WebSocket fermé de manière inattendue');
+            };
+
+            notificationChatSocket.onerror = function (e) {
+                console.error('Erreur WebSocket :', e);
+            }; {% endcomment %}
+        {% comment %} </script> {% endcomment %}
+
+        <script src="{% static 'js/app.js' %}"></script>
+    </body>
+
+        
+        {% comment %} document.addEventListener("DOMContentLoaded", function() {
+            document.body.addEventListener("click", function(event) {
+                const link = event.target.closest("a");
+                if (link && link.href) {
+                    const url = new URL(link.href, window.location.origin);
+
+                    if (url.origin === window.location.origin) {
+                        event.preventDefault() // Empeche le rechargement de toute la page
+                        const templateName = url.pathname.split("/").filter(Boolean).join("_"); //Recup le template par l'url
+                        fetch(`/load/${templateName}/`, {headers: { "X-Request-With": "XMLHttpRequest" } })
+                            .then(response => response.text())
+                            .then(html => {
+                                // Maj des nouveaux elements sur la page
+                                document.getElementById("content").innerHTML = html;
+                                history.pushState(null, "", url.pathname);
+                            })
+                            .catch(error => console.error("Erreur de chargement: ", error));
+                    }
+                }
+            });
+            // Gerer les fleches <- -> sur le site
+            window.addEventListener("popstate", function() {
+                fetch(location.pathname, {headers: { "X-Request-With": "XMLHttpRequest" } })
+                    .then(response => response.text)
+                    .then(html => {
+                        document.getElementById("content").innerHTML = html;
+                    })
+                    .catch(error => console.error("Erreur de navigation: ", error));
+            }); 
+        });{% endcomment %}
+   
 </html>

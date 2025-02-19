@@ -3,6 +3,7 @@
 
 {% block content %}
 
+<div id="content">
     <div class="test-delete">
         <form method="post" class="delete_my_account" action="{% url 'delete_account' %}">
             {% csrf_token %}
@@ -205,5 +206,6 @@
           console.error("Erreur lors de la récupération des données IP :", error);
         });
     </script>
+</div>
 
 {% endblock %}

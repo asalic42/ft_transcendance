@@ -180,7 +180,7 @@ async function openCenter(printName, nameChan) {
 	const chatContainer = document.getElementById('chat-page');
 	chatContainer.innerHTML = ``;
 
-	onChannelOpening(currentChan);
+	// onChannelOpening(currentChan);
 	// markAsRead()
 
 	if (liveChat) clearInterval(liveChat);
@@ -345,14 +345,14 @@ async function addMessage(mess, sender, id, is_link) {
 	chatPage.scrollTop = chatPage.scrollHeight;
 }
 
-function onChannelOpening(channelName) {
-	if (notificationSocket.readyState === WebSocket.OPEN) {
-		notificationSocket.send(JSON.stringify({
-			type: 'channel_opened',
-			channel_name: channelName
-		}));
-	}
-}
+// function onChannelOpening(channelName) {
+// 	if (notificationChatSocketSocket.readyState === WebSocket.OPEN) {
+// 		notificationChatSocketSocket.send(JSON.stringify({
+// 			type: 'channel_opened',
+// 			channel_name: channelName
+// 		}));
+// 	}
+// }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //! LEFT CHAN PART
@@ -609,8 +609,8 @@ async function postMessage(currentChan, mess, is_link) {
 		const data = await response.json();
 
 		// notif
-		if (notificationSocket.readyState === WebSocket.OPEN)
-			markAsRead()
+		// if (notificationChatSocketSocket.readyState === WebSocket.OPEN)
+			// markAsRead()
 
 		// Accéder à idSender
 		const idSender = data.message.idSender;
@@ -698,11 +698,11 @@ async function post_deblock(a) {
 }
 
 // Fonction pour marquer une notif comme lue
-function markAsRead() {
-	if (notificationSocket.readyState == WebSocket.OPEN) {
-		notificationSocket.send(JSON.stringify({
-			'type': 'mark_as_read',
-			'channel_name': currentChan,
-		}));
-	}
-}
+// function markAsRead() {
+// 	if (notificationChatSocketSocket.readyState == WebSocket.OPEN) {
+// 		notificationChatSocketSocket.send(JSON.stringify({
+// 			'type': 'mark_as_read',
+// 			'channel_name': currentChan,
+// 		}));
+// 	}
+// }

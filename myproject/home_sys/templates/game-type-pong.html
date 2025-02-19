@@ -4,25 +4,27 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
+<div id="content">
 
-<div class="page">
-	<div class="rectangle"></div>
-	<a href="{% url 'game-mode-pong' %}" class="retour">
-		<span class="game-mode" id="retour" >Retour</span>
-	</a>
-	<h1 class="title">Choix du type de jeu</h1>
-	<div class="mode-choices">
+	<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
 
-		<a href="{% url 'game' %}" class="game">
-			<span class="game-mode">Local</span>
+	<div class="page">
+		<div class="rectangle"></div>
+		<a href="game-mode-pong/" class="retour">
+			<span class="game-mode" id="retour" >Retour</span>
 		</a>
-		<a href="{% url 'game-distant-choice' %}" class="game-distant">
-			<span class="game-mode">Distant</span>
-		</a>
+		<h1 class="title">Choix du type de jeu</h1>
+		<div class="mode-choices">
+
+			<a href="game/" class="game">
+				<span class="game-mode">Local</span>
+			</a>
+			<a href="game-distant-choice/" class="game-distant">
+				<span class="game-mode">Distant</span>
+			</a>
+		</div>
+
 	</div>
-
 </div>
-
 
 {% endblock %}

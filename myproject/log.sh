@@ -104,7 +104,7 @@ if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Stopping docker services...${NC}"
     sudo docker-compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    sudo docker system prune --volumes -a
+    sudo docker system prune --volumes
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 

@@ -4,51 +4,54 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+<div id="content">
 
-<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
+	<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+	
+	<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
 
-<div class="scores" id="scores">
-	<h3 id="title">Player 1</h3>
-	<h3 id="scoreP1">0</h3>
-	<h3 id="scoreP2">0</h3>
-	<h3 id="title">BOT</h3>
-</div>
-
-<div id="page">
-	<a href="{% url 'game-mode-pong' %}" class="retour">
-		<span class="inputs" id="retour" >Retour</span>
-	</a>
-    <h1 class="title">Choix de la difficulté du bot (1-4)</h1>
-	<div id="input">
-		<form id="LevelForm" action="javascript:levelinput()" method="get" name="LevelForm">
-			<input class="inputs" type="number" id="levelfield" name="levelfield" min="1" max="4" value="2"/>
-			<input id="button" class="inputs" type="submit" id="sendlvl"/>
-		</form>
-    </div>
-</div>
-
-<div id="canvas-container">
-	<canvas width="1920" height="850" id="game"></canvas>
-	<div id="button-container">
-		<button id="replay-button" style="display: none;">Play again !</button>
+	<div class="scores" id="scores">
+		<h3 id="title">Player 1</h3>
+		<h3 id="scoreP1">0</h3>
+		<h3 id="scoreP2">0</h3>
+		<h3 id="title">BOT</h3>
 	</div>
-	<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-		<svg width="1100" height="150" id="svg-wrapper-player1">
-			<text x="50%" y="50%" dy=".35em" text-anchor="middle" id="svg-wrapper-player1">
-				Player 1 Wins !
-			</text>
-		</svg>
+	
+	<div id="page">
+		<a href="game-mode-pong/" class="retour">
+			<span class="inputs" id="retour" >Retour</span>
+		</a>
+	    <h1 class="title">Choix de la difficulté du bot (1-4)</h1>
+		<div id="input">
+			<form id="LevelForm" method="get" name="LevelForm">
+				<input class="inputs" type="number" id="levelfield" name="levelfield" min="1" max="4" value="2"/>
+				<input id="button" class="inputs" type="submit" id="sendlvl"/>
+			</form>
+	    </div>
 	</div>
-	<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
-		<svg width="1100" height="150" id="svg-wrapper-player2">
-			<text x="50%" y="50%" dy=".35em" text-anchor="middle" id="svg-wrapper-player2">
-				BOT Wins !
-			</text>
-		</svg>
+	
+	<div id="canvas-container">
+		<canvas width="1920" height="850" id="game"></canvas>
+		<div id="button-container">
+			<button id="replay-button" data-type="bot" style="display: none;">Play again !</button>
+		</div>
+		<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+			<svg width="1100" height="150" id="svg-wrapper-player1">
+				<text x="50%" y="50%" dy=".35em" text-anchor="middle" id="svg-wrapper-player1">
+					Player 1 Wins !
+				</text>
+			</svg>
+		</div>
+		<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+			<svg width="1100" height="150" id="svg-wrapper-player2">
+				<text x="50%" y="50%" dy=".35em" text-anchor="middle" id="svg-wrapper-player2">
+					BOT Wins !
+				</text>
+			</svg>
+		</div>
 	</div>
+	
+	<script src="{% static 'js/game-bot.js' %}"></script>
 </div>
-
-<script src="{% static 'js/game-bot.js' %}"></script>
 
 {% endblock %}
