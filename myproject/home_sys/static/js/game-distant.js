@@ -97,6 +97,12 @@ window.onload = function() {
 	document.getElementById('canvas-container').style.display = 'flex';
 }
 
+window.addEventListener("beforeunload", function() {
+    if (socket.readyState === WebSocket.OPEN && id_t !== 0) {  // <-- Vérifier id_t
+        socket.send(JSON.stringify({ action: "window_closed" }));
+    }
+});
+
 var animation_id;
 
 function startGame(data) {

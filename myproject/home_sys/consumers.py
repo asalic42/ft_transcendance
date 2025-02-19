@@ -1,3 +1,10 @@
+import json
+import asyncio
+from collections import defaultdict
+from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async
+from django.shortcuts import get_object_or_404
+import time
 import os
 import django
 
@@ -16,6 +23,7 @@ import logging
 from .utils import add_pong_logic
 from .models import *
 import math
+from django.shortcuts import render, redirect, get_object_or_404
 
 """ Other functions utils """
 def get_player_name(player_values, player_number):
@@ -48,6 +56,7 @@ class PongGame:
 		self.is_over = False
 		self.multiplyer = 0
 		self.bounce = 0
+		self.reported_to_tournament = False  # <-- Nouveau drapeau
 
 	def reset_game(self):
 		self.ball = {
@@ -185,12 +194,14 @@ class PongConsumer(AsyncWebsocketConsumer):
 				# sys.stdout.flush()
 				await self.addTgame(game_data['pk'])
 				tournament_group = f"tournament_{self.id_t}"
-				await self.channel_layer.group_send(
-					tournament_group,
-					{
-						'type': 'match_finished',  # Le type définit le nom de la méthode à appeler dans le consumer cible
-					}
-				)
+				if self.game.reported_to_tournament is False:
+					self.game.reported_to_tournament = True  # Bloquer les doubles envois
+					await self.channel_layer.group_send(
+						tournament_group,
+						{
+							'type': 'match_finished',  # Le type définit le nom de la méthode à appeler dans le consumer cible
+						}
+					)
 
 			await self.send(text_data=json.dumps({
 				'type': 'game_created',
@@ -206,7 +217,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 	@database_sync_to_async
 	def create_current_game(self):
-		game, created = CurrentGame.objects.get_or_create(game_id=self.game_id)
+		created = CurrentGame.objects.get_or_create(game_id=self.game_id)
 		if created:
 			print("game has been added into the database")
 		else:
@@ -273,20 +284,28 @@ class PongConsumer(AsyncWebsocketConsumer):
 	
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
+			
+			# Marquer le perdant
 			if player_number == 1:
 				self.game.scores['p2'] = 1
-			elif player_number == 2:
+			else:
 				self.game.scores['p1'] = 1
 	
-			loser = player_number
-			
-			await self.send_game_state()
+			# Envoyer game_won aux joueurs
 			await self.channel_layer.group_send(
-				self.room_group_name, {
-					'type': 'game_won',
-					'loser': loser 
-				}
+				self.room_group_name,
+				{"type": "game_won", "loser": player_number}
 			)
+	
+			# Envoyer match_finished au tournoi UNE FOIS SEULEMENT
+			if self.id_t != 0 and not self.game.reported_to_tournament:
+				self.game.reported_to_tournament = True  # Bloquer les doubles envois
+				tournament_group = f"tournament_{self.id_t}"
+				await self.channel_layer.group_send(
+					tournament_group,
+					{"type": "match_finished"}
+				)
+	
 			self.game.remove_player(self.channel_name)
 		else:
 			print(f"Channel {self.channel_name} already removed from players.")
@@ -550,16 +569,24 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 """ CASSE BRIQUE GAME MULTIPLAYER """
 
+"""
+?------------------------------------------------------------------------------------------------------------------
+?------------------------------------------------------------------------------------------------------------------
+?------------------------------------------------------------------------------------------------------------------
+?------------------------------------------------------------------------------------------------------------------
+"""
+
 class CasseBriqueGame:
 	def __init__(self):
 		self.players = {}
 		self.health = {'p1': 5, 'p2': 5}
-		self.mapTab = {}
+		self.mapTab = None
 		# self.block_array = []
 		self.reset_game()
 		self.map = None
 		self.is_running = False
 		self.multiplyer = 0
+		self.timeleft = 0
 
 	def reset_game(self):
 		self.scores = {'p1': 0, 'p2': 0 }
@@ -616,7 +643,39 @@ class CasseBriqueGame:
 		}
 		return True
 
+	@database_sync_to_async
+	def fetch_map(self, map_id):
+		selected_map = get_object_or_404(Maps, id=map_id)
+		try:
+			with open(selected_map.LinkMaps, 'r') as file:
+				map_data = file.read()
+				return {"map": [list(map(int, line)) for line in map_data.split('\n') if line]}
+		except FileNotFoundError:
+			return {"error": "Carte non trouvée."}
+
+
+	async def load_map(self, map_id):
+		# Cette méthode sera appelée pour charger la map depuis la base de données
+		try:
+			map_data = await self.fetch_map(map_id)
+			if "error" in map_data:
+				print(f"Error loading map: {map_data['error']}")
+				return False
+				
+			self.map = map_data["map"]
+			# Convertir la map en format pour les blocs
+			self.mapTab = []
+			for row in self.map:
+				self.mapTab.append([int(cell) for cell in row])
+			return True
+		except Exception as e:
+			print(f"Error loading map: {e}")
+			return False
+
 	def create_blocks(self, block_array):
+		if not self.mapTab:
+			print("Warning: No map loaded!")
+			return block_array
 
 		start_x = 600 / 8
 		start_y = 750 / 24
@@ -628,12 +687,12 @@ class CasseBriqueGame:
 		for i in range(6):
 			for j in range(12):
 				block_array.append({
-						"x": x,
-						"y": y + start_y + start_y,
-						"width": width,
-						"height": height,
-						"state": self.mapTab[j][i]
-					})
+					"x": x,
+					"y": y + start_y + start_y,
+					"width": width,
+					"height": height,
+					"state": self.mapTab[j][i]
+				})
 				y += start_y
 			x += start_x
 			y = start_y - 5
@@ -669,18 +728,101 @@ class CasseBriqueGame:
 			'scores': self.scores
 		}
 
+	def remove_player(self, channel_name):
+		if channel_name in self.players:
+			del self.players[channel_name]
+
 class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	games = defaultdict(CasseBriqueGame)
+	
+	@database_sync_to_async
+	def create_room(self):
+		created = casse_brique_room.objects.get_or_create(game_id=self.game_id, map_id=self.map_id)
+		if created:
+			print("game has been added into the database")
+		else:
+			print("game already exists in the database")
+		sys.stdout.flush()
+	
+	@database_sync_to_async
+	def delete_room(self):
+		# On peut supprimer en filtrant sur game_id
+		casse_brique_room.objects.filter(game_id=self.game_id).delete()
+	
+	async def game_won(self, event):
+		"""Handler pour le message de type game_won"""
+		await self.send(text_data=json.dumps({
+			'type': 'game_won',
+			'loser': event['loser'],
+			'disconnected': event.get('disconnected', False)
+		}))
+
+	# Modification de la méthode disconnect pour gérer correctement la déconnexion
+	async def disconnect(self, close_code):
+		game_was_running = self.game.is_running
+		self.game.is_running = False
+		self.game.is_over = True
+		
+		if self.channel_name in self.game.players:
+			player_number = self.game.players[self.channel_name]['number']
+			loser = player_number
+		
+			# Sauvegarde du résultat avec le perdant
+			await self.save_game_result()
+		
+			try:
+				# Notification aux joueurs
+				await self.channel_layer.group_send(
+					self.room_group_name,
+					{
+						'type': 'game_won',
+						'loser': loser,
+						'disconnected': True
+					}
+				)
+		
+				# Fermeture forcée des autres connexions
+				await self.channel_layer.group_send(
+					self.room_group_name,
+					{
+						'type': 'close_connection',
+						'message': 'Opponent disconnected. You win!'
+					}
+				)
+			except Exception as e:
+				print(f"Error sending disconnect messages: {e}")
+		
+			self.game.remove_player(self.channel_name)
+		
+		# Nettoyage de la room
+		await self.delete_room()
+		if self.room_group_name in self.__class__.games:
+			del self.__class__.games[self.room_group_name]
+		
+		await self.channel_layer.group_discard(
+			self.room_group_name,
+			self.channel_name
+		)
+		await self.close()
+
+	# Nouveau handler pour fermer les connexions
+	async def close_connection(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'close_connection',
+			'message': event['message']
+		}))
+		await self.close()
 
 	async def connect(self):
-		self.room_name = "casse-brique"
+		self.game_id = self.scope['url_route']['kwargs']['game_id']
+		self.map_id = self.scope['url_route']['kwargs']['map_id']
+		self.room_name = f"{self.game_id}"
 		self.room_group_name = f"game_{self.room_name}"
 		self.game = self.games[self.room_group_name]
 
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
-		# try to add player
 		if not self.game.add_player(self.channel_name, user_id):
 			await self.close()
 			return
@@ -689,43 +831,78 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			self.room_group_name,
 			self.channel_name
 		)
-
 		await self.accept()
 
-		player_number = self.game.players[self.channel_name]['number']
-		initial_state_game = self.game.get_game_state()
+		# Charger la map si ce n'est pas déjà fait
+		if not self.game.mapTab:
+			default_map_id = 1
+			success = await self.game.load_map(self.map_id)
+			if not success:
+				await self.close()
+				return
 
+		# Créer les blocs pour le nouveau joueur
+		player = self.game.players[self.channel_name]
+		player['block_array'] = self.game.create_blocks([])
+
+		# Envoyer l'état initial
+		player_number = player['number']
+		initial_state = self.game.get_game_state()
 		await self.send(text_data=json.dumps({
 			'type': 'game_state',
 			'number': player_number,
-			'blocks_p1': initial_state_game['blocks_p1'],
-			'blocks_p2': initial_state_game['blocks_p2'],
-			'ball_p1': initial_state_game['ball_p1'],
-			'ball_p2': initial_state_game['ball_p2'],
-			'player1_coords': initial_state_game['player1_coords'],
-			'player2_coords': initial_state_game['player2_coords'],
-			'scores': initial_state_game['scores']
+			'mapData': self.game.mapTab,  # Envoyer la map au client
+			**initial_state,
+			'time': 0
 		}))
 
-		# selected_map = self.game.map if hasattr(self.game, 'map') else None
+		print(f"creating game room, len={len(self.game.players)}")
+		sys.stdout.flush()
+		if len(self.game.players) == 1:
+			await self.create_room()
 
 		if len(self.game.players) == 2 and not self.game.is_running:
-			if (1 in self.game.map and 2 in self.game.map) and self.game.map[1] == self.game.map[2]:
-	
-				self.game.is_running = True
-				await self.send_game_state(0)
-				asyncio.create_task(self.start_game())
-			# else affichage erreur: not same map
+			await self.delete_room()
+			self.game.is_running = True
+			await self.send_game_state(0)
+			asyncio.create_task(self.start_game())
+
+	@database_sync_to_async
+	def save_game_result(self):
+		try:
+			id_p1 = None
+			id_p2 = None
+			
+			# Récupération des IDs des joueurs
+			for player in self.game.players.values():
+				if player['number'] == 1 and player.get('user_id'):
+					id_p1 = player['user_id']
+				elif player['number'] == 2 and player.get('user_id'):
+					id_p2 = player['user_id']
 		
-	async def disconnect(self, close_code):
-		self.game.is_running = False
+			if id_p1 is None or id_p2 is None:
+				print(f"Missing player IDs. P1: {id_p1}, P2: {id_p2}")
+				return
+		
+			winner_id = id_p1 if self.game.scores['p1'] > self.game.scores['p2'] else id_p2
+			
+			game_data = MultiCasseBrique.objects.create(
+				id_p1_id=id_p1,
+				id_p2_id=id_p2,
+				winner_id=winner_id,
+				score_p1=self.game.scores['p1'],
+				score_p2=self.game.scores['p2'],
+				map=1  # Vous pouvez adapter ceci selon votre logique
+			)
+			print(f"Game saved successfully: {game_data}")
+			
+		except Exception as e:
+			print(f"Error saving game result: {str(e)}")
+			# Log plus détaillé de l'erreur
+			import traceback
+			print(traceback.format_exc())
 
-		await self.channel_layer.group_discard(
-			self.room_group_name,
-			self.channel_name
-		)
 
-		print("Player disconnected")
 
 	async def receive(self, text_data):
 		try:
@@ -953,7 +1130,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			await self.channel_layer.group_send(
 				self.room_group_name, {
 					'type': 'game_update',
-					'time': time,
+					'time': self.game.timeleft,	
 					**state
 				},
 			)
@@ -974,10 +1151,16 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		}))
 	
 	async def game_over(self, event):
-		loser = self.game.players[self.channel_name]
+		if self.game.scores['p1'] == self.game.scores['p2']:
+			winner = 0
+		elif self.game.scores['p1'] > self.game.scores['p2']:
+			winner = 1
+		else:
+			winner = 2
+
 		await self.send(text_data=json.dumps({
 			'type': 'game_over',
-			'loser': loser
+			'winner': winner
 		}))
 
 	async def get_player_names(self, event):
@@ -1010,6 +1193,12 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 	""" """ """ """ """ """ """ """
 	""" Start the game """
 	""" """ """ """ """ """ """ """
+	async def start_game_send(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'game_start',
+		}))
+	
+	
 	async def start_game(self):
 
 		player1_name = await database_sync_to_async(get_player_name)(self.game.players.values(), 1)
@@ -1033,6 +1222,13 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		print("\033[0;34m Demarrage du jeu ! \033[0m")
 		sys.stdout.flush()
 
+		await self.channel_layer.group_send(
+				self.room_group_name,
+				{
+					'type': 'start_game_send',
+				}
+			)
+			
 		countdown_messages = ['3', '2', '1', 'Start!']
 		for message in countdown_messages:
 			await self.channel_layer.group_send(
@@ -1042,8 +1238,10 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			await asyncio.sleep(1)
-		
-		# time_left = 60
+
+
+		time_left = 60
+		start = time.time()
 		while self.game.is_running and len(self.game.players) == 2:
 			update_interval = 0.016 # 60 FPS
 			current_time = asyncio.get_event_loop().time()
@@ -1060,14 +1258,9 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 				# End of the game
 				# if time_left <= 0:
-				if self.game.scores['p1'] >= 10 or self.game.scores['p2'] >= 10:
-					await self.channel_layer.group_send(
-						self.room_group_name, {
-							'type': 'game_over'
-						}
-					)
-					self.game.is_running = False
-				
+				end = time.time()
+				self.game.timeleft = end - start
+					
 				try:
 					await self.send_game_state(0)
 					elapsed = asyncio.get_event_loop().time() - current_time
@@ -1078,6 +1271,14 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				except ChannelFull:
 					print("Channel full, skipping update")
 				
+				if (self.game.timeleft >= 10):
+					await self.save_game_result()
+					await self.channel_layer.group_send(
+						self.room_group_name, {
+							'type': 'game_over'
+						}
+					)
+					self.game.is_running = False
 				# await asyncio.sleep(1)
 				# time_left -= 1
 				last_update = current_time
@@ -1120,57 +1321,57 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 logger = logging.getLogger(__name__)
 
 class StatusConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.user = self.scope['user']
-        if self.user.is_authenticated:
-            await self.accept()
-            await self.channel_layer.group_add("status_updates", self.channel_name)
-            logger.info(f"User {self.user.id} connected to WebSocket.")
+	async def connect(self):
+		self.user = self.scope['user']
+		if self.user.is_authenticated:
+			await self.accept()
+			await self.channel_layer.group_add("status_updates", self.channel_name)
+			logger.info(f"User {self.user.id} connected to WebSocket.")
 
-    async def disconnect(self, close_code):
-        if hasattr(self, 'user') and self.user.is_authenticated:
-            await self.channel_layer.group_discard("status_updates", self.channel_name)
-            logger.info(f"User {self.user.id} disconnected from WebSocket.")
+	async def disconnect(self, close_code):
+		if hasattr(self, 'user') and self.user.is_authenticated:
+			await self.channel_layer.group_discard("status_updates", self.channel_name)
+			logger.info(f"User {self.user.id} disconnected from WebSocket.")
 
-    async def user_status_update(self, event):
-        await self.send(text_data=json.dumps({
-            "user_id": event["user_id"],
-            "is_online": event["is_online"],
-        }))
-        logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
+	async def user_status_update(self, event):
+		await self.send(text_data=json.dumps({
+			"user_id": event["user_id"],
+			"is_online": event["is_online"],
+		}))
+		logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
 
 class FriendRequestConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.user = self.scope['user']
-        if self.user.is_authenticated:
-            # Associer l'utilisateur à un groupe unique basé sur son ID
-            await self.channel_layer.group_add(
-                f"user_{self.user.id}",  # Groupe basé sur l'ID de l'utilisateur récepteur
-                self.channel_name
-            )
-            await self.accept()
-        else:
-            await self.close()
+	async def connect(self):
+		self.user = self.scope['user']
+		if self.user.is_authenticated:
+			# Associer l'utilisateur à un groupe unique basé sur son ID
+			await self.channel_layer.group_add(
+				f"user_{self.user.id}",  # Groupe basé sur l'ID de l'utilisateur récepteur
+				self.channel_name
+			)
+			await self.accept()
+		else:
+			await self.close()
 
-    async def disconnect(self, close_code):
-        if self.user.is_authenticated:
-            # Lorsque l'utilisateur se déconnecte, quitter le groupe
-            await self.channel_layer.group_discard(
-                f"user_{self.user.id}",
-                self.channel_name
-            )
+	async def disconnect(self, close_code):
+		if self.user.is_authenticated:
+			# Lorsque l'utilisateur se déconnecte, quitter le groupe
+			await self.channel_layer.group_discard(
+				f"user_{self.user.id}",
+				self.channel_name
+			)
 
-    async def send_friend_request(self, event):
-        """
-        Cette méthode reçoit un message du signal et envoie une notification WebSocket
-        pour signaler à l'utilisateur récepteur qu'il a une nouvelle demande d'ami.
-        """
-        # Envoi de la notification à l'utilisateur récepteur
-        await self.send(text_data=json.dumps({
-            'type': 'friend_request',  # Type de message, à gérer côté front-end
-            'message': 'Vous avez une nouvelle demande d\'ami!',
-            'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
-        }))
+	async def send_friend_request(self, event):
+		"""
+		Cette méthode reçoit un message du signal et envoie une notification WebSocket
+		pour signaler à l'utilisateur récepteur qu'il a une nouvelle demande d'ami.
+		"""
+		# Envoi de la notification à l'utilisateur récepteur
+		await self.send(text_data=json.dumps({
+			'type': 'friend_request',  # Type de message, à gérer côté front-end
+			'message': 'Vous avez une nouvelle demande d\'ami!',
+			'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
+		}))
 
 """ """ """ """ """ """ """ """
 """ NOTIFICATIONS PUSH """
@@ -1271,8 +1472,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	is_running = {}
 	gameFinished = {}
 	roundNb = {}
+	tournament_ended = {}
 	async def connect(self):
 		try:
+			print("starting connection process")
+			sys.stdout.flush()
 			self.tournament_id = self.scope['url_route']['kwargs']['id_t']
 			self.tournament_group = f"tournament_{self.tournament_id}"
 			
@@ -1289,11 +1493,16 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			if self.tournament_id not in TournamentConsumer.roundNb:
 				TournamentConsumer.roundNb[self.tournament_id] = 0
 			
+			if self.tournament_id not in TournamentConsumer.tournament_ended:
+				TournamentConsumer.tournament_ended[self.tournament_id] = False
+			
 			if (len(TournamentConsumer.players[self.tournament_id]) >= 4 or 
 				TournamentConsumer.is_running[self.tournament_id]):
+				print("closing at len(TournamentConsumer.players[self.tournament_id]")
+				sys.stdout.flush()
 				await self.close()
 				return
-			
+
 			# Ajouter le joueur au groupe
 			await self.channel_layer.group_add(self.tournament_group, self.channel_name)
 			await self.accept()
@@ -1311,15 +1520,66 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			
 			await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 
+			# Si 1 joueur est connecté pour ce tournoi, ajouter à la listes des rooms
+			if len(TournamentConsumer.players[self.tournament_id]) == 1:
+				try : 
+					if (await self.add_t_room()): # si le tournois est déjà fini
+						await self.send(json.dumps({"type": "already"})) #envoyer message pour notif
+						await self.disconnect(0) #deco proprement
+						await self.close() #close le socket
+						return 
+					sys.stdout.flush()
+				except Exception as e:
+					print(f"Erreur lors de l'ajout du tournois dans les rooms disponibles : {str(e)}")
+					sys.stdout.flush()
+					await self.close()	
+					return 
+			if (TournamentConsumer.tournament_ended[self.tournament_id]):
+				await self.send(json.dumps({"type": "already"})) #envoyer message pour notif
+				await self.disconnect(0) #deco proprement
+				await self.close() #close le socket
+				return 
 			# Si 4 joueurs sont connectés pour ce tournoi, lancer le tournoi
 			if len(TournamentConsumer.players[self.tournament_id]) == 4:
+				try : 
+					await self.delete_current_tournament()
+					await self.create_t()
+				except Exception as e:
+					print(f"Erreur lors de la supression du tournoi dans les rooms disponibles : {str(e)}")
+					sys.stdout.flush()
 				await self.start_tournament()
-			
 		except Exception as e:
 			print(f"Erreur lors de la connexion : {str(e)}")
 			sys.stdout.flush()
 			await self.close()
+			return 
 	
+	
+	@database_sync_to_async
+	def create_t(self):
+		created = Tournaments.objects.create(pk=self.tournament_id)
+		if created:
+			print("game has been added into the database")
+
+	@database_sync_to_async
+	def add_t_room(self):
+		created = tournament_room.objects.create(tournament_id=self.tournament_id)
+		if created:
+			print("game has been added into the database")
+		try:
+			check = Tournaments.objects.get(pk=self.tournament_id)
+		except Exception as e:
+			print("returning false")
+			sys.stdout.flush()
+			return False
+		print("returning true")
+		sys.stdout.flush()
+		return True
+			
+	@database_sync_to_async
+	def delete_current_tournament(self):
+		tournament_room.objects.filter(tournament_id=self.tournament_id).delete()
+
 	async def start_tournament(self):
 		print("starting tournament")
 		sys.stdout.flush()
@@ -1333,7 +1593,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			[(players[0], players[2]), (players[1], players[3])],  # Round 2
 			[(players[0], players[3]), (players[1], players[2])],  # Round 3
 		]
-	
+		message = f"The matches will be : \n \
+		Round 1: {round_pairings[0][0][0]['username']} against {round_pairings[0][0][1]['username']} and {round_pairings[0][1][0]['username']} against {round_pairings[0][1][1]['username']} \n \
+		Round 2: {round_pairings[1][0][0]['username']} against {round_pairings[1][0][1]['username']} and {round_pairings[1][1][0]['username']} against {round_pairings[1][1][1]['username']} \n \
+		Round 3: {round_pairings[2][0][0]['username']} against {round_pairings[2][0][1]['username']} and {round_pairings[2][1][0]['username']} against {round_pairings[2][1][1]['username']}"
+
+		print(message)
+		sys.stdout.flush()
 		game_id1 = random.randint(10000, 19999)
 		game_id2 = random.randint(10000, 19999)
 	
@@ -1342,17 +1608,24 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	
 			for pair_index, pair in enumerate(current_round_pairings):
 				game_id = game_id1 if pair_index < 1 else game_id2
+				name = [pair[0]['username'], pair[1]['username']]
+				index = 0
 				for player_in_pair in pair:
 					game_link = f"https://transcendance.42.paris/accounts/game-distant/{game_id}/{self.tournament_id}"
 					print(f'On envoie le lien "{game_link}" à {player_in_pair["channel_name"]} and round nb is at {TournamentConsumer.roundNb[self.tournament_id]}')
+					print(f'name: {name}')
+					print(f'name[index]: {name[index]}')
 					sys.stdout.flush()
 					await self.channel_layer.send(
 						player_in_pair['channel_name'],
 						{
 							'type': 'send_game_link',
 							'link': game_link,
+							'name_op': name[index],
+							'message': message
 						}
-					)
+					)	
+					index += 1
 		else:
 			print("Tournament finished!")
 			sys.stdout.flush()
@@ -1365,7 +1638,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			link = event['link']
 			await self.send(text_data=json.dumps({
 				'type': 'game_link',
-				'link': link
+				'link': link,
+				'name_op': event['name_op'],
+				'message': event['message']
 			}))
 		except 	Exception as e:
 			print(f"Erreur lors de l'envoi du lien de jeu : {e}")
@@ -1381,7 +1656,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 					if p['channel_name'] != self.channel_name
 				]
 				
-				await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 
 				# Si le tournoi est en cours, l'arrêter
 				if TournamentConsumer.is_running[self.tournament_id]:
@@ -1400,7 +1674,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 					TournamentConsumer.roundNb.pop(self.tournament_id, None)
 					TournamentConsumer.is_running.pop(self.tournament_id, None)
 					TournamentConsumer.players.pop(self.tournament_id, None)
-	
+					try : 
+						await self.delete_current_tournament()
+					except Exception as e:
+						print(f"Erreur lors de la supression du tournoi dans les rooms disponibles : {str(e)}")
+						sys.stdout.flush()
+				else:
+					await self.channel_layer.group_send(self.tournament_group, {'type': 'user_list',})
 			# Retirer le joueur du groupe
 			await self.channel_layer.group_discard(self.tournament_group, self.channel_name)
 	
@@ -1426,29 +1706,42 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	
 	async def user_list(self, event):
 		data = []
-		for player in TournamentConsumer.players[self.tournament_id]:
-			data.append(player['username'])
-		await self.send(text_data=json.dumps({
-			'type': 'user_list',
-			'len': len(data),
-			'data': data,}))
+		if self.tournament_id in TournamentConsumer.players:  # Vérifier si la clé existe
+			for player in TournamentConsumer.players[self.tournament_id]:
+				data.append(player['username'])
+			print(f'sending user_list to {data}')
+			sys.stdout.flush()
+			await self.send(text_data=json.dumps({
+				'type': 'user_list',
+				'len': len(data),
+				'data': data,
+			}))
+		else:
+			# Gérer le cas où le tournoi n'existe plus
+			await self.send(text_data=json.dumps({
+				'type': 'user_list',
+				'len': 0,
+				'data': [],
+			}))
 
 	async def match_finished(self, event):
-		TournamentConsumer.gameFinished[self.tournament_id] += 1
-		print(f"match finished: {TournamentConsumer.gameFinished[self.tournament_id]}")
-		sys.stdout.flush()
-		if (TournamentConsumer.gameFinished[self.tournament_id] == 8):
-			TournamentConsumer.gameFinished[self.tournament_id] = 0
-			TournamentConsumer.roundNb[self.tournament_id] += 1
-
-			if TournamentConsumer.roundNb[self.tournament_id] == 3:
-				print("Tournament finished!")
-				sys.stdout.flush()
-				TournamentConsumer.is_running[self.tournament_id] = False
-				await self.tournament_ending()  # Call tournament_ending
-				return
-
-			await self.start_tournament()
+		if self.tournament_id not in self.gameFinished:
+			return  # Sécurité
+	
+		self.gameFinished[self.tournament_id] += 1
+		print(f"Matchs terminés : {self.gameFinished[self.tournament_id]}/2")
+	
+		# Si 2 matches terminés dans ce round
+		if self.gameFinished[self.tournament_id] == 8:
+			self.gameFinished[self.tournament_id] = 0  # Réinitialiser
+			self.roundNb[self.tournament_id] += 1
+	
+			# Si 3 rounds terminés, fin du tournoi
+			if self.roundNb[self.tournament_id] == 3:
+				print("Fin du tournoi !")
+				await self.tournament_ending()
+			else:
+				await self.start_tournament()  # Lancer le round suivant
 
 	@database_sync_to_async
 	def get_tournament_results(self):
@@ -1513,7 +1806,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 						"player_id": player_id, # Include player ID for frontend use
 					}
 				)
-
+			TournamentConsumer.tournament_ended[self.tournament_id] = True
 		except Exception as e:
 			print(f"Error in tournament_ending: {e}")
 			sys.stdout.flush()
