@@ -10,13 +10,13 @@ var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
 let percentage = 0;
 var fps = document.getElementById("fps");
-
+var	blocksDestroyed = 0;
 var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
 const mapSelection = document.querySelector('.mapSelection');
 const game = document.querySelector('.game');
 var count = 0;
-var health = 5;
+var health = 1;
 
 class block {
 	x1; y1; width; height; state;
@@ -46,9 +46,9 @@ async function launch (idMap) {
 	context = table.getContext("2d");
 	
 	await fetchMap(idMap);
-	fps.style.display = 'flex';
-	title.style.display = 'flex';
-	canvasContainer.style.display = 'flex';
+	// fps.style.display = 'flex';
+	// title.style.display = 'flex';
+	Array.from(document.getElementsByClassName("game")).forEach(element => element.style.display = 'flex');
 	mapSelection.style.display ='none';
 
 	createBlocks();
@@ -280,6 +280,10 @@ function isBallHittingblock(ball) {
 			incrementBallSpeed(ball);
 
 			block_arr[k].state--;
+			console.log(`block_arr[k].state ${block_arr[k].state}`);
+			if (!block_arr[k].state) {
+				blocksDestroyed++;
+			}
 			count += Math.abs(5 - block_arr[k].state);
 			break;
 		}
@@ -288,6 +292,9 @@ function isBallHittingblock(ball) {
 
 
 function isGameOver() {
+	if (blocksDestroyed == 73) {
+		return true;
+	}
 	if (health <= 0) {
 		return true;
 	}
@@ -296,6 +303,11 @@ function isGameOver() {
 
 
 function isEnd(ball) {
+	if (blocksDestroyed == 72) {
+		blocksDestroyed++;
+		createBall(Math.floor(getRandomArbitrary(-11, 0)));
+		return true;
+	}
 	if (ball.coords.y + ball.radius >= table.height) {
 		health--;
 		createBall(Math.floor(getRandomArbitrary(-11, 0)));
@@ -349,9 +361,17 @@ function adaptVectorsToFps(ball, player1Coords) {
 }
 
 async function winnerWindow() {
+	console.log(winnerWindow);
 	context.clearRect(0, 0, table.width, table.height);
 	gameOver.style.display = "flex";
 	drawOuterRectangle("#C42021");
+	if (blocksDestroyed == 73) {
+		drawOuterRectangle("#365FA0");
+		gameOver.style.color = "#365FA0";
+		gameOver.textContent = "Omg ! You won !";
+		document.getElementById("replay-button").style.color = "#365FA0";
+		console.log("You won, exterior.");
+	}
 	drawInnerRectangle("#23232e");
 
 	cancelAnimationFrame(id);
@@ -500,15 +520,20 @@ async function addNewGame(id_player, score) {
 	}
 }
 
-function fetchMap(mapId) {
+async function fetchMap(mapId) {
 	return fetch(`/accounts/api/map/${mapId}/`)
 	.then(response => response.text())
 	.then(mapData => {
 		const mapLines = mapData.split('\n');
-		mapLines.forEach((element) => mapTab.push(element.split('').map(x=>Number(x))));
+		mapLines.forEach(function (element) {
+			mapTab.push(element.split('').map(x=>Number(x)));
+			mapTab[mapTab.length - 1].forEach(function (number) {
+				if (number == 0)
+					blocksDestroyed++;
+			});
+		});
 	})
 	.catch(error => {
 		console.error('Erreur lors de la récupération des données de la carte:', error);
 	});
-	
 }

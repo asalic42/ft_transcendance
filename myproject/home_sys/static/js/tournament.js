@@ -28,6 +28,7 @@ function startButton(link, name) {
 		button.textContent = "Everyone needs to finish their game first.";
 		button.style.background = "red";
 		button.disabled = "disabled";
+		document.getElementById("loader").style.display = 'block';
 	};
 }
 
@@ -37,7 +38,7 @@ socket.onmessage = function(event) {
         console.log("Message reçu:", data);
 
         if (data.type === "game_link") {
-			document.getElementById("loader").display = 'none';
+			document.getElementById("loader").style.display = 'none';
 			startButton(data.link, data.name_op)
 			document.getElementById("message").innerHTML = data.message;
 		}

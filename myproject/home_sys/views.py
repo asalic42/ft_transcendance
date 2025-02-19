@@ -223,7 +223,7 @@ def add_solo_casse_brique(request):
 		new_game = SoloCasseBrique.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
 			'id': new_game.id,
-			'id_player': new_game.id_player,
+			'id_player': new_game.id_player.pk,
 			'id_map': new_game.id_map,
 			'score': new_game.score,
 			'date': new_game.date.isoformat(),

@@ -84,8 +84,9 @@ socket.onmessage = function(event) {
 	if (data.type === "game_start") {
 		player1.style.display = 'flex';
 		player2.style.display = 'flex';
-		canvas1.style.display = 'flex';
-		canvas2.style.display = 'flex';
+		Array.from(document.getElementsByClassName("game")).forEach(element => element.style.display = 'flex');
+		// canvas1.style.display = 'flex';
+		// canvas2.style.display = 'flex';
 		fps.style.display = 'flex';
 	}
 
