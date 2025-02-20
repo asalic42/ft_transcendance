@@ -23,16 +23,13 @@
 				{% comment %} <span class="game-mode">join game</span> {% endcomment %}
 			{% comment %} </a> {% endcomment %}
 			<div id="test">
-				{% if all_games %}
-					<h2 id='text'> Join room : </h2>²
-					{% for room in all_games %}
-					<a href="{% url 'game-distant' room.game_id %}" class="game-distant" id="choice">
-						<span class="game-mode" id='choice'>Room {{ room.game_id }}</span>
-					</a>
-					{% endfor %}
-				{% else %}
-					<p>Aucune Room </p>
-				{% endif %}
+				{% comment %} {% if all_games %} {% endcomment %}
+				<div id="test">
+					<h2 id='text'> Join room : </h2>
+					<div id="rooms-list">
+						<p>Chargement des rooms...</p>
+					</div>
+				</div>
 			</div>
 		</div>
 
