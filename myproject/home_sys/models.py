@@ -85,7 +85,7 @@ class Pong(models.Model):
 class Tournaments(models.Model):
 	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
-	winner = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='winner', null=True)
+	winner = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='tournament_wins', null=True)
 
 
 class MatchsTournaments(models.Model):
