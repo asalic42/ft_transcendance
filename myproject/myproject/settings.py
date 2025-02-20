@@ -32,8 +32,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["www.transcendance.42.paris", "transcendance.42.paris"]
-CSRF_TRUSTED_ORIGINS = ["https://www.transcendance.42.paris", "https://transcendance.42.paris"]
+ALLOWED_HOSTS = ["www.transcendance.42.paris", "transcendance.42.paris", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ["https://www.transcendance.42.paris", "https://transcendance.42.paris", "https://127.0.0.1"]
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL
 SECURE_SSL_REDIRECT = True

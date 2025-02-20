@@ -103,7 +103,7 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 }
 
 var user_option = 2;
-window.levelinput = function(value) {
+function levelinput(value) {
 	var form = document.getElementById('LevelForm');
 	user_option = form.elements.levelfield.value;
 	document.getElementById('page').style.display = 'none';
