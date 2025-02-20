@@ -4,19 +4,29 @@
 
 {% block content %}
 <div id="content">
-    <link rel="stylesheet" href="{% static 'css/channels-style.css' %}">
-    <!-- <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script> -->
+        
+<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/channels-style.css' %}">
+<!-- <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script> -->
 
-    <h1 id="blaze">Chatroom</h1>
-    <p id="current-username" data-username="{{current_user.username}}"></p>
-    <p id="users-list" data-users="{% for user in users %}{{ user.username }}{% empty %}{% endfor %}"></p>
-    <div class="page" id="page">
+<!-- <h1 id="blaze">Chatroom</h1> -->
 
-        <div class="column friends">
-            <h2 id="title">Friends</h2>
-            <div id="friends"></div>
-    		<button class="button-chat" id="add-friend-chan">👥+</button>
-        </div>
+<div class="page-title">
+    <div class="sub-container">
+        <h1><span class="emoji-in-title">​💬</span> Chatroom</h1>
+        <p>A place where you can talk to your friends or perfect strangers in channels.</p>
+    </div>
+</div>	
+
+<p id="current-username" data-username="{{current_user.username}}"></p>
+<p id="users-list" data-users="{% for user in users %}{{ user.username }}{% empty %}{% endfor %}"></p>
+<div class="page" id="page">
+
+		<div class="column friends">
+			<h2 id="title">Friends</h2>
+			<div id="friends"></div>
+			<button class="button-chat" id="add-friend-chan">👥+</button>
+		</div>
 
         <div class="column channels">
             <h2 id="title">Channels</h2>

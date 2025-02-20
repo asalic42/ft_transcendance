@@ -82,7 +82,6 @@ class Pong(models.Model):
 	difficulty = models.IntegerField()
 	bounce_nb = models.IntegerField()
 	color = models.CharField(max_length=50, default='yellow')
-    
 class Tournaments(models.Model):
 	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)

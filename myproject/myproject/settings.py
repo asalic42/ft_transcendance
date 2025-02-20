@@ -192,9 +192,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    "https://localhost:8000",
-    "https://transcendance.42.paris:8000",  # Ajouter ici l'URL de ton frontend si besoin
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.transcendance.42.paris",
+    "https://transcendance.42.paris",
+    "https://127.0.0.1",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

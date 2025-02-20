@@ -1372,6 +1372,39 @@ class FriendRequestConsumer(AsyncWebsocketConsumer):
 			'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
 		}))
 
+""" 
+
+	Pour les notifs sur l'onglet notifications
+
+"""
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            await self.accept()
+            await self.channel_layer.group_add(f"notifications_{self.user.id}", self.channel_name)
+            print(f"Utilisateur {self.user.id} ajouté au groupe notifications.")
+        else:
+            await self.close()
+
+    async def disconnect(self, close_code):
+        if self.user.is_authenticated:
+            await self.channel_layer.group_discard(f"notifications_{self.user.id}", self.channel_name)
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'message': event['message'],
+        }))
+
+    async def update_notification_status(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'update_status',
+            'has_unread_notifications': event['has_unread_notifications'],
+        }))
+
 """ """ """ """ """ """ """ """
 """ NOTIFICATIONS PUSH """
 """ Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """
@@ -1623,10 +1656,19 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			[(players[0], players[2]), (players[1], players[3])],  # Round 2
 			[(players[0], players[3]), (players[1], players[2])],  # Round 3
 		]
-		message = f"The matches will be : \n \
-		Round 1: {round_pairings[0][0][0]['username']} against {round_pairings[0][0][1]['username']} and {round_pairings[0][1][0]['username']} against {round_pairings[0][1][1]['username']} \n \
-		Round 2: {round_pairings[1][0][0]['username']} against {round_pairings[1][0][1]['username']} and {round_pairings[1][1][0]['username']} against {round_pairings[1][1][1]['username']} \n \
-		Round 3: {round_pairings[2][0][0]['username']} against {round_pairings[2][0][1]['username']} and {round_pairings[2][1][0]['username']} against {round_pairings[2][1][1]['username']}"
+
+		message = f"The matches will be : <br>"
+		for i in range(3):
+			message += "["
+			if i == TournamentConsumer.roundNb[self.tournament_id]:
+				message += "X"
+			message += "]"
+			message += f"Round {i+1}: <span	class='username'>{round_pairings[i][0][0]['username']}</span> against <span	class='username'>{round_pairings[i][0][1]['username']}</span> and \
+									  <span	class='username'>{round_pairings[i][1][0]['username']}</span> against <span	class='username'>{round_pairings[i][1][1]['username']}</span> <br>"
+
+		# Round 1: {round_pairings[0][0][0]['username']} against {round_pairings[0][0][1]['username']} and {round_pairings[0][1][0]['username']} against {round_pairings[0][1][1]['username']} \n \
+		# Round 2: {round_pairings[1][0][0]['username']} against {round_pairings[1][0][1]['username']} and {round_pairings[1][1][0]['username']} against {round_pairings[1][1][1]['username']} \n \
+		# Round 3: {round_pairings[2][0][0]['username']} against {round_pairings[2][0][1]['username']} and {round_pairings[2][1][0]['username']} against {round_pairings[2][1][1]['username']}"
 
 		print(message)
 		sys.stdout.flush()
@@ -1697,7 +1739,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 							'message': 'Le tournoi a été annulé en raison d\'une déconnexion'
 						}
 					)
-				
+				# if (not TournamentConsumer.tournament_ended[self.tournament_id]):
+					# Tournaments.objects.filter(pk=self.tournament_id).delete()
+					
 				# Nettoyer les données du tournoi si plus aucun joueur
 				if len(TournamentConsumer.players[self.tournament_id]) == 0:
 					TournamentConsumer.gameFinished.pop(self.tournament_id, None)
