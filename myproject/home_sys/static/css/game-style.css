@@ -1,0 +1,266 @@
+/* Creation de polices */
+
+
+
+#page {
+	font-family: 'Thunder-VF';
+	text-align: center;
+	position: relative;	
+	box-sizing: border-box;
+	top: 200px;
+	width: 70%;
+	border: 3px solid #ED4EB0;
+	border-radius: 50px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	background: linear-gradient(to bottom right, #232330, #14141e);
+}
+
+.title {
+	color: var(--font-color);
+	width: 100%;
+	font-size: 	70px;
+}
+
+#LevelForm {
+	margin: 50px;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	gap: 100px;	
+}
+
+.inputs {
+	font-family: 'Thunder-SemiBold';
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	width: 200px;
+	height: 60px;
+	border-radius: 10px;
+	outline: 3px solid #ED4EB0;
+	font-size: 32px;
+	background-color: #141418;
+	color: rgba(237, 78, 176, 0.9);
+	border: none;
+}
+
+#button {
+	transition: all 0.3s ease-in-out;
+}
+
+#button:hover {
+	box-shadow: rgb(237, 78, 176, 0.4) -8px 6px,
+				rgba(237, 78, 176, 0.3) -12px 10px,
+				rgba(237, 78, 176, 0.2) -16px 14px,
+				rgba(237, 78, 176, 0.1) -20px 18px;
+	background-color: #2E2E38;
+	transform: translateX(10px) translateY(-9px);
+}
+
+/* Stylisation du jeu */
+
+#game {
+	width: 100%;
+	text-align:center;
+}
+
+#canvas-container {
+	border-radius: 1%;
+	position: relative;
+    z-index: 5;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	width: 99%
+}
+
+h3 {
+	text-align: center;
+}
+
+#fps {
+	margin-top: 5px;
+}
+
+/* Style des scores au top */
+.scores {
+	font-family: 'Namaku';
+	gap: 50px;
+	justify-content: center;
+	align-items: center;
+	display: none;
+	color: white;
+	text-align: center;
+}
+
+#title {
+	width: 100%;
+}
+
+/* Style du du bouton REPLAY */
+#button-container {
+	position: absolute;
+	margin-top: 200px; 
+}
+
+#replay-button {
+	display: block;
+	text-align: center;
+	background-color: #2B2B3B;
+	cursor: pointer;
+	font-family: 'coolvetica-condensed-rg';
+	font-size: 30px;
+	margin: 0%;
+}
+
+/*
+Ici on va venir definir les deux animations (deux couleurs differentes, texte qui change légerement.)
+On refait tous les keyframe pour ne pas se casser la tête
+*/
+svg {
+	font-family: "BungeeShade-Regular", sans-serif;
+	width: 100%; height: 100%;
+}
+
+#svg-wrapper-player1, #text-p1{
+	fill: #121217; /* Pas de remplissage par défaut */
+	animation: stroke2 2s alternate;
+	stroke-width: 3;
+	font-size: 5vw;
+	stroke: #365FA0;
+	/* font-size: 100px; */
+}
+
+
+#svg-wrapper-player2, #text-p2 {
+	fill: #121217; /* Pas de remplissage par défaut */
+	animation: stroke 2s alternate;
+	stroke-width: 3;
+	font-size: 5vw;
+	stroke: #C42021;
+}
+
+@keyframes stroke {
+	0% {
+		fill: none !important;
+		stroke: #365fa0;
+		stroke-dashoffset: 25%;
+		stroke-dasharray: 0 50%;
+		stroke-width: 3;
+	}
+	70%		{fill: none !important; stroke: #365fa0;}
+	82%		{fill: none !important; stroke: #668DCC; stroke-dasharray: 50% 0;}
+	91%		{fill: none !important; stroke: #365fa0;}
+	92%		{fill: none !important; stroke: #668DCC; stroke-dasharray: 50% 0;}
+	94%		{fill: none !important; stroke: #365fa0;}
+	96%		{fill: none !important; stroke: #668DCC; stroke-dasharray: 50% 0;}
+	100%	{fill: none !important; stroke: #365fa0;}
+}
+
+@keyframes stroke2 {
+	0% {	
+		fill: none !important;
+		stroke: #C42021;
+		stroke-dashoffset: 25%;
+		stroke-dasharray: 0 50%;
+		stroke-width: 3;
+	}
+	70%		{fill: none !important; stroke: #C42021;}
+	82%		{fill: none !important; stroke: #E56161; stroke-dasharray: 50% 0;}
+	91%		{fill: none !important; stroke: #C42021;}
+	92%		{fill: none !important; stroke: #E56161; stroke-dasharray: 50% 0;}
+	94%		{fill: none !important; stroke: #C42021;}
+	96%		{fill: none !important; stroke: #E56161; stroke-dasharray: 50% 0;}
+	100%	{fill: none !important; stroke: #C42021;}
+}
+
+
+.wrapper {
+	display: block;
+	position: absolute;
+}
+
+/* CSS Game Distant: Multiplayer Pong */
+
+#overlay {
+	display: none;
+	z-index: 6;
+	position: absolute;
+    transform: translate(-50%, -50%);
+	text-align: center;
+	top: 50%;
+	left: 50%;
+}
+
+#overlay #countdown {
+	color: white;
+	font-size: 28px;
+}
+
+#disconnected {
+	display: none;
+	color: white;
+};
+
+.retour {
+	height: 10%;
+	padding-right: 85%;
+	top: 30px;
+	position: relative;
+}
+
+#retour {
+	width: 100px;
+	height: 30px;
+	border-radius: 5px;
+	outline: 3px solid #ED4EB0;
+	font-size: 20px;
+}
+
+.retour {
+	height: 10%;
+	padding-right: 85%;
+	top: 30px;
+	position: relative;
+}
+
+a {
+	text-decoration: none;
+}
+
+.game-mode span {
+    font-family: 'coolvetica-condensed-rg';
+}
+
+.game-mode {
+	justify-content: center;
+	align-items: center;
+    cursor: pointer;
+	display: flex;
+	width: 100px;
+	height: 30px;
+    border-radius: 10px;
+    outline: 3px solid #ED4EB0;
+	font-size: 16px;
+	background-color: #141418;
+    color: rgba(237, 78, 176, 0.9);
+	transition: all 0.3s ease-in-out;
+}
+
+.game-mode:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
+}
+
+.game {
+	display: none;
+}
