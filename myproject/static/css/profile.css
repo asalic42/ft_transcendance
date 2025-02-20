@@ -1,0 +1,149 @@
+
+.parent-container {
+	display: flex;
+	justify-content: space-between; /* Espace les éléments */
+	align-items: flex-start; /* Aligne les éléments en haut */
+	margin-top: 5%; /* Ajustez selon vos besoins */
+	padding: 0 20px; /* Ajoute un peu d'espace sur les côtés */
+}
+
+.other-profile-add-friend,
+.other-profile-block {
+	width: auto;
+	height: auto;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-radius: 10px;
+	margin-right: 10px;
+	margin-left: 10px;
+	border: 1px solid black;
+	transition: all 0.3s ease;
+	font-weight: bold;
+}
+
+.profile-container {
+	display: flex;
+	flex: 1;
+	margin-top: 5%;
+	justify-content: center; /* Centre horizontalement */
+	align-items: center;
+}
+
+.other-profile-add-friend {
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
+.other-profile-add-friend:hover {
+	background-color: rgb(0, 179, 0);
+	scale: 1.15;
+	box-shadow: 0px 0px 10px 2px rgba(0, 194, 0, 0.74);
+	cursor: pointer;
+}
+
+.other-profile-block:hover {
+	background-color: red;
+	scale: 1.15;
+	box-shadow: 0px 0px 10px 2px rgba(194, 0, 0, 0.74);
+	cursor: pointer;
+}
+
+.profile-box {
+	display: flex;
+	width: 450px;
+	height: 530px;
+	background-color: #888888;
+	border-radius: 10px;
+	border: 2px solid black;
+	flex-direction: column; /* Permet d'empiler les éléments */
+	justify-content: center; /* Centre le contenu verticalement */
+	align-items: center; /* Centre le contenu horizontalement */
+	text-align: center; /* Centre le texte à l'intérieur */
+	box-shadow: -10px 10px #23232e;
+	background: linear-gradient(to right, #aa3196, #9159c0);
+	transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+}
+
+.profile-box:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
+}
+
+.profile-separator {
+	position: absolute;
+	width: 450px;
+	height: 188px;
+	margin-top: 377px;
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+	border: 2px solid black;
+	background-color: #d8d8d8;
+}
+
+.profile-img {
+	width: 150px;
+	height: 150px;
+	border: 2px solid black;
+	border-radius: 50%;
+	margin-top: -140px;
+	margin-bottom: 15px; /* Ajouté pour espacer l'image du texte */
+}
+
+/* .profile-img-upload {
+	position: absolute;
+	width: auto;
+	height: auto;
+	padding: 5px;
+	border: 2px solid rgb(0, 0, 0);
+	border-radius: 50px;
+	margin-top: -375px;
+	margin-left: 110px;
+	transition: all 0.3s ease;
+}
+
+.profile-img-upload:hover {
+	background-color: rgb(69, 224, 22);
+	cursor: pointer;
+}
+*/
+
+.profile-user-info {
+	flex-direction: column;
+	display: flex; /* Assure que les éléments sont empilés verticalement */
+	justify-content: center;
+	background-color: white;
+	border: 1px solid black;
+	border-radius: 10px;
+	padding: 10px;
+}
+
+.profile-user-info span {
+	font-family: 'Courier New', Courier, monospace;
+	display: flex;
+	text-align: left;
+	align-items: left;
+	font-size: 20px;
+}
+
+.profile-text-settings-rdv {
+	color: black;
+	margin-top: 10px; /* Ajouté pour espacer le texte du bas */
+	padding: 20px;
+}
+
+.profile-go-to-settings {
+	width: 200px;
+	height: auto;
+	padding: 10px;
+	color: black;
+	margin-top: -20px;
+	background: linear-gradient(to right, #aa3196, #721bb9);
+	border-radius: 10px;
+}
+
+.profile-go-to-settings:hover {
+	cursor: pointer;
+}
+
