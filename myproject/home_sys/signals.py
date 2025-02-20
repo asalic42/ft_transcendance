@@ -19,12 +19,22 @@ def save_user_profile(sender, instance, **kwargs):
 @receiver(post_migrate)
 def run_after_migrations(sender, **kwargs):
 	cursor = connection.cursor()
-	cursor.execute("DELETE FROM home_sys_currentgame;")  # Delete tous les channels qui n'ont pas été supprimés (serveur éteint subitement)
-	# print("Salon supprimés")
-	cursor.execute("SELECT COUNT(*) FROM home_sys_maps;")  # Vérifie si des cartes existent déjà
+
+	# Supprimer les parties en cours et les salons restants après un arrêt brutal du serveur
+	tournament_room.objects.all().delete()
+	CurrentGame.objects.all().delete()
+	casse_brique_room.objects.all().delete()
+
+	# Réinitialiser le statut de connexion de tous les utilisateurs
+	Users.objects.update(is_online=False)
+	print("Tous les statuts de connexion ont été réinitialisés à hors ligne.")
+
+	# Vérifie si des cartes existent déjà
+	cursor.execute("SELECT COUNT(*) FROM home_sys_maps;")
 	count = cursor.fetchone()[0]
 
-	if count == 0:  # Importer les cartes uniquement si la table est vide
+	# Importer les cartes uniquement si la table est vide
+	if count == 0:
 		try:
 			call_command('importmaps')
 			print("Maps importées avec succès après la migration!")
@@ -32,9 +42,7 @@ def run_after_migrations(sender, **kwargs):
 			print(f"Erreur lors de l'importation des maps: {e}")
 	else:
 		print("Les maps sont déjà importées, aucune action nécessaire.")
-	tournament_room.objects.all().delete()
-	CurrentGame.objects.all().delete()
-	casse_brique_room.objects.all().delete()
+	
 
 # signals.py
 from django.contrib.auth.signals import user_logged_in, user_logged_out
