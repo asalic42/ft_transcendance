@@ -106,7 +106,7 @@ if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
     docker system prune --volumes --force
     echo -e "${BLUE}> Removing django cache...${NC}"
-    find . -type d -name "__pycache__" -exec rm -r {} +
+    sudo find . -type d -name "__pycache__" -exec rm -r {} +
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
