@@ -42,7 +42,7 @@ button {
 	justify-content: space-between;
 	margin-bottom: 20px;
 	gap: 100px;
-	top: 30px;
+	top: 100px;
 	position: relative;
 }
 
@@ -74,9 +74,6 @@ h2 {
 	border-bottom-right-radius: 10px;
 }
 
-.empty-state {
-	text-align: center;
-}
 
 .user-avatar {
 	width: 50px;
@@ -153,4 +150,235 @@ h3 {padding-bottom: 25px; margin-top: 3%;}
 	width: 450px;
 	height: 188px;
 	margin-top: 377px;
+}
+
+/* ------------------------ */
+
+/* Conteneur principal */
+.online-users, .offline-users {
+    background: rgba(37, 37, 37, 0.884);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.online-users h2, .offline-users h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #fff;
+    text-align: center;
+}
+
+/* Carte utilisateur */
+.user-card {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.164);
+	border: 1px solid black;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    background: rgba(255, 255, 255, 0.363);
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.user-card.last {
+    margin-bottom: 0;
+}
+
+/* Photo de profil */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #000000;
+    margin-right: 15px;
+}
+
+/* Nom d'utilisateur */
+.user-name {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-right: auto;
+}
+
+/* Bouton "Voir le profil" */
+.profile-button {
+    background: #6a11cb;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.profile-button:hover {
+    background: #2575fc;
+}
+
+/* Statut en ligne */
+.online-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #4caf50; /* Vert pour en ligne */
+}
+
+.online-status.offline {
+    background-color: #f44336; /* Rouge pour hors ligne */
+}
+
+/* État vide */
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .online-users, .offline-users {
+        width: 100%;
+    }
+}
+
+
+/* ----------------------- */
+
+/* Style général pour le conteneur */
+.page-title-home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #c84e89, #6a11cb);
+	border-radius: 15px;
+    color: white;
+	height: auto;
+    font-family: 'Thunder-VF';
+    text-align: center;
+}
+
+.sub-container-home {
+    padding-bottom: 20px;
+	width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+/* Style pour le titre */
+h1 {
+    font-size: 2.5rem;
+	margin-top: 10px;
+    margin-bottom: 20px;
+    animation: fadeIn 2s ease-in-out;
+}
+
+.emoji-in-title-home {
+    display: inline-block;
+    animation: rotateEmoji 4s infinite alternate;
+    transition: all 0.5s ease;
+}
+
+.emoji-in-title-home2 {
+    display: inline-block;
+    animation: rotateEmojiMirror 4s infinite alternate;
+	transition: all 0.5s ease;
+}
+
+.emoji-in-title-home:hover {
+    scale: 2;
+    animation: rotateEmoji 0.1s infinite alternate;
+}
+
+.emoji-in-title-home2:hover {
+	scale: 2;
+    animation: rotateEmojiMirror 0.1s infinite alternate;
+}
+
+@keyframes rotateEmoji {
+    0% {
+        transform: rotate(-10deg);
+    }
+    50% {
+        transform: rotate(10deg);
+    }
+    100% {
+        transform: rotate(-10deg);
+    }
+}
+
+@keyframes rotateEmojiMirror {
+    0% {
+        transform: scaleX(-1) rotate(-10deg);
+    }
+    50% {
+        transform: scaleX(-1) rotate(10deg);
+    }
+    100% {
+        transform: scaleX(-1) rotate(-10deg);
+    }
+}
+
+/* Style pour la liste */
+.feature-list {
+    list-style: none;
+    text-align: center;
+	opacity: 0;
+	animation: fadeIn 2s ease-in-out forwards;
+	animation-delay: 1s;
+}
+
+.feature-list li {
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    width: fit-content; /* Limite la largeur au contenu */
+    height: auto; /* La hauteur s'adapte au contenu */
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: inline-flex; /* Utilisez inline-flex au lieu de flex */
+    margin: 5px 0; /* Espacement entre les éléments */
+	margin-left: -50px;
+}
+
+.feature-list li:hover {
+	scale: 1.2;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.feature-list li:hover .feature-icon {
+    transform: scale(1.2);
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -17,14 +17,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // Load la page
 	function loadPage(url, pushState = true) {
 		// Nettoyage de l'URL pour éviter les chemins répétitifs
-		let cleanUrl = url.replace(/^\/+|\/+$/g, ''); // Enlève les slashes au début et à la fin
-		cleanUrl = cleanUrl.replace(/^accounts\//, ''); // Enlève 'accounts/' au début s'il existe
-		
-		// Construction de l'URL finale
-		const finalizedUrl = '/accounts/' + cleanUrl;
-		
-		console.log(`Original URL: ${url}, Cleaned URL: ${cleanUrl}, Final URL: ${finalizedUrl}`);
-		
+		var finalizedUrl = "";
+		if (url != "accounts/") {
+			let cleanUrl = url.replace(/^\/+|\/+$/g, ''); // Enlève les slashes au début et à la fin
+			cleanUrl = cleanUrl.replace(/^accounts\//, ''); // Enlève 'accounts/' au début s'il existe
+			
+			// Construction de l'URL finale
+			finalizedUrl = '/accounts/' + cleanUrl;
+			
+			console.log(`Original URL: ${url}, Cleaned URL: ${cleanUrl}, Final URL: ${finalizedUrl}`);
+		}
+		else {finalizedUrl = "/" + url;}
 		fetch(finalizedUrl, { 
 			headers: {
 				"X-Requested-With": "XMLHttpRequest",
