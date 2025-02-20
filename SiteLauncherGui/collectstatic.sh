@@ -1,4 +1,4 @@
 #!/bin/bash
-CONTAINER_NAME=$(sudo docker ps --format='{{.Names}}' | grep myproject-web)
-exec sudo /usr/bin/docker exec "$CONTAINER_NAME" python3 manage.py collectstatic --noinput
+CONTAINER_NAME=$(docker ps --format='{{.Names}}' | grep myproject-web)
+exec /usr/bin/docker exec "$CONTAINER_NAME" python3 manage.py collectstatic --noinput
 
