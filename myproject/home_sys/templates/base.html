@@ -170,7 +170,10 @@
     			}
     			return cookieValue;
     		}
+
     		const csrftoken = getCookie('csrftoken');
+            {% comment %} else {% endcomment %}
+                {% comment %} csrf = getCookie('csrftoken'); {% endcomment %}
     	</script>
 {% comment %} 
         <script>

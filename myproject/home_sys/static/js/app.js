@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		fetch(finalizedUrl, { 
 			headers: {
 				"X-Requested-With": "XMLHttpRequest",
-				"X-CSRFToken": getTokenCSRF()
+				"X-CSRFToken": csrftoken
 			},
 			credentials: 'include'
 		})
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: formData,
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getTokenCSRF()
+                "X-CSRFToken": csrftoken
             }
 
         })
