@@ -15,7 +15,6 @@ function getTokenCSRF() {
 document.addEventListener("DOMContentLoaded", function () {
 
     // Load la page
-    // In app.js, update the loadPage function:
 	function loadPage(url, pushState = true) {
 		// Nettoyage de l'URL pour éviter les chemins répétitifs
 		let cleanUrl = url.replace(/^\/+|\/+$/g, ''); // Enlève les slashes au début et à la fin
@@ -55,7 +54,8 @@ document.addEventListener("DOMContentLoaded", function () {
 				} else {
 					newScript.textContent = oldScript.textContent;
 				}
-				document.body.appendChild(newScript).parentNode.removeChild(newScript);
+				document.body.appendChild(newScript);
+                newScript.onload = () => newScript.remove();
 			});
 	
 			// Utilise l'URL nettoyée pour l'historique
@@ -69,12 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
             event.preventDefault(); //Empeche le rechargement de toute la page
 
-
-            // let basePath = "/accounts/";  // Base fixe de l'URL
             let urlPath = link.getAttribute("href").replace(/^\/+/, ""); // Supprime les `/` en trop au début
-            
-            // let finalUrl = basePath;
-            // if (!urlPath.startsWith("accounts/"))
             let finalUrl = urlPath; // Construit l'URL proprement
             loadPage(finalUrl);
         }

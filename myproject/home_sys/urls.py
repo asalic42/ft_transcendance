@@ -34,6 +34,7 @@ urlpatterns = [
 	path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
 	path('api/add_pong/', add_pong, name='add_solo_casse_brique'),
 	path('api/map/<int:map_id>/', map_view, name="map_view"),
+    path('api/rooms/', get_rooms, name="get_rooms"),
     # Channels URLs
     path('get-ip-info/', get_ip_info, name='get_ip_info'),
     path('user-settings/', settings_user, name='settings_user'),
@@ -61,6 +62,7 @@ urlpatterns = [
 	path('api/postPv/', postPv, name="postPv"),
 	path('api/doesUserHaveAccessToChan/<int:idC>/<int:idU>', doesUserHaveAccessToChan, name="doesUserHaveAccessToChan"),
 	path('api/getNameById/<int:idU>/', getNameById, name="getNameById"),
+    
     path('add_friend/<str:username>/', add_friend, name='add_friend'),
     path('accept_friend_request/<str:username>/', accept_friend_request, name='accept_friend_request'),
     path('decline_friend_request/<str:username>/', decline_friend_request, name='decline_friend_request'),
@@ -69,5 +71,6 @@ urlpatterns = [
     path('remove_blocked_user/<str:username>/', remove_blocked_user, name="remove_blocked_user"),
     path('invite_friend/<str:username>/', invite_friend, name="invite_friend"),
     path('invitation_declined/<str:username>/', invitation_declined, name="invitation_declined"),
+
     path('api/user-status/', user_status, name='user-status'),
 ]

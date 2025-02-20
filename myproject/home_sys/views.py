@@ -168,10 +168,10 @@ def game_mode_pong_page(request):
 def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
-@login_required
-def game_distant_page_choice(request):
-	all_games = CurrentGame.objects.all()
-	return (render(request, 'game-type-pong2.html', {'all_games': all_games}))
+# @login_required
+# def game_distant_page_choice(request):
+# 	all_games = CurrentGame.objects.all()
+# 	return (render(request, 'game-distant-choice.html', {'all_games': all_games}))
 
 @login_required
 def game_distant_page(request, game_id):
@@ -1002,3 +1002,8 @@ def create_current_game(request, sender_id):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@login_required
+def get_rooms(request):
+	rooms = CurrentGame.objects.all().values("game_id")
+	return JsonResponse({"rooms": list(rooms)})
