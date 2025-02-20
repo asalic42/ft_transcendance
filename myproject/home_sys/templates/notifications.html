@@ -115,6 +115,22 @@
     {% endfor %}
 </div> -->
 
+<style>
+    /* Statut en ligne */
+    .online-status {
+        width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        border: 2px solid white;
+        background-color: #2e332e;
+        margin-left: 35px;
+    }
+
+    .online-status.active {
+        background-color: #4caf50;
+    }
+</style>
+
 <script>
     function getAddFriendResponse(baliseName, url, dataStatus) {
         document.querySelectorAll(`${baliseName}`).forEach(button => {

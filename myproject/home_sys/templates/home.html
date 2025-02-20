@@ -70,7 +70,7 @@
 							profile
 						</button>
 					{% endif %}
-					<div class="online-status" id="user-{{ user.id }}"></div>
+					<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 				</div>
         {% empty %}
             <div class="empty-state">
@@ -93,7 +93,7 @@
 					<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
 						profile
 					</button>
-					<div class="online-status" id="user-{{ user.id }}"></div>
+					<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 				</div>
         {% empty %}
             <div class="empty-state">

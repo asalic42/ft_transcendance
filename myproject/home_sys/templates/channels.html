@@ -17,7 +17,7 @@
     </div>
 </div>	
 
-<p id="current-username" data-username="{{current_user.username}}"></p>
+<p id="current-username" data-username="{{current_user.username}}" data-user-id="{{current_user.id}}"></p>
 <p id="users-list" data-users="{% for user in users %}{{ user.username }}{% empty %}{% endfor %}"></p>
 <div class="page" id="page">
 

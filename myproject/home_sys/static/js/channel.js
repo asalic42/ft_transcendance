@@ -9,6 +9,7 @@ let blockedUsersList = null;
 // Recup l'user courant
 const userElement = document.getElementById('current-username');
 const username = userElement.getAttribute('data-username');
+const userid = parseInt(userElement.getAttribute('data-user-id'), 10);
 // console.log(`Current username is ${username}`);
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -299,7 +300,11 @@ async function addMessage(mess, sender, id, is_link) {
 	const message = document.createElement('div');
 	message.classList.add('message');
 
-	if (sender === username) message.classList.add('sent');
+	console.log("USER ID:", userid);
+	console.log("ID:", id);
+	console.log("USER ID === ID: ", userid === id);
+
+	if (id === userid) message.classList.add('sent');
 	else message.classList.add('received');
 
 	let pp;
@@ -337,10 +342,13 @@ async function addMessage(mess, sender, id, is_link) {
 	message.appendChild(messElement);
 	chatPage.appendChild(message);
 
-	const messImage = document.getElementById('caca');
-	usernameElement.addEventListener('click', async function () {
-		window.location.href = `/accounts/profile/${sender}`;
-	});
+	const messImages = document.querySelectorAll('#caca');
+    messImages.forEach(function (messImage) {
+        messImage.addEventListener('click', async function () {
+			const sender = messImage.nextElementSibling.textContent;
+            window.location.href = `/accounts/profile/${sender}`;
+        });
+    });
 
 	chatPage.scrollTop = chatPage.scrollHeight;
 }

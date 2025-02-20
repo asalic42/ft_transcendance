@@ -85,19 +85,6 @@
     background: #4caf50;
 }
 
-/* Statut en ligne */
-.online-status {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #4caf50; /* Vert pour en ligne */
-    margin-left: 10px;
-}
-
-.online-status.offline {
-    background-color: #f44336; /* Rouge pour hors ligne */
-}
-
 /* Dernier élément sans marge */
 .last {
     margin-bottom: 0;

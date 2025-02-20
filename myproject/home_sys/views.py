@@ -478,6 +478,11 @@ def update_user_info(request):
 						other_user.invite.remove(user_profile.pk)
 						other_user.invite.add(user.users)
 
+			messages_pseudo_update = Messages.objects.all().filter(idSender=user_profile.pk)
+			for idv in messages_pseudo_update:
+				idv.sender = user_profile.name
+				idv.save()
+
 
 			return JsonResponse({
 				"status": "success",
