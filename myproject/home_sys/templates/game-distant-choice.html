@@ -10,20 +10,16 @@
 
 	<div class="page">
 		<div class="rectangle"></div>
-		<a href="{% url 'game-mode-pong' %}" class="retour">
+		<a href="game-distant-choice" class="retour">
 			<span class="game-mode" id="retour" >Retour</span>
 		</a>
 		<h1 class="title">Choix de la room</h1>
 		<div class="mode-choices">
 
-			<a href="{% url 'game-distant' request.user.id %}" class="game-distant">
+			<button class="game-distant" id="distant" data-user-id={{ request.user.id }}>
 				<span class="game-mode">New game</span>
-			</a>
-			{% comment %} <a href="{% url 'game-distant' request.user.id %}" class="game-distant"> {% endcomment %}
-				{% comment %} <span class="game-mode">join game</span> {% endcomment %}
-			{% comment %} </a> {% endcomment %}
+			</button>
 			<div id="test">
-				{% comment %} {% if all_games %} {% endcomment %}
 				<div id="test">
 					<h2 id='text'> Join room : </h2>
 					<div id="rooms-list">

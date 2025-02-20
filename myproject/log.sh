@@ -78,12 +78,12 @@ if [ "$1" == "b-all" ]; then
     # scriptmanNotify "[2/3] Je build les images docker..."
 
     echo -e "${BLUE}> Building docker image... ${NC}"
-    sudo docker-compose build
+    docker compose build
 
     # scriptmanNotify "[3/3] Lancement des services rien que pour toi mon cochon. Refresh quand je disparaitrais."
     
     echo -e "${PURPLE}> Launching services...${NC}"
-    sudo docker-compose up # démarre en arrière-plan
+    docker compose up # démarre en arrière-plan
 
     # scriptmanNotify "Fin de la règle b-all bb !"
 
@@ -93,25 +93,27 @@ fi
 # SIMPLE BUILD
 if [ "$1" == "b" ]; then
     echo -e "${BLUE}> Building docker image...${NC}"
-    sudo docker-compose build
+    docker compose build
     echo -e "${PURPLE}> Launching services...${NC}"
-    sudo docker-compose up -d
+    docker compose up -d
     echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris"
 fi
 
 # FULL REMOVE
 if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Stopping docker services...${NC}"
-    sudo docker-compose stop
+    docker compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    sudo docker system prune --volumes
+    docker system prune --volumes --force
+    echo -e "${BLUE}> Removing django cache...${NC}"
+    sudo find . -type d -name "__pycache__" -exec rm -r {} +
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
 # SIMPLE REMOVE
 if [ "$1" == "r" ]; then
     echo -e "${BLUE}> Removing docker image...${NC}"
-    sudo docker-compose down
+    docker compose down
     echo -e "${GREEN}> Done.${NC} [For simple rebuild] > ./log.sh b"
 fi
 
@@ -119,9 +121,9 @@ fi
 if [ "$1" == "l" ]; then
 
     echo -e ">> Checking if we have already start docker's services..."
-    if [ "$(sudo docker-compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
+    if [ "$(sudo docker compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
         echo -e "${BLUE}>${NC} Docker services are not running. ${BLUE}Starting them...${NC}"
-        sudo docker-compose up -d
+        docker compose up -d
     else
         echo -e "${GREEN}> Docker services are already running.${NC}"
     fi

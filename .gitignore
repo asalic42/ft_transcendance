@@ -1,4 +1,5 @@
 .env
+debug.log
 myproject/djenv
 myproject/myproject/home_sys/migrations/__pycache__/
 myproject/myproject/loginpage/migrations/__pycache__/ 
