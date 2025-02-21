@@ -1,34 +1,37 @@
-// Securite CSRF cookies
-function getTokenCSRF() {
+function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
-        document.cookie.split(';').forEach(cookie => {
-            let trimmedCookie = cookie.trim();
-            if (trimmedCookie.startsWith('csrftoken=')) {
-                cookieValue = trimmedCookie.split('=')[1];
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
-        });
+        }
     }
     return cookieValue;
 }
+
+const csrftoken = getCookie('csrftoken');
 
 document.addEventListener("DOMContentLoaded", function () {
 
     // Load la page
 	function loadPage(url, pushState = true) {
 		// Nettoyage de l'URL pour éviter les chemins répétitifs
-		let cleanUrl = url.replace(/^\/+|\/+$/g, ''); // Enlève les slashes au début et à la fin
-		cleanUrl = cleanUrl.replace(/^accounts\//, ''); // Enlève 'accounts/' au début s'il existe
-		
-		// Construction de l'URL finale
-		const finalizedUrl = '/accounts/' + cleanUrl;
-		
-		console.log(`Original URL: ${url}, Cleaned URL: ${cleanUrl}, Final URL: ${finalizedUrl}`);
-		
+		var finalizedUrl = "";
+		if (url != "accounts/") {
+			let cleanUrl = url.replace(/^\/+|\/+$/g, ''); // Enlève les slashes au début et à la fin
+			cleanUrl = cleanUrl.replace(/^accounts\//, ''); // Enlève 'accounts/' au début s'il existe
+			
+			// Construction de l'URL finale
+			finalizedUrl = '/accounts/' + cleanUrl;
+		}
+		else {finalizedUrl = "/" + url;}
 		fetch(finalizedUrl, { 
 			headers: {
 				"X-Requested-With": "XMLHttpRequest",
-				"X-CSRFToken": csrftoken
 			},
 			credentials: 'include'
 		})
@@ -45,24 +48,33 @@ document.addEventListener("DOMContentLoaded", function () {
 	
 			document.getElementById("content").innerHTML = newContent.innerHTML;
 	
-			// Re-execute scripts
-			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-				const newScript = document.createElement('script');
-				if (oldScript.src) {
-					newScript.src = oldScript.src;
-					newScript.async = false;
-				} else {
-					newScript.textContent = oldScript.textContent;
-				}
-				document.body.appendChild(newScript);
-                newScript.onload = () => newScript.remove();
-			});
-	
+            reloadScripts(newContent);
+
 			// Utilise l'URL nettoyée pour l'historique
 			if (pushState) history.pushState(null, "", finalizedUrl);
 		})
 		.catch(error => console.error("Erreur de chargement:", error));
 	}
+
+    // Recharge les scripts non-detectes mais ne prends pas en compte les scripts inline (pas secure de les evaluer)
+    function reloadScripts(container) {
+        if (!container) return;
+
+        document.querySelectorAll("script[src]").forEach(script => script.remove());
+        // const existingScripts = new Set(Array.from(document.querySelectorAll('script')).map(s => s.src));
+
+        Array.from(container.querySelectorAll('script')).forEach(oldscript => {
+            const newScript = document.createElement('script');
+            if (oldscript.src) {
+                newScript.src = oldscript.src;
+                newScript.async = false;
+                document.body.appendChild(newScript);
+            } else {
+                newScript.textContent = oldscript.textContent;
+                document.body.appendChild(newScript);
+            }
+        });
+    }
 
     function handleLinkClick(event) {
         const link = event.target.closest("a");
@@ -96,7 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
             body: formData,
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": csrftoken
             }
 
         })

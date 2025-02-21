@@ -411,7 +411,7 @@ async function addNewGame(id_player) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': csrftoken,  // Use the function directly
+				// 'X-CSRFToken': csrftoken,  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({  // Convertit les données en JSON

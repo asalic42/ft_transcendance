@@ -3,25 +3,27 @@
 {% load static %}
 
 {% block content %}
-
-{% comment %} <link rel="stylesheet" href="{% static 'css/home-style.css' %}"> {% endcomment %}
 <div id="content">
 
 	<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
-
-	<div class="title">
-		<h1>Bienvenue mon enfant !</h1>
-		<h3>Je te présente tes freres et soeurs :</h3>
+	
+	<div class="page-title-home">
+		<div class="sub-container-home">
+			<h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance ! <span class="emoji-in-title-home2">👋</span></h1>
+			<ul class="feature-list">
+				<li><span class="feature-icon">📝</span> One rule, do what you want. </li>
+			</ul>
+		</div>
 	</div>
-
+	
 	<div class="users-status-container">
 		<div class="profile-container">
-
+	
 			<div class="profile-box">
 				<img class="profile-img" src="{{ user.users.image.url }}" alt="">
 				<!-- <button class="profile-img-upload">➕</button> -->
-			
+		
 				{% if request.user.is_authenticated %}
 					<div class="profile-user-info">
 						<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
@@ -31,14 +33,14 @@
 				{% else %}
 					<p>Vous n'êtes pas connecté.</p>
 				{% endif %}
-				
+		
 				<div class="profile-separator">
 					{% if request.user == user %}
 						<p class="profile-text-settings-rdv">
 							Si vous voulez modifier vos informations utilisateurs
 							rendez-vous dans les settings.
 						</p>
-						<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+						<button class="profile-go-to-settings" onclick="window.location.href="user-settings">Je veux modifier mon profil</button>
 					{% else %}
 						<p class="other-profile-text-settings-rdv">
 							Vous pouvez ajouter {{profile_user.username}} en ami(e)
@@ -48,15 +50,15 @@
 						<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
 						<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
 					{% endif %}
-					
+		
 				</div>
 			</div>
 		</div>
-
-	    <!-- Online Users -->
-	    <div class="online-users">
-	        <h2>Online</h2>
-	        {% for user in online_users %}
+		
+		<!-- Online Users -->
+		<div class="online-users">
+			<h2>Online</h2>
+			{% for user in online_users %}
 				{% if forloop.last %}
 					<div class="user-card last">
 				{% else %}
@@ -66,22 +68,22 @@
 						<p class="user-name">{{ user }}</p>
 						{% if request.user != user %}
 							<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
-								Voir le profil
+								profile
 							</button>
 						{% endif %}
-						<div class="online-status" id="user-{{ user.id }}"></div>
+						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 					</div>
-	        {% empty %}
-	            <div class="empty-state">
-	                <p>Looks like no one's online.</p>
-	            </div>
-	        {% endfor %}
-	    </div>
-
-	    <!-- Offline Users -->
-	    <div class="offline-users">
-	        <h2>Offline</h2>
-	        {% for user in offline_users %}
+			{% empty %}
+				<div class="empty-state">
+					<p>Looks like no one's online.</p>
+				</div>
+			{% endfor %}
+		</div>
+	
+		<!-- Offline Users -->
+		<div class="offline-users">
+			<h2>Offline</h2>
+			{% for user in offline_users %}
 				{% if forloop.last %}
 					<div class="user-card last">
 				{% else %}
@@ -90,19 +92,49 @@
 						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
 						<p class="user-name">{{ user }}</p>
 						<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
-							Voir le profil
+							profile
 						</button>
-						<div class="online-status" id="user-{{ user.id }}"></div>
+						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 					</div>
-	        {% empty %}
-	            <div class="empty-state">
-	                <p>Looks like no one's offline.</p>
-	            </div>
-	        {% endfor %}
-	    </div>
+			{% empty %}
+				<div class="empty-state">
+					<p>Looks like no one's offline.</p>
+				</div>
+			{% endfor %}
+		</div>
 	</div>
-
-	<script src="{% static 'js/home.js' %}"></script>
 </div>
 
+<script src="{% static 'js/home.js' %}"></script>
+{% comment %} <script>
+	function createRandomShape() {
+		// Creer un element qu'on ajoute a la liste class html (pour les styliser en CSS)
+		const shape = document.createElement('div');
+		shape.classList.add('shape');
+	
+		// Choisi une taille aleatoire entre 50px et 250px
+		const size = Math.floor(Math.random() * 200) + 50;
+		shape.style.width = `${size}px`;
+		shape.style.height = `${size}px`;
+	
+		// Position aleatoire sur la page
+		shape.style.top = `${Math.random() * 100}vh`;
+		shape.style.left = `${Math.random() * 100}vw`;
+	
+		// Definir une vitesse d'animation aleatoire
+		shape.style.animationDuration = `${Math.floor(Math.random() * 5) + 3}s`;
+	
+		// Couleur aleatoire
+		const colors = ['#048399', '#005067', '#B96B85', '#5f73b3', '#a32048'];
+		const choosen_color = colors[Math.floor(Math.random() * colors.length)];
+		shape.style.background = `radial-gradient(circle, ${choosen_color}, white)`;
+	
+		// Ajouter la classe changee au body html
+		document.body.appendChild(shape);
+	
+	}   
+	
+	for (let i=0; i < 10; i++) {
+		createRandomShape(); }
+</script>{% endcomment %}
 {% endblock %}

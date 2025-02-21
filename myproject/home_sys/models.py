@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 
+""" USERS """
+
 class Users(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	name = models.CharField(max_length = 150)
@@ -45,6 +47,8 @@ class Users(models.Model):
             'lose_nb': self.lose_nb,
         }
 
+""" CHANS """
+
 class Chans(models.Model):
 	id = models.AutoField(primary_key = True)
 	name = models.CharField(unique = True, max_length = 30)
@@ -58,6 +62,8 @@ class Chans(models.Model):
 # 	idChan = models.IntegerField()
 # 	idUser = models.IntegerField()
 
+""" ACHIEVEMENT """
+
 class Achievements(models.Model):
 	id = models.AutoField(primary_key = True)
 	name = models.CharField()
@@ -67,9 +73,13 @@ class Achievements(models.Model):
 	def __str__(self):
 		return self.name
 
+""" USERACHIEVEMENTS """
+
 class UserAchievements(models.Model):
 	idUser = models.IntegerField()
 	idAchievement = models.IntegerField()
+
+""" PONG """
 
 class Pong(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -82,17 +92,21 @@ class Pong(models.Model):
 	difficulty = models.IntegerField()
 	bounce_nb = models.IntegerField()
 	color = models.CharField(max_length=50, default='yellow')
-    
+
+""" TOURNAMENTS """
+
 class Tournaments(models.Model):
 	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
-	winner = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='winner', null=True)
+	winner = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='tournament_wins', null=True)
 
+""" MATCHSTOURNAMENTS """
 
 class MatchsTournaments(models.Model):
 	idTournaments = models.ForeignKey(Tournaments, on_delete=models.CASCADE, related_name='idTournaments')
 	idMatchs = models.ForeignKey(Pong, on_delete=models.CASCADE, related_name='idMatchs')
 
+""" SOLOCASSEBRIQUE """
 
 class SoloCasseBrique(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -101,9 +115,13 @@ class SoloCasseBrique(models.Model):
 	score = models.IntegerField()
 	date = models.DateTimeField(auto_now_add = True)
 
+""" MAPS """
+
 class Maps(models.Model):
 	id = models.AutoField(primary_key=True)
 	LinkMaps = models.CharField()
+
+""" MUTLICASSEBRIQUE """
 
 class MultiCasseBrique(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -115,9 +133,13 @@ class MultiCasseBrique(models.Model):
 	date = models.DateTimeField(auto_now_add=True)
 	map = models.IntegerField()
 
+""" BLOCKUSERS """
+
 class BlockUsers(models.Model):
 	idUser = models.IntegerField()
 	idBlocked = models.IntegerField()
+
+""" MESSAGES """
 
 class Messages(models.Model):
 	id = models.AutoField(primary_key = True)
@@ -129,22 +151,33 @@ class Messages(models.Model):
 	is_link = models.BooleanField(default = False)
 	read = models.BooleanField(null=True)
 
+""" PRIVATECHAN """
+
 class PrivateChan(models.Model):
 	id = models.AutoField(primary_key = True)
 	id_chan = models.IntegerField(unique = True)
 	id_u1 = models.IntegerField()
 	id_u2 = models.IntegerField()
 
+""" CURRENTGAME """
+
 class CurrentGame(models.Model):
 	game_id = models.IntegerField(unique=True)
 
+""" TOURNAMENTROOM """
+
 class tournament_room(models.Model):
     tournament_id = models.IntegerField(unique=True)
+
+
+""" USEROPENEDCHANNEL """
 
 class UserOpenedChannel(models.Model):
 	user = models.ForeignKey(Users, on_delete=models.CASCADE)
 	channel_name = models.CharField(max_length=30)
 	opened_at = models.DateTimeField(auto_now_add=True)
+
+""" CASSEBRIQUEROOM """
 
 class casse_brique_room(models.Model):
 	game_id = models.IntegerField(unique=True)
