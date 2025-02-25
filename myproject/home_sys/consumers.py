@@ -1860,3 +1860,4 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def result(self, event):  # New method to handle 'result' messages
 		await self.send(text_data=json.dumps(event))
+

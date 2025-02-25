@@ -129,6 +129,7 @@
     </main>
 
     <style>
+
         .notification-status {
             position: absolute;
             width: 50px;
@@ -181,7 +182,7 @@
         );
 
         notificationSocket.onopen = function (e) {
-            console.log("WebSocket connecté avec succès !");
+            console.log("[NOTIFS] WebSocket connecté avec succès !");
         };
 
         notificationSocket.onmessage = function (e) {
@@ -194,11 +195,11 @@
         };
 
         notificationSocket.onclose = function (e) {
-            console.error('WebSocket fermé de manière inattendue');
+            console.error('[NOTIFS] WebSocket fermé de manière inattendue');
         };
 
         notificationSocket.onerror = function (e) {
-            console.error('Erreur WebSocket :', e);
+            console.error('[NOTIFS] Erreur WebSocket :', e);
         };
     </script>
 

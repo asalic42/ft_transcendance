@@ -980,3 +980,4 @@ def create_current_game(request, sender_id):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
