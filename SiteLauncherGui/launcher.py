@@ -211,7 +211,7 @@ class SiteLauncher(QMainWindow):
             if pid:
                 os.kill(pid, signal.SIGTERM)  # SIGTERM pour stopper proprement le processus
             self.process.waitForFinished()
-            self.output.append(ansi_to_html("\033[1;31m [SIGNAL] ./log.sh as been stop.\033[0m"))
+            self.output.append(ansi_to_html("\033[1;31m [SIGNAL] ./log.sh has been stop.\033[0m"))
 
     def dockerStop(self):
         self.output.append(ansi_to_html("\033[1;34m [SIGNAL] Waiting to stop docker services.\033[0m"))
