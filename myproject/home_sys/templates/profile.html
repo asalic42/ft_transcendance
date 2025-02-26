@@ -43,7 +43,7 @@
 								Si vous voulez modifier vos informations utilisateurs
 								rendez-vous dans les settings.
 							</p>
-							<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+							<a class="profile-go-to-settings" href="user-settings/">Je veux modifier mon profil</a>
 						{% else %}
 							<p class="other-profile-text-settings-rdv">
 								Vous pouvez ajouter {{profile_user.username}} en ami(e)
