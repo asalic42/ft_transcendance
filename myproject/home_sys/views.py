@@ -17,6 +17,33 @@ from .utils import add_pong_logic
 from django.db.models import Q
 from .utils import send_notification_to_user
 
+""" 
+|
+|	Pour toutes les pages HTML
+|	redirection vers le bon .html au lieu des redirections (mode SPA)
+|
+"""
+import sys
+@login_required
+@never_cache
+def load_template(request, page, game_id=None, map_id=None):
+	template_path = os.path.join(settings.BASE_DIR, 'home_sys', 'templates', f"{page}.html")
+	if os.path.exists(template_path):
+		context = {}
+		
+		if page == "other_game_multi_room":
+			tour = casse_brique_room.objects.all()
+			context['all_games'] = tour
+		elif page == "other_game_multi":
+			context = {
+				'game_id': game_id,
+				'map_id': map_id
+			}
+		return render(request, f"{page}.html", context)
+			
+			
+	return JsonResponse({"error": 'Page not found'}, status=404)
+
 """
 |
 |	Pour la page home,
@@ -27,16 +54,16 @@ from .utils import send_notification_to_user
 @login_required
 @never_cache
 def home(request):
-    # Récupérer les utilisateurs et pré-calculer leur statut
-    users = Users.objects.all()
-    online_users = users.filter(is_online=True)
-    offline_users = users.filter(is_online=False)
-    
-    context = {
-        'online_users': online_users,
-        'offline_users': offline_users,
-    }
-    return render(request, 'home.html', context)
+	# Récupérer les utilisateurs et pré-calculer leur statut
+	users = Users.objects.all()
+	online_users = users.filter(is_online=True)
+	offline_users = users.filter(is_online=False)
+		
+	context = {
+		'online_users': online_users,
+		'offline_users': offline_users,
+	}
+	return render(request, 'home.html', context)
 
 """
 |
@@ -95,9 +122,9 @@ def settings_user(request):
 def profile_page(request):
 	return (render(request, 'profile.html'))
 
-@login_required
-def service_unavailable(request):
-	return (render(request, 'service_unavailable.html'))
+# @login_required
+# def service_unavailable(request):
+	# return (render(request, 'service_unavailable.html'))
 
 """
 |
@@ -108,22 +135,22 @@ def service_unavailable(request):
 
 @login_required
 def channels_page(request):
-    # Récupérer le profil de l'utilisateur connecté
-    current_user_profile = request.user.users
+	# Récupérer le profil de l'utilisateur connecté
+	current_user_profile = request.user.users
 
-    # Récupérer les demandes d'ami
-    friends = current_user_profile.friends.all()
+	# Récupérer les demandes d'ami
+	friends = current_user_profile.friends.all()
 
-    # Passer les ami au template
-    context = {
-        'users': {
-            'friends': friends
-        },
-        'current_user': request.user,
-        'all_users': User.objects.all()
-    }
+	# Passer les ami au template
+	context = {
+		'users': {
+			'friends': friends
+		},
+		'current_user': request.user,
+		'all_users': User.objects.all()
+	}
 
-    return render(request, 'channels.html', context)
+	return render(request, 'channels.html', context)
 
 @login_required
 def game_page(request):
@@ -141,10 +168,10 @@ def game_mode_pong_page(request):
 def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
-@login_required
-def game_distant_page_choice(request):
-	all_games = CurrentGame.objects.all()
-	return (render(request, 'game-type-pong2.html', {'all_games': all_games}))
+# @login_required
+# def game_distant_page_choice(request):
+# 	all_games = CurrentGame.objects.all()
+# 	return (render(request, 'game-distant-choice.html', {'all_games': all_games}))
 
 @login_required
 def game_distant_page(request, game_id):
@@ -171,10 +198,10 @@ def tournament_choice(request):
 	tour = tournament_room.objects.all()
 	return render(request, 'tournament_choice.html', {'all_games':tour})
 
-@login_required
+""" @login_required
 def casse_brique_room_choice(request):
 	tour = casse_brique_room.objects.all()
-	return render(request, 'other_game_multi_room.html', {'all_games':tour})
+	return render(request, 'other_game_multi_room.html', {'all_games':tour}) """
 
 def other_game_choice(request):
 	return (render(request, 'other_game_choice.html'))
@@ -233,14 +260,14 @@ def add_solo_casse_brique(request):
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 def add_pong(request):
-    try:
-        data = json.loads(request.body)
-        game_data = add_pong_logic(data)
-        return JsonResponse({'status': 'success', 'game': game_data}, status=201)
-    except Users.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
-    except (KeyError, json.JSONDecodeError) as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+	try:
+		data = json.loads(request.body)
+		game_data = add_pong_logic(data)
+		return JsonResponse({'status': 'success', 'game': game_data}, status=201)
+	except Users.DoesNotExist:
+		return JsonResponse({'status': 'error', 'message': 'Utilisateur non trouvé'}, status=404)
+	except (KeyError, json.JSONDecodeError) as e:
+		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 """
 |
@@ -583,79 +610,79 @@ def get_users_of_one_tournament(user, id):
 
 @login_required
 def profile_view(request, username):
-    # Si aucun username n'est fourni, utiliser l'utilisateur connecté
-    if not username:
-        return redirect('profile', username=request.user.username)
-    
-    try:
-        user = User.objects.get(username=username)
-        users_profile = Users.objects.get(user=user)
-        
-        # Récupérer les parties de Pong associées à l'utilisateur
-        games_P = Pong.objects.filter(
-            Q(id_p1=users_profile) | Q(id_p2=users_profile)
-        ).order_by('-date')
+	# Si aucun username n'est fourni, utiliser l'utilisateur connecté
+	if not username:
+		return redirect('profile', username=request.user.username)
+		
+	try:
+		user = User.objects.get(username=username)
+		users_profile = Users.objects.get(user=user)
+		
+		# Récupérer les parties de Pong associées à l'utilisateur
+		games_P = Pong.objects.filter(
+			Q(id_p1=users_profile) | Q(id_p2=users_profile)
+		).order_by('-date')
 
 
-        # Attribuer une couleur aux matchs de Pong en fonction du score
-        for game in games_P:
-            s1, s2 = game.score_p1, game.score_p2
+		# Attribuer une couleur aux matchs de Pong en fonction du score
+		for game in games_P:
+			s1, s2 = game.score_p1, game.score_p2
 
-            if game.id_p1 != users_profile:
-                s1, s2 = game.score_p2, game.score_p1
+			if game.id_p1 != users_profile:
+				s1, s2 = game.score_p2, game.score_p1
 
-            if s1 < s2:
-                game.color = 'red'
-            elif s1 > s2:
-                game.color = 'green'
+			if s1 < s2:
+				game.color = 'red'
+			elif s1 > s2:
+				game.color = 'green'
 
-        # Récupérer les autres jeux
-        games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
-        games_M_CB = MultiCasseBrique.objects.filter(
-            Q(id_p1=users_profile) | Q(id_p2=users_profile)
-        ).order_by('-date')
+		# Récupérer les autres jeux
+		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+		games_M_CB = MultiCasseBrique.objects.filter(
+			Q(id_p1=users_profile) | Q(id_p2=users_profile)
+		).order_by('-date')
 
-        # Dictionnaire pour stocker les données des tournois
-        games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True).distinct().order_by("-idTournaments__date"))
+		# Dictionnaire pour stocker les données des tournois
+		games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True).distinct().order_by("-idTournaments__date"))
 
-        # Dictionnaire pour stocker les données des tournois
-        tournaments_users = {}
-        tournaments_colors = {}  # Nouveau dictionnaire pour stocker les couleurs
-        tournaments_date = {}
+		# Dictionnaire pour stocker les données des tournois
+		tournaments_users = {}
+		tournaments_colors = {}  # Nouveau dictionnaire pour stocker les couleurs
+		tournaments_date = {}
 
-        # Parcourir chaque tournoi
-        for tournament_id in games_T_CB:
-            # Récupérer le gagnant du tournoi
-            tournament = Tournaments.objects.get(id=tournament_id)
-            winner = tournament.winner
+		# Parcourir chaque tournoi
+		for tournament_id in games_T_CB:
+			# Récupérer le gagnant du tournoi
+			tournament = Tournaments.objects.get(id=tournament_id)
+			winner = tournament.winner
 
-            # Déterminer la couleur du tournoi
-            if users_profile == winner:
-                tournament_color = 'green'  # L'utilisateur principal est le gagnant
-            else:
-                tournament_color = 'red'  # L'utilisateur principal n'est pas le gagnant
+			# Déterminer la couleur du tournoi
+			if users_profile == winner:
+				tournament_color = 'green'  # L'utilisateur principal est le gagnant
+			else:
+				tournament_color = 'red'  # L'utilisateur principal n'est pas le gagnant
 
-            # Stocker la couleur dans le dictionnaire
-            tournaments_colors[tournament_id] = tournament_color
-            tournaments_date[tournament_id] = tournament.date
+			# Stocker la couleur dans le dictionnaire
+			tournaments_colors[tournament_id] = tournament_color
+			tournaments_date[tournament_id] = tournament.date
 
-            # Récupérer les images des autres utilisateurs du tournoi
-            users_img = get_users_of_one_tournament(users_profile, tournament_id)
-            tournaments_users[tournament_id] = users_img
+			# Récupérer les images des autres utilisateurs du tournoi
+			users_img = get_users_of_one_tournament(users_profile, tournament_id)
+			tournaments_users[tournament_id] = users_img
 
-        return render(request, 'profile.html', {
-            'user': user,
-            'games_P': games_P,
-            'games_S_CB': games_S_CB,
-            'games_M_CB': games_M_CB,
-            'games_T_CB': games_T_CB,
-            'tournaments_users': tournaments_users,
+		return render(request, 'profile.html', {
+			'user': user,
+			'games_P': games_P,
+			'games_S_CB': games_S_CB,
+			'games_M_CB': games_M_CB,
+			'games_T_CB': games_T_CB,
+			'tournaments_users': tournaments_users,
 			'tournaments_colors': tournaments_colors,
 			'tournaments_date': tournaments_date,
-        })
-    
-    except User.DoesNotExist:
-        return redirect('home')
+		})
+		
+	except User.DoesNotExist:
+		return redirect('home')
 
 @login_required
 @require_http_methods(["GET"])
@@ -729,24 +756,24 @@ def doesUserHaveAccessToChan(request, idC, idU):
 		return JsonResponse({'status': 'error'})
 
 def check_duplicate_private_channel(request, user1_id, user2_id):
-    """
-    Vérifie si un canal privé existe déjà entre deux utilisateurs
-    """
-    # Normalise les IDs (le plus petit en premier)
-    id_u1, id_u2 = sorted([int(user1_id), int(user2_id)])
-    
-    # Cherche un canal existant avec ces utilisateurs dans n'importe quel ordre
-    existing_channel = PrivateChan.objects.filter(
-        (Q(id_u1=id_u1) & Q(id_u2=id_u2)) |
-        (Q(id_u1=id_u2) & Q(id_u2=id_u1))
-    ).first()
-    
-    if existing_channel:
-        return JsonResponse({
-            'exists': True,
-            'channel_id': existing_channel.id_chan
-        })
-    return JsonResponse({'exists': False})
+	"""
+	Vérifie si un canal privé existe déjà entre deux utilisateurs
+	"""
+	# Normalise les IDs (le plus petit en premier)
+	id_u1, id_u2 = sorted([int(user1_id), int(user2_id)])
+		
+	# Cherche un canal existant avec ces utilisateurs dans n'importe quel ordre
+	existing_channel = PrivateChan.objects.filter(
+		(Q(id_u1=id_u1) & Q(id_u2=id_u2)) |
+		(Q(id_u1=id_u2) & Q(id_u2=id_u1))
+	).first()
+		
+	if existing_channel:
+		return JsonResponse({
+			'exists': True,
+			'channel_id': existing_channel.id_chan
+		})
+	return JsonResponse({'exists': False})
 
 @require_http_methods(["POST"])
 def	postPv(request):
@@ -786,16 +813,16 @@ def add_friend(request, username):
 		
 		if (other_user.users in current_user.blocked.all()):
 			return JsonResponse({'status': 'unblockBefore'})
-        
+		
 		# Si Current User in OtherUser Friend list
 		if (current_user in other_user.users.friends.all()):
 			return JsonResponse({'status': 'friend'})
-        
+		
 		# Si Current User in OtherUser Blocked list
 		if (current_user in other_user.users.blocked.all()):
 			return JsonResponse({'status': 'blocked'})
-        
-        # Si Current User in OtherUser Friends_request list
+		
+		# Si Current User in OtherUser Friends_request list
 		if (current_user in other_user.users.friends_request.all()):
 			return JsonResponse({'status': 'waiting'})
 
@@ -848,7 +875,7 @@ def accept_friend_request(request, username):
 
 			if (other_user.users in current_user_profile.blocked.all()):
 				return JsonResponse({'status': 'unblockBefore'})
-            
+			
 			# Si Current User in OtherUser Blocked list
 			if (current_user_profile in other_user.users.blocked.all()):
 				return JsonResponse({'status': 'blocked'})
@@ -983,8 +1010,8 @@ from django.http import JsonResponse
 from .models import Users
 
 def user_status(request):
-    users = Users.objects.all().values('id', 'is_online')
-    return JsonResponse(list(users), safe=False)
+	users = Users.objects.all().values('id', 'is_online')
+	return JsonResponse(list(users), safe=False)
 
 
 @login_required
@@ -998,3 +1025,7 @@ def create_current_game(request, sender_id):
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
+@login_required
+def get_rooms(request):
+	rooms = CurrentGame.objects.all().values("game_id")
+	return JsonResponse({"rooms": list(rooms)})

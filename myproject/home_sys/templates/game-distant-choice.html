@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div id="content">
+
+	<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
+
+	<div class="page">
+		<div class="rectangle"></div>
+		<a href="game-distant-choice" class="retour">
+			<span class="game-mode" id="retour" >Retour</span>
+		</a>
+		<h1 class="title">Choix de la room</h1>
+		<div class="mode-choices">
+
+			<button class="game-distant" id="distant" data-user-id={{ request.user.id }}>
+				<span class="game-mode">New game</span>
+			</button>
+			<div id="test">
+				<div id="test">
+					<h2 id='text'> Join room : </h2>
+					<div id="rooms-list">
+						<p>Chargement des rooms...</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+{% endblock %}

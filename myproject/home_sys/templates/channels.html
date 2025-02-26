@@ -3,7 +3,8 @@
 {% load static %}
 
 {% block content %}
-
+<div id="content">
+        
 <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 <link rel="stylesheet" href="{% static 'css/channels-style.css' %}">
 <!-- <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script> -->
@@ -21,50 +22,51 @@
 <p id="users-list" data-users="{% for user in users %}{{ user.username }}{% empty %}{% endfor %}"></p>
 <div class="page" id="page">
 
-    <div class="column friends">
-        <h2 id="title">Friends</h2>
-        <div id="friends"></div>
-		<button class="button-chat" id="add-friend-chan">👥+</button>
+		<div class="column friends">
+			<h2 id="title">Friends</h2>
+			<div id="friends"></div>
+			<button class="button-chat" id="add-friend-chan">👥+</button>
+		</div>
+
+        <div class="column channels">
+            <h2 id="title">Channels</h2>
+            <div id="channels-list"></div>
+            <button class="button-chat" id="new-chan">+</button>
+        </div>
+
+        <!-- Formulaire pour definir un nom de channel -->
+
+        <div id="input-channel" class="hidden-form">
+            <h2>New channel name</h2>
+            <input type="text" id="channel-name" pattern="[a-zA-Z0-9]">
+        </div>
+
+        <!-- Formulaire pour ajouter un ami au channel courant -->
+
+        <div id="input-dm" class="hidden-form">
+    		<h2>Private 1 to 1 chat</h2>
+        
+    		{% comment %} <input type="text" id="name-input-add-friend-chan" placeholder="Channel Name"> {% endcomment %}
+        
+    		<select name="friends" id="input-add-friend-chan">
+    			{% if users.friends.all %}
+    				{% for other_user in users.friends.all %}
+    					<option value="{{ other_user.id }}" class="user-username">
+    						{{ other_user.name }}
+    					</option>
+    				{% endfor %}
+    			{% else %}
+    				<option disabled>No friends found</option>
+    			{% endif %}
+    		</select>
+        
+            <button class="button-chat" id="sendForm">Send</button>
+    	</div>
+
+        <div id="overlay" class="overlay"></div>
+
+        <script src="{% static 'js/channel.js' %}"></script> 
     </div>
-    
-    <div class="column channels">
-        <h2 id="title">Channels</h2>
-        <div id="channels-list"></div>
-        <button class="button-chat" id="new-chan">+</button>
-    </div>
-
-    <!-- Formulaire pour definir un nom de channel -->
-    
-    <div id="input-channel" class="hidden-form">
-        <h2>New channel name</h2>
-        <input type="text" id="channel-name" pattern="[a-zA-Z0-9]">
-    </div>
-
-    <!-- Formulaire pour ajouter un ami au channel courant -->
-
-    <div id="input-dm" class="hidden-form">
-		<h2>Private 1 to 1 chat</h2>
-		
-		{% comment %} <input type="text" id="name-input-add-friend-chan" placeholder="Channel Name"> {% endcomment %}
-		
-		<select name="friends" id="input-add-friend-chan">
-			{% if users.friends.all %}
-				{% for other_user in users.friends.all %}
-					<option value="{{ other_user.id }}" class="user-username">
-						{{ other_user.name }}
-					</option>
-				{% endfor %}
-			{% else %}
-				<option disabled>No friends found</option>
-			{% endif %}
-		</select>
-		
-        <button class="button-chat" id="sendForm">Send</button>
-	</div>
-
-    <div id="overlay" class="overlay"></div>
-
-    <script src="{% static 'js/channel.js' %}"></script> 
 </div>
 
 {% endblock %}

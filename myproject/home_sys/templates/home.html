@@ -3,104 +3,135 @@
 {% load static %}
 
 {% block content %}
+<div id="content">
 
-<link rel="stylesheet" href="{% static 'css/profile.css' %}">
-<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
-
-<div class="page-title-home">
-    <div class="sub-container-home">
-        <h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance ! <span class="emoji-in-title-home2">👋</span></h1>
-        <ul class="feature-list">
-            <li><span class="feature-icon">📝</span> One rule, do what you want. </li>
-        </ul>
-    </div>
-</div>
-
-<div class="users-status-container">
-	<div class="profile-container">
-
-		<div class="profile-box">
-			<img class="profile-img" src="{{ user.users.image.url }}" alt="">
-			<!-- <button class="profile-img-upload">➕</button> -->
+	<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 	
-			{% if request.user.is_authenticated %}
-				<div class="profile-user-info">
-					<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
-					<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
-					<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
-				</div>
-			{% else %}
-				<p>Vous n'êtes pas connecté.</p>
-			{% endif %}
+	{% if request.user.is_authenticated %}
+		<div class="profile-user-info">
+			<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
+			<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
+			<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
+		</div>
+	{% else %}
+		<p>Vous n'êtes pas connecté.</p>
+	{% endif %}
 	
-			<div class="profile-separator">
-				{% if request.user == user %}
-					<p class="profile-text-settings-rdv">
-						Si vous voulez modifier vos informations utilisateurs
-						rendez-vous dans les settings.
-					</p>
-					<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
-				{% else %}
-					<p class="other-profile-text-settings-rdv" style="color: black;">
-						Vous pouvez ajouter {{profile_user.username}} en ami(e)
-						ou décider de le/la bloquer.
-					</p>
-				
-					<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
-					<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
-				{% endif %}
+	<div class="profile-separator">
+		{% if request.user == user %}
+			<p class="profile-text-settings-rdv">
+				Si vous voulez modifier vos informations utilisateurs
+				rendez-vous dans les settings.
+			</p>
+			<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+		{% else %}
+			<p class="other-profile-text-settings-rdv" style="color: black;">
+				Vous pouvez ajouter {{profile_user.username}} en ami(e)
+				ou décider de le/la bloquer.
+			</p>
+		
+			<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
+			<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
+		{% endif %}
+
+	</div>
 	
-			</div>
+	<div class="page-title-home">
+		<div class="sub-container-home">
+			<h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance ! <span class="emoji-in-title-home2">👋</span></h1>
+			<ul class="feature-list">
+				<li><span class="feature-icon">📝</span> One rule, do what you want. </li>
+			</ul>
 		</div>
 	</div>
 	
-    <!-- Online Users -->
-    <div class="online-users">
-        <h2>Online</h2>
-        {% for user in online_users %}
-			{% if forloop.last %}
-				<div class="user-card last">
-			{% else %}
-				<div class="user-card">
-			{% endif %}
-					<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
-					<p class="user-name">{{ user }}</p>
-					{% if request.user != user %}
+	<div class="users-status-container">
+		<div class="profile-container">
+	
+			<div class="profile-box">
+				<img class="profile-img" src="{{ user.users.image.url }}" alt="">
+				<!-- <button class="profile-img-upload">➕</button> -->
+		
+				{% if request.user.is_authenticated %}
+					<div class="profile-user-info">
+						<span class="profile-username" style="color: black">👩‍🦲 : {{ user.username }} </span>
+						<span class="profile-pseudo" style="color: black">👤 : {{ user.users.pseudo }} </span>
+						<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
+					</div>
+				{% else %}
+					<p>Vous n'êtes pas connecté.</p>
+				{% endif %}
+		
+				<div class="profile-separator">
+					{% if request.user == user %}
+						<p class="profile-text-settings-rdv">
+							Si vous voulez modifier vos informations utilisateurs
+							rendez-vous dans les settings.
+						</p>
+						<button class="profile-go-to-settings" onclick="window.location.href="user-settings">Je veux modifier mon profil</button>
+					{% else %}
+						<p class="other-profile-text-settings-rdv">
+							Vous pouvez ajouter {{profile_user.username}} en ami(e)
+							ou décider de le/la bloquer.
+						</p>
+					
+						<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
+						<button class="other-profile-block" data-username="{{ user.username }}">BLOCK🖕</button>
+					{% endif %}
+		
+				</div>
+			</div>
+		</div>
+		
+		<!-- Online Users -->
+		<div class="online-users">
+			<h2>Online</h2>
+			{% for user in online_users %}
+				{% if forloop.last %}
+					<div class="user-card last">
+				{% else %}
+					<div class="user-card">
+				{% endif %}
+						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
+						<p class="user-name">{{ user }}</p>
+						{% if request.user != user %}
+							<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
+								profile
+							</button>
+						{% endif %}
+						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
+					</div>
+			{% empty %}
+				<div class="empty-state">
+					<p>Looks like no one's online.</p>
+				</div>
+			{% endfor %}
+		</div>
+	
+		<!-- Offline Users -->
+		<div class="offline-users">
+			<h2>Offline</h2>
+			{% for user in offline_users %}
+				{% if forloop.last %}
+					<div class="user-card last">
+				{% else %}
+					<div class="user-card">
+				{% endif %}
+						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
+						<p class="user-name">{{ user }}</p>
 						<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
 							profile
 						</button>
-					{% endif %}
-					<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
+						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
+					</div>
+			{% empty %}
+				<div class="empty-state">
+					<p>Looks like no one's offline.</p>
 				</div>
-        {% empty %}
-            <div class="empty-state">
-                <p>Looks like no one's online.</p>
-            </div>
-        {% endfor %}
-    </div>
-
-    <!-- Offline Users -->
-    <div class="offline-users">
-        <h2>Offline</h2>
-        {% for user in offline_users %}
-			{% if forloop.last %}
-				<div class="user-card last">
-			{% else %}
-				<div class="user-card">
-			{% endif %}
-					<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
-					<p class="user-name">{{ user }}</p>
-					<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
-						profile
-					</button>
-					<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
-				</div>
-        {% empty %}
-            <div class="empty-state">
-                <p>Looks like no one's offline.</p>
-            </div>
-        {% endfor %}
-    </div>
+			{% endfor %}
+		</div>
+	</div>
 </div>
 
 <script src="{% static 'js/home.js' %}"></script>

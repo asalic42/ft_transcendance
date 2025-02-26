@@ -1,6 +1,7 @@
 // Variables
-var table;
-var context;
+var table = document.getElementById("game");
+var context = table.getContext("2d");
+var fps = document.getElementById("fps");
 var score_p1 = document.getElementById("scoreP1");
 var score_p2 = document.getElementById("scoreP2");
 var bounce = 0;
@@ -14,11 +15,9 @@ let percentage = 0;
 let cachedUserId = null;
 
 //! Init
+// document.addEventListener("DOMContentLoaded", () => {
 
-window.onload = function() {
-	table = document.getElementById("game");
-	context = table.getContext("2d");
-}
+// })
 
 function createBall(vx) {
 	// Balls coords
@@ -104,13 +103,14 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 }
 
 var user_option = 2;
-function levelinput(value) {
+window.levelinput = function(value) {
 	var form = document.getElementById('LevelForm');
 	user_option = form.elements.levelfield.value;
 	document.getElementById('page').style.display = 'none';
 	document.getElementById('scores').style.display = 'flex';
 	document.getElementById('fps').style.display = 'flex';
 	document.getElementById('canvas-container').style.display = 'flex';
+
 	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 
 }
@@ -164,7 +164,6 @@ function isBallHittingWall(ball) {
 		ball.hit_vertical++;
 	if (ball.hit_vertical >= 5)
 		ball.hit_vertical = 0;
-
 }
 
 function moveBall(ball, player1Coords, player2Coords) {
@@ -314,9 +313,31 @@ function replay(player) {
 	else
 		button.style.color = "#365FA0";
 	button.addEventListener("click", () => {
-		window.location.reload();
+		restart_game();
 	});
-	
+}
+
+function restart_game() {
+	cancelAnimationFrame(id);
+
+	document.getElementById("wrapper-player1").style.display = "none";
+	document.getElementById("wrapper-player2").style.display = "none";
+	document.getElementById("replay-button").style.display = "none";
+
+	frameTime = {counter : 0, time : 0};
+	totalframeTime = {counter : 0, time : 0};
+	bounce = 0;
+	count_p1 = 0;
+	count_p2 = 0;
+	stop = 0;
+	percentage = 0;
+	cachedUserId = null;
+
+	document.getElementById("scoreP1").innerText = "0";
+	document.getElementById("scoreP2").innerText = "0";
+
+	context.clearRect(0, 0, table.width, table.height);
+	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 }
 
 //! Tools
@@ -390,7 +411,7 @@ async function addNewGame(id_player) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
+				// 'X-CSRFToken': csrftoken,  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({  // Convertit les données en JSON
@@ -414,3 +435,25 @@ async function addNewGame(id_player) {
 		console.error('Erreur:', error);
 	}
 }
+
+document.addEventListener("beforeunload", function() {
+	console.log("je suis la ! bitch");
+	cancelAnimationFrame(id);
+	document.getElementById("wrapper-player1").style.display = "none";
+	document.getElementById("wrapper-player2").style.display = "none";
+	document.getElementById("replay-button").style.display = "none";
+
+	frameTime = {counter : 0, time : 0};
+	totalframeTime = {counter : 0, time : 0};
+	bounce = 0;
+	count_p1 = 0;
+	count_p2 = 0;
+	stop = 0;
+	percentage = 0;
+	cachedUserId = null;
+
+	document.getElementById("scoreP1").innerText = "0";
+	document.getElementById("scoreP2").innerText = "0";
+
+	context.clearRect(0, 0, table.width, table.height);
+})

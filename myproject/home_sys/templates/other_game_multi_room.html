@@ -4,34 +4,36 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
+<div id="content">
 
-<div class="page">
-	<div class="rectangle"></div>
-	<a href="{% url 'other_game_choice' %}" class="retour">
-		<span class="game-mode" id="retour" >Retour</span>
-	</a>
-	<h1 class="title">Choix de la room</h1>
-	<div class="mode-choices">
+	<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
 
-		<a href="{% url 'map_choice' %}" class="game-distant">
-			<span class="game-mode">New room</span>
+	<div class="page">
+		<div class="rectangle"></div>
+		<a href="other_game_choice/" class="retour">
+			<span class="game-mode" id="retour" >Retour</span>
 		</a>
-		<div id="test">
-			{% if all_games %}
-				<h2 id='text'> Join room : </h2>²
-				{% for room in all_games %}
-				<a href="{% url 'other_game_multi' room.game_id room.map_id %}" class="game-distant" id="choice">
-					<span class="game-mode" id='choice'>Room {{ room.game_id }} map {{room.map_id}} </span>
-				</a>
-				{% endfor %}
-			{% else %}
-				<p>Aucune Room </p>
-			{% endif %}
+		<h1 class="title">Choix de la room</h1>
+		<div class="mode-choices">
+
+			<a href="map_choice/" class="game-distant">
+				<span class="game-mode">New room</span>
+			</a>
+			<div id="test">
+				{% if all_games %}
+					<h2 id='text'> Join room : </h2>
+					{% for room in all_games %}
+						<a href="other_game_multi/{{ room.game_id }}/{{ room.map_id }}" class="game-distant" id="choice">
+							<span class="game-mode" id='choice'>Room {{ room.game_id }} map {{room.map_id}} </span>
+						</a>
+					{% endfor %}
+				{% else %}
+					<p>Aucune Room </p>
+				{% endif %}
+			</div>
 		</div>
+
 	</div>
-
 </div>
-
 
 {% endblock %}

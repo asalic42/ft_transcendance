@@ -4,51 +4,52 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+<div id="content">
+    <link rel="stylesheet" href="{% static 'css/game-style.css' %}">
 
-<h3 class="scores" id="fps">Fps : 0</h3>
+    <h3 class="scores" id="fps">Fps : 0</h3>
 
-<a href="{% url 'game-distant-choice' %}" class="game-distant">
-	<span class="game-mode">Retour</span>
-</a>
+    <a href="game-distant-choice" class="game-distant">
+    	<span class="game-mode">Retour</span>
+    </a>
 
-<div class="scores" id="scores">
-	
-	<h3 id="title-p1">Player 1</h3>
-	<h3 id="scoreP1">0</h3>
-	<h3 id="scoreP2">0</h3>
-	<h3 id="title-p2">Player 2</h3>
+    <div class="scores" id="scores">
+    
+    	<h3 id="title-p1">Player 1</h3>
+    	<h3 id="scoreP1">0</h3>
+    	<h3 id="scoreP2">0</h3>
+    	<h3 id="title-p2">Player 2</h3>
+    </div>
+
+    <div id="canvas-container">
+        <canvas width="1920" height="850" id="game"></canvas>
+        <div id="button-container">
+            <button id="replay-button" style="display: none;">Play again !</button>
+        </div>
+        <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+            <svg width="1100" height="150" id="svg-wrapper-player1">
+                <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
+            </svg>
+        </div>
+        <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+            <svg width="1100" height="150" id="svg-wrapper-player2">
+                <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
+            </svg>
+        </div>
+        <div id="overlay">
+            <h1 id="countdown">3</h1>
+        </div>
+    </div>
+
+    <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
+
+    <script>
+    	var gameId = "{{ game_id }}";
+    	{% block script %}
+    	    var id_t = 0;
+    	{% endblock %}
+    </script>
+
+    <script src="{% static 'js/game-distant.js' %}"></script>
 </div>
-
-<div id="canvas-container">
-    <canvas width="1920" height="850" id="game"></canvas>
-    <div id="button-container">
-        <button id="replay-button" style="display: none;">Play again !</button>
-    </div>
-    <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-        <svg width="1100" height="150" id="svg-wrapper-player1">
-            <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
-        </svg>
-    </div>
-    <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
-        <svg width="1100" height="150" id="svg-wrapper-player2">
-            <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
-        </svg>
-    </div>
-    <div id="overlay">
-        <h1 id="countdown">3</h1>
-    </div>
-</div>
-
-<h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
-
-<script>
-	var gameId = "{{ game_id }}";
-	{% block script %}
-	var id_t = 0;
-	{% endblock %}
-</script>
-
-<script src="{% static 'js/game-distant.js' %}"></script>
-
 {% endblock %}

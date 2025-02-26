@@ -6,6 +6,8 @@
 
 {% block content %}
 
+<div id="content">
+
 	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 	<link rel="stylesheet" href="{% static 'css/profile.css' %}">
 
@@ -41,7 +43,7 @@
 								Si vous voulez modifier vos informations utilisateurs
 								rendez-vous dans les settings.
 							</p>
-							<button class="profile-go-to-settings" onclick="window.location.href='{% url 'settings_user' %}'">Je veux modifier mon profil</button>
+							<button class="profile-go-to-settings" onclick="window.location.href="user-settings">Je veux modifier mon profil</button>
 						{% else %}
 							<p class="other-profile-text-settings-rdv" style="color: black;">
 								Vous pouvez ajouter {{profile_user.username}} en ami(e)
@@ -216,5 +218,6 @@
 	</div>
 
 	<script src="{% static 'js/profile.js' %}"></script>
+</div>
 
 {% endblock %}

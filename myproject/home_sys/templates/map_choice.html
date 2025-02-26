@@ -4,21 +4,22 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
+<div id="content">
 
+	<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
-<div class="mapSelection">
-	
-	<a href="{% url 'game-choice' %}" class="retour">
-		<span class="mapButton" id="retour" >Retour</span>
-	</a>
+	<div class="mapSelection">
 
-    <h1 class="title">Choix de la map</h1>
-    <div class="map-choice">
-		<a href="{% url 'other_game_multi' request.user.id 1 %}" class="mapButton">Map 1</a>
-		<a href="{% url 'other_game_multi' request.user.id 2 %}" class="mapButton">Map 2</a>
-		<a href="{% url 'other_game_multi' request.user.id 3 %}" class="mapButton">Map 3</a>
+		<a href="game-choice/" class="retour">
+			<span class="mapButton" id="retour" >Retour</span>
+		</a>
+
+	    <h1 class="title">Choix de la map</h1>
+	    <div class="map-choice">
+			<a href="other_game_multi/{{request.user.id}}/{{1}}" class="mapButton">Map 1</a>
+			<a href="other_game_multi/{{request.user.id}}/{{2}}" class="mapButton">Map 2</a>
+			<a href="other_game_multi/{{request.user.id}}/{{3}}" class="mapButton">Map 3</a>
+		</div>
 	</div>
 </div>
-
 {% endblock %}

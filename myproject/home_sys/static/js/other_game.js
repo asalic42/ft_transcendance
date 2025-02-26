@@ -2,21 +2,27 @@ const BALL_SPEED_INCREMENT = 0.075;
 const BALL_INITIAL_SPEED = 9;
 
 // Variables
-let mapTab = [];
+var mapTab = [];
 var table;
 var context;
 var canvasContainer = document.getElementById("canvas-container");
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
-let percentage = 0;
+var percentage = 0;
 var fps = document.getElementById("fps");
 var	blocksDestroyed = 0;
 var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
-const mapSelection = document.querySelector('.mapSelection');
-const game = document.querySelector('.game');
+var mapSelection = document.querySelector('.mapSelection');
+var game = document.querySelector('.game');
 var count = 0;
-var health = 1;
+var health = 5;
+var cachedUserId = null;
+var id=0;
+var selectedMap;
+var block_arr = [];
+var user_option = 2;
+const keys = {};
 
 class block {
 	x1; y1; width; height; state;
@@ -28,11 +34,9 @@ class block {
 		this.state = state;
 	}
 }
-let cachedUserId = null;
 
 //! Init
 
-var selectedMap;
 mapSelection.addEventListener('click', (event) => {
 	if (event.target.tagName === 'BUTTON') {
 		selectedMap = event.target.dataset.map
@@ -54,7 +58,6 @@ async function launch (idMap) {
 	createBlocks();
 	createBall();
 }
-let block_arr = [];
 
 function createBlocks() {
 	var start_x = table.width / 8;
@@ -139,7 +142,6 @@ function isBallHittingPlayer(ball, player1Coords) {
 	return false;
 }
 
-var user_option = 2;
 function rangeSlide(value) {
 	document.getElementById('rangeValue').innerHTML = value;
 	user_option = value;
@@ -317,8 +319,9 @@ function isEnd(ball) {
 }
 
 //! Loop func
-let id=0;
 function launchAnim(ball, player1Coords, start) {
+	if (document.hidden) return;
+
 	timeRelatedStuff(ball, start);
 	adaptVectorsToFps(ball, player1Coords);
 	start = Date.now();
@@ -361,10 +364,13 @@ function adaptVectorsToFps(ball, player1Coords) {
 }
 
 async function winnerWindow() {
+	if (window.hidden) return;
+	
 	console.log(winnerWindow);
 	context.clearRect(0, 0, table.width, table.height);
 	gameOver.style.display = "flex";
 	drawOuterRectangle("#C42021");
+	
 	if (blocksDestroyed == 73) {
 		drawOuterRectangle("#365FA0");
 		gameOver.style.color = "#365FA0";
@@ -375,7 +381,6 @@ async function winnerWindow() {
 	drawInnerRectangle("#23232e");
 
 	cancelAnimationFrame(id);
-	console.log("tourne en boucle");
 	try {
 		const playerId = await getCurrentPlayerId();
 		if (!playerId) {
@@ -384,8 +389,6 @@ async function winnerWindow() {
 			return;
 		}
 		
-		console.log(playerId, count);
-
 		// Attendre que l'ajout du score soit terminé
 		await addNewGame(playerId, count);
 		
@@ -398,11 +401,13 @@ async function winnerWindow() {
 // Séparer l'affichage du bouton replay de son action
 function showReplayButton() {
 	const button = document.getElementById("replay-button");
-	button.style.display = "flex";
-	// button.style.color = "#C42021";
-	button.addEventListener("click", () => {
-		window.location.reload();
-	});
+	if (button) {
+		button.style.display = "flex";
+		// button.style.color = "#C42021";
+		button.addEventListener("click", () => {
+			window.location.reload();
+		});
+	}
 }
 
 
@@ -457,7 +462,6 @@ function drawInnerRectangle(color) {
 	context.closePath();
 }
 
-const keys = {};
 
 window.addEventListener("keydown", (event) => {
 	keys[event.key] = true;
@@ -498,7 +502,7 @@ async function addNewGame(id_player, score) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': csrftoken,  // Use the function directly
+				'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
@@ -536,4 +540,15 @@ async function fetchMap(mapId) {
 	.catch(error => {
 		console.error('Erreur lors de la récupération des données de la carte:', error);
 	});
+}
+
+window.addEventListener("visibilitychange", handleQuitPlayer);
+
+function handleQuitPlayer() {
+	if (window.hidden) {
+		cancelAnimationFrame(id);
+		console.log("j'ai quit");
+	}
+	else
+		console.log("je suis la moi");
 }

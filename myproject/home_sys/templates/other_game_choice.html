@@ -4,21 +4,24 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
+<div id="content">
 
-<div class="page">
-	<div class="rectangle"></div>
-	<h1 class="title">Choix du mode de jeu</h1>
-	<div class="mode-choices">
+	<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
-		<a href="{% url 'other_game' %}" class="casse-brique">
-			<span class="game-mode">Solo</span>
-		</a>
-		<a href="{% url 'other_game_multi_room' %}" class="casse-brique-multi">
-			<span class="game-mode">1v1</span>
-		</a>
+	<div class="page">
+		<div class="rectangle"></div>
+		<h1 class="title">Choix du mode de jeu</h1>
+		<div class="mode-choices">
+
+			<a href="other_game/" class="casse-brique">
+				<span class="game-mode">Solo</span>
+			</a>
+			<a href="other_game_multi_room/" class="casse-brique-multi">
+				<span class="game-mode">1v1</span>
+			</a>
+		</div>
+
 	</div>
-
 </div>
 
 {% endblock %}

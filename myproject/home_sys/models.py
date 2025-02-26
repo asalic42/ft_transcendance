@@ -19,6 +19,7 @@ class Users(models.Model):
 
 	invite = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='user_invite')
 	has_unread_notifications = models.BooleanField(default=False)
+	# has_unread_chat = models.BooleanField(default=False)
 
 	status = models.BooleanField(default=True)  # Ce champ semble déjà utilisé pour autre chose
 	is_online = models.BooleanField(default=False)  # Nouveau champ pour le statut de connexion
@@ -97,7 +98,7 @@ class Pong(models.Model):
 class Tournaments(models.Model):
 	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
-	winner = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='winner', null=True)
+	winner = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='tournament_wins', null=True)
 
 """ MATCHSTOURNAMENTS """
 
@@ -175,7 +176,6 @@ class UserOpenedChannel(models.Model):
 	user = models.ForeignKey(Users, on_delete=models.CASCADE)
 	channel_name = models.CharField(max_length=30)
 	opened_at = models.DateTimeField(auto_now_add=True)
-	tournament_id = models.IntegerField(unique=True)
 
 """ CASSEBRIQUEROOM """
 

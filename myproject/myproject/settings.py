@@ -39,6 +39,7 @@ CSRF_TRUSTED_ORIGINS = ["https://www.transcendance.42.paris", "https://transcend
 SECURE_SSL_REDIRECT = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
@@ -108,7 +109,9 @@ ROOT_URLCONF = 'myproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            # os.path.join(BASE_DIR, 'home_sys', 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -215,6 +218,10 @@ CORS_ALLOW_HEADERS = [
     'Authorization',
 ]
 
+
+""" CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_ALL_ORIGINS = True """
 
 MEDIA_URL = '/media/'
 

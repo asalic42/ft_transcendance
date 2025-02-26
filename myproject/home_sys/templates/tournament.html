@@ -4,10 +4,13 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'css/tournament-style.css' %}">
+<div id="content">
+
+	<link rel="stylesheet" href="{% static 'css/tournament-style.css' %}">
 	<script>
-	var id_t = "{{id_t}}";
+		var id_t = "{{id_t}}";
 	</script>
+
 <div class="container">
 
     <div class="square" id="square">
@@ -19,5 +22,7 @@
 			<p id="message" style="font-size: 32px; text-align: center;"></p>
 		</div>
 	</div>
-<script src="{% static 'js/tournament.js' %}"></script>
+
+	<script src="{% static 'js/tournament.js' %}"></script>
+</div>
 {% endblock %}

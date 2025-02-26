@@ -8,7 +8,7 @@ var game = document.getElementById("game");
 var count_p1 = 0;
 var count_p2 = 0;
 let stop = 0;                           // Endgame
-const keys = {};                        // Players bars
+let keys = {};                        // Players bars
 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
@@ -17,7 +17,7 @@ function getRandomArbitrary(min, max) {
 	return result;
 }
   
-window.onload = function() {
+document.addEventListener("DOMContentLoaded", function() {
     table = document.getElementById("game");
     context = table.getContext("2d");
 
@@ -25,7 +25,7 @@ window.onload = function() {
 	document.getElementById('fps').style.display = 'flex';
 	document.getElementById('canvas-container').style.display = 'flex';
 	createBall(Math.floor(getRandomArbitrary(-10, 10)));
-}
+})
 
 function drawOuterRectangle(color) {
     context.fillStyle = color;
@@ -131,6 +131,7 @@ function isPointWin(ball) {
     return false;
 }
 
+let id =0;
 function launchAnim(ball, player1Coords, player2Coords, start) {
 	end = Date.now();
 	let elapsedTime = end - start; // Temps réel pris par la frame
@@ -150,7 +151,7 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 	player1Coords.vy = player1Coords.const_vy * percentage;
 	player2Coords.vy = player2Coords.const_vy * percentage;
 	start = Date.now();
-	requestAnimationFrame(function () {
+	id = requestAnimationFrame(function () {
 		if (stop)
 			return;
         context.clearRect(0, 0, table.width, table.height);
@@ -283,6 +284,30 @@ function newGame(player) {
 	else
 		button.style.color = "#365FA0";
 	button.addEventListener("click", () => {
-		window.location.reload();
+		restart_game();
     });
+}
+
+function restart() {
+	cancelAnimationFrame(id);
+
+	document.getElementById("wrapper-player1").style.display = "none";
+	document.getElementById("wrapper-player2").style.display = "none";
+	document.getElementById("replay-button").style.display = "none";
+
+	frameTime = {counter : 0, time : 0};
+	totalframeTime = {counter : 0, time : 0};
+	bounce = 0;
+	count_p1 = 0;
+	count_p2 = 0;
+	stop = 0;
+	percentage = 0;
+	cachedUserId = null;
+	keys = {};
+
+	document.getElementById("scoreP1").innerText = "0";
+	document.getElementById("scoreP2").innerText = "0";
+
+	context.clearRect(0, 0, table.width, table.height);
+	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 }

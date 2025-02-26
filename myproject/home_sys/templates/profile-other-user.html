@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<div id="content">
+
     <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
 
 
@@ -181,7 +183,7 @@
             const url = `/accounts/add_friend/${username}/`;
 
             // Récupérer le token CSRF
-            const csrfToken = getCookie('csrftoken');
+            const csrfToken = csrftoken;
             if (!csrfToken) {
                 console.error("CSRF token non trouvé !");
                 alert("Erreur : CSRF token manquant.");
@@ -235,5 +237,5 @@
         }
 
     </script>
-
-{% endblock %} -->
+</div>
+{% endblock %}
