@@ -32,8 +32,19 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["www.transcendance.42.paris", "transcendance.42.paris", "127.0.0.1"]
-CSRF_TRUSTED_ORIGINS = ["https://www.transcendance.42.paris", "https://transcendance.42.paris", "https://127.0.0.1"]
+ALLOWED_HOSTS = [
+	"www.transcendance.42.paris",
+	"transcendance.42.paris",
+	"127.0.0.1",
+	"10.18.183.197"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.transcendance.42.paris",
+    "https://transcendance.42.paris",
+    "https://127.0.0.1",
+    "https://10.18.183.197:5000",
+]
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL
 SECURE_SSL_REDIRECT = True
@@ -191,12 +202,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://www.transcendance.42.paris",
-    "https://transcendance.42.paris",
-    "https://127.0.0.1",
-]
 
 CORS_ALLOW_CREDENTIALS = True
 
