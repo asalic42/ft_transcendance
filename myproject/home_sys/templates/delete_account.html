@@ -181,7 +181,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
       // Fonction pour obtenir la localisation de l'IP via l'API ipinfo.io
-      fetch('http://127.0.0.1:8000/accounts/get-ip-info')  // Remplacez "YOUR_API_KEY" par votre clé API gratuite
+      fetch('https://transcendance.42.paris/accounts/get-ip-info')
         .then(response => response.json())
         .then(data => {
           const ipLocation = data.loc.split(',');

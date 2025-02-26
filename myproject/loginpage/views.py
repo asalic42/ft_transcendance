@@ -10,6 +10,9 @@ from django.contrib import messages
 # Page d'accueil
 @never_cache
 def index(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    
     storage = messages.get_messages(request)
     storage.used = True
     return render(request, 'index.html')
@@ -18,6 +21,9 @@ def index(request):
 # Inscription d'un utilisateur
 @never_cache
 def signup(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+	
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -42,6 +48,9 @@ def signup(request):
 # Connexion d'un utilisateur
 @never_cache
 def signin(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')

@@ -104,7 +104,10 @@ if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Stopping docker services...${NC}"
     sudo docker-compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    sudo docker system prune --volumes -a
+    docker system prune --volumes --force
+    echo -e "${BLUE}> Removing django cache...${NC}"
+    sudo find . -type d -name "__pycache__" -exec rm -r {} +
+    sudo rm -rf home_sys/static 
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
@@ -119,7 +122,7 @@ fi
 if [ "$1" == "l" ]; then
 
     echo -e ">> Checking if we have already start docker's services..."
-    if [ "$(sudo docker-compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
+    if [ "$(sudo sudo docker-compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
         echo -e "${BLUE}>${NC} Docker services are not running. ${BLUE}Starting them...${NC}"
         sudo docker-compose up -d
     else

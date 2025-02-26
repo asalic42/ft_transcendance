@@ -224,7 +224,7 @@ def add_solo_casse_brique(request):
 		new_game = SoloCasseBrique.objects.create(**data)
 		return JsonResponse({'status': 'success', 'game': {
 			'id': new_game.id,
-			'id_player': new_game.id_player,
+			'id_player': new_game.id_player.pk,
 			'id_map': new_game.id_map,
 			'score': new_game.score,
 			'date': new_game.date.isoformat(),
@@ -391,10 +391,27 @@ def post_message(request):
 	except (KeyError, json.JSONDecodeError) as e:
 		return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
+import requests
+from django.http import JsonResponse
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
+
 def get_ip_info(request):
-	url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
-	response = requests.get(url)
-	return JsonResponse(response.json())
+    # URL de l'API ipinfo.io avec le token
+    url = f'https://ipinfo.io/json?token={settings.IP_LOCALISATION}'
+    
+    try:
+        # Effectuer la requête vers l'API
+        response = requests.get(url)
+        response.raise_for_status()  # Lève une exception pour les codes d'état HTTP 4xx/5xx
+        data = response.json()  # Convertir la réponse en JSON
+        return JsonResponse(data)  # Renvoyer la réponse JSON au client
+    except requests.exceptions.RequestException as e:
+        # Log l'erreur et renvoyer une réponse d'erreur
+        logger.error(f"Erreur lors de la requête vers ipinfo.io: {e}")
+        return JsonResponse({"error": "Impossible de récupérer les informations IP"}, status=500)
 
 @require_GET
 def check_username(request):

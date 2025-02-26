@@ -32,8 +32,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["www.transcendance.42.paris", "transcendance.42.paris"]
-CSRF_TRUSTED_ORIGINS = ["https://www.transcendance.42.paris", "https://transcendance.42.paris"]
+ALLOWED_HOSTS = ["www.transcendance.42.paris", "transcendance.42.paris", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ["https://www.transcendance.42.paris", "https://transcendance.42.paris", "https://127.0.0.1"]
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL
 SECURE_SSL_REDIRECT = True
@@ -88,6 +88,8 @@ IP_LOCALISATION= env('MAP_IP_LOCALISATION')
 # URL de redirection après l'authentification
 #LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 #LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
+
+LOGIN_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -189,12 +191,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    "https://localhost:8000",
-    "https://transcendance.42.paris:8000",  # Ajouter ici l'URL de ton frontend si besoin
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.transcendance.42.paris",
+    "https://transcendance.42.paris",
+    "https://127.0.0.1",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://www.transcendance.42.paris",
+    "https://transcendance.42.paris",
+    "https://127.0.0.1",
+]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'Content-Type',
+    'Authorization',
+]
+
+
 MEDIA_URL = '/media/'
 
 # Répertoire physique sur le disque où les fichiers médias seront stockés
