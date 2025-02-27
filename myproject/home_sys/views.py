@@ -1,8 +1,6 @@
-import os
+import os, sys
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
@@ -10,39 +8,127 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods, require_GET
 from django.conf import settings
-from .models import *
-import json
-import requests
-from .utils import add_pong_logic
 from django.db.models import Q
-from .utils import send_notification_to_user
+from .models import *
+import json, requests
+from .utils import add_pong_logic, send_notification_to_user
 
-""" 
-|
-|	Pour toutes les pages HTML
-|	redirection vers le bon .html au lieu des redirections (mode SPA)
-|
-"""
-import sys
+
+
 @login_required
 @never_cache
-def load_template(request, page, game_id=None, map_id=None):
-	template_path = os.path.join(settings.BASE_DIR, 'home_sys', 'templates', f"{page}.html")
-	if os.path.exists(template_path):
+def load_template(request, page, **kwargs):
+	template_name = f"{page}.html"
+	context = {}
+
+	if page == "home" or page == "accounts":
+		template_name = "home.html"
+		users = Users.objects.all()
+		context['online_users'] = users.filter(is_online=True)
+		context['offline_users'] = users.filter(is_online=False)
+
+	elif page == "profile":
+		# Cas particulier pour la vue profile_view : on passe le nom d'utilisateur en paramètre
+		print("called profile")
+		username = kwargs.get('username', request.user.username)
+		print(f"username: {username}")
+		sys.stdout.flush()
+		try:
+			user = User.objects.get(username=username)
+			users_profile = Users.objects.get(user=user)
+		except User.DoesNotExist:
+			return redirect('home')
+
+		# Récupération des parties de Pong associées à l'utilisateur
+		games_P = Pong.objects.filter(
+			Q(id_p1=users_profile) | Q(id_p2=users_profile)
+		).order_by('-date')
+
+		# Attribuer une couleur aux matchs de Pong en fonction du score
+		for game in games_P:
+			s1, s2 = game.score_p1, game.score_p2
+			if game.id_p1 != users_profile:
+				s1, s2 = game.score_p2, game.score_p1
+			if s1 < s2:
+				game.color = 'red'
+			elif s1 > s2:
+				game.color = 'green'
+
+		# Récupération des autres jeux
+		games_S_CB = SoloCasseBrique.objects.filter(id_player=users_profile).order_by('-date')
+		games_M_CB = MultiCasseBrique.objects.filter(
+			Q(id_p1=users_profile) | Q(id_p2=users_profile)
+		).order_by('-date')
+
+		# Gestion des tournois
+		games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True)
+						   .distinct()
+						   .order_by("-idTournaments__date"))
+		tournaments_users = {}
+		tournaments_colors = {}
+		tournaments_date = {}
+		for tournament_id in games_T_CB:
+			tournament = Tournaments.objects.get(id=tournament_id)
+			winner = tournament.winner
+			if users_profile == winner:
+				tournament_color = 'green'
+			else:
+				tournament_color = 'red'
+			tournaments_colors[tournament_id] = tournament_color
+			tournaments_date[tournament_id] = tournament.date
+			users_img = get_users_of_one_tournament(users_profile, tournament_id)
+			tournaments_users[tournament_id] = users_img
+
+		context = {
+			'user': user,
+			'games_P': games_P,
+			'games_S_CB': games_S_CB,
+			'games_M_CB': games_M_CB,
+			'games_T_CB': games_T_CB,
+			'tournaments_users': tournaments_users,
+			'tournaments_colors': tournaments_colors,
+			'tournaments_date': tournaments_date,
+		}
+
+	elif page == "channels":
+		current_user_profile = request.user.users
+		context = {
+			'users': {
+				'friends': current_user_profile.friends.all()
+			},
+			'current_user': request.user,
+			'all_users': User.objects.all()
+		}
+
+	elif page == "notifications":
+		current_user_profile = request.user.users
+		friend_requests = current_user_profile.friends_request.all()
+		context = {
+			'users': current_user_profile,
+			'friend_requests': friend_requests,
+		}
+
+	elif page == "other_game_multi":
+		context = {
+			'game_id': kwargs.get('game_id'),
+			'map_id': kwargs.get('map_id')
+		}
+
+	elif page == "signout":
+		print("je suis bien la bitch")
+		sys.stdout.flush()
+		return (redirect('loginpage:sign_in'))
+
+	else:
 		context = {}
-		
-		if page == "other_game_multi_room":
-			tour = casse_brique_room.objects.all()
-			context['all_games'] = tour
-		elif page == "other_game_multi":
-			context = {
-				'game_id': game_id,
-				'map_id': map_id
-			}
-		return render(request, f"{page}.html", context)
-			
-			
-	return JsonResponse({"error": 'Page not found'}, status=404)
+
+	# Vérifier l'existence du template dans le répertoire
+	template_path = os.path.join(settings.BASE_DIR, 'home_sys', 'templates', f"{page}.html")
+	if not os.path.exists(template_path):
+		return JsonResponse({"error": "Page not found"}, status=404)
+
+	return render(request, template_name, context)
+
 
 """
 |

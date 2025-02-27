@@ -1,4 +1,4 @@
-apt install openssl -y
+#!/bin/sh
 
 CERT_DIR="/etc/nginx/certs"
 

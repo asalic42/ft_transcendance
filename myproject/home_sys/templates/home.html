@@ -40,7 +40,7 @@
 							Si vous voulez modifier vos informations utilisateurs
 							rendez-vous dans les settings.
 						</p>
-						<button class="profile-go-to-settings" onclick="window.location.href="user-settings">Je veux modifier mon profil</button>
+						<a class="profile-go-to-settings" href="user-settings/">Je veux modifier mon profil</a>
 					{% else %}
 						<p class="other-profile-text-settings-rdv">
 							Vous pouvez ajouter {{profile_user.username}} en ami(e)
@@ -67,9 +67,9 @@
 						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
 						<p class="user-name">{{ user }}</p>
 						{% if request.user != user %}
-							<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
+							<a class="profile-button" href="{% url 'profile' user %}">
 								profile
-							</button>
+							</a>
 						{% endif %}
 						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 					</div>
@@ -91,9 +91,9 @@
 				{% endif %}
 						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
 						<p class="user-name">{{ user }}</p>
-						<button class="profile-button" onclick="window.location.href='{% url 'profile' username=user %}'">
+						<a class="profile-button" href="{% url 'profile' user %}">
 							profile
-						</button>
+						</a>
 						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 					</div>
 			{% empty %}

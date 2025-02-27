@@ -13,7 +13,7 @@ var fps = document.getElementById("fps");
 var	blocksDestroyed = 0;
 var score = document.getElementById("title");
 var gameOver = document.getElementById("gameOver");
-var mapSelection = document.querySelector('.mapSelection');
+var mapSelection = document.getElementById('mapSelection');
 var game = document.querySelector('.game');
 var count = 0;
 var health = 5;
@@ -44,6 +44,22 @@ mapSelection.addEventListener('click', (event) => {
 		launch(selectedMap);
 	}
 });
+// var selectedMap;
+// function initializeMapButtons() {
+//     const mapButtons = document.querySelectorAll('.mapButton[data-map-id]');
+// 	console.log("initialized")
+//     mapButtons.forEach(button => {
+//         button.addEventListener('click', function() {
+//             const mapId = this.getAttribute('data-map-id');
+//             document.getElementById("map-choice").style.display = "none";
+//             selectedMap = parseInt(mapId);
+//             console.log(selectedMap);
+//             launch(selectedMap);
+//         });
+//     });
+// }
+
+// initializeMapButtons();
 
 async function launch (idMap) {
 	table = document.getElementById("game");
