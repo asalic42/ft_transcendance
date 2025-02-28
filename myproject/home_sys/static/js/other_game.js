@@ -31,22 +31,21 @@ class block {
 let cachedUserId = null;
 
 //! Init
-
 var selectedMap;
 function initializeMapButtons() {
-    const mapButtons = document.querySelectorAll('.mapButton[data-map-id]');
+	const mapButtons = document.querySelectorAll('.mapButton[data-map-id]');
 	console.log("initialized")
-    mapButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const mapId = this.getAttribute('data-map-id');
-            document.getElementById("map-choice").style.display = "none";
-            selectedMap = parseInt(mapId);
-            console.log(selectedMap);
-            launch(selectedMap);
-        });
-    });
+	mapButtons.forEach(button => {
+		button.addEventListener('click', function() {
+			const mapId = this.getAttribute('data-map-id');
+			document.getElementById("map-choice").style.display = "none";
+			selectedMap = parseInt(mapId);
+			console.log(selectedMap);
+			launch(selectedMap);
+		});
+	});
 }
-
+		
 initializeMapButtons();
 
 async function launch (idMap) {

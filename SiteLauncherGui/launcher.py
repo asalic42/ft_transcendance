@@ -142,7 +142,7 @@ class SiteLauncher(QMainWindow):
         l_static = addElmt("Collecte les statics", "Static", self.static)
         l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch)
         l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop)
-        l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker-compose stop]", "Docker Stop", self.dockerStop)
+        l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker compose stop]", "Docker Stop", self.dockerStop)
 
         # Zone de texte pour les logs
         self.output = QTextBrowser()  # Utilisation de QTextBrowser
@@ -216,7 +216,7 @@ class SiteLauncher(QMainWindow):
     def dockerStop(self):
         self.output.append(ansi_to_html("\033[1;34m [SIGNAL] Waiting to stop docker services.\033[0m"))
         self.stop()
-        self.run_command("sudo docker-compose stop")
+        self.run_command("docker compose stop")
 
         self.process.waitForFinished()
         self.output.append(ansi_to_html("\033[1;32m [SIGNAL] Docker services are down.\033[0m"))

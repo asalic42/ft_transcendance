@@ -22,12 +22,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Fonction de chargement de page via fetch
+    // Fonction de chargement de page via fetch
+    // Ajouter une variable globale pour tracker les scripts chargés
+    let loadedScripts = [];
+    
+    // Fonction de chargement de page via fetch (modifiée)
     function loadPage(url, pushState = true) {
-		if (url != "accounts/" && url != "/accounts/")
-			var finalizedUrl = prependAccounts(url);
-		else
-			var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
-
+        // Supprimer les anciens scripts avant de charger la nouvelle page
+        loadedScripts.forEach(script => script.remove());
+        loadedScripts = []; // Réinitialiser le tableau
+    
+        if (url != "accounts/" && url != "/accounts/")
+            var finalizedUrl = prependAccounts(url);
+        else
+            var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+    
         fetch(finalizedUrl, { 
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
@@ -40,39 +49,43 @@ document.addEventListener("DOMContentLoaded", function () {
             let parser = new DOMParser();
             let doc = parser.parseFromString(html, "text/html");
             let newContent = doc.getElementById("content");
-
+    
             if (!newContent) {
                 window.location.href = finalizedUrl;
                 return;
             }
-
+    
             document.getElementById("content").innerHTML = newContent.innerHTML;
-
-			if (document.getElementById('mapSelection')) {
-				// Ensure the script has run (safety check)
-				if (typeof initializeMapButtons === 'function') {
-					initializeMapButtons();
-				}
-			}
-            // Réexécution des scripts intégrés
-            // app.js (inside the loadPage function)
-			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-				const newScript = document.createElement('script');
-				if (oldScript.src) {
-					// Add cache-buster to prevent stale scripts
-					newScript.src = oldScript.src + '?t=' + Date.now();
-					newScript.async = false;
-				} else {
-					newScript.textContent = oldScript.textContent;
-				}
-				document.body.appendChild(newScript);
-				// Remove the script after execution to avoid clutter
-				newScript.onload = () => newScript.remove();
-			});
-
+    
+            // Gestion des scripts
+            const scriptPromises = [];
+            Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
+                const newScript = document.createElement('script');
+                if (oldScript.src) {
+                    newScript.src = oldScript.src;
+                    newScript.async = false;
+                    const promise = new Promise((resolve, reject) => {
+                        newScript.onload = () => {
+                            resolve();
+                        };
+                        newScript.onerror = reject;
+                    });
+                    scriptPromises.push(promise);
+                } else {
+                    newScript.textContent = oldScript.textContent;
+                    scriptPromises.push(Promise.resolve());
+                }
+                document.body.appendChild(newScript);
+                loadedScripts.push(newScript); // Stocker la référence
+            });
+    
+            return Promise.all(scriptPromises);
+        })
+        .then(() => {
+            if (document.getElementById('mapSelection')) {
+                initializeMapButtons();
+            }
             if (pushState) history.pushState(null, "", finalizedUrl);
-			// if (url = "other_game/")
-				// window.initializeMapButtons();
         })
         .catch(error => console.error("Erreur de chargement:", error));
     }
