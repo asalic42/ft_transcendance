@@ -54,6 +54,31 @@ fi
 # }
 
 
+########################## FUNCTION ##########################
+
+
+# Permet d'init une variable d'env au sein du container myproject-web pour la récup avec Django
+#
+#   [SIGNATURE]: initialize_ip_addr arg1
+
+initialize_ip_addr() {
+
+    if [ $? -eq 0 ] && [ -n "$1" ]; then
+
+        image_name="myproject-web"
+        container_name=$(sudo docker ps --filter "ancestor=$image_name" --format "{{.Names}}")
+
+        sudo docker exec -it "$container_name" bash -c "export HOST_IP=$1" 2> /dev/null
+
+    else
+        echo "Erreur : Aucune adresse IP 192... trouvée pour l'interface wlo1."
+        exit 1
+    fi
+}
+
+##############################################################
+
+
 # FULL REMOVE + BUILD + LAUNCH
 if [ "$1" == "ev" ];then
     ./log.sh r-all
@@ -64,6 +89,53 @@ fi
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
     # scriptmanNotify "C'est parti mon build le projet"
+
+    ################# Récupération de l'addr IP #################
+
+
+    IP=$(hostname -I | awk '{print $1}')
+    
+    if grep -q "^HOST_IP=" .env; then
+        # Si HOST_IP existe, mettre à jour sa valeur avec sed
+        sed -i "s/^HOST_IP=.*/HOST_IP=\"$IP\"/" .env
+        echo "Fichier .env mis à jour"
+    else
+        # Si HOST_IP n'existe pas, l'ajouter à la fin du fichier
+        echo "HOST_IP=\"$IP\"" >> .env
+        echo "HOST_IP ajouté au fichier .env"
+    fi
+
+    # Vérifier si l'adresse IP a été récupérée
+    if [ -z "$IP" ]; then
+        echo "Impossible de récupérer l'adresse IP."
+        exit 1
+    fi
+
+    # Chemin vers le fichier de configuration Nginx
+    NGINX_CONF="./nginx/nginx.conf"
+
+    # Vérifier si le fichier de configuration existe
+    if [ ! -f "$NGINX_CONF" ]; then
+        echo "Le fichier de configuration Nginx n'existe pas : $NGINX_CONF"
+        exit 1
+    fi
+
+    # Sauvegarder le fichier de configuration original
+    cp "$NGINX_CONF" "$NGINX_CONF.bak"
+
+    # Insérer l'adresse IP dans le fichier de configuration
+    sed -i "s/^\([[:space:]]*\)server_name[[:space:]]*.*;/\1server_name $IP;/" "$NGINX_CONF"
+
+    # Vérifier si la modification a été effectuée
+    if grep -q "server_name $IP;" "$NGINX_CONF"; then
+        echo "L'adresse IP a été insérée avec succès dans le fichier de configuration Nginx."
+    else
+        echo "Échec de l'insertion de l'adresse IP dans le fichier de configuration Nginx."
+        exit 1
+    fi
+
+    ################# [FIN] Récupération de l'addr IP #################
+
 
 	rm -rf static/;
 	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
@@ -78,42 +150,46 @@ if [ "$1" == "b-all" ]; then
     # scriptmanNotify "[2/3] Je build les images docker..."
 
     echo -e "${BLUE}> Building docker image... ${NC}"
-    docker compose build
+    sudo docker-compose build
+
 
     # scriptmanNotify "[3/3] Lancement des services rien que pour toi mon cochon. Refresh quand je disparaitrais."
     
     echo -e "${PURPLE}> Launching services...${NC}"
-    docker compose up # démarre en arrière-plan
+    sudo docker-compose up -d # démarre en arrière-plan
 
+    sleep 10
+    echo -e "${PURPLE}> Initialisation de la [VE] HOST_IP${NC}"
+
+    initialize_ip_addr $IP
     # scriptmanNotify "Fin de la règle b-all bb !"
 
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://transcendance.42.paris"
+    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://$IP:5000"
 fi
 
 # SIMPLE BUILD
 if [ "$1" == "b" ]; then
     echo -e "${BLUE}> Building docker image...${NC}"
-    docker compose build
+    sudo docker-compose build
     echo -e "${PURPLE}> Launching services...${NC}"
-    docker compose up -d
+    sudo docker-compose up -d
     echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris"
 fi
 
 # FULL REMOVE
 if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Stopping docker services...${NC}"
-    docker compose stop
+    sudo docker-compose stop
     echo -e "${BLUE}> Removing docker image and volume...${NC}"
-    docker system prune --volumes --force
+    sudo docker system prune --volumes --force
     echo -e "${BLUE}> Removing django cache...${NC}"
-    find . -type d -name "__pycache__" -exec rm -r {} +
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
 fi
 
 # SIMPLE REMOVE
 if [ "$1" == "r" ]; then
     echo -e "${BLUE}> Removing docker image...${NC}"
-    docker compose down
+    sudo docker-compose down
     echo -e "${GREEN}> Done.${NC} [For simple rebuild] > ./log.sh b"
 fi
 
@@ -121,18 +197,12 @@ fi
 if [ "$1" == "l" ]; then
 
     echo -e ">> Checking if we have already start docker's services..."
-    if [ "$(sudo docker compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
+    if [ "$(sudo sudo docker-compose ps -q | xargs -r sudo docker inspect -f '{{.State.Running}}')" != "true" ]; then
         echo -e "${BLUE}>${NC} Docker services are not running. ${BLUE}Starting them...${NC}"
-        docker compose up -d
+        sudo docker-compose up -d
     else
         echo -e "${GREEN}> Docker services are already running.${NC}"
     fi
-
-    # Attendre que le service soit accessible
-    # until $(curl --output /dev/null --silent --head --fail http://0.0.0.0:8000); do
-    #     printf '.'
-    #     sleep 1
-    # done
 
     echo -e "${GREEN}> Service is up! Opening browser...${NC}"
     open https://transcendance.42.paris/signin/

@@ -32,12 +32,20 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+#################################################################
+
+IP_ADDR = os.environ.get("HOST_IP")
+
+#################################################################
+
+
 ALLOWED_HOSTS = [
-	"10.24.1.5"
+	IP_ADDR,
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://10.24.1.5:5000",
+    f"https://{IP_ADDR}:5000",
 ]
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL
