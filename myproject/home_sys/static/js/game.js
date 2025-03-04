@@ -25,7 +25,7 @@ var router = {
 			const link = e.target.closest('a');
 			if (link && link.href) {
 				e.preventDefault();
-				this.navigate(link.href);
+				this.navigate(new URL(link.href).pathname);
 			}
 		});
 
@@ -40,25 +40,31 @@ var router = {
 	},
   
 	handleRouteChange: function() {
-	  const currentPath = new URL(window.location.href).pathname;
+	  const currentPath = window.location.pathname;
 	  const isGamePage = this.isOnGamePage(currentPath);
 	  
-	  // Déclencher la vérification
-	  if (isGamePage && !gameActive) {
-		startGame();
-	  }
-	  else if (!isGamePage && gameActive)
-		cleanGame();
+	  if (isGamePage)
+		this.enterGame();
+	  else
+	  	this.exitGame();
 	},
   
 	isOnGamePage: function(path) {
 		const normalizedPath = path.replace(/\/$/, '');
 		return normalizedPath === '/accounts/game'; // Adaptez à votre URL de jeu
-	}
-  };
+	},
 
-// window.addEventListener("popstate", cleanGame);
-// window.addEventListener("beforeunload", cleanGame);
+	enterGame: function() {
+		if (!gameActive) {
+			setTimeout(() => startGame(), 50);
+		}
+	},
+
+	exitGame: function() {
+		if (gameActive) cleanGame();
+	},
+
+  };
 
 function startGame() {
 
