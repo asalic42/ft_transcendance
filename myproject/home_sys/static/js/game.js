@@ -1,14 +1,108 @@
 // Variables
 var table;
 var context;
-var score_p1 = document.getElementById("scoreP1");
-var score_p2 = document.getElementById("scoreP2");
-var fps = document.getElementById("fps");
-var game = document.getElementById("game");
+var score_p1;
+var score_p2;
+var fps;
 var count_p1 = 0;
 var count_p2 = 0;
-let stop = 0;                           // Endgame
-let keys = {};                        // Players bars
+var stop = 0;                           // Endgame
+var keys = {};                        // Players bars
+var id = 0;
+var frameTime = {counter : 0, time : 0};
+var totalframeTime = {counter : 0, time : 0};
+var gameActive = false;
+
+
+// Router simplifié
+var router = {
+	init: function() {
+	  // Détecter les changements d'URL initiaux
+		window.addEventListener('popstate', this.handleRouteChange.bind(this));
+	  
+	  // Intercepter les clics sur les liens
+		document.body.addEventListener('click', (e) => {
+			const link = e.target.closest('a');
+			if (link && link.href) {
+				e.preventDefault();
+				this.navigate(link.href);
+			}
+		});
+
+		this.handleRouteChange();
+	},
+  
+	navigate: function(url) {
+		if (new URL(url).pathname === window.location.pathname) return;
+
+		history.pushState({}, '', url);
+		this.handleRouteChange();
+	},
+  
+	handleRouteChange: function() {
+	  const currentPath = new URL(window.location.href).pathname;
+	  const isGamePage = this.isOnGamePage(currentPath);
+	  
+	  // Déclencher la vérification
+	  if (isGamePage && !gameActive) {
+		startGame();
+	  }
+	  else if (!isGamePage && gameActive)
+		cleanGame();
+	},
+  
+	isOnGamePage: function(path) {
+		const normalizedPath = path.replace(/\/$/, '');
+		return normalizedPath === '/accounts/game'; // Adaptez à votre URL de jeu
+	}
+  };
+
+// window.addEventListener("popstate", cleanGame);
+// window.addEventListener("beforeunload", cleanGame);
+
+function startGame() {
+
+	if (gameActive) return;
+
+	table = document.getElementById('game');
+	context = table.getContext('2d');
+
+	gameActive = true;
+
+	count_p1 = 0;
+	count_p2 = 0;
+	stop = 0;
+	keys = {};
+
+	const container = document.getElementById('canvas-container');
+	if (!container) return ;
+
+	const safeShow = (id) => {
+		const el = document.getElementById(id);
+		if (el) el.style.display = 'flex';
+	}
+	safeShow('scores');
+	safeShow('fps');
+	safeShow('canvas-container');
+	
+	score_p1 = document.getElementById("scoreP1");
+	score_p2 = document.getElementById("scoreP2");
+	fps = document.getElementById("fps");
+
+	score_p1.textContent = "0";
+	score_p2.textContent = "0";
+
+	update();
+	context.clearRect(0, 0, table.width, table.height);
+
+	createBall(Math.floor(getRandomArbitrary(-10, 10)));
+
+	window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('keyup', handleKeyup);
+
+	console.log("je suis la encule");
+
+}
 
 function getRandomArbitrary(min, max) {
 	var result = Math.random() * (max - min) + min;
@@ -18,14 +112,12 @@ function getRandomArbitrary(min, max) {
 }
   
 document.addEventListener("DOMContentLoaded", function() {
-    table = document.getElementById("game");
-    context = table.getContext("2d");
+	table = document.getElementById('game');
+	context = table.getContext('2d');
 
-	document.getElementById('scores').style.display = 'flex';
-	document.getElementById('fps').style.display = 'flex';
-	document.getElementById('canvas-container').style.display = 'flex';
-	createBall(Math.floor(getRandomArbitrary(-10, 10)));
-})
+	router.init();
+
+});
 
 function drawOuterRectangle(color) {
     context.fillStyle = color;
@@ -54,13 +146,16 @@ function update() {
     console.log('Creating player...');
 }
 
-window.addEventListener("keydown", (event) => {
-    keys[event.key] = true;
-});
+function handleKeydown(event) {
+	keys[event.key] = true;
+}
 
-window.addEventListener("keyup", (event) => {
-    keys[event.key] = false;
-});
+function handleKeyup(event) {
+	keys[event.key] = false;
+}
+
+// window.addEventListener("keydown", handleKeydown);
+// window.addEventListener("keyup", handleKeyup);
 
 function movePlayer(player1Coords, player2Coords) {
     if (keys["z"] && player1Coords.y1 - player1Coords.vy > 0) {
@@ -111,16 +206,13 @@ function createBall(vx) {
 	launchAnim(ball, player1Coords, player2Coords, Date.now());
 }
 
-var frameTime = {counter : 0, time : 0};
-var totalframeTime = {counter : 0, time : 0};
-
 /* Function that detects whether a player has won a point or not */
 function isPointWin(ball) {
     if (ball.radius + ball.coords.x >= table.width) {
-        count_p1++;
-        score_p1.innerText = count_p1;
-        createBall(Math.floor(getRandomArbitrary(-10, 0)));
-        return true;
+    	count_p1++;
+    	score_p1.innerText = count_p1;
+    	createBall(Math.floor(getRandomArbitrary(-10, 0)));
+    	return true;
     }
     else if (ball.coords.x - ball.radius <= 0) {
         count_p2++;
@@ -131,8 +223,10 @@ function isPointWin(ball) {
     return false;
 }
 
-let id =0;
 function launchAnim(ball, player1Coords, player2Coords, start) {
+	if (stop || !gameActive)
+		return;
+
 	end = Date.now();
 	let elapsedTime = end - start; // Temps réel pris par la frame
 	frameTime.counter++;
@@ -152,14 +246,13 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 	player2Coords.vy = player2Coords.const_vy * percentage;
 	start = Date.now();
 	id = requestAnimationFrame(function () {
-		if (stop)
-			return;
         context.clearRect(0, 0, table.width, table.height);
         update();
         drawPlayer(player1Coords, player2Coords, "#ED4EB0");
         if (isPointWin(ball))
             return ;
         moveBall(ball, player1Coords, player2Coords);
+		// router.handleRouteChange();
         launchAnim(ball, player1Coords, player2Coords, start);
     });
     
@@ -212,7 +305,7 @@ function moveBall(ball, player1Coords, player2Coords) {
 	// Conditions so that the ball bounces from the edges
 
     if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
-		console.log(ball.vector.vx);
+		// console.log(ball.vector.vx);
 		ball.const_vector.vx = -(ball.const_vector.vx);
 		ball.vector.vx = -ball.vector.vx;
 		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30) {
@@ -288,26 +381,39 @@ function newGame(player) {
     });
 }
 
-function restart() {
+function cleanGame() {
+	console.log("but i love it");
+	if (!gameActive) return;
+	gameActive = false;
+
+	context = null;
+	table = null;
+
+	stop = 1;
 	cancelAnimationFrame(id);
 
-	document.getElementById("wrapper-player1").style.display = "none";
-	document.getElementById("wrapper-player2").style.display = "none";
-	document.getElementById("replay-button").style.display = "none";
+	const safeHide = (id)=> {
+		const el = document.getElementById(id);
+		if (el) el.style.display = 'none';
+	};
 
-	frameTime = {counter : 0, time : 0};
-	totalframeTime = {counter : 0, time : 0};
-	bounce = 0;
+	safeHide('scores');
+	safeHide('fps');
+	safeHide('canvas-container');
+
+	window.removeEventListener("keydown", handleKeydown);
+	window.removeEventListener("keyup", handleKeyup);
+
 	count_p1 = 0;
 	count_p2 = 0;
 	stop = 0;
-	percentage = 0;
-	cachedUserId = null;
 	keys = {};
+}
 
-	document.getElementById("scoreP1").innerText = "0";
-	document.getElementById("scoreP2").innerText = "0";
-
-	context.clearRect(0, 0, table.width, table.height);
-	createBall(Math.floor(getRandomArbitrary(-11, 11)));
+function restart_game() {
+	if (gameActive) {
+		cleanGame();
+		setTimeout(startGame, 100); }
+	else
+		startGame();
 }

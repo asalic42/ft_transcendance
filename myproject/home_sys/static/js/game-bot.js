@@ -204,7 +204,7 @@ function isPointWin(ball) {
 }
 
 //! Loop func
-let id=0;
+var id=0;
 function launchAnim(ball, player1Coords, player2Coords, start) {
 
 	timeRelatedStuff(ball, player2Coords, start);
@@ -369,7 +369,7 @@ function drawInnerRectangle(color) {
 	context.closePath();
 }
 
-const keys = {};
+var keys = {};
 
 window.addEventListener("keydown", (event) => {
 	keys[event.key] = true;

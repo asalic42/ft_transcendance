@@ -22,7 +22,7 @@ var id=0;
 var selectedMap;
 var block_arr = [];
 var user_option = 2;
-const keys = {};
+var keys = {};
 
 class block {
 	x1; y1; width; height; state;
@@ -516,7 +516,7 @@ async function addNewGame(id_player, score) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
+				// 'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({

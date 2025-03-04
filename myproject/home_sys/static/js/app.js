@@ -13,7 +13,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-const csrftoken = getCookie('csrftoken');
+// const csrftoken = getCookie('csrftoken');
 
 document.addEventListener("DOMContentLoaded", function () {
 
