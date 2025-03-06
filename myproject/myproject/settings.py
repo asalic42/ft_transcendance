@@ -86,8 +86,8 @@ environ.Env.read_env()  # Lire le fichier .env
 
 # Configuration OAuth pour 42
 
-SOCIAL_AUTH_42_KEY = env('42_CLIENT_ID')
-SOCIAL_AUTH_42_SECRET = env('42_CLIENT_SECRET')
+SOCIAL_AUTH_42_KEY = env('CLIENT_ID_42')
+SOCIAL_AUTH_42_SECRET = env('CLIENT_SECRET_42')
 SOCIAL_AUTH_42_SCOPE = ['public']  # Vous pouvez ajuster les scopes selon vos besoins
 
 # Exemple d'URL d'autorisation

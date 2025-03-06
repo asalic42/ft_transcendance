@@ -133,9 +133,12 @@ def load_template(request, page, **kwargs):
 |
 """
 
+from django.template.loader import render_to_string
+
 @login_required
 @never_cache
 def home(request):
+	
 	# Récupérer les utilisateurs et pré-calculer leur statut
 	users = Users.objects.all()
 	online_users = users.filter(is_online=True)

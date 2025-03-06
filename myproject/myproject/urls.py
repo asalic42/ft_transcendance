@@ -25,10 +25,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     # path('admin/', admin.site.urls),  # Route vers la page d'administration de Django (commentée pour l'instant)
 
-    path('', RedirectView.as_view(url='signin')),  
-    # Redirige l'utilisateur de la page d'accueil vers la page de connexion (signin) par défaut
-
-    path('signin/', include('loginpage.urls')),    
+    path('', include('loginpage.urls')),    
     # Inclut toutes les URLs liées à l'authentification (connexion et inscription) définies dans l'application login_sys
 
     path('accounts/', include('home_sys.urls')),     

@@ -46,23 +46,29 @@ def signup(request):
     return redirect('index')
 
 # Connexion d'un utilisateur
-@never_cache
+# In signin view
+from django.http import JsonResponse
+
 def signin(request):
     if request.user.is_authenticated:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'authenticated', 'redirect': 'accounts/home/'})
         return redirect('home')
 
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Utiliser la fonction authenticate pour vérifier les informations d'identification
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            # L'utilisateur existe et les informations sont correctes, se connecter
             login(request, user)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'redirect': 'accounts/home/'})
             return redirect('home')
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Login failed'}, status=400)
             messages.error(request, 'Login failed')
             return redirect('index')
 

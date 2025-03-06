@@ -437,3 +437,64 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('visited', 'true');
     }
 });
+
+// Add this to script.js
+signinForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(signinForm);
+
+    fetch(signinForm.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = data.redirect;
+        } else {
+            // Trigger shake animation
+            const signinContainer = document.querySelector('.signin-container');
+            const signupContainer = document.querySelector('.signup-container');
+
+            signinContainer.classList.add('shake');
+            signupContainer.classList.add('shake');
+            setTimeout(() => signinContainer.classList.remove('shake'), 500);
+            setTimeout(() => signupContainer.classList.remove('shake'), 500);
+            
+            // Show error message
+            //const errorDiv = document.createElement('div');
+            //errorDiv.textContent = data.message || 'Login failed';
+            //errorDiv.className = 'error-signin';
+            //errorDiv.style.color = "red";
+            //errorDiv.style.fontSize = "14px";
+            //errorDiv.style.zIndex = "100";
+            //errorDiv.style.opacity = "1";
+            //errorDiv.style.transition = "all 1s ease";
+            //errorDiv.style.marginBottom = "4px";
+            //signinContainer.prepend(errorDiv);
+            //setTimeout(() => {
+            //    errorDiv.style.opacity = 1;  // Appliquer l'opacité à 1 pour faire apparaître le message
+            //}, 10);  // Petit délai pour assurer que la transition commence correctement
+            //// Supprimer le message après un certain temps avec une transition
+            //setTimeout(() => {
+            //    errorDiv.style.opacity = 0;  // Transition vers la transparence
+            //}, 2500);
+            //setTimeout(() => {
+            //    errorDiv.remove();
+            //}, 3000);
+        }
+    })
+    .catch(error => {
+        
+        console.error('Error:', error);
+        document.querySelector('.signin-container').classList.add('shake');
+        document.querySelector('.signup-container').classList.add('shake');
+
+        setTimeout(() => document.querySelector('.signin-container').classList.remove('shake'), 500);
+        setTimeout(() => document.querySelector('.signup-container').classList.remove('shake'), 500);
+    });
+});

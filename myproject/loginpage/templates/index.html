@@ -23,6 +23,8 @@
         <!-- Lottie animations or other effects here -->
     </div>
 
+    <div class="login-error"></div>
+
     <div class="signin-container">
         <form class="form1" id="id-signin-form" action="{% url 'sign_in' %}" method="POST">
             {% csrf_token %}
@@ -132,22 +134,7 @@
 
         </form>
     </div>
-    
-    {% if messages %}
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var loginForm = document.querySelector('.signin-container');
-                loginForm.classList.add('shake');
-            });
-        </script>
-    {% else %}
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var loginForm = document.querySelector('.signin-container');
-                loginForm.classList.remove('shake');
-            });
-        </script>
-    {% endif %}
+
 
     <script src="{% static 'js/script.js' %}"></script>
 
