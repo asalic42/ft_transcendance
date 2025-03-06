@@ -1,16 +1,3 @@
-// Variables
-// var table;
-// var context;
-// var score_p1;
-// var score_p2;
-// var fps;
-// var count_p1 = 0;
-// var count_p2 = 0;
-// var stop = 0;                           // Endgame
-// var keys = {};                        // Players bars
-// var id = 0;
-// var frameTime = {counter : 0, time : 0};
-// var totalframeTime = {counter : 0, time : 0};
 
 (function() {
 
@@ -105,7 +92,6 @@
 		// Arrete le jeu
 		stopGame() {
 
-			console.log("JE SUIS LAAAAAAAAAAAAAAAA");
 			this.stop = true;
 			cancelAnimationFrame(this.animationId);
 
@@ -113,8 +99,8 @@
 			window.removeEventListener('keyup', this.keyHandler);
 			this.keyHandler = null;
 
-			const safeHide = (id) => document.getElementById(id).style.display = 'none';
-			['scores', 'fps', 'canvas-container'].forEach(safeHide);
+			const container = document.getElementById('canvas-container');
+			if (container) container.remove();
 
 			this.initState();
 		}
@@ -485,7 +471,7 @@
 			}
 
 			const gameHtml = `
-				<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+				<link rel="stylesheet" href="/static/css/game-style.css">
 
 				<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
 
@@ -518,7 +504,9 @@
 				</div>
 			`;
 
+			content.innerHTML = '';
 			content.innerHTML = gameHtml;
+
 			callback();
 		},
 
@@ -527,6 +515,9 @@
 				this.currentGame.stopGame();
 				this.currentGame = null;
 			}
+
+			const content = document.getElementById('content');
+			content.innerHTML = '';
 		}
 	  };
 
