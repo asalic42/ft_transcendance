@@ -10,46 +10,24 @@
 		}
 
 		initState() {
-			this.table = null;
-			this.context = null;
+			// document.getElementById('game') = null;
+			// this.context = null;
 			this.animationId = 0;
-			this.fps = null;
+			// this.fps = null;
 			this.frameTime = {counter : 0, time : 0};
 			this.totalframeTime = {counter : 0, time : 0};
 			this.keys = {};
-			this.score_p1 = null;
-			this.score_p2 = null;
 			this.count = {p1: 0, p2: 0};
 			this.stop = false;
+			this.player1Coords = null;
+			this.player2Coords = null;
+			this.ball = null;
 		}
 
 		start() {
 
-			// Vérifier que le canvas existe
-			this.table = document.getElementById('game');
-			if (!this.table) {
-			   console.error("Canvas 'game' introuvable !");
-			   return;
-			}
-
-			// Vérifier le contexte 2D
-			this.context = this.table.getContext('2d');
-			if (!this.context) {
-			   console.error("Contexte 2D non supporté !");
-			   return;
-			}
-
-			// Vérifier les éléments de score
-			this.score_p1 = document.getElementById("scoreP1");
-			this.score_p2 = document.getElementById("scoreP2");
-			if (!this.score_p1 || !this.score_p2) {
-			   console.error("Éléments de score introuvables !");
-			   return;
-			}
 			this.count = {p1: 0, p2: 0};
 			this.stop = false;
-
-			this.fps = document.getElementById("fps");
 
 			this.setupDOM();
 			this.setupListeners();
@@ -62,19 +40,15 @@
 		// Active le DOM au chargement de la page
 		setupDOM() {
 
+			console.log("JE MONTRE LAAAAAAAAAAAAA");
 			const safeShow = (id) => {
 				const element = document.getElementById(id);
 				if (element) element.style.display = 'flex';
 			};
 			['scores', 'fps', 'canvas-container'].forEach(safeShow);
 
-			if (!this.score_p1 || !this.score_p2) {
-				console.log("element introuvable");
-				return ;
-			}
-
-			this.score_p1.textContent = "0";
-			this.score_p2.textContent = "0";
+			document.getElementById("scoreP1").textContent = "0";
+			document.getElementById("scoreP2").textContent = "0";
 		}
 
 		// Active les ecouteurs pour les touches claviers
@@ -93,34 +67,38 @@
 		stopGame() {
 
 			this.stop = true;
-			cancelAnimationFrame(this.animationId);
+			if (this.animationId) {
+				cancelAnimationFrame(this.animationId);
+				this.animationId = null;
+			}
 
 			window.removeEventListener('keydown', this.keyHandler);
 			window.removeEventListener('keyup', this.keyHandler);
 			this.keyHandler = null;
 
-			const container = document.getElementById('canvas-container');
-			if (container) container.remove();
-
+			if (document.getElementById('game').getContext('2d')) {
+				document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
+			}
 			this.initState();
 		}
 
 		// Dessine le rectangle exterieur de l'aire de jeu
 		drawOuterRectangle(color) {
-			this.context.fillStyle = color;
-			this.context.beginPath();
-			this.context.roundRect(0, 0, this.table.width, this.table.height, 10);
-			this.context.fill();
-			this.context.closePath();
+			// if (!this.context) console.log("je n'existe pas");
+			document.getElementById('game').getContext('2d').fillStyle = color;
+			document.getElementById('game').getContext('2d').beginPath();
+			document.getElementById('game').getContext('2d').roundRect(0, 0, document.getElementById('game').width, document.getElementById('game').height, 10);
+			document.getElementById('game').getContext('2d').fill();
+			document.getElementById('game').getContext('2d').closePath();
 		}
 
 		// Dessine le rectangle interieur de l'aire de jeu
 		drawInnerRectangle(color) {
-			this.context.fillStyle = color;
-			this.context.beginPath();
-			this.context.roundRect(5, 5, this.table.width - 10, this.table.height - 10, 8);
-			this.context.fill();
-			this.context.closePath();
+			document.getElementById('game').getContext('2d').fillStyle = color;
+			document.getElementById('game').getContext('2d').beginPath();
+			document.getElementById('game').getContext('2d').roundRect(5, 5, document.getElementById('game').width - 10, document.getElementById('game').height - 10, 8);
+			document.getElementById('game').getContext('2d').fill();
+			document.getElementById('game').getContext('2d').closePath();
 		}
 
 		// Update l'aire de jeu
@@ -128,8 +106,8 @@
 			this.drawOuterRectangle("#ED4EB0");
 			this.drawInnerRectangle("#23232e");
 		
-			this.context.fillStyle = '#ED4EB0';
-			this.context.fillRect(this.table.width / 2, 0, 5, this.table.height);
+			document.getElementById('game').getContext('2d').fillStyle = '#ED4EB0';
+			document.getElementById('game').getContext('2d').fillRect(document.getElementById('game').width / 2, 0, 5, document.getElementById('game').height);
 		
 			console.log('Creating player...');
 		}
@@ -137,7 +115,7 @@
 		// Creer la balle au debut du jeu
 		createBall(vx) {
 			// Balls coords
-			this.ball = {coords : {x : this.table.width / 2, y : this.table.height / 2},
+			this.ball = {coords : {x : document.getElementById('game').width / 2, y : document.getElementById('game').height / 2},
 						const_vector : {vx : vx, vy : Math.floor(this.getRandomArbitrary(-10, 10))},
 						vector : {},
 						radius : 13,
@@ -147,10 +125,10 @@
 			this.ball.vector = { vx: this.ball.const_vector.vx, vy: this.ball.const_vector.vy };
 		
 			// Initials points player 1
-			this.player1Coords = {x1 : 92, y1 : (this.table.height / 2) - 40, x2 : 100, y2 : (this.table.height / 2) + 40, const_vy : 20, vy : 20};
+			this.player1Coords = {x1 : 92, y1 : (document.getElementById('game').height / 2) - 40, x2 : 100, y2 : (document.getElementById('game').height / 2) + 40, const_vy : 20, vy : 20};
 		
 			// Initials points player 2
-			this.player2Coords = {x1 : this.table.width - 100, y1 : (this.table.height / 2) - 40, x2 : this.table.width - 92, y2 : (this.table.height / 2) + 40, const_vy : 20, vy : 20};
+			this.player2Coords = {x1 : document.getElementById('game').width - 100, y1 : (document.getElementById('game').height / 2) - 40, x2 : document.getElementById('game').width - 92, y2 : (document.getElementById('game').height / 2) + 40, const_vy : 20, vy : 20};
 			this.gameLoop(Date.now());
 		}
 
@@ -183,12 +161,12 @@
 		// Dessine les players
 		drawPlayer() {
 			this.movePlayer(this.player1Coords, this.player2Coords);
-			this.context.fillStyle = "#ED4EB0";
-			this.context.beginPath();
-			this.context.roundRect(this.player1Coords.x1, this.player1Coords.y1, 5, 80, 10);
-			this.context.roundRect(this.player2Coords.x1, this.player2Coords.y1, 5, 80, 10);
-			this.context.fill();
-			this.context.closePath();
+			document.getElementById('game').getContext('2d').fillStyle = "#ED4EB0";
+			document.getElementById('game').getContext('2d').beginPath();
+			document.getElementById('game').getContext('2d').roundRect(this.player1Coords.x1, this.player1Coords.y1, 5, 80, 10);
+			document.getElementById('game').getContext('2d').roundRect(this.player2Coords.x1, this.player2Coords.y1, 5, 80, 10);
+			document.getElementById('game').getContext('2d').fill();
+			document.getElementById('game').getContext('2d').closePath();
 		}
 
 		// Bouge la balle et check les rebonds
@@ -221,7 +199,7 @@
 				return;
 			}
 
-			else if ((this.ball.coords.y - this.ball.radius <= 0 || this.ball.coords.y + this.ball.radius >= this.table.height) && !this.ball.hit_vertical) {
+			else if ((this.ball.coords.y - this.ball.radius <= 0 || this.ball.coords.y + this.ball.radius >= document.getElementById('game').height) && !this.ball.hit_vertical) {
 				this.ball.hit_vertical = 1;
 				this.ball.vector.vy = -this.ball.vector.vy;
 				this.ball.const_vector.vy = -this.ball.const_vector.vy;
@@ -239,18 +217,18 @@
 
 		// Dessine la balle
 		drawBall() {
-			this.context.beginPath();
-			this.context.fillStyle = 'white';
-			this.context.arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius, Math.PI * 2, false);
-			this.context.fill();
-			this.context.closePath();
+			document.getElementById('game').getContext('2d').beginPath();
+			document.getElementById('game').getContext('2d').fillStyle = 'white';
+			document.getElementById('game').getContext('2d').arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius, Math.PI * 2, false);
+			document.getElementById('game').getContext('2d').fill();
+			document.getElementById('game').getContext('2d').closePath();
 
-			this.context.beginPath();
-			this.context.fillStyle = "#23232e";
-			this.context.arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius - 2, Math.PI * 2, false);
-			this.context.fill();
-			this.context.stroke();
-			this.context.closePath();
+			document.getElementById('game').getContext('2d').beginPath();
+			document.getElementById('game').getContext('2d').fillStyle = "#23232e";
+			document.getElementById('game').getContext('2d').arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius - 2, Math.PI * 2, false);
+			document.getElementById('game').getContext('2d').fill();
+			document.getElementById('game').getContext('2d').stroke();
+			document.getElementById('game').getContext('2d').closePath();
 		}
 
 		// Bouge le player selon les touches claviers
@@ -259,7 +237,7 @@
 				this.player1Coords.y1 -= this.player1Coords.vy;
 				this.player1Coords.y2 -= this.player1Coords.vy;
 			}
-			if (this.keys["s"] && this.player1Coords.y2 + this.player1Coords.vy < this.table.height) {
+			if (this.keys["s"] && this.player1Coords.y2 + this.player1Coords.vy < document.getElementById('game').height) {
 				this.player1Coords.y1 += this.player1Coords.vy;
 				this.player1Coords.y2 += this.player1Coords.vy;
 			}
@@ -267,7 +245,7 @@
 				this.player2Coords.y1 -= this.player2Coords.vy;
 				this.player2Coords.y2 -= this.player2Coords.vy;
 			}
-			if (this.keys["ArrowDown"] && this.player2Coords.y2 + this.player1Coords.vy < this.table.height) {
+			if (this.keys["ArrowDown"] && this.player2Coords.y2 + this.player1Coords.vy < document.getElementById('game').height) {
 				this.player2Coords.y1 += this.player2Coords.vy;
 				this.player2Coords.y2 += this.player2Coords.vy;
 			}
@@ -290,7 +268,7 @@
 				if (this.frameTime.time > 250) {
 					this.totalframeTime.counter += this.frameTime.counter;
 					this.totalframeTime.time += 250
-					this.fps.innerText = "Fps : " + (this.frameTime.counter * 4) + " | Avg Fps : " + (this.totalframeTime.counter * (1000 / this.totalframeTime.time)).toPrecision(5);
+					document.getElementById("fps").innerText = "Fps : " + (this.frameTime.counter * 4) + " | Avg Fps : " + (this.totalframeTime.counter * (1000 / this.totalframeTime.time)).toPrecision(5);
 					this.frameTime.counter = 0;
 					this.frameTime.time = 0;
 				}
@@ -302,11 +280,18 @@
 				this.player2Coords.vy = this.player2Coords.const_vy * percentage;
 				start = Date.now();
 
-	    	    if (this.context) this.context.clearRect(0, 0, this.table.width, this.table.height);
+				const safeShow = (id) => {
+					const element = document.getElementById(id);
+					if (element) element.style.display = 'flex';
+				};
+				['scores', 'fps', 'canvas-container'].forEach(safeShow);
+
+	    	    if (document.getElementById('game').getContext('2d')) document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 	    	    this.update();
 	    	    this.drawPlayer();
 
 	    	    if (this.isPointWin()) {
+					// console.log("score p1: ", this.score_p1.innerText);
 	    	        return ;
 				}
 	    	    this.moveBall();
@@ -318,15 +303,15 @@
 
 		// Add un point a un player
 		isPointWin() {
-			if (this.ball.radius + this.ball.coords.x >= this.table.width) {
+			if (this.ball.radius + this.ball.coords.x >= document.getElementById('game').width) {
 				this.count.p1++;
-				this.score_p1.innerText = this.count.p1;
+				document.getElementById("scoreP1").textContent = this.count.p1;
 				this.createBall(Math.floor(this.getRandomArbitrary(-10, 0)));
 				return true;
 			}
 			else if (this.ball.coords.x - this.ball.radius <= 0) {
 				this.count.p2++;
-				this.score_p2.innerText = this.count.p2;
+				document.getElementById("scoreP2").textContent = this.count.p2;
 				this.createBall(Math.floor(this.getRandomArbitrary(0, 10)));
 				return true;
 			}
@@ -336,7 +321,7 @@
 		// Page de win
 		winnerWindow(player) {
 		
-			this.context.clearRect(0, 0, this.table.width, this.table.height);
+			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 
 			const winner1Text = document.getElementById("wrapper-player1");
 			const winner2Text = document.getElementById("wrapper-player2");
@@ -376,8 +361,9 @@
 		restartGame() {
 			if (this.stop)
 				this.stopGame();
-			// if (this.context) this.context.clearRect(0, 0, this.table.width, this.table.height);
-			this.start();
+			setTimeout(() => {
+				this.start();
+			}, 50);
 		}
 
 		// Donne une direction aleatoire a la balle
@@ -409,6 +395,7 @@
 				}
 			});
 
+			console.log("j'appelle ROUTES 1");
 			this.handleRouteChange();
 		},
 
@@ -416,6 +403,7 @@
 			if (new URL(url).pathname === window.location.pathname) return;
 
 			history.pushState({}, '', url);
+			console.log("j'appelle ROUTES 2");
 			this.handleRouteChange();
 		},
 	
@@ -424,7 +412,6 @@
 		  const isGamePage = this.isOnGamePage(currentPath);
 		
 		  if (isGamePage) {
-			console.log("je rentre dans la fonction");
 			this.enterGame();
 		  }
 		  else
@@ -432,8 +419,10 @@
 		},
 	
 		isOnGamePage: function(path) {
+			console.log("BEFORE: ", path);
 			const normalizedPath = path.replace(/\/$/, '');
-			return normalizedPath === '/accounts/game'; // Adaptez à votre URL de jeu
+			console.log("normalized = ", normalizedPath);
+			return normalizedPath === '/accounts/game' || normalizedPath === '/accounts/game/'; // Adaptez à votre URL de jeu
 		},
 
 		enterGame: function() {
@@ -445,8 +434,10 @@
 
 			this.injectTemplate(() => {
 				this.waitElementsDom(() => {
-					this.currentGame = new PongGame();
-					this.currentGame.start();
+					if (!this.currentGame) {
+						this.currentGame = new PongGame();
+						this.currentGame.start();
+					}
 				});
 			});
 		},
@@ -465,12 +456,24 @@
 		injectTemplate: function(callback) {
 			const content = document.getElementById('content');
 
-			if (content.querySelector('#canvas-container')) {
-				callback();
-				return;
-			}
+			const oldContent = content.querySelector('#canvas-container');
+			if (oldContent) oldContent.remove();
+			// if (content.querySelector('#canvas-container')) {
+				// callback();
+				// return;
+			// }
 
-			const gameHtml = `
+			const oldContainer = content.querySelector('#canvas-container');
+			const oldScores = content.querySelector('#scores');
+			const oldFps = content.querySelector('#fps');
+			
+			if (oldContainer) oldContainer.remove();
+			if (oldScores) oldScores.remove();
+			if (oldFps) oldFps.remove();
+
+			const newContent = document.createElement('div');
+
+			newContent.innerHTML = `
 				<link rel="stylesheet" href="/static/css/game-style.css">
 
 				<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
@@ -504,10 +507,9 @@
 				</div>
 			`;
 
-			content.innerHTML = '';
-			content.innerHTML = gameHtml;
-
-			callback();
+			content.appendChild(newContent);
+			setTimeout(callback, 10);
+			// callback();
 		},
 
 		exitGame: function() {
@@ -516,8 +518,8 @@
 				this.currentGame = null;
 			}
 
-			const content = document.getElementById('content');
-			content.innerHTML = '';
+			const gameElements = document.querySelectorAll('#canvas-container, #scores, #fps');
+			gameElements.forEach(el => el.remove());
 		}
 	  };
 

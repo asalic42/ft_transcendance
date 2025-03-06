@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		else
 			var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
 
+
         fetch(finalizedUrl, { 
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
@@ -67,10 +68,11 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 				document.body.appendChild(newScript);
 				// Remove the script after execution to avoid clutter
-                // console.log("je supp le script");
+                console.log("je supp le script");
 				newScript.onload = () => newScript.remove();
 			});
 
+            // reloadScripts(doc);
             if (pushState) history.pushState(null, "", finalizedUrl);
         })
         .catch(error => console.error("Erreur de chargement:", error));
