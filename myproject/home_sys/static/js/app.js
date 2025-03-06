@@ -17,44 +17,6 @@ function getCookie(name) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    // Load la page
-	// function loadPage(url, pushState = true) {
-	// 	// Nettoyage de l'URL pour éviter les chemins répétitifs
-	// 	var finalizedUrl = "";
-	// 	if (url != "accounts/") {
-	// 		let cleanUrl = url.replace(/^\/+|\/+$/g, ''); // Enlève les slashes au début et à la fin
-	// 		cleanUrl = cleanUrl.replace(/^accounts\//, ''); // Enlève 'accounts/' au début s'il existe
-			
-	// 		// Construction de l'URL finale
-	// 		finalizedUrl = '/accounts/' + cleanUrl;
-	// 	}
-	// 	else {finalizedUrl = "/" + url;}
-	// 	fetch(finalizedUrl, { 
-	// 		headers: {
-	// 			"X-Requested-With": "XMLHttpRequest",
-	// 		},
-	// 		credentials: 'include'
-	// 	})
-	// 	.then(response => response.text())
-	// 	.then(html => {
-	// 		let parser = new DOMParser();
-	// 		let doc = parser.parseFromString(html, "text/html");
-	// 		let newContent = doc.getElementById("content");
-	
-	// 		if (!newContent) {
-	// 			window.location.href = finalizedUrl;
-	// 			return;
-	// 		}
-	
-	// 		document.getElementById("content").innerHTML = newContent.innerHTML;
-	
-    //         reloadScripts(newContent);
-
-	// 		// Utilise l'URL nettoyée pour l'historique
-	// 		if (pushState) history.pushState(null, "", finalizedUrl);
-	// 	})
-	// 	.catch(error => console.error("Erreur de chargement:", error));
-	// }
     // Ajoute /accounts/ si absent
     function prependAccounts(url) {
         let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
@@ -71,7 +33,6 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(finalizedUrl, { 
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
-                // "X-CSRFToken": getCookie()
             },
             credentials: 'include'
         })
@@ -95,7 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 			}
             // Réexécution des scripts intégrés
-            // app.js (inside the loadPage function)
 			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
 				const newScript = document.createElement('script');
 				if (oldScript.src) {
@@ -107,35 +67,34 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 				document.body.appendChild(newScript);
 				// Remove the script after execution to avoid clutter
+                // console.log("je supp le script");
 				newScript.onload = () => newScript.remove();
 			});
 
             if (pushState) history.pushState(null, "", finalizedUrl);
-			// if (url = "other_game/")
-				// window.initializeMapButtons();
         })
         .catch(error => console.error("Erreur de chargement:", error));
     }
 
     // Recharge les scripts non-detectes mais ne prends pas en compte les scripts inline (pas secure de les evaluer)
-    function reloadScripts(container) {
-        if (!container) return;
+    // function reloadScripts(container) {
+    //     if (!container) return;
 
-        document.querySelectorAll("script[src]").forEach(script => script.remove());
-        // const existingScripts = new Set(Array.from(document.querySelectorAll('script')).map(s => s.src));
+    //     document.querySelectorAll("script[src]").forEach(script => script.remove());
+    //     // const existingScripts = new Set(Array.from(document.querySelectorAll('script')).map(s => s.src));
 
-        Array.from(container.querySelectorAll('script')).forEach(oldscript => {
-            const newScript = document.createElement('script');
-            if (oldscript.src) {
-                newScript.src = oldscript.src;
-                newScript.async = false;
-                document.body.appendChild(newScript);
-            } else {
-                newScript.textContent = oldscript.textContent;
-                document.body.appendChild(newScript);
-            }
-        });
-    }
+    //     Array.from(container.querySelectorAll('script')).forEach(oldscript => {
+    //         const newScript = document.createElement('script');
+    //         if (oldscript.src) {
+    //             newScript.src = oldscript.src;
+    //             newScript.async = false;
+    //             document.body.appendChild(newScript);
+    //         } else {
+    //             newScript.textContent = oldscript.textContent;
+    //             document.body.appendChild(newScript);
+    //         }
+    //     });
+    // }
 
     function handleLinkClick(event) {
         const link = event.target.closest("a");

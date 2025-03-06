@@ -16,11 +16,11 @@
 		<h1 class="title">Choix du type de jeu</h1>
 		<div class="mode-choices">
 
-			<div class="game" onclick="router.navigate('/game')">
-			{% comment %} <a href="game/" class="game"> {% endcomment %}
+			{% comment %} <div class="game" onclick="router.navigate('/game')"> {% endcomment %}
+			<a href="game/" class="game">
 				<span class="game-mode">Local</span>
-			</div>
-			{% comment %} </a> {% endcomment %}
+			{% comment %} </div> {% endcomment %}
+			</a>
 			<a href="game-distant-choice" class="game-distant">
 				<span class="game-mode">Distant</span>
 			</a>
@@ -30,4 +30,3 @@
 </div>
 
 {% endblock %}
-!

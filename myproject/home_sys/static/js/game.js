@@ -1,425 +1,537 @@
 // Variables
-var table;
-var context;
-var score_p1;
-var score_p2;
-var fps;
-var count_p1 = 0;
-var count_p2 = 0;
-var stop = 0;                           // Endgame
-var keys = {};                        // Players bars
-var id = 0;
-var frameTime = {counter : 0, time : 0};
-var totalframeTime = {counter : 0, time : 0};
-var gameActive = false;
+// var table;
+// var context;
+// var score_p1;
+// var score_p2;
+// var fps;
+// var count_p1 = 0;
+// var count_p2 = 0;
+// var stop = 0;                           // Endgame
+// var keys = {};                        // Players bars
+// var id = 0;
+// var frameTime = {counter : 0, time : 0};
+// var totalframeTime = {counter : 0, time : 0};
 
+(function() {
 
-// Router simplifié
-var router = {
-	init: function() {
-	  // Détecter les changements d'URL initiaux
-		window.addEventListener('popstate', this.handleRouteChange.bind(this));
-	  
-	  // Intercepter les clics sur les liens
-		document.body.addEventListener('click', (e) => {
-			const link = e.target.closest('a');
-			if (link && link.href) {
-				e.preventDefault();
-				this.navigate(new URL(link.href).pathname);
-			}
-		});
+	if (window.PongGame) return ;
 
-		this.handleRouteChange();
-	},
-  
-	navigate: function(url) {
-		if (new URL(url).pathname === window.location.pathname) return;
-
-		history.pushState({}, '', url);
-		this.handleRouteChange();
-	},
-  
-	handleRouteChange: function() {
-	  const currentPath = window.location.pathname;
-	  const isGamePage = this.isOnGamePage(currentPath);
-	  
-	  if (isGamePage)
-		this.enterGame();
-	  else
-	  	this.exitGame();
-	},
-  
-	isOnGamePage: function(path) {
-		const normalizedPath = path.replace(/\/$/, '');
-		return normalizedPath === '/accounts/game'; // Adaptez à votre URL de jeu
-	},
-
-	enterGame: function() {
-		if (!gameActive) {
-			setTimeout(() => startGame(), 50);
+	class PongGame {
+		constructor() {
+			this.initState();
+			this.keyHandler = this.handleKey.bind(this);
 		}
-	},
 
-	exitGame: function() {
-		if (gameActive) cleanGame();
-	},
+		initState() {
+			this.table = null;
+			this.context = null;
+			this.animationId = 0;
+			this.fps = null;
+			this.frameTime = {counter : 0, time : 0};
+			this.totalframeTime = {counter : 0, time : 0};
+			this.keys = {};
+			this.score_p1 = null;
+			this.score_p2 = null;
+			this.count = {p1: 0, p2: 0};
+			this.stop = false;
+		}
 
-  };
+		start() {
 
-function startGame() {
+			// Vérifier que le canvas existe
+			this.table = document.getElementById('game');
+			if (!this.table) {
+			   console.error("Canvas 'game' introuvable !");
+			   return;
+			}
 
-	if (gameActive) return;
+			// Vérifier le contexte 2D
+			this.context = this.table.getContext('2d');
+			if (!this.context) {
+			   console.error("Contexte 2D non supporté !");
+			   return;
+			}
 
-	table = document.getElementById('game');
-	context = table.getContext('2d');
+			// Vérifier les éléments de score
+			this.score_p1 = document.getElementById("scoreP1");
+			this.score_p2 = document.getElementById("scoreP2");
+			if (!this.score_p1 || !this.score_p2) {
+			   console.error("Éléments de score introuvables !");
+			   return;
+			}
+			this.count = {p1: 0, p2: 0};
+			this.stop = false;
 
-	gameActive = true;
+			this.fps = document.getElementById("fps");
 
-	count_p1 = 0;
-	count_p2 = 0;
-	stop = 0;
-	keys = {};
+			this.setupDOM();
+			this.setupListeners();
 
-	const container = document.getElementById('canvas-container');
-	if (!container) return ;
+			this.update();
 
-	const safeShow = (id) => {
-		const el = document.getElementById(id);
-		if (el) el.style.display = 'flex';
-	}
-	safeShow('scores');
-	safeShow('fps');
-	safeShow('canvas-container');
-	
-	score_p1 = document.getElementById("scoreP1");
-	score_p2 = document.getElementById("scoreP2");
-	fps = document.getElementById("fps");
+			this.createBall(Math.floor(this.getRandomArbitrary(-10, 10)));
+		}
 
-	score_p1.textContent = "0";
-	score_p2.textContent = "0";
+		// Active le DOM au chargement de la page
+		setupDOM() {
 
-	update();
-	context.clearRect(0, 0, table.width, table.height);
+			const safeShow = (id) => {
+				const element = document.getElementById(id);
+				if (element) element.style.display = 'flex';
+			};
+			['scores', 'fps', 'canvas-container'].forEach(safeShow);
 
-	createBall(Math.floor(getRandomArbitrary(-10, 10)));
+			if (!this.score_p1 || !this.score_p2) {
+				console.log("element introuvable");
+				return ;
+			}
 
-	window.addEventListener('keydown', handleKeydown);
-    window.addEventListener('keyup', handleKeyup);
+			this.score_p1.textContent = "0";
+			this.score_p2.textContent = "0";
+		}
 
-	console.log("je suis la encule");
+		// Active les ecouteurs pour les touches claviers
+		setupListeners() {
 
-}
+			this.keyHandler = (e) => this.handleKey(e);
+			window.addEventListener('keydown', this.keyHandler);
+			window.addEventListener('keyup', this.keyHandler);
+		}
 
-function getRandomArbitrary(min, max) {
-	var result = Math.random() * (max - min) + min;
-	if (result >= -9 && result <= 9)
-		return getRandomArbitrary(min, max);
-	return result;
-}
-  
-document.addEventListener("DOMContentLoaded", function() {
-	table = document.getElementById('game');
-	context = table.getContext('2d');
+		handleKey(e) {
+			this.keys[e.key] = (e.type === 'keydown');
+		}
 
-	router.init();
+		// Arrete le jeu
+		stopGame() {
 
-});
+			console.log("JE SUIS LAAAAAAAAAAAAAAAA");
+			this.stop = true;
+			cancelAnimationFrame(this.animationId);
 
-function drawOuterRectangle(color) {
-    context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(0, 0, table.width, table.height, 10);
-	context.fill();
-	context.closePath();
-}
+			window.removeEventListener('keydown', this.keyHandler);
+			window.removeEventListener('keyup', this.keyHandler);
+			this.keyHandler = null;
 
-function drawInnerRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
-	context.fill();
-    context.closePath();
-}
+			const safeHide = (id) => document.getElementById(id).style.display = 'none';
+			['scores', 'fps', 'canvas-container'].forEach(safeHide);
 
-function update() {
+			this.initState();
+		}
 
-	drawOuterRectangle("#ED4EB0");
-	drawInnerRectangle("#23232e");
+		// Dessine le rectangle exterieur de l'aire de jeu
+		drawOuterRectangle(color) {
+			this.context.fillStyle = color;
+			this.context.beginPath();
+			this.context.roundRect(0, 0, this.table.width, this.table.height, 10);
+			this.context.fill();
+			this.context.closePath();
+		}
 
-    context.fillStyle = '#ED4EB0';
-    context.fillRect(table.width / 2, 0, 5, table.height);
+		// Dessine le rectangle interieur de l'aire de jeu
+		drawInnerRectangle(color) {
+			this.context.fillStyle = color;
+			this.context.beginPath();
+			this.context.roundRect(5, 5, this.table.width - 10, this.table.height - 10, 8);
+			this.context.fill();
+			this.context.closePath();
+		}
 
-    console.log('Creating player...');
-}
+		// Update l'aire de jeu
+		update() {
+			this.drawOuterRectangle("#ED4EB0");
+			this.drawInnerRectangle("#23232e");
+		
+			this.context.fillStyle = '#ED4EB0';
+			this.context.fillRect(this.table.width / 2, 0, 5, this.table.height);
+		
+			console.log('Creating player...');
+		}
 
-function handleKeydown(event) {
-	keys[event.key] = true;
-}
+		// Creer la balle au debut du jeu
+		createBall(vx) {
+			// Balls coords
+			this.ball = {coords : {x : this.table.width / 2, y : this.table.height / 2},
+						const_vector : {vx : vx, vy : Math.floor(this.getRandomArbitrary(-10, 10))},
+						vector : {},
+						radius : 13,
+						hit_vertical : 0,
+						hit_player : 0};
 
-function handleKeyup(event) {
-	keys[event.key] = false;
-}
+			this.ball.vector = { vx: this.ball.const_vector.vx, vy: this.ball.const_vector.vy };
+		
+			// Initials points player 1
+			this.player1Coords = {x1 : 92, y1 : (this.table.height / 2) - 40, x2 : 100, y2 : (this.table.height / 2) + 40, const_vy : 20, vy : 20};
+		
+			// Initials points player 2
+			this.player2Coords = {x1 : this.table.width - 100, y1 : (this.table.height / 2) - 40, x2 : this.table.width - 92, y2 : (this.table.height / 2) + 40, const_vy : 20, vy : 20};
+			this.gameLoop(Date.now());
+		}
 
-// window.addEventListener("keydown", handleKeydown);
-// window.addEventListener("keyup", handleKeyup);
+		/* Check if the ball touch a player */
+		isBallHittingPlayer() {
 
-function movePlayer(player1Coords, player2Coords) {
-    if (keys["z"] && player1Coords.y1 - player1Coords.vy > 0) {
-        player1Coords.y1 -= player1Coords.vy;
-        player1Coords.y2 -= player1Coords.vy;
-    }
-    if (keys["s"] && player1Coords.y2 + player1Coords.vy < table.height) {
-        player1Coords.y1 += player1Coords.vy;
-        player1Coords.y2 += player1Coords.vy;
-    }
-    if (keys["ArrowUp"] && player2Coords.y1 - player1Coords.vy > 0) {
-        player2Coords.y1 -= player2Coords.vy;
-        player2Coords.y2 -= player2Coords.vy;
-    }
-    if (keys["ArrowDown"] && player2Coords.y2 + player1Coords.vy < table.height) {
-        player2Coords.y1 += player2Coords.vy;
-        player2Coords.y2 += player2Coords.vy;
-    }
-}
+			if (this.ball.hit_player > 0 && this.ball.hit_player < 5) {// pendant les deux prochaines frames impossible de rebondir sur les murs.
+				this.ball.hit_player++;
+				return false;
+			}
+			if (this.ball.hit_player >= 5)
+				this.ball.hit_player = 0;
 
-function drawPlayer(player1Coords, player2Coords, color) {
-	
-	movePlayer(player1Coords, player2Coords);
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
-	context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
-	context.fill();
-	context.closePath();
-}
+		    if (this.ball.coords.x - this.ball.radius >= this.player1Coords.x1 && this.ball.coords.x - this.ball.radius <= this.player1Coords.x2 + Math.abs(this.ball.vector.vx * 1) &&
+					this.ball.coords.y - this.ball.radius <= this.player1Coords.y2 + this.ball.radius / 2 &&
+					this.ball.coords.y + this.ball.radius >= this.player1Coords.y1 - this.ball.radius / 2) {
+						this.ball.hit_player = 1
+						return true;
+					}
 
-function createBall(vx) {
-    // Balls coords
-	var ball = {coords : {x : table.width / 2, y : table.height / 2},
-				const_vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-10, 10))},
-				vector : {},
-				radius : 13,
-				hit_vertical : 0,
-				hit_player : 0};
+			else if (this.ball.coords.x + this.ball.radius >= this.player2Coords.x1 - Math.abs(this.ball.vector.vx * 1) && this.ball.coords.x + this.ball.radius <= this.player2Coords.x2 &&
+					this.ball.coords.y - this.ball.radius <= this.player2Coords.y2 + this.ball.radius / 2 &&
+					this.ball.coords.y + this.ball.radius >= this.player2Coords.y1 - this.ball.radius / 2) {
+						this.ball.hit_player = 1
+						return true;
+					}
+			return false;
+		}
 
-	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy };
+		// Dessine les players
+		drawPlayer() {
+			this.movePlayer(this.player1Coords, this.player2Coords);
+			this.context.fillStyle = "#ED4EB0";
+			this.context.beginPath();
+			this.context.roundRect(this.player1Coords.x1, this.player1Coords.y1, 5, 80, 10);
+			this.context.roundRect(this.player2Coords.x1, this.player2Coords.y1, 5, 80, 10);
+			this.context.fill();
+			this.context.closePath();
+		}
 
-    // Initials points player 1
-	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
+		// Bouge la balle et check les rebonds
+		moveBall() {
+			// Conditions so that the ball bounces from the edges
+			if (!this.stop && this.isBallHittingPlayer()) {
+				this.ball.const_vector.vx = -(this.ball.const_vector.vx);
+				this.ball.vector.vx = -this.ball.vector.vx;
+				if (this.ball.const_vector.vx < 0 && this.ball.const_vector.vx > -30) {
+					this.ball.vector.vx -= 1;
+					this.ball.const_vector.vx -= 1;
+				}
+				else if (this.ball.const_vector.vx < 30) {
+					this.ball.vector.vx += 1;
+					this.ball.const_vector.vx += 1;
+				}
+			}
 
-    // Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
-	launchAnim(ball, player1Coords, player2Coords, Date.now());
-}
+			// Winning condition
+			else if (this.count.p1 == 5 || this.count.p2 == 5) {
+				this.stop = 1;
+				if (this.count.p1 == 5) {
+					console.log("player 1 wins");
+					this.winnerWindow(1);
+				}
+				else {
+					console.log("player 2 wins");
+					this.winnerWindow(2);
+				}   
+				return;
+			}
 
-/* Function that detects whether a player has won a point or not */
-function isPointWin(ball) {
-    if (ball.radius + ball.coords.x >= table.width) {
-    	count_p1++;
-    	score_p1.innerText = count_p1;
-    	createBall(Math.floor(getRandomArbitrary(-10, 0)));
-    	return true;
-    }
-    else if (ball.coords.x - ball.radius <= 0) {
-        count_p2++;
-        score_p2.innerText = count_p2;
-        createBall(Math.floor(getRandomArbitrary(0, 10)));
-        return true;
-    }
-    return false;
-}
+			else if ((this.ball.coords.y - this.ball.radius <= 0 || this.ball.coords.y + this.ball.radius >= this.table.height) && !this.ball.hit_vertical) {
+				this.ball.hit_vertical = 1;
+				this.ball.vector.vy = -this.ball.vector.vy;
+				this.ball.const_vector.vy = -this.ball.const_vector.vy;
+			}
+			if (this.ball.hit_vertical) // pendant les deux prochaines frames impossible de rebondir sur les murs.
+				this.ball.hit_vertical++;
+			if (this.ball.hit_vertical >= 5)
+				this.ball.hit_vertical = 0;
+		
+			this.ball.coords.x += this.ball.vector.vx;	
+			this.ball.coords.y += this.ball.vector.vy;
 
-function launchAnim(ball, player1Coords, player2Coords, start) {
-	if (stop || !gameActive)
-		return;
+			this.drawBall();
+		}
 
-	end = Date.now();
-	let elapsedTime = end - start; // Temps réel pris par la frame
-	frameTime.counter++;
-	frameTime.time += elapsedTime;
-	if (frameTime.time > 250) {
-		totalframeTime.counter += frameTime.counter;
-		totalframeTime.time += 250
-		fps.innerText = "Fps : " + (frameTime.counter * 4) + " | Avg Fps : " + (totalframeTime.counter * (1000 / totalframeTime.time)).toPrecision(5);
-		frameTime.counter = 0;
-		frameTime.time = 0;
-	}
+		// Dessine la balle
+		drawBall() {
+			this.context.beginPath();
+			this.context.fillStyle = 'white';
+			this.context.arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius, Math.PI * 2, false);
+			this.context.fill();
+			this.context.closePath();
 
-	let percentage = (elapsedTime / 16.66).toPrecision(5);
-	ball.vector.vx = ball.const_vector.vx * percentage;
-	ball.vector.vy = ball.const_vector.vy * percentage;
-	player1Coords.vy = player1Coords.const_vy * percentage;
-	player2Coords.vy = player2Coords.const_vy * percentage;
-	start = Date.now();
-	id = requestAnimationFrame(function () {
-        context.clearRect(0, 0, table.width, table.height);
-        update();
-        drawPlayer(player1Coords, player2Coords, "#ED4EB0");
-        if (isPointWin(ball))
-            return ;
-        moveBall(ball, player1Coords, player2Coords);
-		// router.handleRouteChange();
-        launchAnim(ball, player1Coords, player2Coords, start);
-    });
-    
-}
+			this.context.beginPath();
+			this.context.fillStyle = "#23232e";
+			this.context.arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius - 2, Math.PI * 2, false);
+			this.context.fill();
+			this.context.stroke();
+			this.context.closePath();
+		}
 
-/* Check if the ball touch a player */
-function isBallHittingPlayer(ball, player1Coords, player2Coords) {
+		// Bouge le player selon les touches claviers
+		movePlayer() {
+			if (this.keys["z"] && this.player1Coords.y1 - this.player1Coords.vy > 0) {
+				this.player1Coords.y1 -= this.player1Coords.vy;
+				this.player1Coords.y2 -= this.player1Coords.vy;
+			}
+			if (this.keys["s"] && this.player1Coords.y2 + this.player1Coords.vy < this.table.height) {
+				this.player1Coords.y1 += this.player1Coords.vy;
+				this.player1Coords.y2 += this.player1Coords.vy;
+			}
+			if (this.keys["ArrowUp"] && this.player2Coords.y1 - this.player1Coords.vy > 0) {
+				this.player2Coords.y1 -= this.player2Coords.vy;
+				this.player2Coords.y2 -= this.player2Coords.vy;
+			}
+			if (this.keys["ArrowDown"] && this.player2Coords.y2 + this.player1Coords.vy < this.table.height) {
+				this.player2Coords.y1 += this.player2Coords.vy;
+				this.player2Coords.y2 += this.player2Coords.vy;
+			}
+		}
 
-	if (ball.hit_player > 0 && ball.hit_player < 5) {// pendant les deux prochaines frames impossible de rebondir sur les murs.
-		ball.hit_player++;
-		return false;
-	}
-	if (ball.hit_player >= 5)
-		ball.hit_player = 0;
+		// Loop du jeu
+		gameLoop(start) {
+			if (this.stop) return;
 
-    if (ball.coords.x - ball.radius >= player1Coords.x1 && ball.coords.x - ball.radius <= player1Coords.x2 + Math.abs(ball.vector.vx * 1) &&
-			ball.coords.y - ball.radius <= player1Coords.y2 + ball.radius / 2 &&
-			ball.coords.y + ball.radius >= player1Coords.y1 - ball.radius / 2) {
-				ball.hit_player = 1
+			const frame = () => {
+				if (this.stop) {
+					cancelAnimationFrame(this.animationId);
+					return ;
+				}
+
+				let end = Date.now();
+				let elapsedTime = end - start; // Temps réel pris par la frame
+				this.frameTime.counter++;
+				this.frameTime.time += elapsedTime;
+				if (this.frameTime.time > 250) {
+					this.totalframeTime.counter += this.frameTime.counter;
+					this.totalframeTime.time += 250
+					this.fps.innerText = "Fps : " + (this.frameTime.counter * 4) + " | Avg Fps : " + (this.totalframeTime.counter * (1000 / this.totalframeTime.time)).toPrecision(5);
+					this.frameTime.counter = 0;
+					this.frameTime.time = 0;
+				}
+
+				let percentage = (elapsedTime / 16.66).toPrecision(5);
+				this.ball.vector.vx = this.ball.const_vector.vx * percentage;
+				this.ball.vector.vy = this.ball.const_vector.vy * percentage;
+				this.player1Coords.vy = this.player1Coords.const_vy * percentage;
+				this.player2Coords.vy = this.player2Coords.const_vy * percentage;
+				start = Date.now();
+
+	    	    if (this.context) this.context.clearRect(0, 0, this.table.width, this.table.height);
+	    	    this.update();
+	    	    this.drawPlayer();
+
+	    	    if (this.isPointWin()) {
+	    	        return ;
+				}
+	    	    this.moveBall();
+				this.animationId = requestAnimationFrame(frame);
+	    	};
+
+			this.animationId = requestAnimationFrame(frame);
+		}
+
+		// Add un point a un player
+		isPointWin() {
+			if (this.ball.radius + this.ball.coords.x >= this.table.width) {
+				this.count.p1++;
+				this.score_p1.innerText = this.count.p1;
+				this.createBall(Math.floor(this.getRandomArbitrary(-10, 0)));
 				return true;
 			}
-
-	else if (ball.coords.x + ball.radius >= player2Coords.x1 - Math.abs(ball.vector.vx * 1) && ball.coords.x + ball.radius <= player2Coords.x2 &&
-			ball.coords.y - ball.radius <= player2Coords.y2 + ball.radius / 2 &&
-			ball.coords.y + ball.radius >= player2Coords.y1 - ball.radius / 2) {
-				ball.hit_player = 1
+			else if (this.ball.coords.x - this.ball.radius <= 0) {
+				this.count.p2++;
+				this.score_p2.innerText = this.count.p2;
+				this.createBall(Math.floor(this.getRandomArbitrary(0, 10)));
 				return true;
 			}
-
-	return false;
-}
-
-function drawBall(ball) {
-	context.beginPath();
-    context.fillStyle = 'white';
-    context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-    context.fill();
-    context.closePath();
-	
-	context.beginPath();
-	context.fillStyle = "#23232e";
-    context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
-    context.fill();
-    context.stroke();
-    context.closePath();
-}
-
-function moveBall(ball, player1Coords, player2Coords) {
-
-	// Conditions so that the ball bounces from the edges
-
-    if (!stop && isBallHittingPlayer(ball, player1Coords, player2Coords)) {
-		// console.log(ball.vector.vx);
-		ball.const_vector.vx = -(ball.const_vector.vx);
-		ball.vector.vx = -ball.vector.vx;
-		if (ball.const_vector.vx < 0 && ball.const_vector.vx > -30) {
-			ball.vector.vx -= 1;
-			ball.const_vector.vx -= 1;
-
+			return false;
 		}
-		else if (ball.const_vector.vx < 30) {
-			ball.vector.vx += 1;
-			ball.const_vector.vx += 1;
 
+		// Page de win
+		winnerWindow(player) {
+		
+			this.context.clearRect(0, 0, this.table.width, this.table.height);
+
+			const winner1Text = document.getElementById("wrapper-player1");
+			const winner2Text = document.getElementById("wrapper-player2");
+			if (player == 1) {
+				this.drawOuterRectangle("#365fa0");
+				winner1Text.style.display = "block";
+			}
+			else {
+				this.drawOuterRectangle("#C42021");
+				winner2Text.style.display = "block";
+			}
+			this.drawInnerRectangle("#23232e");
+			this.newGame(player);
+		}
+
+		// Lancer une nouvelle partie apres click bouton
+		newGame(player) {
+			const button = document.getElementById("replay-button");
+			button.style.display = "block";
+		
+			if (player == 1)
+				button.style.color = "#C42021";
+			else
+				button.style.color = "#365FA0";
+			button.addEventListener("click", () => {
+				const winner1Text = document.getElementById("wrapper-player1");
+				const winner2Text = document.getElementById("wrapper-player2");
+			
+				winner1Text.style.display = "none";
+				winner2Text.style.display = "none";
+				button.style.display = "none";
+				this.restartGame();
+			});
+		}
+
+		// Restart the game
+		restartGame() {
+			if (this.stop)
+				this.stopGame();
+			// if (this.context) this.context.clearRect(0, 0, this.table.width, this.table.height);
+			this.start();
+		}
+
+		// Donne une direction aleatoire a la balle
+		getRandomArbitrary(min, max) {
+			var result = Math.random() * (max - min) + min;
+			if (result >= -9 && result <= 9)
+				return this.getRandomArbitrary(min, max);
+			return result;
 		}
 	}
+	// }
 
-    // Winning condition
-    else if (count_p1 == 5 || count_p2 == 5) {
-        stop = 1;
-        if (count_p1 == 5) {
-            console.log("player 1 wins");
-            winnerWindow(1);
-        }
-        else {
-            console.log("player 2 wins");
-            winnerWindow(2);
-        }   
-        return;
-    }
+	window.PongGame = PongGame;
+
+	// Router simplifié
+	var router = {
+		currentGame: null,
+
+		init: function() {
+		  // Détecter les changements d'URL initiaux
+			window.addEventListener('popstate', this.handleRouteChange.bind(this));
+		
+		  // Intercepter les clics sur les liens
+			document.body.addEventListener('click', (e) => {
+				const link = e.target.closest('a');
+				if (link && link.href) {
+					e.preventDefault();
+					this.navigate(new URL(link.href, window.location.origin));
+				}
+			});
+
+			this.handleRouteChange();
+		},
+
+		navigate: function(url) {
+			if (new URL(url).pathname === window.location.pathname) return;
+
+			history.pushState({}, '', url);
+			this.handleRouteChange();
+		},
 	
-	else if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
-		ball.hit_vertical = 1;
-        ball.vector.vy = -ball.vector.vy;
-		ball.const_vector.vy = -ball.const_vector.vy;
-	}
-	if (ball.hit_vertical) // pendant les deux prochaines frames impossible de rebondir sur les murs.
-		ball.hit_vertical++;
-	if (ball.hit_vertical >= 5)
-		ball.hit_vertical = 0;
-
-    ball.coords.x += ball.vector.vx;	
-	ball.coords.y += ball.vector.vy;
-
-	drawBall(ball);
-}
-
-function winnerWindow(player) {
+		handleRouteChange: function() {
+		  const currentPath = window.location.pathname;
+		  const isGamePage = this.isOnGamePage(currentPath);
+		
+		  if (isGamePage) {
+			console.log("je rentre dans la fonction");
+			this.enterGame();
+		  }
+		  else
+		  	this.exitGame();
+		},
 	
-	context.clearRect(0, 0, table.width, table.height);
-    
-	const winner1Text = document.getElementById("wrapper-player1");
-	const winner2Text = document.getElementById("wrapper-player2");
-	if (player == 1) {
-        drawOuterRectangle("#365fa0");
-        winner1Text.style.display = "block";
-    }
-	else {
-        drawOuterRectangle("#C42021");
-		winner2Text.style.display = "block";
-    }
-    drawInnerRectangle("#23232e");
-    newGame(player);
-}
+		isOnGamePage: function(path) {
+			const normalizedPath = path.replace(/\/$/, '');
+			return normalizedPath === '/accounts/game'; // Adaptez à votre URL de jeu
+		},
 
-function newGame(player) {
-    const button = document.getElementById("replay-button");
-    button.style.display = "block";
+		enterGame: function() {
 
-	if (player == 1)
-		button.style.color = "#C42021";
-	else
-		button.style.color = "#365FA0";
-	button.addEventListener("click", () => {
-		restart_game();
-    });
-}
+			if (this.currentGame) {
+	            this.currentGame.stopGame();
+	            this.currentGame = null;
+	        }
 
-function cleanGame() {
-	console.log("but i love it");
-	if (!gameActive) return;
-	gameActive = false;
+			this.injectTemplate(() => {
+				this.waitElementsDom(() => {
+					this.currentGame = new PongGame();
+					this.currentGame.start();
+				});
+			});
+		},
 
-	context = null;
-	table = null;
+		waitElementsDom: function(callback) {
+			const checkEl = () => {
+				if (document.getElementById('game') && document.getElementById('scoreP1') && document.getElementById('scoreP2')) {
+					callback();
+				} else {
+					setTimeout(checkEl, 50);
+				}
+			};
+			checkEl();
+		},
 
-	stop = 1;
-	cancelAnimationFrame(id);
+		injectTemplate: function(callback) {
+			const content = document.getElementById('content');
 
-	const safeHide = (id)=> {
-		const el = document.getElementById(id);
-		if (el) el.style.display = 'none';
-	};
+			if (content.querySelector('#canvas-container')) {
+				callback();
+				return;
+			}
 
-	safeHide('scores');
-	safeHide('fps');
-	safeHide('canvas-container');
+			const gameHtml = `
+				<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
 
-	window.removeEventListener("keydown", handleKeydown);
-	window.removeEventListener("keyup", handleKeyup);
+				<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
 
-	count_p1 = 0;
-	count_p2 = 0;
-	stop = 0;
-	keys = {};
-}
+				<div class="scores" id="scores">
+					<h3 id="title">Player 1</h3>
+					<h3 id="scoreP1">0</h3>
+					<h3 id="scoreP2">0</h3>
+					<h3 id="title">Player 2</h3>
+				</div>
 
-function restart_game() {
-	if (gameActive) {
-		cleanGame();
-		setTimeout(startGame, 100); }
-	else
-		startGame();
-}
+				<div id="canvas-container">
+					<canvas width="1920" height="850" id="game"></canvas>
+					<div id="button-container">
+						<button id="replay-button" style="display: none;">Play again !</button>
+					</div>
+					<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+						<svg width="1100" height="150">
+							<text x="50%" y="50%" dy=".35em" text-anchor="middle">
+								Player 1 Wins !
+							</text>
+						</svg>
+					</div>
+					<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+						<svg width="1100" height="150" id="svg-wrapper-player2">
+							<text x="50%" y="50%" dy=".35em" text-anchor="middle">
+								Player 2 Wins !
+							</text>
+						</svg>
+					</div>
+				</div>
+			`;
+
+			content.innerHTML = gameHtml;
+			callback();
+		},
+
+		exitGame: function() {
+			if (this.currentGame) {
+				this.currentGame.stopGame();
+				this.currentGame = null;
+			}
+		}
+	  };
+
+	document.addEventListener("DOMContentLoaded", function() {
+		router.init();
+	});
+}) ();
+
