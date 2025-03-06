@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
 
 
-        fetch(finalizedUrl, { 
+        return fetch(finalizedUrl, { 
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
             },
@@ -48,6 +48,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            const existingCanvas = document.getElementById('canvas-container');
+            if (existingCanvas) {
+                newContent.querySelector('#canvas-container')?.remove();
+            }
             document.getElementById("content").innerHTML = newContent.innerHTML;
 
 			if (document.getElementById('mapSelection')) {
@@ -68,35 +72,13 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 				document.body.appendChild(newScript);
 				// Remove the script after execution to avoid clutter
-                console.log("je supp le script");
 				newScript.onload = () => newScript.remove();
 			});
 
-            // reloadScripts(doc);
             if (pushState) history.pushState(null, "", finalizedUrl);
         })
         .catch(error => console.error("Erreur de chargement:", error));
     }
-
-    // Recharge les scripts non-detectes mais ne prends pas en compte les scripts inline (pas secure de les evaluer)
-    // function reloadScripts(container) {
-    //     if (!container) return;
-
-    //     document.querySelectorAll("script[src]").forEach(script => script.remove());
-    //     // const existingScripts = new Set(Array.from(document.querySelectorAll('script')).map(s => s.src));
-
-    //     Array.from(container.querySelectorAll('script')).forEach(oldscript => {
-    //         const newScript = document.createElement('script');
-    //         if (oldscript.src) {
-    //             newScript.src = oldscript.src;
-    //             newScript.async = false;
-    //             document.body.appendChild(newScript);
-    //         } else {
-    //             newScript.textContent = oldscript.textContent;
-    //             document.body.appendChild(newScript);
-    //         }
-    //     });
-    // }
 
     function handleLinkClick(event) {
         const link = event.target.closest("a");
@@ -114,8 +96,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Cas particulier si besoin (exemple pour LevelForm)
         if (form.id === "LevelForm") {
-            const level = form.elements.levelfield.value;
-            levelinput(level);
+            loadPage(location.pathname).then(() => {
+                levelinput();
+            });
             return;
         }
 

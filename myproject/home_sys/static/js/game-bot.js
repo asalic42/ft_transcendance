@@ -1,27 +1,25 @@
 // Variables
-var table = document.getElementById("game");
-var context = table.getContext("2d");
-var fps = document.getElementById("fps");
-var score_p1 = document.getElementById("scoreP1");
-var score_p2 = document.getElementById("scoreP2");
+// var table = document.getElementById("game");
+// var context = table.getContext("2d");
+// var fps = document.getElementById("fps");
+// var score_p1 = document.getElementById("scoreP1");
+// var score_p2 = document.getElementById("scoreP2");
 var bounce = 0;
-var game = document.getElementById("game");
+var user_option = 2;
+// var game = document.getElementById("game");
 var count_p1 = 0;
 var count_p2 = 0;
-let stop = 0;
+var stop = 0;
 var frameTime = {counter : 0, time : 0};
 var totalframeTime = {counter : 0, time : 0};
-let percentage = 0;
-let cachedUserId = null;
-
-//! Init
-// document.addEventListener("DOMContentLoaded", () => {
-
-// })
+var percentage = 0;
+var cachedUserId = null;
+var id=0;
+var keys = {};
 
 function createBall(vx) {
 	// Balls coords
-	var ball = {coords : {x : table.width / 2, y : table.height / 2},
+	var ball = {coords : {x : document.getElementById("game").width / 2, y : document.getElementById("game").height / 2},
 				const_vector : {vx : vx, vy : Math.floor(getRandomArbitrary(-11, 11))},
 				vector : {},
 				radius : 13,
@@ -31,10 +29,10 @@ function createBall(vx) {
 	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy };
 
 	// Initials points player 1
-	var player1Coords = {x1 : 92, y1 : (table.height / 2) - 40, x2 : 100, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20};
+	var player1Coords = {x1 : 92, y1 : (document.getElementById("game").height / 2) - 40, x2 : 100, y2 : (document.getElementById("game").height / 2) + 40, const_vy : 20, vy : 20};
 
 	// Initials points player 2
-	var player2Coords = {x1 : table.width - 100, y1 : (table.height / 2) - 40, x2 : table.width - 92, y2 : (table.height / 2) + 40, const_vy : 20, vy : 20, ball_predicted_hit : 0};
+	var player2Coords = {x1 : document.getElementById("game").width - 100, y1 : (document.getElementById("game").height / 2) - 40, x2 : document.getElementById("game").width - 92, y2 : (document.getElementById("game").height / 2) + 40, const_vy : 20, vy : 20, ball_predicted_hit : 0};
 
 	launchAnim(ball, player1Coords, player2Coords, Date.now());
 	isGameOver();
@@ -48,7 +46,7 @@ function movePlayer(player1Coords) {
 		player1Coords.y1 -= player1Coords.vy;
 		player1Coords.y2 -= player1Coords.vy;
 	}
-	if (keys["s"] && player1Coords.y2 + player1Coords.vy < table.height) {
+	if (keys["s"] && player1Coords.y2 + player1Coords.vy < document.getElementById("game").height) {
 		player1Coords.y1 += player1Coords.vy;
 		player1Coords.y2 += player1Coords.vy;
 	}
@@ -56,7 +54,7 @@ function movePlayer(player1Coords) {
 
 function moveBot(player2Coords) {
 	if ((player2Coords.ball_predicted_hit > 10 || player2Coords.ball_predicted_hit < -10) &&
-		player2Coords.y1 + player2Coords.vy > 0 && player2Coords.y2 + player2Coords.vy < table.height) {
+		player2Coords.y1 + player2Coords.vy > 0 && player2Coords.y2 + player2Coords.vy < document.getElementById("game").height) {
 		player2Coords.y1 += player2Coords.vy;
 		player2Coords.y2 += player2Coords.vy;
 		player2Coords.ball_predicted_hit -= player2Coords.vy;
@@ -67,12 +65,12 @@ function drawPlayer(player1Coords, player2Coords, color) {
 	
 	movePlayer(player1Coords);
 	moveBot(player2Coords);
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
-	context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
-	context.fill();
-	context.closePath();
+	document.getElementById("game").getContext("2d").fillStyle = color;
+	document.getElementById("game").getContext("2d").beginPath();
+	document.getElementById("game").getContext("2d").roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
+	document.getElementById("game").getContext("2d").roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
+	document.getElementById("game").getContext("2d").fill();
+	document.getElementById("game").getContext("2d").closePath();
 }
 
 function isBallHittingPlayer(ball, player1Coords, player2Coords) {
@@ -102,18 +100,36 @@ function isBallHittingPlayer(ball, player1Coords, player2Coords) {
 	return false;
 }
 
-var user_option = 2;
-window.levelinput = function(value) {
+function levelinput() {
 	var form = document.getElementById('LevelForm');
 	user_option = form.elements.levelfield.value;
-	document.getElementById('page').style.display = 'none';
-	document.getElementById('scores').style.display = 'flex';
-	document.getElementById('fps').style.display = 'flex';
+	console.log("level: ", user_option);
+
+	if (!document.getElementById('canvas-container')) {
+		console.error("canvas-container introuvable");
+		return;
+	}
 	document.getElementById('canvas-container').style.display = 'flex';
 
+	if (document.getElementById('page')) document.getElementById('page').style.display = 'none';
+	if (document.getElementById('scores')) document.getElementById('scores').style.display = 'flex';
+	if (document.getElementById('fps')) document.getElementById('fps').style.display = 'flex';
+
+	if (document.getElementById("scoreP1")) document.getElementById("scoreP1").textContent = 0;
+	if (document.getElementById("scoreP2")) document.getElementById("scoreP2").textContent = 0;
+
+	update();
 	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 
 }
+
+window.addEventListener("keydown", (event) => {
+    keys[event.key] = true;
+});
+
+window.addEventListener("keyup", (event) => {
+    keys[event.key] = false;
+});
 
 //! Ball
 
@@ -140,22 +156,22 @@ function calculateBall(ball, player2Coords) {
 }
 
 function drawBall(ball) {
-	context.beginPath();
-	context.fillStyle = 'white';
-	context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-	context.fill();
-	context.closePath();
+	document.getElementById("game").getContext("2d").beginPath();
+	document.getElementById("game").getContext("2d").fillStyle = 'white';
+	document.getElementById("game").getContext("2d").arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
+	document.getElementById("game").getContext("2d").fill();
+	document.getElementById("game").getContext("2d").closePath();
 	
-	context.beginPath();
-	context.fillStyle = "#23232e";
-	context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
-	context.fill();
-	context.stroke();
-	context.closePath();
+	document.getElementById("game").getContext("2d").beginPath();
+	document.getElementById("game").getContext("2d").fillStyle = "#23232e";
+	document.getElementById("game").getContext("2d").arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
+	document.getElementById("game").getContext("2d").fill();
+	document.getElementById("game").getContext("2d").stroke();
+	document.getElementById("game").getContext("2d").closePath();
 }
 
 function isBallHittingWall(ball) {
-	if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= table.height) && !ball.hit_vertical) {
+	if ((ball.coords.y - ball.radius <= 0 || ball.coords.y + ball.radius >= document.getElementById("game").height) && !ball.hit_vertical) {
 		ball.hit_vertical = 1;
 		ball.vector.vy = -ball.vector.vy;
 		ball.const_vector.vy = -ball.const_vector.vy;
@@ -188,15 +204,15 @@ function moveBall(ball, player1Coords, player2Coords) {
 
 /* Function that detects whether a player has won a point or not */
 function isPointWin(ball) {
-    if (ball.radius + ball.coords.x >= table.width) {
+    if (ball.radius + ball.coords.x >= document.getElementById("game").width) {
         count_p1++;
-        score_p1.innerText = count_p1;
+        document.getElementById("scoreP1").textContent = count_p1;
         createBall(Math.floor(getRandomArbitrary(-10, 0)));
         return true;
     }
     else if (ball.coords.x - ball.radius <= 0) {
         count_p2++;
-        score_p2.innerText = count_p2;
+        document.getElementById("scoreP2").textContent = count_p2;
         createBall(Math.floor(getRandomArbitrary(0, 10)));
         return true;
     }
@@ -204,7 +220,6 @@ function isPointWin(ball) {
 }
 
 //! Loop func
-var id=0;
 function launchAnim(ball, player1Coords, player2Coords, start) {
 
 	timeRelatedStuff(ball, player2Coords, start);
@@ -212,7 +227,7 @@ function launchAnim(ball, player1Coords, player2Coords, start) {
 	start = Date.now();
 	if (stop)
 		return;
-	context.clearRect(0, 0, table.width, table.height);
+	if (document.getElementById('game').getContext('2d')) document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 	update();
 	drawPlayer(player1Coords, player2Coords, "#ED4EB0");
 	if (isPointWin(ball))
@@ -238,7 +253,7 @@ function timeRelatedStuff(ball, player2Coords, start) {
 	if (frameTime.time > 250) {
 		totalframeTime.counter += frameTime.counter;
 		totalframeTime.time += 250
-		fps.innerText = "Fps : " + (frameTime.counter * 4) + " | Avg Fps : " + (totalframeTime.counter * (1000 / totalframeTime.time)).toPrecision(3);
+		document.getElementById("fps").innerText = "Fps : " + (frameTime.counter * 4) + " | Avg Fps : " + (totalframeTime.counter * (1000 / totalframeTime.time)).toPrecision(3);
 		frameTime.counter = 0;
 		frameTime.time = 0;
 	}
@@ -270,7 +285,7 @@ function isGameOver() {
 
 async function winnerWindow(player) {
 	
-	context.clearRect(0, 0, table.width, table.height);
+	document.getElementById("game").getContext("2d").clearRect(0, 0, document.getElementById("game").width, document.getElementById("game").height);
 	cancelAnimationFrame(id);
 
 	const winner1Text = document.getElementById("wrapper-player1");
@@ -333,10 +348,10 @@ function restart_game() {
 	percentage = 0;
 	cachedUserId = null;
 
-	document.getElementById("scoreP1").innerText = "0";
-	document.getElementById("scoreP2").innerText = "0";
+	document.getElementById("scoreP1").textContent = "0";
+	document.getElementById("scoreP2").textContent = "0";
 
-	context.clearRect(0, 0, table.width, table.height);
+	document.getElementById("game").getContext("2d").clearRect(0, 0, document.getElementById("game").width, document.getElementById("game").height);
 	createBall(Math.floor(getRandomArbitrary(-11, 11)));
 }
 
@@ -354,37 +369,27 @@ function getRandomArbitrary(min, max) {
 }
 
 function drawOuterRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(0, 0, table.width, table.height, 10);
-	context.fill();
-	context.closePath();
+	document.getElementById("game").getContext("2d").fillStyle = color;
+	document.getElementById("game").getContext("2d").beginPath();
+	document.getElementById("game").getContext("2d").roundRect(0, 0, document.getElementById("game").width, document.getElementById("game").height, 10);
+	document.getElementById("game").getContext("2d").fill();
+	document.getElementById("game").getContext("2d").closePath();
 }
 
 function drawInnerRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
-	context.fill();
-	context.closePath();
+	document.getElementById("game").getContext("2d").fillStyle = color;
+	document.getElementById("game").getContext("2d").beginPath();
+	document.getElementById("game").getContext("2d").roundRect(5, 5, document.getElementById("game").width - 10, document.getElementById("game").height - 10, 8);
+	document.getElementById("game").getContext("2d").fill();
+	document.getElementById("game").getContext("2d").closePath();
 }
-
-var keys = {};
-
-window.addEventListener("keydown", (event) => {
-	keys[event.key] = true;
-});
-
-window.addEventListener("keyup", (event) => {
-	keys[event.key] = false;
-});
 
 function update() {
 	drawOuterRectangle("#ED4EB0");
 	drawInnerRectangle("#23232e");
 
-	context.fillStyle = '#ED4EB0';
-	context.fillRect(table.width / 2, 0, 5, table.height);
+	document.getElementById("game").getContext("2d").fillStyle = '#ED4EB0';
+	document.getElementById("game").getContext("2d").fillRect(document.getElementById("game").width / 2, 0, 5, document.getElementById("game").height);
 }
 
 async function getCurrentPlayerId() {
@@ -411,7 +416,6 @@ async function addNewGame(id_player) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				// 'X-CSRFToken': csrftoken,  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({  // Convertit les données en JSON
@@ -427,7 +431,7 @@ async function addNewGame(id_player) {
 
 		if (!response.ok) {
 			const text = await response.text();
-			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);		}
+			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`); }
 
 		const result = await response.json();
 		console.log('Nouveau jeu ajouté:', result);
@@ -435,25 +439,3 @@ async function addNewGame(id_player) {
 		console.error('Erreur:', error);
 	}
 }
-
-document.addEventListener("beforeunload", function() {
-	console.log("je suis la ! bitch");
-	cancelAnimationFrame(id);
-	document.getElementById("wrapper-player1").style.display = "none";
-	document.getElementById("wrapper-player2").style.display = "none";
-	document.getElementById("replay-button").style.display = "none";
-
-	frameTime = {counter : 0, time : 0};
-	totalframeTime = {counter : 0, time : 0};
-	bounce = 0;
-	count_p1 = 0;
-	count_p2 = 0;
-	stop = 0;
-	percentage = 0;
-	cachedUserId = null;
-
-	document.getElementById("scoreP1").innerText = "0";
-	document.getElementById("scoreP2").innerText = "0";
-
-	context.clearRect(0, 0, table.width, table.height);
-})

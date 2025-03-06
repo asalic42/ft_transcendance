@@ -40,7 +40,6 @@
 		// Active le DOM au chargement de la page
 		setupDOM() {
 
-			console.log("JE MONTRE LAAAAAAAAAAAAA");
 			const safeShow = (id) => {
 				const element = document.getElementById(id);
 				if (element) element.style.display = 'flex';
@@ -290,10 +289,8 @@
 	    	    this.update();
 	    	    this.drawPlayer();
 
-	    	    if (this.isPointWin()) {
-					// console.log("score p1: ", this.score_p1.innerText);
+	    	    if (this.isPointWin())
 	    	        return ;
-				}
 	    	    this.moveBall();
 				this.animationId = requestAnimationFrame(frame);
 	    	};
@@ -395,7 +392,6 @@
 				}
 			});
 
-			console.log("j'appelle ROUTES 1");
 			this.handleRouteChange();
 		},
 
@@ -403,7 +399,6 @@
 			if (new URL(url).pathname === window.location.pathname) return;
 
 			history.pushState({}, '', url);
-			console.log("j'appelle ROUTES 2");
 			this.handleRouteChange();
 		},
 	
@@ -458,10 +453,6 @@
 
 			const oldContent = content.querySelector('#canvas-container');
 			if (oldContent) oldContent.remove();
-			// if (content.querySelector('#canvas-container')) {
-				// callback();
-				// return;
-			// }
 
 			const oldContainer = content.querySelector('#canvas-container');
 			const oldScores = content.querySelector('#scores');
@@ -509,7 +500,6 @@
 
 			content.appendChild(newContent);
 			setTimeout(callback, 10);
-			// callback();
 		},
 
 		exitGame: function() {
