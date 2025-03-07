@@ -1,19 +1,10 @@
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
+// Recup le csrf token definit plus tot dans le code
+function getCSRFToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1] || '';
 }
-
-// const csrftoken = getCookie('csrftoken');
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -47,11 +38,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = finalizedUrl;
                 return;
             }
-
-            const existingCanvas = document.getElementById('canvas-container');
-            if (existingCanvas) {
-                newContent.querySelector('#canvas-container')?.remove();
-            }
             document.getElementById("content").innerHTML = newContent.innerHTML;
 
 			if (document.getElementById('mapSelection')) {
@@ -68,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					newScript.src = oldScript.src + '?t=' + Date.now();
 					newScript.async = false;
 				} else {
-					newScript.textContent = oldScript.textContent;
+				    newScript.textContent = oldScript.textContent;
 				}
 				document.body.appendChild(newScript);
 				// Remove the script after execution to avoid clutter
@@ -97,7 +83,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Cas particulier si besoin (exemple pour LevelForm)
         if (form.id === "LevelForm") {
             loadPage(location.pathname).then(() => {
-                levelinput();
+                console.log("j'appelle BOT ici");
+                const bot_game = new BotGame();
+                bot_game.start();
             });
             return;
         }

@@ -41,3 +41,4 @@ def send_notification_to_user(user_id, channel_name):
             'channel_name': channel_name
 		}
 	)
+

@@ -10,10 +10,7 @@
 		}
 
 		initState() {
-			// document.getElementById('game') = null;
-			// this.context = null;
 			this.animationId = 0;
-			// this.fps = null;
 			this.frameTime = {counter : 0, time : 0};
 			this.totalframeTime = {counter : 0, time : 0};
 			this.keys = {};
@@ -26,6 +23,7 @@
 
 		start() {
 
+			console.log("START");
 			this.count = {p1: 0, p2: 0};
 			this.stop = false;
 
@@ -75,6 +73,7 @@
 			window.removeEventListener('keyup', this.keyHandler);
 			this.keyHandler = null;
 
+			console.log("stop, supp context");
 			if (document.getElementById('game').getContext('2d')) {
 				document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 			}
@@ -104,6 +103,12 @@
 		update() {
 			this.drawOuterRectangle("#ED4EB0");
 			this.drawInnerRectangle("#23232e");
+
+			const safeShow = (id) => {
+				const element = document.getElementById(id);
+				if (element) element.style.display = 'flex';
+			};
+			['scores', 'fps', 'canvas-container'].forEach(safeShow);
 		
 			document.getElementById('game').getContext('2d').fillStyle = '#ED4EB0';
 			document.getElementById('game').getContext('2d').fillRect(document.getElementById('game').width / 2, 0, 5, document.getElementById('game').height);
@@ -114,6 +119,7 @@
 		// Creer la balle au debut du jeu
 		createBall(vx) {
 			// Balls coords
+
 			this.ball = {coords : {x : document.getElementById('game').width / 2, y : document.getElementById('game').height / 2},
 						const_vector : {vx : vx, vy : Math.floor(this.getRandomArbitrary(-10, 10))},
 						vector : {},
@@ -255,7 +261,7 @@
 			if (this.stop) return;
 
 			const frame = () => {
-				if (this.stop) {
+				if (this.stop || !document.getElementById('game')) {
 					cancelAnimationFrame(this.animationId);
 					return ;
 				}
@@ -279,18 +285,13 @@
 				this.player2Coords.vy = this.player2Coords.const_vy * percentage;
 				start = Date.now();
 
-				const safeShow = (id) => {
-					const element = document.getElementById(id);
-					if (element) element.style.display = 'flex';
-				};
-				['scores', 'fps', 'canvas-container'].forEach(safeShow);
-
-	    	    if (document.getElementById('game').getContext('2d')) document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
+	    	    if (document.getElementById('game')) document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 	    	    this.update();
 	    	    this.drawPlayer();
 
-	    	    if (this.isPointWin())
+	    	    if (this.isPointWin()) {
 	    	        return ;
+				}
 	    	    this.moveBall();
 				this.animationId = requestAnimationFrame(frame);
 	    	};
@@ -363,6 +364,58 @@
 			}, 50);
 		}
 
+		// Get player ID from database
+		// async getCurrentPlayerId() {
+		// 	if (this.cachedUserId !== null) {
+		// 		return this.cachedUserId;
+		// 	}
+		// 	try {
+		// 		const response = await fetch('/accounts/api/current-user/', {
+		// 			credentials: 'same-origin'
+		// 		});
+		// 		const data = await response.json();
+		// 		this.cachedUserId = data.userId;
+		// 		console.log("user ID = ", this.cachedUserId);
+		// 		return this.cachedUserId;
+		// 	} catch (error) {
+		// 		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+		// 		return null;
+		// 	}
+		// }
+
+		// Add player stats to database
+		// async addNewGame(id_player1, id_player2) {
+		// 	// console.log("id_player dans addNewGame: ", id_player);
+		// 	try {
+		// 		const response = await fetch('/accounts/api/add_pong/', {
+		// 			method: 'POST',
+		// 			headers: {
+		// 				'Content-Type': 'application/json',
+		// 				'X-CSRFToken': getCSRFToken()
+		// 			},
+		// 			credentials: 'include',
+		// 			body: JSON.stringify({  // Convertit les données en JSON
+		// 				id_p1: id_player1,
+		// 				id_p2: id_player2,
+		// 				is_bot_game: false,
+		// 				score_p1: this.count.p1,
+		// 				score_p2: this.count.p2,
+		// 				difficulty: this.user_option,
+		// 				bounce_nb: this.bounce,
+		// 			})
+		// 		});
+			
+		// 		if (!response.ok) {
+		// 			const text = await response.text();
+		// 			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`); }
+				
+		// 		const result = await response.json();
+		// 		console.log('Nouveau jeu ajouté:', result);
+		// 	} catch (error) {
+		// 		console.error('Erreur:', error);
+		// 	}
+		// }
+
 		// Donne une direction aleatoire a la balle
 		getRandomArbitrary(min, max) {
 			var result = Math.random() * (max - min) + min;
@@ -371,7 +424,6 @@
 			return result;
 		}
 	}
-	// }
 
 	window.PongGame = PongGame;
 
@@ -385,6 +437,7 @@
 		
 		  // Intercepter les clics sur les liens
 			document.body.addEventListener('click', (e) => {
+				console.log("je passe par la moi !");
 				const link = e.target.closest('a');
 				if (link && link.href) {
 					e.preventDefault();
@@ -407,6 +460,7 @@
 		  const isGamePage = this.isOnGamePage(currentPath);
 		
 		  if (isGamePage) {
+			console.log("here !");
 			this.enterGame();
 		  }
 		  else
@@ -414,10 +468,9 @@
 		},
 	
 		isOnGamePage: function(path) {
-			console.log("BEFORE: ", path);
 			const normalizedPath = path.replace(/\/$/, '');
 			console.log("normalized = ", normalizedPath);
-			return normalizedPath === '/accounts/game' || normalizedPath === '/accounts/game/'; // Adaptez à votre URL de jeu
+			return (normalizedPath === '/accounts/game' || normalizedPath === '/accounts/game/'); // Adaptez à votre URL de jeu
 		},
 
 		enterGame: function() {
@@ -426,11 +479,11 @@
 	            this.currentGame.stopGame();
 	            this.currentGame = null;
 	        }
-
 			this.injectTemplate(() => {
 				this.waitElementsDom(() => {
 					if (!this.currentGame) {
 						this.currentGame = new PongGame();
+						console.log("AUSSI ICI");
 						this.currentGame.start();
 					}
 				});
@@ -451,16 +504,16 @@
 		injectTemplate: function(callback) {
 			const content = document.getElementById('content');
 
-			const oldContent = content.querySelector('#canvas-container');
-			if (oldContent) oldContent.remove();
+			// const oldContent = content.querySelector('#canvas-container');
+			// if (oldContent) oldContent.remove();
 
-			const oldContainer = content.querySelector('#canvas-container');
-			const oldScores = content.querySelector('#scores');
-			const oldFps = content.querySelector('#fps');
+			// const oldContainer = content.querySelector('#canvas-container');
+			// const oldScores = content.querySelector('#scores');
+			// const oldFps = content.querySelector('#fps');
 			
-			if (oldContainer) oldContainer.remove();
-			if (oldScores) oldScores.remove();
-			if (oldFps) oldFps.remove();
+			// if (oldContainer) oldContainer.remove();
+			// if (oldScores) oldScores.remove();
+			// if (oldFps) oldFps.remove();
 
 			const newContent = document.createElement('div');
 
@@ -499,6 +552,7 @@
 			`;
 
 			content.appendChild(newContent);
+			if (!document.getElementById("canvas-container")) console.log("canvas-container n'existe pas");
 			setTimeout(callback, 10);
 		},
 
