@@ -14,6 +14,7 @@
 
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    	<script src="{% static 'js/game.js' %}"></script>
 
     </head>
     <body>
@@ -34,7 +35,7 @@
 
             <!-- HOME -->
                 <li class="nav-item">
-                    <a href="home/" class="nav-icon">
+                    <a href="home" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/wmwqvixz.json"
                             trigger="hover"
@@ -70,7 +71,7 @@
 
             <!-- CHATROOM -->
                 <li class="nav-item">
-                    <a href="{% url 'channels' %}" class="nav-icon">
+                    <a href="channels" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/ayhtotha.json"
                             trigger="hover"
@@ -87,7 +88,7 @@
 
             <!-- NOTIFICATION(S) -->
                 <li class="nav-item">
-                    <a href="{% url 'notifications' %}" class="nav-icon">
+                    <a href="notifications" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/lznlxwtc.json"
                             trigger="hover"
@@ -109,7 +110,7 @@
     					MARGIN: 0 auto;
     					border-top: 2px solid rgba(128, 128, 128, 0.8);">
     				</div>
-                    <a href="{% url 'settings_user' %}" class="nav-icon">
+                    <a href="user-settings" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/ifsxxxte.json"
                             trigger="hover"
@@ -156,21 +157,7 @@
         </style>
 
         {% comment %} <script>
-    		function getCookie(name) {
-    			let cookieValue = null;
-    			if (document.cookie && document.cookie !== '') {
-    				const cookies = document.cookie.split(';');
-    				for (let i = 0; i < cookies.length; i++) {
-    					const cookie = cookies[i].trim();
-    					if (cookie.substring(0, name.length + 1) === (name + '=')) {
-    						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-    						break;
-    					}
-    				}
-    			}
-    			return cookieValue;
-    		}
-    		const csrftoken = getCookie('csrftoken');
+    		
     	</script> {% endcomment %}
 {% comment %} 
         <script>

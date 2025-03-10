@@ -1,4 +1,4 @@
-import os
+import os, sys
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -29,7 +29,6 @@ def load_template(request, page, **kwargs):
 
 	elif page == "profile":
 		# Cas particulier pour la vue profile_view : on passe le nom d'utilisateur en paramètre
-		import sys
 		print("called profile")
 		username = kwargs.get('username', request.user.username)
 		print(f"username: {username}")
@@ -114,6 +113,11 @@ def load_template(request, page, **kwargs):
 			'game_id': kwargs.get('game_id'),
 			'map_id': kwargs.get('map_id')
 		}
+
+	elif page == "signout":
+		print("je suis bien la bitch")
+		sys.stdout.flush()
+		return (redirect('loginpage:sign_in'))
 
 	else:
 		context = {}

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import *
 
 urlpatterns = [
@@ -10,7 +10,7 @@ urlpatterns = [
     path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
     # Route générique pour toute autre page nécessitant un rendu (ex: about, contact, etc.)
     path('<str:page>/', load_template, name='load_template'),
-    
+    path('login/', include('loginpage.urls', namespace='loginpage')),
     # --- Routes pour les actions et API (inchangées) ---
     path('signout/', signout, name='signout'),
     path('deleteAccount/', delete_account, name='delete_account'),
@@ -26,7 +26,7 @@ urlpatterns = [
     path('api/rooms/', get_rooms, name="get_rooms"),
     
     path('get-ip-info/', get_ip_info, name='get_ip_info'),
-    path('user-settings/', settings_user, name='settings_user'),
+    # path('user-settings/', settings_user, name='settings_user'),
     path('user-settings/check_username/', check_username, name='check_username'),
     path('user-settings/check_email/', check_email, name='check_email'),
     path('user-settings/check_pseudo/', check_pseudo, name='check_pseudo'),

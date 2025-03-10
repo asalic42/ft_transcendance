@@ -6,7 +6,7 @@
 
 <div id="content">
 
-	<link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+	<link rel="stylesheet" href="{% static 'css/game-bot-style.css' %}">
 	
 	<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
 
@@ -17,7 +17,7 @@
 		<h3 id="title">BOT</h3>
 	</div>
 	
-	<div id="page">
+	<div id="bot-page">
 		<a href="game-mode-pong" class="retour">
 			<span class="inputs" id="retour" >Retour</span>
 		</a>
@@ -30,8 +30,8 @@
 	    </div>
 	</div>
 	
-	<div id="canvas-container">
-		<canvas width="1920" height="850" id="game"></canvas>
+	<div id="bot-canvas-container">
+		<canvas width="1920" height="850" id="bot-game"></canvas>
 		<div id="button-container">
 			<button id="replay-button" data-type="bot" style="display: none;">Play again !</button>
 		</div>

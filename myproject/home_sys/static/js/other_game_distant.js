@@ -47,7 +47,7 @@ let start;
 
 // WebSocket concerns
 
-const socket = new WebSocket(`wss://transcendance.42.paris/ws/casse-brique/${game_id}/${map_id}`);
+const socket = new WebSocket(`wss://192.168.66.45:5000/ws/casse-brique/${game_id}/${map_id}`);
 
 socket.onopen = function () {
 	console.log("Connexion au Socket !");
@@ -203,7 +203,7 @@ function game_restarted(data) {
 }
 
 //! Loop func
-let id=0;
+var id=0;
 function launchAnim(data) {
 
 	// console.log("je suis ici !!");
@@ -228,17 +228,17 @@ function launchAnim(data) {
 		context2.clearRect(0, 0, table2.width, table2.height);
 		updateDrawing(gameState);
 
-		// if (gameState.scores) {
-			// score1.innerText = gameState.scores.p1;
-			// score2.innerText = gameState.scores.p2;
+		if (gameState.scores) {
+			score1.innerText = gameState.scores.p1;
+			score2.innerText = gameState.scores.p2;
 
-			// if (gameState.scores.p1 >= 10 && gameState.scores.p1 == gameState.scores.p2)
-				// winnerWindow(0);
-			// if (gameState.scores.p1 >= 10)
-				// winnerWindow(1);
-			// else if (gameState.scores.p2 >= 10)
-				// winnerWindow(2);
-		// }
+			if (gameState.scores.p1 >= 10 && gameState.scores.p1 == gameState.scores.p2)
+				winnerWindow(0);
+			if (gameState.scores.p1 >= 10)
+				winnerWindow(1);
+			else if (gameState.scores.p2 >= 10)
+				winnerWindow(2);
+		}
 		timer.textContent = "Time left: " + gameState.timeLeft + "s";
 	})
 }
@@ -401,12 +401,12 @@ function updateFPS() {
     fpsElement.textContent = `Fps : ${fps} | Avg Fps : ${avgFps}`;
     lastTime = now;
     
-    // requestAnimationFrame(updateFPS);
+    requestAnimationFrame(updateFPS);
 }
 
-const interval = setInterval(function() {
-	updateFPS()
-}, 1000);
+// const interval = setInterval(function() {
+	// updateFPS()
+// }, 1000);
  
 
-requestAnimationFrame(updateFPS);
+// requestAnimationFrame(updateFPS);

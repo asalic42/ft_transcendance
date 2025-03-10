@@ -1,16 +1,9 @@
-
-// Sécurité CSRF cookies
-function getTokenCSRF() {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        document.cookie.split(';').forEach(cookie => {
-            let trimmedCookie = cookie.trim();
-            if (trimmedCookie.startsWith('csrftoken=')) {
-                cookieValue = trimmedCookie.split('=')[1];
-            }
-        });
-    }
-    return cookieValue;
+// Recup le csrf token definit plus tot dans le code
+function getCSRFToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1] || '';
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -28,19 +21,15 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Fonction de chargement de page via fetch (modifiée)
     function loadPage(url, pushState = true) {
-        // Supprimer les anciens scripts avant de charger la nouvelle page
-        loadedScripts.forEach(script => script.remove());
-        loadedScripts = []; // Réinitialiser le tableau
-    
-        if (url != "accounts/" && url != "/accounts/")
-            var finalizedUrl = prependAccounts(url);
-        else
-            var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
-    
-        fetch(finalizedUrl, { 
+		if (url != "accounts/" && url != "/accounts/")
+			var finalizedUrl = prependAccounts(url);
+		else
+			var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+
+
+        return fetch(finalizedUrl, { 
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getTokenCSRF()
             },
             credentials: 'include'
         })
@@ -54,37 +43,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = finalizedUrl;
                 return;
             }
-    
             document.getElementById("content").innerHTML = newContent.innerHTML;
-    
-            // Gestion des scripts
-            const scriptPromises = [];
-            Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-                const newScript = document.createElement('script');
-                if (oldScript.src) {
-                    newScript.src = oldScript.src;
-                    newScript.async = false;
-                    const promise = new Promise((resolve, reject) => {
-                        newScript.onload = () => {
-                            resolve();
-                        };
-                        newScript.onerror = reject;
-                    });
-                    scriptPromises.push(promise);
-                } else {
-                    newScript.textContent = oldScript.textContent;
-                    scriptPromises.push(Promise.resolve());
-                }
-                document.body.appendChild(newScript);
-                loadedScripts.push(newScript); // Stocker la référence
-            });
-    
-            return Promise.all(scriptPromises);
-        })
-        .then(() => {
-            if (document.getElementById('mapSelection')) {
-                initializeMapButtons();
-            }
+
+			if (document.getElementById('mapSelection')) {
+				// Ensure the script has run (safety check)
+				if (typeof initializeMapButtons === 'function') {
+					initializeMapButtons();
+				}
+			}
+            // Réexécution des scripts intégrés
+			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
+				const newScript = document.createElement('script');
+				if (oldScript.src) {
+					// Add cache-buster to prevent stale scripts
+					newScript.src = oldScript.src + '?t=' + Date.now();
+					newScript.async = false;
+				} else {
+				    newScript.textContent = oldScript.textContent;
+				}
+				document.body.appendChild(newScript);
+				// Remove the script after execution to avoid clutter
+				newScript.onload = () => newScript.remove();
+			});
+
             if (pushState) history.pushState(null, "", finalizedUrl);
         })
         .catch(error => console.error("Erreur de chargement:", error));
@@ -106,8 +87,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Cas particulier si besoin (exemple pour LevelForm)
         if (form.id === "LevelForm") {
-            const level = form.elements.levelfield.value;
-            levelinput(level);
+            loadPage(location.pathname).then(() => {
+                console.log("j'appelle BOT ici");
+                const bot_game = new BotGame();
+                bot_game.start();
+            });
             return;
         }
 
@@ -119,7 +103,6 @@ document.addEventListener("DOMContentLoaded", function () {
             body: formData,
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getTokenCSRF()
             }
         })
         .then(response => response.json())

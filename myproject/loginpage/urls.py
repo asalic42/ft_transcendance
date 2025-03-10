@@ -2,6 +2,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'loginpage'
+
 urlpatterns = [
     path('', views.index, name='index'),  # This renders your HTML
     path('sign-in/', views.signin, name='sign_in'),

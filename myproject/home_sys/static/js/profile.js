@@ -13,16 +13,16 @@ blockButton.addEventListener('click', function(e) {
     // Construire l'URL correctement
     const url = `/accounts/block_user/${username}/`;
     // Récupérer le token CSRF
-    const csrfToken = getCookie('csrftoken');
-    if (!csrfToken) {
-        console.error("CSRF token non trouvé !");
-        alert("Erreur : CSRF token manquant.");
-        return;
-    }
+    // const csrfToken = getCookie('csrftoken');
+    // if (!csrfToken) {
+    //     console.error("CSRF token non trouvé !");
+    //     alert("Erreur : CSRF token manquant.");
+    //     return;
+    // }
     fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken,
+            // 'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({})
@@ -70,17 +70,17 @@ addButton.addEventListener('click', function(e) {
     const url = `/accounts/add_friend/${username}/`;
 
     // Récupérer le token CSRF
-    const csrfToken = getCookie('csrftoken');
-    if (!csrfToken) {
-        console.error("CSRF token non trouvé !");
-        alert("Erreur : CSRF token manquant.");
-        return;
-    }
+    // const csrfToken = getCookie('csrftoken');
+    // if (!csrfToken) {
+        // // console.error("CSRF token non trouvé !");
+        // // alert("Erreur : CSRF token manquant.");
+    //     // return;
+    // }
 
     fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken,
+            // 'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({})
