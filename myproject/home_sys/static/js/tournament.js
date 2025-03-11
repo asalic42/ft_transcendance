@@ -1,4 +1,4 @@
-const socket = new WebSocket(`wss://192.168.66.45:5000/ws/tournament/${id_t}`);
+const socket = new WebSocket(`wss://192.168.43.45:5000/ws/tournament/${id_t}`);
 
 socket.onopen = function() {
     console.log("Connexion réussie au WebSocket");
@@ -9,7 +9,7 @@ socket.onopen = function() {
 
 socket.onclose = function socket_close() {
 	alert("Tournament is full, running or there has been an error.")
-	window.location.href = "https://192.168.66.45:5000/accounts/game-mode-pong/"
+	window.location.href = "https://192.168.43.45:5000/accounts/game-mode-pong/"
 }
 
 function startButton(link, name) {
@@ -69,7 +69,7 @@ socket.onmessage = function(event) {
 		}
 		if (data.type === "tournament_cancelled") {
 			alert("Tournament is cancelled. Someone disconnected.");
-			window.location.href = "https://192.168.66.45:5000/accounts/game-mode-pong/"
+			window.location.href = "https://192.168.43.45:5000/accounts/game-mode-pong/"
 		}
 		if (data.type === "user_list") {
 			span.textContent = "Users connected to tournament: ";
@@ -85,7 +85,7 @@ socket.onmessage = function(event) {
 			}
 
 			sleep(1000);
-			window.location.href = "https://192.168.66.45:5000/accounts/game-mode-pong/"
+			window.location.href = "https://192.168.43.45:5000/accounts/game-mode-pong/"
 		}
     } catch (error) {
         console.error("Erreur de parsing des données du WebSocket :", error);

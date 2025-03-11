@@ -47,7 +47,7 @@ let start;
 
 // WebSocket concerns
 
-const socket = new WebSocket(`wss://192.168.66.45:5000/ws/casse-brique/${game_id}/${map_id}`);
+const socket = new WebSocket(`wss://192.168.43.45:5000/ws/casse-brique/${game_id}/${map_id}`);
 
 socket.onopen = function () {
 	console.log("Connexion au Socket !");

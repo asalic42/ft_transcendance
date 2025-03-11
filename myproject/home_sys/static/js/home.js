@@ -21,7 +21,7 @@ function fetchAllUsersStatus() {
 }
 
 function connectWebSocket() {
-	statusSocket = new WebSocket("wss://192.168.66.45:5000/ws/status/");
+	statusSocket = new WebSocket("wss://192.168.43.45:5000/ws/status/");
 
 	statusSocket.onopen = function(e) {
 		console.log("WebSocket connection established");

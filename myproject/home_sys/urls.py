@@ -10,7 +10,7 @@ urlpatterns = [
     path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
     # Route générique pour toute autre page nécessitant un rendu (ex: about, contact, etc.)
     path('<str:page>/', load_template, name='load_template'),
-    path('login/', include('loginpage.urls', namespace='loginpage')),
+    path('login/', include('loginpage.urls', namespace='loginpage'), name="redirectafter"),
     # --- Routes pour les actions et API (inchangées) ---
     path('signout/', signout, name='signout'),
     path('deleteAccount/', delete_account, name='delete_account'),

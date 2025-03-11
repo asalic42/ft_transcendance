@@ -7,6 +7,26 @@ function getCSRFToken() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Registre des scripts déjà chargés pour éviter les doublons
+    window.loadedScripts = window.loadedScripts || {
+        external: new Set(), // URLs des scripts externes
+        moduleVars: new Set() // Noms des variables globales créées par les scripts
+    };
+
+    // Nettoyer les variables globales explicitement
+    function cleanupGlobalVars() {
+        window.loadedScripts.moduleVars.forEach(varName => {
+            try {
+                if (window[varName]) {
+                    window[varName] = null;
+                    delete window[varName];
+                }
+            } catch (e) {
+                console.warn("Impossible de nettoyer la variable:", varName);
+            }
+        });
+        window.loadedScripts.moduleVars.clear();
+    }
 
     // Ajoute /accounts/ si absent
     function prependAccounts(url) {
@@ -14,18 +34,15 @@ document.addEventListener("DOMContentLoaded", function () {
         return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
     }
 
-    // Fonction de chargement de page via fetch
-    // Fonction de chargement de page via fetch
-    // Ajouter une variable globale pour tracker les scripts chargés
-    let loadedScripts = [];
-    
-    // Fonction de chargement de page via fetch (modifiée)
+    // Fonction de chargement de page via fetch (améliorée)
     function loadPage(url, pushState = true) {
-		if (url != "accounts/" && url != "/accounts/")
-			var finalizedUrl = prependAccounts(url);
-		else
-			var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+        if (url != "accounts/" && url != "/accounts/")
+            var finalizedUrl = prependAccounts(url);
+        else
+            var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
 
+        // Nettoyage avant chargement de la nouvelle page
+        cleanupGlobalVars();
 
         return fetch(finalizedUrl, { 
             headers: {
@@ -43,30 +60,75 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = finalizedUrl;
                 return;
             }
+            
+            // Nettoyage des scripts existants chargés dynamiquement
+            document.querySelectorAll('script[data-dynamic="true"]').forEach(script => {
+                script.remove();
+            });
+            
+            // Mise à jour du contenu
             document.getElementById("content").innerHTML = newContent.innerHTML;
 
-			if (document.getElementById('mapSelection')) {
-				// Ensure the script has run (safety check)
-				if (typeof initializeMapButtons === 'function') {
-					initializeMapButtons();
-				}
-			}
-            // Réexécution des scripts intégrés
-			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-				const newScript = document.createElement('script');
-				if (oldScript.src) {
-					// Add cache-buster to prevent stale scripts
-					newScript.src = oldScript.src + '?t=' + Date.now();
-					newScript.async = false;
-				} else {
-				    newScript.textContent = oldScript.textContent;
-				}
-				document.body.appendChild(newScript);
-				// Remove the script after execution to avoid clutter
-				newScript.onload = () => newScript.remove();
-			});
-
-            if (pushState) history.pushState(null, "", finalizedUrl);
+            // Initialisation de fonctions spécifiques si nécessaire
+            if (document.getElementById('mapSelection')) {
+                if (typeof initializeMapButtons === 'function') {
+                    initializeMapButtons();
+                }
+            }
+            
+            // Traitement des nouveaux scripts
+            const scriptPromises = [];
+            
+            Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
+                // Analyser le contenu du script pour identifier les variables globales
+                if (!oldScript.src && oldScript.textContent) {
+                    const varDeclarations = oldScript.textContent.match(/(?:var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g) || [];
+                    varDeclarations.forEach(declaration => {
+                        const varName = declaration.replace(/(?:var|let|const)\s+/, '');
+                        window.loadedScripts.moduleVars.add(varName);
+                    });
+                }
+                
+                const newScript = document.createElement('script');
+                newScript.setAttribute('data-dynamic', 'true'); // Pour identification
+                
+                if (oldScript.src) {
+                    // Pour les scripts externes
+                    const scriptUrl = oldScript.src.split('?')[0]; // URL de base sans paramètres
+                    
+                    // Éviter de charger le même script plusieurs fois
+                    if (window.loadedScripts.external.has(scriptUrl)) {
+                        return; // Sauter ce script s'il est déjà chargé
+                    }
+                    
+                    window.loadedScripts.external.add(scriptUrl);
+                    newScript.src = scriptUrl + '?t=' + Date.now(); // Cache busting
+                    newScript.async = false;
+                    
+                    // Créer une promesse pour attendre le chargement
+                    const promise = new Promise((resolve, reject) => {
+                        newScript.onload = resolve;
+                        newScript.onerror = reject;
+                    });
+                    scriptPromises.push(promise);
+                } else {
+                    // Pour les scripts inline, utiliser une IIFE pour isoler les variables
+                    newScript.textContent = `(function() { 
+                        try {
+                            ${oldScript.textContent}
+                        } catch (error) {
+                            console.error("Erreur dans le script inline:", error);
+                        }
+                    })();`;
+                }
+                
+                document.body.appendChild(newScript);
+            });
+            
+            // Attendre le chargement de tous les scripts
+            return Promise.all(scriptPromises).then(() => {
+                if (pushState) history.pushState(null, "", finalizedUrl);
+            });
         })
         .catch(error => console.error("Erreur de chargement:", error));
     }
@@ -89,6 +151,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (form.id === "LevelForm") {
             loadPage(location.pathname).then(() => {
                 console.log("j'appelle BOT ici");
+                // Éviter les redéclarations
+                if (window.botGame) {
+                    delete window.botGame;
+                }
                 const bot_game = new BotGame();
                 bot_game.start();
             });
@@ -103,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: formData,
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCSRFToken()
             }
         })
         .then(response => response.json())
@@ -110,13 +177,19 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.error) {
                 alert(data.error);
             } else if (data.html) {
+                // Nettoyage avant mise à jour du contenu
+                cleanupGlobalVars();
+                document.querySelectorAll('script[data-dynamic="true"]').forEach(script => {
+                    script.remove();
+                });
+                
                 document.getElementById("content").innerHTML = data.html;
                 history.pushState(null, "", prependAccounts(data.redirect || form.action));
             } else if (data.redirect) {
                 loadPage(data.redirect);
             }
         })
-        .catch(error => console.error("Erreur d’envoi:", error));
+        .catch(error => console.error("Erreur d'envoi:", error));
     }
 
     document.body.addEventListener("click", handleLinkClick);

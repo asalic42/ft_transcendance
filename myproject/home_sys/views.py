@@ -159,7 +159,7 @@ def home(request):
 """
 def signout(request):
 	logout(request)
-	return (redirect('sign_in'))
+	return (redirect('loginpage'))
 
 """
 [-------------------------------------------------------------------------]
@@ -173,6 +173,7 @@ def signout(request):
 |   Une fois effacé, on redirige sur la page de "compte effacé avec succès"
 |
 """
+@ensure_csrf_cookie
 @login_required
 def delete_account(request):
 
@@ -423,6 +424,7 @@ def does_channel_exist(request, asked_name):
 	except Chans.DoesNotExist:
 		return JsonResponse({'status': 'error'})
 
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def post_chan(request):
 	try:
@@ -467,6 +469,7 @@ def get_messages(request):
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des messages'}, status=500)
 
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def post_message(request):
 	try:
@@ -536,6 +539,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import Users
 
+@ensure_csrf_cookie
 @login_required
 def update_user_info(request):
 	if request.method == 'POST':
@@ -613,6 +617,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .models import Users
 
+@ensure_csrf_cookie
 @login_required
 def upload_avatar(request):
 	if request.method == 'POST':
@@ -844,6 +849,7 @@ def check_duplicate_private_channel(request, user1_id, user2_id):
 		})
 	return JsonResponse({'exists': False})
 
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def	postPv(request):
 	try:
@@ -870,6 +876,7 @@ def getNameById(request, idU):
 # Configurez le logger
 # logger = logging.getLogger(__name__)
 
+@ensure_csrf_cookie
 @login_required
 def add_friend(request, username):
 	if request.method == 'POST':
@@ -935,6 +942,7 @@ def notification_page(request):
 
 	return render(request, 'notifications.html', context)
 
+@ensure_csrf_cookie
 @login_required
 def accept_friend_request(request, username):
 	if request.method == 'POST':
@@ -961,6 +969,7 @@ def accept_friend_request(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def decline_friend_request(request, username):
 	if request.method == 'POST':
@@ -976,6 +985,7 @@ def decline_friend_request(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def block_user(request, username):
 	if request.method == 'POST':
@@ -1006,6 +1016,7 @@ def block_user(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def remove_friend(request, username):
 	if request.method == 'POST':
@@ -1024,6 +1035,7 @@ def remove_friend(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def remove_blocked_user(request, username):
 	if request.method == 'POST':
@@ -1040,6 +1052,7 @@ def remove_blocked_user(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def invite_friend(request, username):
 	if request.method == 'POST':
@@ -1059,6 +1072,7 @@ def invite_friend(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def invitation_declined(request, username):
 	if request.method == 'POST':

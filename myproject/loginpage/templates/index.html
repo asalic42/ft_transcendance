@@ -24,8 +24,7 @@
     </div>
 
     <div class="signin-container">
-        <form class="form1" id="id-signin-form" action="{% url 'sign_in' %}" method="POST">
-            {% csrf_token %}
+		<form class="form1" id="id-signin-form" action="{% url 'loginpage:sign_in' %}" method="POST">            {% csrf_token %}
             <h2>SIGN IN</h2>
 
             <div class="inputbox">
@@ -66,8 +65,7 @@
     </div>
 
     <div class="signup-container">
-        <form class="form2" id="id-signup-form" action="{% url 'sign_up' %}" method="POST">
-            {% csrf_token %}
+		<form class="form2" id="id-signup-form" action="{% url 'loginpage:sign_up' %}" method="POST">            {% csrf_token %}
 
             <h2>SIGN UP</h2>
 
