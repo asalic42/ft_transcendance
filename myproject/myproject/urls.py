@@ -28,10 +28,10 @@ urlpatterns = [
     path('', RedirectView.as_view(url='signin')),  
     # Redirige l'utilisateur de la page d'accueil vers la page de connexion (signin) par défaut
 
-    path('signin/', include('loginpage.urls')),    
+    path('signin/', include('loginpage.urls')),
     # Inclut toutes les URLs liées à l'authentification (connexion et inscription) définies dans l'application login_sys
 
-    path('accounts/', include('home_sys.urls')),     
+    path('accounts/', include('home_sys.urls')),
     # Inclut toutes les URLs relatives aux fonctionnalités du compte (comme la gestion du profil) dans l'application home_sys
 
     path('admin/', admin.site.urls),

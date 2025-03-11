@@ -10,25 +10,28 @@
 
 	<div class="page">
 		<div class="rectangle"></div>
-		<a href="game-distant-choice" class="retour">
+		<a href="game-type-pong" class="retour">
 			<span class="game-mode" id="retour" >Retour</span>
 		</a>
 		<h1 class="title">Choix de la room</h1>
 		<div class="mode-choices">
 
-			<button class="game-distant" id="distant" data-user-id={{ request.user.id }}>
+			<a href="game-distant/{{ request.user.id }}/0" class="game-distant">
 				<span class="game-mode">New game</span>
-			</button>
+			</a>
 			<div id="test">
-				<div id="test">
+				{% if all_games %}
 					<h2 id='text'> Join room : </h2>
-					<div id="rooms-list">
-						<p>Chargement des rooms...</p>
-					</div>
-				</div>
+					{% for room in all_games %}
+						<a href="game-distant/{{ room.game_id }}/{{ room.id_t }}" class="game-distant" id="choice">
+							<span class="game-mode" id="choice">Room {{ room.game_id}}</span>
+						</a>
+					{% endfor %}
+				{% else %}
+					<p>Aucune Room </p>
+				{% endif %}
 			</div>
 		</div>
-
 	</div>
 </div>
 

@@ -272,6 +272,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 			await self.create_current_game()
 
 		if len(self.game.players) == 2 and not self.game.is_running and not self.game.is_over:
+			print("nous sommes 2")
+			sys.stdout.flush()
+
 			self.game.is_running = True
 			await self.delete_current_game()
 			await self.send_game_state()
@@ -382,6 +385,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 						**game_state
 					})
 	
+					print("SOMMES NOUS DEUX ???")
+					sys.stdout.flush()
 					asyncio.create_task(self.start_game())
 					return
 			except json.JSONDecodeError:
@@ -481,6 +486,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 			if current_time - last_update >= update_interval:
 				ball = self.game.ball
 
+				print("JE SUIS LA")
+				sys.stdout.flush()
+
 				# Maj ball coords
 				ball['coords']['x'] += ball['vector']['vx'] * self.game.multiplyer
 				ball['coords']['y'] += ball['vector']['vy'] * self.game.multiplyer
@@ -544,7 +552,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 							'vy': 30
 						}
 
-				if self.game.scores['p1'] >= 1 or self.game.scores['p2'] >= 1:
+				if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
 					self.game.is_running = False
 					await self.add_pong_serializer()
 

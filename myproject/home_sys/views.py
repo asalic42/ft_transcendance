@@ -13,8 +13,6 @@ from .models import *
 import json, requests
 from .utils import add_pong_logic, send_notification_to_user
 
-
-
 @login_required
 @never_cache
 def load_template(request, page, **kwargs):
@@ -113,10 +111,14 @@ def load_template(request, page, **kwargs):
 			'game_id': kwargs.get('game_id'),
 			'map_id': kwargs.get('map_id')
 		}
+	
+	elif page == "game-distant":
+		context = {
+			'game_id': kwargs.get('game_id'),
+			'id_t': kwargs.get('id_t')
+		}
 
 	elif page == "signout":
-		print("je suis bien la bitch")
-		sys.stdout.flush()
 		return (redirect('loginpage:sign_in'))
 
 	else:

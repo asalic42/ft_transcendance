@@ -6,7 +6,6 @@ from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 
-
 # Page d'accueil
 @never_cache
 def index(request):
@@ -43,11 +42,12 @@ def signup(request):
         login(request, userauth)
         return (redirect('home'))
     
-    return redirect('index')
+    return redirect('loginpage:index')
 
 # Connexion d'un utilisateur
 @never_cache
 def signin(request):
+
     if request.user.is_authenticated:
         return redirect('home')
 
@@ -64,9 +64,9 @@ def signin(request):
             return redirect('home')
         else:
             messages.error(request, 'Login failed')
-            return redirect('index')
+            return redirect('loginpage:index')
 
-    return redirect('index')
+    return redirect('loginpage:index')
 
 # Déconnexion de l'utilisateur
 def signout(request):

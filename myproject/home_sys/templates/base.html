@@ -14,7 +14,12 @@
 
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    	<script src="{% static 'js/game.js' %}"></script>
+
+        {% comment %} Game Scripts {% endcomment %}
+    	<script type="module" src="{% static 'js/game.js' %}"></script>
+	    <script src="{% static 'js/game-bot.js' %}"></script>
+        <script type="module" src="{% static 'js/game-distant.js' %}"></script>
+    	<script type="module" src="{% static 'js/router.js' %}"></script>
 
     </head>
     <body>
