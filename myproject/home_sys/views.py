@@ -11,7 +11,11 @@ from django.conf import settings
 from django.db.models import Q
 from .models import *
 import json, requests
+import uuid
 from .utils import add_pong_logic, send_notification_to_user
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 @never_cache
@@ -1099,4 +1103,14 @@ def create_current_game(request, sender_id):
 @login_required
 def get_rooms(request):
 	rooms = CurrentGame.objects.all().values("game_id")
-	return JsonResponse({"rooms": list(rooms)})
+	return JsonResponse(list(rooms), safe=False)
+
+@login_required
+def create_room(request):
+    if request.method == 'POST':
+        new_room = CurrentGame.objects.create(
+            game_id=uuid.uuid4())
+        return JsonResponse({
+            'game_id': new_room.game_id,
+        })
+    return JsonResponse({'error': 'Méthode non autorisée'}, status=405)

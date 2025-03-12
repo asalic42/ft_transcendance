@@ -16,21 +16,16 @@
 		<h1 class="title">Choix de la room</h1>
 		<div class="mode-choices">
 
-			<a href="game-distant/{{ request.user.id }}/0" class="game-distant">
+			<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
+			{% comment %} <a href="#" class="game-distant" id="new-room">	 {% endcomment %}
 				<span class="game-mode">New game</span>
 			</a>
+
 			<div id="test">
-				{% if all_games %}
-					<h2 id='text'> Join room : </h2>
-					{% for room in all_games %}
-						<a href="game-distant/{{ room.game_id }}/{{ room.id_t }}" class="game-distant" id="choice">
-							<span class="game-mode" id="choice">Room {{ room.game_id}}</span>
-						</a>
-					{% endfor %}
-				{% else %}
-					<p>Aucune Room </p>
-				{% endif %}
-			</div>
+				<h2 id='text'> Join room :</h2>
+				<div id="rooms-list"></div>
+			</div> 
+
 		</div>
 	</div>
 </div>

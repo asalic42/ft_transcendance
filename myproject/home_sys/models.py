@@ -169,7 +169,6 @@ class CurrentGame(models.Model):
 class tournament_room(models.Model):
     tournament_id = models.IntegerField(unique=True)
 
-
 """ USEROPENEDCHANNEL """
 
 class UserOpenedChannel(models.Model):

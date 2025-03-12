@@ -9,7 +9,7 @@
 
     <h3 class="scores" id="fps">Fps : 0</h3>
 
-    <a href="game-distant-choice" class="game-distant">
+    <a href="game-distant-choice/" class="game-distant">
     	<span class="game-mode">Retour</span>
     </a>
 
@@ -43,13 +43,14 @@
 
     <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
 
-    <script>
+    {% comment %} <script>
     	var gameId = "{{ game_id }}";
     	{% block script %}
     	    var id_t = "{{ id_t }}";
     	{% endblock %}
-    </script>
+    </script> {% endcomment %}
 
     <script src="{% static 'js/game-distant.js' %}"></script>
 </div>
+
 {% endblock %}
