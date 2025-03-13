@@ -43,14 +43,7 @@
 
     <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
 
-    {% comment %} <script>
-    	var gameId = "{{ game_id }}";
-    	{% block script %}
-    	    var id_t = "{{ id_t }}";
-    	{% endblock %}
-    </script> {% endcomment %}
-
-    <script src="{% static 'js/game-distant.js' %}"></script>
+    {% comment %} <script src="{% static 'js/game-distant.js' %}"></script> {% endcomment %}
 </div>
 
 {% endblock %}

@@ -7,7 +7,7 @@
 <div id="content">
 
 	<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
-
+	
 	<div class="page">
 		<div class="rectangle"></div>
 		<a href="game-type-pong" class="retour">
@@ -17,17 +17,18 @@
 		<div class="mode-choices">
 
 			<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
-			{% comment %} <a href="#" class="game-distant" id="new-room">	 {% endcomment %}
 				<span class="game-mode">New game</span>
 			</a>
-
+			
 			<div id="test">
 				<h2 id='text'> Join room :</h2>
 				<div id="rooms-list"></div>
 			</div> 
-
+			<p>"HEY"</p>
+			
 		</div>
 	</div>
+	
 </div>
 
 {% endblock %}

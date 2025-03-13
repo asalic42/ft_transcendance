@@ -31,17 +31,17 @@ class Router {
         this.handleRouteChange();
     }
 
-    handleRouteChange() {
+    async handleRouteChange() {
 
         const currentPath = window.location.pathname;
         const isGamePage = this.isOnGamePage(currentPath);
-        const isRoomSelect = currentPath.includes('/accounts/game-distant-choice');
+        const isRoomSelect = currentPath.match('/accounts/game-distant-choice');
         const isDistantGame = currentPath.match(/^\/accounts\/game-distant\/(\d+)\/(\d+)\/?/);
     
         if (isGamePage)
             this.enterLocalGame();
-        else if (isRoomSelect)
-            this.handleRoomSelection();
+        // else if (isRoomSelect)
+            // await this.handleRoomSelection();
         else if (isDistantGame)
             this.handleDistantGame(isDistantGame);
         else
@@ -53,33 +53,24 @@ class Router {
         return (normalizedPath === '/accounts/game' || normalizedPath === '/accounts/game/'); // Adaptez à votre URL de jeu
     }
 
-    handleRoomSelection() {
-        // if (this.currentGame) {
-        //     this.currentGame.stopGame();
-        //     this.currentGame = null;
-        // }
+    async handleRoomSelection() {
 
-        this.injectTemplateRoom(() => {
-            if (!this.currentGame) {
-                this.currentGame = new RoomGameManager();
-                console.log("ROOM GAME CHOOSE !!");
-            }
-        });
+        this.injectTemplateRoom();
+        new RoomGameManager();
     }
 
     handleDistantGame(match) {
         // on ignore la premiere variable index=0 => fullPath
         const [, gameId, id_t] = match;
-        // if (this.currentGame) {
-        //     this.currentGame.stopGame();
-        //     this.currentGame = null;
-        // }
+        if (this.currentGame) {
+            this.currentGame.stopGame();
+            this.currentGame = null;
+        }
 
         this.injectTemplateGameDistant(() => {
             // this.waitElementsDom(() => {
                 // if (!this.currentGame) {
                 this.currentGame = new PongDistantGame(gameId, id_t);
-                console.log("DEBUT DISTANT GAME !!");
                 // }
             // });
         });
@@ -95,7 +86,6 @@ class Router {
             this.waitElementsDom(() => {
                 if (!this.currentGame) {
                     this.currentGame = new PongGame();
-                    console.log("AUSSI ICI");
                     this.currentGame.start();
                 }
             });
@@ -113,35 +103,39 @@ class Router {
         checkEl();
     }
 
-    injectTemplateRoom(callback) {
-        const content = document.getElementById('content');
+    injectTemplateRoom() {
+        return new Promise((resolve) => {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
 
-        const newContent = document.createElement('div');
-        newContent.innerHTML = `
-            <link rel="stylesheet" href="/static/css/game-mode-style.css">
+            console.log("inject html");
+            const newContent = document.createElement('div');
+            newContent.innerHTML = `
+                <link rel="stylesheet" href="/static/css/game-mode-style.css">
 
-	        <div class="page">
-	        	<div class="rectangle"></div>
-	        	<a href="game-type-pong" class="retour">
-	        		<span class="game-mode" id="retour" >Retour</span>
-	        	</a>
-	        	<h1 class="title">Choix de la room</h1>
-	        	<div class="mode-choices">
-	        		<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
-	        			<span class="game-mode">New game</span>
-	        		</a>
+	            <div class="page">
+	            	<div class="rectangle"></div>
+	            	<a href="game-type-pong" class="retour">
+	            		<span class="game-mode" id="retour" >Retour</span>
+	            	</a>
+	            	<h1 class="title">Choix de la room</h1>
+	            	<div class="mode-choices">
+	            		<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
+	            			<span class="game-mode">New game</span>
+	            		</a>
 
-	        		<div id="test">
-	        			<h2 id='text'> Join room :</h2>
-	        			<div id="rooms-list"></div>
-	        		</div> 
+	            		<div id="test">
+	            			<h2 id='text'> Join room :</h2>
+	            			<div id="rooms-list"></div>
+	            		</div> 
 
-	        	</div>
-	        </div>
-        `;
+	            	</div>
+	            </div>
+            `;
 
-        content.appendChild(newContent);
-        setTimeout(callback, 10);
+            content.appendChild(newContent);
+            setTimeout(() => resolve(), 10);
+        });
     }
 
     injectTemplateGameDistant(callback) {
@@ -244,7 +238,6 @@ class Router {
 
     exitGame() {
         if (this.currentGame) {
-            console.log("current game = ", this.currentGame);
             this.currentGame.stopGame();
             this.currentGame = null;
         }
