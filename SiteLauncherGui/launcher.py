@@ -8,8 +8,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QTextBrowser,
     QLabel,
-    QWidget
+    QWidget,
 )
+from PyQt5.QtGui import QMovie
 from PyQt5.QtCore import QProcess
 from dotenv import load_dotenv
 import signal
@@ -18,6 +19,14 @@ from threading import Thread
 from time import sleep
 import subprocess
 
+
+ID_LAUNCH = "#launch"
+ID_STATIC = "#static"
+ID_RELAUNCH = "#relaunch"
+ID_NAV = "#firefox"
+ID_STOP = "#stop"
+ID_DOCKER_STOP = "#dockerStop"
+ID_CLEAR_OUTPUT = "#clearOutput"
 
 
 def ansi_to_html(ansi_text):
@@ -103,11 +112,16 @@ class SiteLauncher(QMainWindow):
         script_root = os.getenv("SCRIPT_ROOT")
         os.chdir(script_root)
 
+        self.imgs_src = os.getenv("IMGS_ROOT")
+
         self.all_cmd = {"launch": "./log.sh b-all"}
         self.initUI()
 
     def initUI(self):
         layout = QVBoxLayout()
+
+        self.all_labels = {}
+        self.all_buttons = []
 
         def styleButton(button):
 
@@ -120,9 +134,13 @@ class SiteLauncher(QMainWindow):
                 QPushButton:hover {
                     background-color: darkviolet;
                 }
+                QPushButton:disabled {
+                    background-color: gray;
+                    color: white;
+                }
                 """)
             
-        def addElmt(labelText, buttonName, buttonFunction):
+        def addElmt(labelText, buttonName, buttonFunction, id=None, addgif=False):
             
             subLayout = QVBoxLayout()
 
@@ -135,15 +153,32 @@ class SiteLauncher(QMainWindow):
             subLayout.addWidget(label)
             subLayout.addWidget(button)
 
+            if (not id):
+                id = hash(buttonName)
+
+            gifwidget = None
+            if (addgif):
+                gifwidget = QLabel()
+                subLayout.addWidget(gifwidget)
+
+            self.all_labels[id] = {"text": label, "gif": gifwidget}
+            self.all_buttons.append(button)
+
             return (subLayout)
 
         # Boutons
-        l_launch = addElmt("Appelle la règle [b-all]", "Lancer", self.launch)
-        l_static = addElmt("Collecte les statics", "Static", self.static)
-        l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch)
-        l_nav = addElmt("Ouvrir en private sur firefox", "Ouvrir dans Nav", self.openFirefox)
-        l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop)
-        l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker compose stop]", "Docker Stop", self.dockerStop)
+        l_launch = addElmt("Appelle la règle [b-all]", "Lancer", self.launch, ID_LAUNCH)
+        l_static = addElmt("Collecte les statics", "Static", self.static, ID_STATIC)
+        l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch, ID_RELAUNCH)
+        l_nav = addElmt("Ouvrir en private sur firefox", "Ouvrir dans Nav", self.openFirefox, ID_NAV)
+        l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop, ID_STOP)
+        
+        l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker compose stop]", "Docker Stop", self.dockerStop, ID_DOCKER_STOP)
+        self.loading = QMovie(f"{self.imgs_src}Spinner.gif")
+
+        #self.all_labels[ID_DOCKER_STOP]["gif"].setMovie(self.loading)
+
+        l_clear_output = addElmt("Effacer l\'output", "Effacer", self.clear_output, ID_CLEAR_OUTPUT)
 
         # Zone de texte pour les logs
         self.output = QTextBrowser()  # Utilisation de QTextBrowser
@@ -171,10 +206,14 @@ class SiteLauncher(QMainWindow):
         container = QWidget()
         container.setStyleSheet("background-color: #e7e7e7;")
 
+        layout_output = QVBoxLayout()
+        layout_output.addWidget(self.output)
+        layout_output.addLayout(l_clear_output)
+
         ltmp = QHBoxLayout()
 
         ltmp.addLayout(layout)
-        ltmp.addWidget(self.output)
+        ltmp.addLayout(layout_output)
 
         container.setLayout(ltmp)
         container.setStyleSheet("border: 1px solid;")
@@ -217,6 +256,24 @@ class SiteLauncher(QMainWindow):
 
     ##################################################################
 
+    def clear_output(self):
+        """ On clear l'output mon coco """
+        self.output.clear()
+
+    def disable_buttons(self):
+        """ On change le status du bouton en fonction de son status actuel """
+
+        """ print(">>>", self.all_labels[ID_DOCKER_STOP]["gif"])
+        if (self.all_labels[ID_DOCKER_STOP]["gif"].movie()):
+            print("OUI")
+            print (self.all_labels[ID_DOCKER_STOP]["gif"].isVisible())
+
+        self.all_labels[ID_DOCKER_STOP]["gif"].setVisible(self.all_buttons[0].isEnabled()) """
+
+        for button in self.all_buttons:
+            print(button, button.isEnabled())
+            button.setEnabled(not button.isEnabled())
+
 
     def static(self):
         """Lance collectstatic.sh et affiche la sortie en temps réel."""
@@ -246,11 +303,25 @@ class SiteLauncher(QMainWindow):
 
     def dockerStop(self):
         self.output.append(ansi_to_html("\033[1;34m [SIGNAL] Waiting to stop docker services.\033[0m"))
-        self.stop()
-        self.run_command("sudo docker compose stop")
 
-        self.process.waitForFinished()
-        self.output.append(ansi_to_html("\033[1;32m [SIGNAL] Docker services are down.\033[0m"))
+        docker_stop_cmd = ["sudo", "docker", "compose", "stop"]
+
+        docker_stop_process = QProcess(self)
+        
+        # Start the process with the command and arguments
+        self.disable_buttons()
+
+        docker_stop_process.start(docker_stop_cmd[0], docker_stop_cmd[1:])
+
+        while docker_stop_process.state() == QProcess.Running:
+            self.output.append(ansi_to_html("\033[1;33m [STATUS] Waiting for Docker services to stop...\033[0m"))
+            docker_stop_process.waitForFinished(500)
+
+        # Vérifier si le processus s'est terminé correctement
+        if docker_stop_process.exitCode() == 0:
+            self.output.append(ansi_to_html("\033[1;32m [SIGNAL] Docker services are down.\033[0m"))
+        else:
+            self.output.append(ansi_to_html("\033[1;31m [ERROR] Failed to stop Docker services.\033[0m"))
 
     def run_command(self, command):
         """Exécute une commande système."""
