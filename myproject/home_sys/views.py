@@ -1088,7 +1088,6 @@ def user_status(request):
 	users = Users.objects.all().values('id', 'is_online')
 	return JsonResponse(list(users), safe=False)
 
-
 @login_required
 def create_current_game(request, sender_id):
 	try:
@@ -1106,11 +1105,24 @@ def get_rooms(request):
 	return JsonResponse(list(rooms), safe=False)
 
 @login_required
+@require_http_methods(["POST"])
 def create_room(request):
-    if request.method == 'POST':
-        new_room = CurrentGame.objects.create(
-            game_id=uuid.uuid4())
-        return JsonResponse({
-            'game_id': new_room.game_id,
-        })
-    return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
+	try:
+		data = json.loads(request.body)
+		game_id = data.get('gameId')
+
+		if not game_id:
+			return JsonResponse({'error': 'gameId manquant'}, status=400)
+		
+		new_room = CurrentGame.objects.create(
+			game_id=game_id
+		)
+
+		return JsonResponse({
+			'game_id': str(new_room.game_id)
+		})
+	
+	except json.JSONDecodeError:
+		return JsonResponse({'error': 'Donnes JSON invalides'}, status=400)
+	except Exception as e:
+		return JsonResponse({'error': str(e)}, status=500)

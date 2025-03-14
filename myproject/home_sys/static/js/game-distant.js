@@ -1,130 +1,123 @@
 import { gameRouter } from './router.js'
 
 // utils/api.js
-async function apiGet(url) {
-	try {
-	  	const response = await fetch(url, {
-			credentials: 'include'
-		});
-	 	if (!response.ok) throw new Error('Erreur réseau');
-	  	return await response.json();
-	} catch (error) {
-	  	console.error('API GET Error:', error);
-	  	throw error;
-	}
-}
+// async function apiGet(url) {
+// 	try {
+// 	  	const response = await fetch(url, {
+// 			credentials: 'include'
+// 		});
+// 	 	if (!response.ok) throw new Error('Erreur réseau');
+// 	  	return await response.json();
+// 	} catch (error) {
+// 	  	console.error('API GET Error:', error);
+// 	  	throw error;
+// 	}
+// }
 
-async function apiPost(url, data = {}) {
-	try {
-	  	const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-CSRFToken': getCSRFToken()
-			},
-			body: JSON.stringify(data)
-	  	});
-	  	if (!response.ok) throw new Error('Erreur réseau');
-	  	return await response.json();
-	} catch (error) {
-		console.error('API POST Error:', error);
-		throw error;
-	}
-}
+// async function apiPost(url, data = {}) {
+// 	try {
+// 	  	const response = await fetch(url, {
+// 			method: 'POST',
+// 			headers: {
+// 				'Content-Type': 'application/json',
+// 				'X-CSRFToken': getCSRFToken()
+// 			},
+// 			body: JSON.stringify(data)
+// 	  	});
+// 	  	if (!response.ok) throw new Error('Erreur réseau');
+// 	  	return await response.json();
+// 	} catch (error) {
+// 		console.error('API POST Error:', error);
+// 		throw error;
+// 	}
+// }
 
-export class RoomGameManager {
-	constructor() {
-		console.log("CONSTRUCTOR ROOM");
-		if (document.getElementById('rooms-list').dataset.initialized) return ;
+// export class RoomGameManager {
+// 	constructor() {
+// 		console.log("CONSTRUCTOR ROOM");
+// 		// if (document.getElementById('rooms-list').dataset.initialized) return ;
 
-		this.roomList = document.getElementById('rooms-list');
-		if (!this.roomList) {
-			console.error("Element #rooms-list introuvable !");
-			return ;
-		}
-		document.getElementById('rooms-list').dataset.initialized = true;
-		this.initEventListenners();
-		this.loadRooms();
-	}
+// 		this.roomList = document.getElementById('rooms-list');
+// 		if (!this.roomList) {
+// 			console.error("Element #rooms-list introuvable !");
+// 			return ;
+// 		}
+// 		// document.getElementById('rooms-list').dataset.initialized = true;
+// 		this.initEventListenners();
+// 		this.loadRooms();
+// 	}
 
-	initEventListenners() {
-		console.log("ADD ROOMS LISTENERS");
-		document.getElementById('new-room').addEventListener('click', (e) => {
-			e.preventDefault();
-			this.createRoom();
-		});
+// 	initEventListenners() {
+// 		console.log("ADD ROOMS LISTENERS");
+// 		document.getElementById('new-room').addEventListener('click', (e) => {
+// 			e.preventDefault();
+// 			this.createRoom();
+// 		});
 
-		this.roomList.addEventListener('click', (e) => {
-			console.log("listener JOIN actif");
-			const roomLink = e.target.closest('.room-link');
-			if (roomLink) {
-				e.preventDefault();
-				this.joinRoom(roomLink.dataset.gameId);
-			}
-		});
-	}
+// 		this.roomList.addEventListener('click', (e) => {
+// 			console.log("listener JOIN actif");
+// 			const roomLink = e.target.closest('.room-link');
+// 			if (roomLink) {
+// 				e.preventDefault();
+// 				this.joinRoom(roomLink.dataset.gameId);
+// 			}
+// 		});
+// 	}
 
-	async loadRooms() {
-		console.log("LOAD ROOMS");
-		try {
-			const rooms = await apiGet('/accounts/api/rooms/');
+// 	async loadRooms() {
+// 		console.log("LOAD ROOMS");
+// 		try {
+// 			const rooms = await apiGet('/accounts/api/rooms/');
 
-			// console.log("rooms length: ", rooms.length);
-			// this.roomList.innerHTML = rooms.length ? rooms.map(room => `
-			// 	<a href="game-distant/${room.game_id}/0" class="game-distant room-link" data-game-id="${room.game_id}">
-			// 		<span class="game-mode">Room ${room.game_id}</span>
-			// 	</a>`).join('') :
-			// '<p>Aucune Room</p>';
+// 			const tmp = document.createDocumentFragment();
+// 			if (rooms.length === 0) {
+// 				const p = document.createElement('p');
+// 				p.textContent = "Aucune Room";
+// 				tmp.appendChild(p);
+// 			}
+// 			else {
+// 				rooms.forEach(room => {
+// 					const link = document.createElement('a');
+// 					link.href = `game-distant/${room.game_id}/0`;
+// 					link.className = 'game-distant room-link';
+// 					link.dataset.gameId = room.gameId;
 
-			const tmp = document.createDocumentFragment();
-			if (rooms.length === 0) {
-				const p = document.createElement('p');
-				p.textContent = "Aucune Room";
-				tmp.appendChild(p);
-			}
-			else {
-				rooms.forEach(room => {
-					const link = document.createElement('a');
-					link.href = `game-distant/${room.game_id}/0`;
-					link.className = 'game-distant room-link';
-					link.dataset.gameId = room.gameId;
+// 					const span = document.createElement('span');
+// 					span.className = "game-mode";
+// 					span.textContent = `Room ${room.game_id}`;
 
-					const span = document.createElement('span');
-					span.className = "game-mode";
-					span.textContent = `Room ${room.game_id}`;
+// 					link.appendChild(span);
+// 					tmp.appendChild(link);
+// 				})
+// 			}
 
-					link.appendChild(span);
-					tmp.appendChild(link);
-				})
-			}
-
-			document.getElementById('rooms-list').replaceChildren(tmp);
+// 			document.getElementById('rooms-list').replaceChildren(tmp);
 
 
-			console.log("HTML bien ajoute !!!");
-		} catch (error) {
-			console.error('Error loading rooms: ', error);
-			this.roomList.innerHTML = '<p>Erreur de chargement</p>';
-		}
-	}
+// 			console.log("HTML bien ajoute !!!");
+// 		} catch (error) {
+// 			console.error('Error loading rooms: ', error);
+// 			this.roomList.innerHTML = '<p>Erreur de chargement</p>';
+// 		}
+// 	}
 
-	async createRoom() {
-		console.log("CREATE A ROOM");
-		try {
-			const gameId = await apiPost('/accounts/api/create-room/');
-			gameRouter.navigate(`/game-distant/${gameId.game_id}/0`);
-			new PongDistantGame();
-		} catch (error) {
-			console.error("Error when creating a room: ", error);
-		}
-	}
+// 	async createRoom() {
+// 		console.log("CREATE A ROOM");
+// 		try {
+// 			const gameId = await apiPost('/accounts/api/create-room/');
+// 			gameRouter.navigate(`/game-distant/${gameId.game_id}/0`);
+// 			new PongDistantGame();
+// 		} catch (error) {
+// 			console.error("Error when creating a room: ", error);
+// 		}
+// 	}
 
-	joinRoom(gameId) {
-		console.log("JOIN A ROOM");
-		gameRouter.navigate(`/game-distant/${gameId}/0`);
-		new PongDistantGame();
-	}
-}
+// 	joinRoom(gameId) {
+// 		console.log("JOIN A ROOM");
+// 		gameRouter.navigate(`/game-distant/${gameId}/0`);
+// 		new PongDistantGame();
+// 	}
+// }
 
 export class PongDistantGame {
 
@@ -436,12 +429,71 @@ export class PongDistantGame {
 	}
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-	console.log("je suis la!");
-	if (window.location.pathname.includes('/accounts/game-distant-choice')) {
-		console.log("je demarre le jeu");
-		gameRouter.handleRoomSelection();
-	// gameRouter.init();
-		// new RoomGameManager();
+function loadRooms() {
+	console.log("LOAD ROOMS");
+	fetch('/accounts/api/rooms/')
+		.then(response => response.json())
+		.then(rooms => {
+			const container = document.getElementById('rooms-list');
+			
+
+			if (rooms.length === 0) {
+				container.innerHTML = '<p>Aucune Room</p>';
+			} else {
+				rooms.forEach(room => {
+					const link = document.createElement('div');
+					link.className = 'game-distant room-link';
+					link.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
+					link.addEventListener('click', () => joinRoom(room.game_id));
+					container.appendChild(link);
+				});
+			}
+			console.log("HTML bien ajoute !!!");
+		})
+		.catch(error => {
+			console.error('Error loading rooms: ', error);
+			// document.addEventListener('rooms-list').innerHTML = '<p class="error">Erreur de chargement</p>';
+		});
+}
+
+function joinRoom(roomId) {
+	new PongDistantGame(roomId, 0);
+}
+
+async function createRoom(gameId) {
+	console.log("CREATE A ROOM");
+	try {
+		const response = await fetch('/accounts/api/create-room/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRFToken': getCSRFToken() // Assurez-vous que cette fonction est bien définie
+			},
+			body: JSON.stringify({
+				gameId: gameId
+			})
+		});
+
+		if (!response.ok) {
+			throw new Error('Erreur reseau lors de la creation de la salle');
+		}
+
+		await response.json();
+		new PongDistantGame(gameId, 0);
+		
+	} catch (error) {
+		console.error("Error when creating a room: ", error);
 	}
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+	document.getElementById('new-room').addEventListener('click', async (e) => {
+		e.preventDefault();
+		const userId = document.getElementById('new-room').getAttribute('data-user-id');
+		await createRoom(userId);
+	});
+
+	console.log("je suis la!");
+	loadRooms();
+
 });

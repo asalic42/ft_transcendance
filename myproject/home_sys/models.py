@@ -58,10 +58,6 @@ class Chans(models.Model):
 	def __str__(self):
 		return self.name
 
-# class UserChan(models.Model):
-# 	idChan = models.IntegerField()
-# 	idUser = models.IntegerField()
-
 """ ACHIEVEMENT """
 
 class Achievements(models.Model):

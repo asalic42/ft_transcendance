@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/add_pong/', add_pong, name='add_solo_casse_brique'),
     path('api/map/<int:map_id>/', map_view, name="map_view"),
     path('api/rooms/', get_rooms, name="get_rooms"),
-    path('api/create-room/', create_room, name="create_room"),
+    path('api/create-room/', create_room, name="create-room"),
 
     path('get-ip-info/', get_ip_info, name='get_ip_info'),
     # path('user-settings/', settings_user, name='settings_user'),

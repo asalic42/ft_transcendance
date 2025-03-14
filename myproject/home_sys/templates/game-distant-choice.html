@@ -16,7 +16,7 @@
 		<h1 class="title">Choix de la room</h1>
 		<div class="mode-choices">
 
-			<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
+			<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room" data-user-id="{{ request.user.id }}">
 				<span class="game-mode">New game</span>
 			</a>
 			
@@ -24,11 +24,11 @@
 				<h2 id='text'> Join room :</h2>
 				<div id="rooms-list"></div>
 			</div> 
-			<p>"HEY"</p>
-			
+
 		</div>
 	</div>
-	
+    {% comment %} <script type="module" src="{% static 'js/game-distant.js' %}"></script> {% endcomment %}
+
 </div>
 
 {% endblock %}

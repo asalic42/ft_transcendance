@@ -1,5 +1,5 @@
 import { PongGame } from './game.js';
-import { PongDistantGame, RoomGameManager } from './game-distant.js';
+// import { PongDistantGame, RoomGameManager } from './game-distant.js';
 
 // Router simplifié
 class Router {
@@ -35,17 +35,17 @@ class Router {
 
         const currentPath = window.location.pathname;
         const isGamePage = this.isOnGamePage(currentPath);
-        const isRoomSelect = currentPath.match('/accounts/game-distant-choice');
-        const isDistantGame = currentPath.match(/^\/accounts\/game-distant\/(\d+)\/(\d+)\/?/);
+        // const isRoomSelect = currentPath.match('/accounts/game-distant-choice');
+        // const isDistantGame = currentPath.match(/^\/accounts\/game-distant\/(\d+)\/(\d+)\/?/);
     
         if (isGamePage)
             this.enterLocalGame();
         // else if (isRoomSelect)
             // await this.handleRoomSelection();
-        else if (isDistantGame)
-            this.handleDistantGame(isDistantGame);
-        else
-            this.exitGame();
+        // else if (isDistantGame)
+            // this.handleDistantGame(isDistantGame);
+        // else
+        //     this.exitGame();
     }
 
     isOnGamePage(path) {
@@ -59,22 +59,22 @@ class Router {
         new RoomGameManager();
     }
 
-    handleDistantGame(match) {
-        // on ignore la premiere variable index=0 => fullPath
-        const [, gameId, id_t] = match;
-        if (this.currentGame) {
-            this.currentGame.stopGame();
-            this.currentGame = null;
-        }
+    // handleDistantGame(match) {
+    //     // on ignore la premiere variable index=0 => fullPath
+    //     const [, gameId, id_t] = match;
+    //     if (this.currentGame) {
+    //         this.currentGame.stopGame();
+    //         this.currentGame = null;
+    //     }
 
-        this.injectTemplateGameDistant(() => {
-            // this.waitElementsDom(() => {
-                // if (!this.currentGame) {
-                this.currentGame = new PongDistantGame(gameId, id_t);
-                // }
-            // });
-        });
-    }
+    //     this.injectTemplateGameDistant(() => {
+    //         // this.waitElementsDom(() => {
+    //             // if (!this.currentGame) {
+    //             this.currentGame = new PongDistantGame(gameId, id_t);
+    //             // }
+    //         // });
+    //     });
+    // }
 
     enterLocalGame() {
 
@@ -103,92 +103,93 @@ class Router {
         checkEl();
     }
 
-    injectTemplateRoom() {
-        return new Promise((resolve) => {
-            const content = document.getElementById('content');
-            content.innerHTML = '';
+    // injectTemplateRoom() {
+    //     return new Promise((resolve) => {
+    //         const content = document.getElementById('content');
+    //         content.innerHTML = '';
 
-            console.log("inject html");
-            const newContent = document.createElement('div');
-            newContent.innerHTML = `
-                <link rel="stylesheet" href="/static/css/game-mode-style.css">
+    //         console.log("inject html");
+    //         const newContent = document.createElement('div');
+    //         // const userId = document.get
+    //         newContent.innerHTML = `
+    //             <link rel="stylesheet" href="/static/css/game-mode-style.css">
 
-	            <div class="page">
-	            	<div class="rectangle"></div>
-	            	<a href="game-type-pong" class="retour">
-	            		<span class="game-mode" id="retour" >Retour</span>
-	            	</a>
-	            	<h1 class="title">Choix de la room</h1>
-	            	<div class="mode-choices">
-	            		<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
-	            			<span class="game-mode">New game</span>
-	            		</a>
+	//             <div class="page">
+	//             	<div class="rectangle"></div>
+	//             	<a href="game-type-pong" class="retour">
+	//             		<span class="game-mode" id="retour" >Retour</span>
+	//             	</a>
+	//             	<h1 class="title">Choix de la room</h1>
+	//             	<div class="mode-choices">
+	//             		<a href="game-distant/{{ request.user.id }}/0" class="game-distant" id="new-room">
+	//             			<span class="game-mode">New game</span>
+	//             		</a>
 
-	            		<div id="test">
-	            			<h2 id='text'> Join room :</h2>
-	            			<div id="rooms-list"></div>
-	            		</div> 
+	//             		<div id="test">
+	//             			<h2 id='text'> Join room :</h2>
+	//             			<div id="rooms-list"></div>
+	//             		</div> 
 
-	            	</div>
-	            </div>
-            `;
+	//             	</div>
+	//             </div>
+    //         `;
 
-            content.appendChild(newContent);
-            setTimeout(() => resolve(), 10);
-        });
-    }
+    //         content.appendChild(newContent);
+    //         setTimeout(() => resolve(), 10);
+    //     });
+    // }
 
-    injectTemplateGameDistant(callback) {
-        const content = document.getElementById('content');
+    // injectTemplateGameDistant(callback) {
+    //     const content = document.getElementById('content');
 
-        const newContent = document.createElement('div');
-        newContent.innerHTML = `
-            <link rel="stylesheet" href="{% static 'css/game-style.css' %}">
+    //     const newContent = document.createElement('div');
+    //     newContent.innerHTML = `
+    //         <link rel="stylesheet" href="{% static 'css/game-style.css' %}">
 
-            <h3 class="scores" id="fps">Fps : 0</h3>
+    //         <h3 class="scores" id="fps">Fps : 0</h3>
 
-            <a href="game-distant-choice" class="game-distant">
-            	<span class="game-mode">Retour</span>
-            </a>
+    //         <a href="game-distant-choice" class="game-distant">
+    //         	<span class="game-mode">Retour</span>
+    //         </a>
 
-            <div class="scores" id="scores">
+    //         <div class="scores" id="scores">
 
-            	<h3 id="title-p1">Player 1</h3>
-            	<h3 id="scoreP1">0</h3>
-            	<h3 id="scoreP2">0</h3>
-            	<h3 id="title-p2">Player 2</h3>
-            </div>
+    //         	<h3 id="title-p1">Player 1</h3>
+    //         	<h3 id="scoreP1">0</h3>
+    //         	<h3 id="scoreP2">0</h3>
+    //         	<h3 id="title-p2">Player 2</h3>
+    //         </div>
 
-            <div id="canvas-container">
-                <canvas width="1920" height="850" id="game"></canvas>
-                <div id="button-container">
-                    <button id="replay-button" style="display: none;">Play again !</button>
-                </div>
-                <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-                    <svg width="1100" height="150" id="svg-wrapper-player1">
-                        <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
-                    </svg>
-                </div>
-                <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
-                    <svg width="1100" height="150" id="svg-wrapper-player2">
-                        <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
-                    </svg>
-                </div>
-                <div id="overlay">
-                    <h1 id="countdown">3</h1>
-                </div>
-            </div>
+    //         <div id="canvas-container">
+    //             <canvas width="1920" height="850" id="game"></canvas>
+    //             <div id="button-container">
+    //                 <button id="replay-button" style="display: none;">Play again !</button>
+    //             </div>
+    //             <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+    //                 <svg width="1100" height="150" id="svg-wrapper-player1">
+    //                     <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
+    //                 </svg>
+    //             </div>
+    //             <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+    //                 <svg width="1100" height="150" id="svg-wrapper-player2">
+    //                     <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
+    //                 </svg>
+    //             </div>
+    //             <div id="overlay">
+    //                 <h1 id="countdown">3</h1>
+    //             </div>
+    //         </div>
 
-            <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
+    //         <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
 
-        `;
-        content.appendChild(newContent);
+    //     `;
+    //     content.appendChild(newContent);
 
-        if (!document.getElementById("canvas-container"))
-            console.log("canvas-container n'existe pas");
-        setTimeout(callback, 10);
+    //     if (!document.getElementById("canvas-container"))
+    //         console.log("canvas-container n'existe pas");
+    //     setTimeout(callback, 10);
 
-    }
+    // }
 
     injectTemplateGame(callback) {
         const content = document.getElementById('content');

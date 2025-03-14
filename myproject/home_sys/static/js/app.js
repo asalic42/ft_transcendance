@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Fonction de chargement de page via fetch
-    function loadPage(url, pushState = true) {
+    async function loadPage(url, pushState = true) {
 		if (url != "accounts/" && url != "/accounts/")
 			var finalizedUrl = prependAccounts(url);
 		else
@@ -47,19 +47,19 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 			}
             // Réexécution des scripts intégrés
-			// Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-			// 	const newScript = document.createElement('script');
-			// 	if (oldScript.src) {
-			// 		// Add cache-buster to prevent stale scripts
-			// 		newScript.src = oldScript.src + '?t=' + Date.now();
-			// 		newScript.async = false;
-			// 	} else {
-			// 	    newScript.textContent = oldScript.textContent;
-			// 	}
-			// 	document.body.appendChild(newScript);
-			// 	// Remove the script after execution to avoid clutter
-			// 	newScript.onload = () => newScript.remove();
-			// });
+			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
+				const newScript = document.createElement('script');
+				if (oldScript.src) {
+					// Add cache-buster to prevent stale scripts
+					newScript.src = oldScript.src + '?t=' + Date.now();
+					newScript.async = false;
+				} else {
+				    newScript.textContent = oldScript.textContent;
+				}
+				document.body.appendChild(newScript);
+				// Remove the script after execution to avoid clutter
+				newScript.onload = () => newScript.remove();
+			});
 
             if (pushState) history.pushState(null, "", finalizedUrl);
         })
