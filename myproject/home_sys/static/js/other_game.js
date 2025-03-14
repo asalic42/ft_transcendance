@@ -486,7 +486,7 @@ async function getCurrentPlayerId() {
 		return cachedUserId;
 	}
 	try {
-		const response = await fetch('/accounts/api/current-user/', {
+		const response = await fetch('/api/current-user/', {
 			credentials: 'same-origin'
 		});
 		const data = await response.json();
@@ -501,7 +501,7 @@ async function getCurrentPlayerId() {
 async function addNewGame(id_player, score) {
 	console.log("Appel de addnewgame");
 	try {
-		const response = await fetch('/accounts/api/add_solo_casse_brique/', {
+		const response = await fetch('/api/add_solo_casse_brique/', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
@@ -528,7 +528,7 @@ async function addNewGame(id_player, score) {
 }
 
 async function fetchMap(mapId) {
-	return fetch(`/accounts/api/map/${mapId}/`)
+	return fetch(`/api/map/${mapId}/`)
 	.then(response => response.text())
 	.then(mapData => {
 		const mapLines = mapData.split('\n');

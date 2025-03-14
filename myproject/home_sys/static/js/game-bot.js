@@ -392,7 +392,7 @@ async function getCurrentPlayerId() {
 		return cachedUserId;
 	}
 	try {
-		const response = await fetch('/accounts/api/current-user/', {
+		const response = await fetch('/api/current-user/', {
 			credentials: 'same-origin'
 		});
 		const data = await response.json();
@@ -407,7 +407,7 @@ async function getCurrentPlayerId() {
 async function addNewGame(id_player) {
 	console.log("Appel de addnewgame");
 	try {
-		const response = await fetch('/accounts/api/add_pong/', {
+		const response = await fetch('/api/add_pong/', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {

@@ -13,6 +13,208 @@ from .models import *
 import json, requests
 from .utils import add_pong_logic, send_notification_to_user
 
+###############################################################################
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.views.decorators.cache import never_cache
+from django.contrib import messages
+
+
+# Page d'accueil
+@never_cache
+def index(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    storage = messages.get_messages(request)
+    storage.used = True
+    return render(request, 'login.html')
+
+
+# Inscription d'un utilisateur
+#@never_cache
+#def signup(request):
+#    if request.user.is_authenticated:
+#        return redirect('home')
+#	
+#    if request.method == 'POST':
+#        username = request.POST.get('username')
+#        email = request.POST.get('email')
+#        password = request.POST.get('password')
+#
+#        # Vérifier si un utilisateur existe déjà avec ce nom d'utilisateur ou cet email
+#        if User.objects.filter(username=username).exists():
+#            return HttpResponse("Ce nom d'utilisateur est déjà pris.", status=400)
+#        if User.objects.filter(email=email).exists():
+#            return HttpResponse("Cet email est déjà utilisé.", status=400)
+#
+#        # Créer un nouvel utilisateur
+#        user = User.objects.create_user(username=username, email=email, password=password)
+#        user.save()
+#
+#        userauth = authenticate(request, username=username, password=password)
+#        login(request, userauth)
+#        return (redirect('home'))
+#    
+#    return redirect('home')
+
+@never_cache
+def signup(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+    
+    if request.method == 'POST':
+        # Check content type to determine how to get the data
+        content_type = request.META.get('CONTENT_TYPE', '')
+        if 'application/json' in content_type:
+            # Handle JSON data
+            import json
+            try:
+                data = json.loads(request.body)
+                username = data.get('username')
+                password = data.get('password')
+                email = data.get('email')
+            except json.JSONDecodeError:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid JSON data'
+                }, status=400)
+        else:
+            # Handle form data
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            email = request.POST.get('email')
+            
+        # Check if a user already exists with this username or email
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Ce nom d\'utilisateur est déjà pris.'
+            }, status=400)
+            
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Cet email est déjà utilisé.'
+            }, status=400)
+            
+        # Create a new user
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.save()
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({
+                'status': 'success',
+                'redirect': reverse('home'),
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    # other user fields you need
+                },
+                'online_count': Users.objects.filter(is_online=True).count()
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid credentials'
+            }, status=400)
+            
+    # GET requests can return minimal data needed for the signup form
+    return JsonResponse({'status': 'unauthenticated'})
+
+
+
+from django.template.loader import render_to_string
+from django.urls import reverse
+
+
+def signin(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+    
+    if request.method == 'POST':
+        # Check content type to determine how to get the data
+        content_type = request.META.get('CONTENT_TYPE', '')
+        
+        if 'application/json' in content_type:
+            # Handle JSON data
+            import json
+            try:
+                data = json.loads(request.body)
+                username = data.get('username')
+                password = data.get('password')
+            except json.JSONDecodeError:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid JSON data'
+                }, status=400)
+        else:
+            # Handle form data
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+        
+        # Continue with authentication
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({
+                'status': 'success',
+                'redirect': reverse('home'),
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    # other user fields you need
+                },
+                'online_count': Users.objects.filter(is_online=True).count()
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid credentials'
+            }, status=400)
+    
+    # GET requests can return minimal data needed for the login form
+    return JsonResponse({'status': 'unauthenticated'})
+
+
+# Déconnexion de l'utilisateur
+def signout(request):
+    logout(request)
+    return HttpResponse("Déconnexion réussie.")
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from zxcvbn import zxcvbn as passwordscore
+
+@require_GET
+def check_username(request):
+    username = request.GET.get('username', '')
+    if (User.objects.filter(username=username).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+
+@require_GET
+def check_email(request):
+    email = request.GET.get('email', '')
+    if (User.objects.filter(email=email).exists()):
+        return (JsonResponse({'is_taken' : True}))
+    return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_password_solidity(request):
+    password = request.GET.get('password', '')
+    return (JsonResponse({'data' : passwordscore(password)['score']}))
+
+#######################################################################################################
+
 
 
 @login_required
@@ -158,7 +360,7 @@ def home(request):
 """
 def signout(request):
 	logout(request)
-	return (redirect('sign_in'))
+	return (redirect('index'))
 
 """
 [-------------------------------------------------------------------------]

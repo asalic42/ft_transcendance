@@ -156,7 +156,7 @@ if [ "$1" == "b-all" ]; then
     # scriptmanNotify "[3/3] Lancement des services rien que pour toi mon cochon. Refresh quand je disparaitrais."
     
     echo -e "${PURPLE}> Launching services...${NC}"
-    sudo docker-compose up -d # démarre en arrière-plan
+    sudo docker-compose up # démarre en arrière-plan
 
     sleep 10
     echo -e "${PURPLE}> Initialisation de la [VE] HOST_IP${NC}"

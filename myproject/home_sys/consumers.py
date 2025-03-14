@@ -1683,7 +1683,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				name = [pair[0]['username'], pair[1]['username']]
 				index = 0
 				for player_in_pair in pair:
-					game_link = f"https://transcendance.42.paris/accounts/game-distant/{game_id}/{self.tournament_id}"
+					game_link = f"https://transcendance.42.paris/game-distant/{game_id}/{self.tournament_id}"
 					print(f'On envoie le lien "{game_link}" à {player_in_pair["channel_name"]} and round nb is at {TournamentConsumer.roundNb[self.tournament_id]}')
 					print(f'name: {name}')
 					print(f'name[index]: {name[index]}')

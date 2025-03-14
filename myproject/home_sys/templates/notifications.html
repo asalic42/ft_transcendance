@@ -136,7 +136,7 @@
         document.querySelectorAll(`${baliseName}`).forEach(button => {
             button.addEventListener('click', function() {
                 const username = this.getAttribute('data-username');
-                fetch(`/accounts/${url}/${username}/`, {
+                fetch(`/${url}/${username}/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken'),
@@ -171,7 +171,7 @@
         document.querySelectorAll(`${baliseName}`).forEach(button => {
             button.addEventListener('click', function() {
                 const username = this.getAttribute('data-username');
-                fetch(`/accounts/${url}/${username}/`, {
+                fetch(`/${url}/${username}/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken'),
@@ -224,7 +224,7 @@
 
     // Fonction pour récupérer les statuts de tous les utilisateurs
     function fetchAllUsersStatus() {
-        fetch("/accounts/api/user-status/") // Remplacez par l'URL de votre endpoint Django
+        fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
             .then(response => response.json())
             .then(users => {
                 console.log("Users status fetched:", users);

@@ -47,6 +47,10 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     f"https://{IP_ADDR}:5000",
 ]
+
+# Cookie CSRF
+CSRF_COOKIE_SAMESITE = 'None'
+
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL
 SECURE_SSL_REDIRECT = True
@@ -68,14 +72,12 @@ INSTALLED_APPS = [
 	'django.db.migrations.migration',
     'rest_framework',
     'social_django',
-    'loginpage',
     'home_sys',
     'channels',
     'corsheaders',
 ]
 
 AUTHENTICATION_BACKENDS = (
-    'loginpage.backends.OAuth2_42',
     'django.contrib.auth.backends.ModelBackend',  # Authentification standard Django
 )
 
@@ -149,6 +151,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

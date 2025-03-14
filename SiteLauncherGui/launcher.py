@@ -115,7 +115,7 @@ class SiteLauncher(QMainWindow):
                 QPushButton {
                     background-color: #a71fb0;
                     padding: 2px;
-                    font-size: 28px;
+                    font-size: 18px;
                 }
                 QPushButton:hover {
                     background-color: darkviolet;
@@ -127,7 +127,7 @@ class SiteLauncher(QMainWindow):
             subLayout = QVBoxLayout()
 
             label = QLabel(f" ●  {labelText}")
-            label.setStyleSheet("font-weight: bold; font-size: 10px;")
+            label.setStyleSheet("font-weight: bold; font-size: 12px;")
             button = QPushButton(f"{buttonName}")
             styleButton(button)
             button.clicked.connect(buttonFunction)
@@ -141,6 +141,7 @@ class SiteLauncher(QMainWindow):
         l_launch = addElmt("Appelle la règle [b-all]", "Lancer", self.launch)
         l_static = addElmt("Collecte les statics", "Static", self.static)
         l_relaunch = addElmt("Envoie un [Ctrl+C] et lance [b-all]", "Relancer", self.relaunch)
+        l_nav = addElmt("Ouvrir en private sur firefox", "Ouvrir dans Nav", self.openFirefox)
         l_stop = addElmt("Envoie un [Ctrl+C]", "Stop", self.stop)
         l_docker_stop = addElmt("Envoie un [Ctrl+C] et lance [docker compose stop]", "Docker Stop", self.dockerStop)
 
@@ -159,6 +160,7 @@ class SiteLauncher(QMainWindow):
         layout.addLayout(l_launch)
         layout.addLayout(l_static)
         layout.addLayout(l_relaunch)
+        layout.addLayout(l_nav)
 
         """ layout.addWidget(self.output) """
         
@@ -187,13 +189,42 @@ class SiteLauncher(QMainWindow):
         """Lance la commande 'launch'."""
         self.run_command(self.all_cmd["launch"])
 
+    ##################################################################
+
+    def openFirefox(self):
+
+        get_ip = ["hostname", "-I"]
+
+        self.get_ip_process = QProcess(self)
+        
+        self.get_ip_process.readyReadStandardOutput.connect(
+            lambda: self.handle_ip_output(self.get_ip_process)
+        )
+        
+        self.get_ip_process.start(get_ip[0], get_ip[1:])
+
+    def handle_ip_output(self, process):
+        
+        output = process.readAllStandardOutput().data().decode().strip()
+        
+        ip_address = output.split()[0]
+
+        firefox_command = ["firefox", "--private-window", f"https://{ip_address}:5000/"]
+
+        # Créer un QProcess pour lancer Firefox
+        self.firefox_process = QProcess(self)
+        self.firefox_process.start(firefox_command[0], firefox_command[1:])
+
+    ##################################################################
+
+
     def static(self):
         """Lance collectstatic.sh et affiche la sortie en temps réel."""
         self.static_process = QProcess(self)  # Créer un nouveau QProcess
         self.static_process.readyReadStandardOutput.connect(lambda: self.read_output(self.static_process))
         self.static_process.readyReadStandardError.connect(lambda: self.read_output(self.static_process))
             
-        command = ["sh", "../SiteLauncherGui/collectstatic.sh"]
+        command = ["sudo", "sh", "../SiteLauncherGui/collectstatic.sh"]
         self.static_process.start(command[0], command[1:])
 
 
@@ -216,7 +247,7 @@ class SiteLauncher(QMainWindow):
     def dockerStop(self):
         self.output.append(ansi_to_html("\033[1;34m [SIGNAL] Waiting to stop docker services.\033[0m"))
         self.stop()
-        self.run_command("docker compose stop")
+        self.run_command("sudo docker compose stop")
 
         self.process.waitForFinished()
         self.output.append(ansi_to_html("\033[1;32m [SIGNAL] Docker services are down.\033[0m"))

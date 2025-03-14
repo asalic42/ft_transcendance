@@ -1,25 +1,57 @@
 from django.urls import path
 from .views import *
 
+
 urlpatterns = [
-    # --- Routes pour les pages en mode SPA ---
-    path('', load_template, {'page': 'home'}, name="home"),
+
+    # --- Main entry points ---
+    path('', index, name='index'),  # Direct root to index view
+    path('signin/', signin, name='signin'),
+    path('signup/', signup, name='signup'),  # Add this line
+    path('home/', load_template, {'page': 'home'}, name="home"),
+
+    path('check_username/', check_username, name='check_username'),
+    path('check_email/', check_email, name='check_email'),
+    path('check_pseudo/', check_pseudo, name='check_pseudo'),
+
+
+    # --- Template loading routes ---
     path('profile/<str:username>/', load_template, {'page': 'profile'}, name='profile'),
     path('channels/', load_template, {'page': 'channels'}, name='channels'),
     path('notifications/', load_template, {'page': 'notifications'}, name='notifications'),
     path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
+
+    # --- Authentication routes ---
+    path('signout/', signout, name='signout'),
+    path('deleteAccount/', delete_account, name='delete_account'),
+    path('deleteSuccess/', delete_success, name='delete_success'),
+
+    # --- API endpoints ---
+    path('api/current-user/', get_current_user_id, name='current_user_id'),
+    path('api/user-status/', user_status, name='user-status'),
+    # ... keep other API endpoints ...
+
+    # --- Generic template loader (MUST BE LAST) ---
+    #path('<str:page>/', load_template, name='load_template'),
+
+    # --- Routes pour les pages en mode SPA ---
+
+    #path('profile/<str:username>/', load_template, {'page': 'profile'}, name='profile'),
+    #path('channels/', load_template, {'page': 'channels'}, name='channels'),
+    #path('notifications/', load_template, {'page': 'notifications'}, name='notifications'),
+    #path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
     # Route générique pour toute autre page nécessitant un rendu (ex: about, contact, etc.)
     path('<str:page>/', load_template, name='load_template'),
     
     # --- Routes pour les actions et API (inchangées) ---
     path('signout/', signout, name='signout'),
-    path('deleteAccount/', delete_account, name='delete_account'),
-    path('deleteSuccess/', delete_success, name='delete_success'),
+    #path('deleteAccount/', delete_account, name='delete_account'),
+    #path('deleteSuccess/', delete_success, name='delete_success'),
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),
     
     # Exemples d'API et endpoints
     path('api/button-test/', button_test_page, name="button_test_page"),
-    path('api/current-user/', get_current_user_id, name='current_user_id'),
+    #path('api/current-user/', get_current_user_id, name='current_user_id'),
     path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),
     path('api/add_pong/', add_pong, name='add_solo_casse_brique'),
     path('api/map/<int:map_id>/', map_view, name="map_view"),
@@ -58,5 +90,5 @@ urlpatterns = [
     path('invite_friend/<str:username>/', invite_friend, name='invite_friend'),
     path('invitation_declined/<str:username>/', invitation_declined, name='invitation_declined'),
     
-    path('api/user-status/', user_status, name='user-status'),
+    #path('api/user-status/', user_status, name='user-status'),
 ]

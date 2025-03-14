@@ -11,7 +11,7 @@ blockButton.addEventListener('click', function(e) {
     }
     console.log("Username récupéré :", username); // Debugging
     // Construire l'URL correctement
-    const url = `/accounts/block_user/${username}/`;
+    const url = `/block_user/${username}/`;
     // Récupérer le token CSRF
     const csrfToken = getCookie('csrftoken');
     if (!csrfToken) {
@@ -67,7 +67,7 @@ addButton.addEventListener('click', function(e) {
     console.log("Username récupéré :", username); // Debugging
 
     // Construire l'URL correctement
-    const url = `/accounts/add_friend/${username}/`;
+    const url = `/add_friend/${username}/`;
 
     // Récupérer le token CSRF
     const csrfToken = getCookie('csrftoken');

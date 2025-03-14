@@ -2,7 +2,7 @@ let statusSocket;
 
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function fetchAllUsersStatus() {
-	fetch("/accounts/api/user-status/") // Remplacez par l'URL de votre endpoint Django
+	fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
 		.then(response => response.json())
 		.then(users => {
 			// console.log("Users status fetched:", users);

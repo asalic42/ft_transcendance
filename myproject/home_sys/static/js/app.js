@@ -1,4 +1,3 @@
-
 // Sécurité CSRF cookies
 function getTokenCSRF() {
     let cookieValue = null;
@@ -13,83 +12,89 @@ function getTokenCSRF() {
     return cookieValue;
 }
 
+// Ajoute / si absent
+function prependAccounts(url) {
+    let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
+    return cleanedUrl.startsWith('') ? '/' + cleanedUrl : '/' + cleanedUrl;
+}
+
+// Ajouter une variable globale pour tracker les scripts chargés
+let loadedScripts = [];
+
+// Exposer loadPage au scope global
+window.loadPage = function(url, pushState = true) {
+    loadedScripts.forEach(script => script.remove());
+    loadedScripts = []; // Réinitialiser le tableau
+
+    if (url != "" && url != "/")
+        var finalizedUrl = prependAccounts(url);
+    else
+        var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+    
+    fetch(finalizedUrl, { 
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getTokenCSRF()
+        },
+        credentials: 'include'
+    })
+    .then(response => response.text())
+    .then(html => {
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(html, "text/html");
+        let newContent = doc.getElementById("content");
+
+        if (!newContent) {
+            window.location.href = finalizedUrl;
+            return;
+        }
+        
+        document.getElementById("content").innerHTML = newContent.innerHTML;
+        
+        // Exécuter les scripts
+        Array.from(newContent.querySelectorAll('script')).forEach(oldScript => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            document.body.appendChild(newScript);
+            loadedScripts.push(newScript);
+        });
+        
+        // Réinitialiser les contrôleurs d'événements
+        reinitCoreScripts();
+        
+        if (pushState) history.pushState(null, "", finalizedUrl);
+    })
+    .catch(error => console.error("Erreur de chargement:", error));
+};
+
+// Fonction centrale pour gérer toute la navigation SPA
+function initSPANavigation() {
+    // Intercepter tous les clics sur les liens
+    document.body.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && link.href && link.origin === location.origin) {
+            e.preventDefault();
+            loadPage(link.href);
+        }
+    });
+
+    // Gérer le retour/avant navigateur
+    window.addEventListener('popstate', function() {
+        loadPage(location.href);
+    });
+}
+
+// Exposer reinitCoreScripts au scope global
+window.reinitCoreScripts = function() {
+    // Réinitialiser les composants spécifiques ici
+    initSPANavigation(); 
+};
+
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Ajoute /accounts/ si absent
-    function prependAccounts(url) {
-        let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
-        return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
-    }
-
-    // Fonction de chargement de page via fetch
-    // Fonction de chargement de page via fetch
-    // Ajouter une variable globale pour tracker les scripts chargés
-    let loadedScripts = [];
-    
-    // Fonction de chargement de page via fetch (modifiée)
-    function loadPage(url, pushState = true) {
-        // Supprimer les anciens scripts avant de charger la nouvelle page
-        loadedScripts.forEach(script => script.remove());
-        loadedScripts = []; // Réinitialiser le tableau
-    
-        if (url != "accounts/" && url != "/accounts/")
-            var finalizedUrl = prependAccounts(url);
-        else
-            var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
-    
-        fetch(finalizedUrl, { 
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getTokenCSRF()
-            },
-            credentials: 'include'
-        })
-        .then(response => response.text())
-        .then(html => {
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(html, "text/html");
-            let newContent = doc.getElementById("content");
-    
-            if (!newContent) {
-                window.location.href = finalizedUrl;
-                return;
-            }
-    
-            document.getElementById("content").innerHTML = newContent.innerHTML;
-    
-            // Gestion des scripts
-            const scriptPromises = [];
-            Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-                const newScript = document.createElement('script');
-                if (oldScript.src) {
-                    newScript.src = oldScript.src;
-                    newScript.async = false;
-                    const promise = new Promise((resolve, reject) => {
-                        newScript.onload = () => {
-                            resolve();
-                        };
-                        newScript.onerror = reject;
-                    });
-                    scriptPromises.push(promise);
-                } else {
-                    newScript.textContent = oldScript.textContent;
-                    scriptPromises.push(Promise.resolve());
-                }
-                document.body.appendChild(newScript);
-                loadedScripts.push(newScript); // Stocker la référence
-            });
-    
-            return Promise.all(scriptPromises);
-        })
-        .then(() => {
-            if (document.getElementById('mapSelection')) {
-                initializeMapButtons();
-            }
-            if (pushState) history.pushState(null, "", finalizedUrl);
-        })
-        .catch(error => console.error("Erreur de chargement:", error));
-    }
-
     function handleLinkClick(event) {
         const link = event.target.closest("a");
         if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
@@ -104,12 +109,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const form = event.target.closest("form");
         if (!form) return;
 
+        console.log("FORM ID : ", form.id);
+
         // Cas particulier si besoin (exemple pour LevelForm)
         if (form.id === "LevelForm") {
             const level = form.elements.levelfield.value;
             levelinput(level);
             return;
         }
+
+        if (form.id === "id-signin-form" || form.id === "id-signup-form")
+            return;
 
         const formData = new FormData(form);
         const actionUrl = prependAccounts(form.action);
@@ -133,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 loadPage(data.redirect);
             }
         })
-        .catch(error => console.error("Erreur d’envoi:", error));
+        .catch(error => console.error("Erreur d'envoi:", error));
     }
 
     document.body.addEventListener("click", handleLinkClick);
