@@ -4,19 +4,18 @@ let lastMessageId = 0;
 let liveChat;
 let liveChan;
 let blockedUsersList = null;
+// let isLoadingChannels = false;
 // let unreadMsg = {};
 
 // Recup l'user courant
-const userElement = document.getElementById('current-username');
-const username = userElement.getAttribute('data-username');
-const userid = parseInt(userElement.getAttribute('data-user-id'), 10);
+let userElement = null;
+let username = null;
+let userid = null;
 // console.log(`Current username is ${username}`);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 //! MONITORING
-
-let liveChanTimeout;
 
 async function checkChannels() {
 	await loadChannels();
@@ -24,7 +23,11 @@ async function checkChannels() {
 	liveChanTimeout = setTimeout(checkChannels, 2000);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+function launch_everything() {
+
+	userElement = document.getElementById('current-username');
+	username = userElement.getAttribute('data-username');
+	userid = parseInt(userElement.getAttribute('data-user-id'), 10);
 
 	checkChannels();
 
@@ -95,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 		});
 	});
-});
+}
 
 // Cliquer sur un channel deja creer
 function clickToChannel(chanItem, printName, nameChan) {
@@ -479,7 +482,7 @@ async function addPvChan(chanId, amiName) {
 		method: 'POST',
 		credentials: 'same-origin',
 		headers: {
-			'X-CSRFToken': csrftoken,  // Use the function directly
+			'X-CSRFToken': getCSRFToken(),  // Use the function directly
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
@@ -513,7 +516,7 @@ async function addChannelToDb(currentChan, pv, ami) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': csrftoken,
+				'X-CSRFToken': getCSRFToken(),
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
@@ -541,10 +544,9 @@ async function addChannelToDb(currentChan, pv, ami) {
 
 // Load channels that already exists and get them from db
 // When UserChan table created, use it
-let isLoadingChannels = false;
 
 async function loadChannels() {
-	if (isLoadingChannels) return; // Si déjà en cours de chargement, ne rien faire
+	// if (isLoadingChannels) return; // Si déjà en cours de chargement, ne rien faire
 
 	try {
 		await getCurrentPlayerId();
@@ -565,8 +567,6 @@ async function loadChannels() {
 		}
 	} catch (error) {
 		console.error('Erreur: ', error);
-	} finally {
-		isLoadingChannels = false;
 	}
 }
 
@@ -599,7 +599,7 @@ async function postMessage(currentChan, mess, is_link) {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': csrftoken,  // Use the function directly
+				'X-CSRFToken': getCSRFToken(),  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
@@ -704,7 +704,6 @@ async function post_deblock(a) {
 		console.error('Erreur: ', error);
 	}
 }
-
 // Fonction pour marquer une notif comme lue
 // function markAsRead() {
 // 	if (notificationChatSocketSocket.readyState == WebSocket.OPEN) {
@@ -713,4 +712,4 @@ async function post_deblock(a) {
 // 			'channel_name': currentChan,
 // 		}));
 // 	}
-// }
+// }getto
