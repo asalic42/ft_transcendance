@@ -438,6 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Modify the success handler in the signin form submission
 vlp_signinForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -467,27 +468,47 @@ vlp_signinForm.addEventListener('submit', function(e) {
         if (data.status === 'success') {
             console.log(">>>> SUCCESS <<<<");
             
-            // Au lieu de rediriger, chargez la page d'accueil via SPA
+            // Explicitly show the navbar before loading new content
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                console.log("Login success - Setting navbar display to flex");
+                navbar.style.display = 'flex';
+            }
+            
+            // Then load the home page content
             if (data.html) {
                 // Si le serveur renvoie directement le HTML
                 document.getElementById('content').innerHTML = data.html;
                 history.pushState(null, "", data.redirect);
                 
+                // Force navbar display after successful login (redundant but ensures it works)
+                if (navbar) {
+                    setTimeout(() => {
+                        navbar.style.display = 'flex';
+                        console.log("Delayed navbar display set to flex");
+                    }, 100);
+                }
+                
                 // Réinitialiser les gestionnaires d'événements SPA
-                reinitCoreScripts();
+                window.reinitCoreScripts();
             } else {
                 // Sinon, charger la page via la fonction loadPage existante
-                loadPage(data.redirect);
+                window.loadPage(data.redirect);
             }
         } else {
-            console.error(">>>> FAILURE <<<<");
-            console.error('Login failed:', data.message || 'Unknown error');
+            console.log("Login : failed.");
             // Afficher l'erreur
+
+            const vlp_signinContainer = document.querySelector('.signin-container');
+            vlp_signinContainer.classList.add("shake");
+                        
+            setTimeout(function() {vlp_signinContainer.classList.remove("shake")}, 1000);
+
             const errorElement = document.querySelector('.login-error');
             if (errorElement) {
                 errorElement.textContent = data.message || 'Login failed';
                 errorElement.style.display = 'block';
-                errorElement.classList.add('active');
+                errorElement.classList.add('show');
             }
         }
     })
@@ -545,13 +566,14 @@ vlp_signupForm.addEventListener('submit', function(e) {
         } else {
             console.error(">>>> FAILURE <<<<");
             console.error('Signup failed:', data.message || 'Unknown error');
-            // Display error
+
             const errorElement = document.querySelector('.signup-error');
             if (errorElement) {
                 errorElement.textContent = data.message || 'Signup failed';
                 errorElement.style.display = 'block';
                 errorElement.classList.add('active');
             }
+
         }
     })
     .catch(error => {

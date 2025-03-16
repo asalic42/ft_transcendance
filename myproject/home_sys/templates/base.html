@@ -16,19 +16,21 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="{% static 'js/app.js' %}?v={{ timestamp }}"></script>
 
+
     </head>
     <body>
     	{% csrf_token %}
     	<meta name="csrf-token" content="{{ csrf_token }}">	
         
-        {% block navbar %}
         <nav class="navbar">
 
             <ul class="navbar-nav">
 
                 <li class="logo" style="margin-bottom: 10px;">
-                    <a href="#" class="nav-icon">
-                        <span class="link-text logo-text">42Project</span>
+                    <a href="" class="nav-icon nlogo">
+                        <span class="link-text logo-text">
+                            Navbar
+                        </span>
                         <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
                             <path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/>
                         </svg>
@@ -37,7 +39,7 @@
 
             <!-- HOME -->
                 <li class="nav-item">
-                    <a href="home/" class="nav-icon">
+                    <a href="{% url 'home' %}" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/wmwqvixz.json"
                             trigger="hover"
@@ -59,18 +61,6 @@
     				</a>
     			</li>
 
-            <!-- PROFILE -->
-                <li class="nav-item">
-    				<a href="{% url 'profile' request.user.username %}" class="nav-icon">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/hrjifpbq.json"
-                            trigger="hover"
-                            target=".nav-item">
-                        </lord-icon>
-                        <span class="link-text">Utilisateur</span>
-                    </a>
-                </li>
-
             <!-- CHATROOM -->
                 <li class="nav-item">
                     <a href="{% url 'channels' %}" class="nav-icon">
@@ -88,6 +78,22 @@
                     </a>
                 </li>
 
+            
+            {% comment %}
+            <!-- PROFILE -->
+            <!--  <li class="nav-item">
+                <a href="{% url 'profile' request.user.username %}" class="nav-icon">
+                        <lord-icon
+                            src="https://cdn.lordicon.com/hrjifpbq.json"
+                            trigger="hover"
+                            target=".nav-item">
+                        </lord-icon>
+                        <span class="link-text">Utilisateur</span>
+                    </a>
+                </li> -->
+            {% endcomment %}
+
+            
             <!-- NOTIFICATION(S) -->
                 <li class="nav-item">
                     <a href="{% url 'notifications' %}" class="nav-icon">
@@ -108,8 +114,6 @@
             <!-- SETTINGS -->
                 <li class="nav-item">
     				<div id="top-border" style="
-    					width: 85%;
-    					MARGIN: 0 auto;
     					border-top: 2px solid rgba(128, 128, 128, 0.8);">
     				</div>
                     <a href="{% url 'settings_user' %}" class="nav-icon">
@@ -124,7 +128,6 @@
                 </li>
             </ul>
         </nav>
-        {% endblock %}
 
     	<main class="main-content" id="content">
             {% block content %}
@@ -232,9 +235,6 @@
             }; {% endcomment %}
         {% comment %} </script> {% endcomment %}
 
-        <script>
-            document.addEventListener("DOMContentLoaded", initSPANavigation);
-        </script>
 
     </body>
 

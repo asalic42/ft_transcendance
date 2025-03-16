@@ -220,8 +220,6 @@
 
 <script>
 
-    let statusSocket;
-
     // Fonction pour récupérer les statuts de tous les utilisateurs
     function fetchAllUsersStatus() {
         fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
@@ -243,7 +241,7 @@
     }
 
     function connectWebSocket() {
-        statusSocket = new WebSocket("wss://transcendance.42.paris/ws/status/");
+        const statusSocket = new WebSocket(`wss://${window.location.host}/ws/status/`);
 
         statusSocket.onopen = function(e) {
             console.log("WebSocket connection established");

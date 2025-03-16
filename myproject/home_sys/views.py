@@ -120,10 +120,11 @@ def signup(request):
                 'online_count': Users.objects.filter(is_online=True).count()
             })
         else:
-            return JsonResponse({
+            return JsonResponse({'status': 'unauthenticated'})
+            """  return JsonResponse({
                 'status': 'error',
                 'message': 'Invalid credentials'
-            }, status=400)
+            }, status=400) """
             
     # GET requests can return minimal data needed for the signup form
     return JsonResponse({'status': 'unauthenticated'})
@@ -174,10 +175,11 @@ def signin(request):
                 'online_count': Users.objects.filter(is_online=True).count()
             })
         else:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Invalid credentials'
-            }, status=400)
+            return JsonResponse({'status': 'unauthenticated'})
+            #return JsonResponse({
+            #    'status': 'error',
+            #    'message': 'Invalid credentials'
+            #}, status=400)
     
     # GET requests can return minimal data needed for the login form
     return JsonResponse({'status': 'unauthenticated'})
@@ -186,7 +188,10 @@ def signin(request):
 # Déconnexion de l'utilisateur
 def signout(request):
     logout(request)
-    return HttpResponse("Déconnexion réussie.")
+    return JsonResponse({
+        'status': 'success',
+        'redirect': reverse('index')
+    })
 
 
 from django.http import JsonResponse
@@ -352,15 +357,6 @@ def home(request):
 	}
 	return render(request, 'home.html', context)
 
-"""
-|
-|   Pour le sign out,
-|   la déconnection d'un user, on redirige sur la page du sign in.
-|
-"""
-def signout(request):
-	logout(request)
-	return (redirect('index'))
 
 """
 [-------------------------------------------------------------------------]
