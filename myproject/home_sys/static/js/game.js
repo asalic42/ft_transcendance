@@ -470,7 +470,7 @@
 		isOnGamePage: function(path) {
 			const normalizedPath = path.replace(/\/$/, '');
 			console.log("normalized = ", normalizedPath);
-			return (normalizedPath === '/accounts/game' || normalizedPath === '/accounts/game/'); // Adaptez à votre URL de jeu
+			return (normalizedPath === '/game' || normalizedPath === '/game/'); // Adaptez à votre URL de jeu
 		},
 
 		enterGame: function() {

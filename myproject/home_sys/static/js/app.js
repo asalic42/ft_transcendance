@@ -45,90 +45,14 @@ function normalizeUrl(url) {
 } */
 
 var waschan = false;
+var wasNotif = false;
 let liveChanTimeout;
-
-/* document.addEventListener("DOMContentLoaded", function () {
-
-    // Ajoute /accounts/ si absent
-    function prependAccounts(url) {
-        let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
-        return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
-    }
-
-    // Fonction de chargement de page via fetch
-    // Fonction de chargement de page via fetch
-    // Ajouter une variable globale pour tracker les scripts chargés
-    
-    // Fonction de chargement de page via fetch (modifiée)
-    function loadPage(url, pushState = true) {
-        // Supprimer les anciens scripts avant de charger la nouvelle page
-    
-        if (url != "accounts/" && url != "/accounts/")
-            var finalizedUrl = prependAccounts(url);
-        else
-            var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
-    
-        fetch(finalizedUrl, { 
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getCSRFToken()
-            },
-            credentials: 'include'
-        })
-        .then(response => response.text())
-        .then(html => {
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(html, "text/html");
-            let newContent = doc.getElementById("content");
-    
-			// window.location.hash = finalizedUrl;
-            if (!newContent) {
-                window.location.href = finalizedUrl;
-                return;
-            }
-    
-            document.getElementById("content").innerHTML = newContent.innerHTML;
-    
-            // Gestion des scripts
-        })
-        .then(() => {
-            if (document.getElementById('mapSelection')) {
-                initializeMapButtons();
-            }
-            if (pushState) history.pushState(null, "", finalizedUrl);
-			if (url === "/accounts/channels") {
-				launch_everything();
-				waschan = true;
-			}
-			else if (waschan){
-				clearTimeout(liveChanTimeout);
-				waschan = false;
-			}
-        })
-        .catch(error => console.error("Erreur de chargement:", error));
-    }
-
-    function handleLinkClick(event) {
-        const link = event.target.closest("a");
-        if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
-            event.preventDefault();
-            let urlPath = prependAccounts(link.getAttribute("href"));
-            loadPage(urlPath);
-        }
-    }
-}); */
-
-/* ----------------------------------- [FIN] AWE-GAME-RAPH ----------------------------------------- */
-    
 
 // Ajouter une variable globale pour tracker les scripts chargés
 /* let loadedScripts = []; */
 
 // Exposer loadPage au scope global
 window.loadPage = function(url, pushState = true) {
-    // Remove previously loaded scripts
-    /* loadedScripts.forEach(script => script.remove());
-    loadedScripts = []; // Réinitialiser le tableau */
     
     // Normalize the URL to prevent duplication
     const normalizedUrl = normalizeUrl(url);
@@ -173,18 +97,6 @@ window.loadPage = function(url, pushState = true) {
         
         document.getElementById("content").innerHTML = newContent.innerHTML;
         
-        // Exécuter les scripts
-        /* Array.from(newContent.querySelectorAll('script')).forEach(oldScript => {
-            const newScript = document.createElement('script');
-            if (oldScript.src) {
-                newScript.src = oldScript.src;
-            } else {
-                newScript.textContent = oldScript.textContent;
-            }
-            document.body.appendChild(newScript);
-            loadedScripts.push(newScript);
-        }); */
-        
         // Update browser history if requested
         if (pushState) {
             history.pushState(null, "", normalizedUrl);
@@ -206,12 +118,24 @@ window.loadPage = function(url, pushState = true) {
         }
         if (pushState) history.pushState(null, "", normalizedUrl);
         
-        const target_url = `https://${window.location.host}/channels/`;
-
-        if (url === target_url) {
+		const profileName = document.getElementById('accounts_link').href;
+		console.log(`profileName: ${profileName}`)
+		if (/^https:\/\/[^/]+\/profile\/.+$/.test(url))
+			console.log("wildcard is working");
+		if (url === `https://${window.location.host}/channels/`) {
             launch_everything();
             waschan = true;
         }
+		else if (/^https:\/\/[^/]+\/profile\/.+$/.test(url) && url != profileName)
+            launch_profile();
+		else if (url === `https://${window.location.host}/notifications/`) {
+			connectWebSocket_notif_page();
+			wasNotif = true 
+		}
+		else if (wasNotif) {
+			notif_close();
+			wasNotif = false;
+		}
         else if (waschan){
             clearTimeout(liveChanTimeout);
             waschan = false;

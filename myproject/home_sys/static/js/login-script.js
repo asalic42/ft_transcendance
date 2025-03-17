@@ -474,7 +474,12 @@ vlp_signinForm.addEventListener('submit', function(e) {
                 console.log("Login success - Setting navbar display to flex");
                 navbar.style.display = 'flex';
             }
-            
+			
+			const a = document.getElementById('accounts_link');
+			if (a) {
+				a.href = `/profile/${username}`;
+			}
+			
             // Then load the home page content
             if (data.html) {
                 // Si le serveur renvoie directement le HTML

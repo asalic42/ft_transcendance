@@ -14,10 +14,11 @@
 
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="{% static 'js/app.js' %}?v={{ timestamp }}"></script>
+        <script src="{% static 'js/app.js' %}"></script>
+		<script src="{% static 'js/profile.js'%}"></script>
+		<script src="{% static 'js/channel.js'%}"></script>
+		<script src="{% static 'js/notifications.js'%}"></script>
 
-		<script src="{% static 'js/channel.js' %}" defer></script> 
-    	{% comment %} <script src="{% static 'js/game.js' %}"></script> {% endcomment %}
 
     </head>
     <body>
@@ -53,7 +54,7 @@
 
     		<!-- GAME -->
     			<li class="nav-item">
-    				<a href="game-choice/" class="nav-icon">
+    				<a href="{% url 'game-choice' %}" class="nav-icon">
     					<lord-icon
     						src="https://cdn.lordicon.com/caxgkjgi.json"
     						trigger="hover"
@@ -82,20 +83,22 @@
 
             
             <!-- PROFILE -->
-            {% comment %}
-            <!-- <li class="nav-item">
-                <a href="{% url 'profile' request.user.username %}" class="nav-icon">
-                    <lord-icon
+            	<li class="nav-item">
+				{% if request.user.is_authenticated%}
+					<a href="{% url 'profile' request.user.username %}" class="nav-icon" id="accounts_link">
+				{% else %}
+					<a class="nav-icon" id="accounts_link">
+				{% endif %}
+				
+                        <lord-icon
                             src="https://cdn.lordicon.com/hrjifpbq.json"
                             trigger="hover"
                             target=".nav-item">
-                    </lord-icon>
-                    <span class="link-text">Utilisateur</span>
-                </a>
-            </li> -->
-            {% endcomment %}
+                        </lord-icon>
+                        <span class="link-text">Utilisateur</span>
+                    </a>
+                </li>
 
-            
             <!-- NOTIFICATION(S) -->
                 <li class="nav-item">
                     <a href="{% url 'notifications' %}" class="nav-icon">
@@ -166,7 +169,21 @@
         
         
         {% comment %} <script>
-    		
+    		function getCookie(name) {
+    			let cookieValue = null;
+    			if (document.cookie && document.cookie !== '') {
+    				const cookies = document.cookie.split(';');
+    				for (let i = 0; i < cookies.length; i++) {
+    					const cookie = cookies[i].trim();
+    					if (cookie.substring(0, name.length + 1) === (name + '=')) {
+    						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+    						break;
+    					}
+    				}
+    			}
+    			return cookieValue;
+    		}
+    		const csrftoken = getCookie('csrftoken');
     	</script> {% endcomment %}
 {% comment %} 
         <script>
@@ -257,5 +274,4 @@
                     .catch(error => console.error("Erreur de navigation: ", error));
             }); 
         });{% endcomment %}
-   
 </html>

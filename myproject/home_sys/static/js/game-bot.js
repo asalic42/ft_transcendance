@@ -389,7 +389,7 @@
 				return this.cachedUserId;
 			}
 			try {
-				const response = await fetch('/accounts/api/current-user/', {
+				const response = await fetch('/api/current-user/', {
 					credentials: 'same-origin'
 				});
 				const data = await response.json();
@@ -406,7 +406,7 @@
 		async addNewGame(id_player) {
 			console.log("id_player dans addNewGame: ", id_player);
 			try {
-				const response = await fetch('/accounts/api/add_pong/', {
+				const response = await fetch('/api/add_pong/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -503,7 +503,7 @@
 
 	window.BotGame = BotGame;
 
-/* function replay(player) {
+function replay(player) {
 	const button = document.getElementById("replay-button");
 	button.style.display = "block";
 
@@ -656,4 +656,3 @@ document.addEventListener("beforeunload", function() {
 
 	context.clearRect(0, 0, table.width, table.height);
 })
- */

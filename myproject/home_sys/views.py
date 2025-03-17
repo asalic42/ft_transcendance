@@ -361,6 +361,15 @@ def home(request):
 	}
 	return render(request, 'home.html', context)
 
+"""
+|
+|   Pour le sign out,
+|   la déconnection d'un user, on redirige sur la page du sign in.
+|
+"""
+def signout(request):
+	logout(request)
+	return (redirect('home'))
 
 """
 [-------------------------------------------------------------------------]
