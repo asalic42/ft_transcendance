@@ -27,7 +27,7 @@ let gameState = {
 };
 
 // WebSocket concerns
-const socket = new WebSocket(`wss://192.168.43.45:5000/ws/pong/${gameId}/${id_t}`);
+const socket = new WebSocket(`wss://172.20.10.3:5000/ws/pong/${gameId}/${id_t}`);
 
 socket.onopen = function() {
 	console.log("Connexion réussie au WebSocket");
