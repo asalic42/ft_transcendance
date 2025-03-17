@@ -139,7 +139,7 @@
                 fetch(`/${url}/${username}/`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-CSRFToken': getCSRFToken(),
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({})
@@ -174,7 +174,7 @@
                 fetch(`/${url}/${username}/`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-CSRFToken': getCSRFToken(),
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({})

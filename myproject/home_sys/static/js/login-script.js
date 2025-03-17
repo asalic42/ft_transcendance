@@ -452,7 +452,7 @@ vlp_signinForm.addEventListener('submit', function(e) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            "X-CSRFToken": getTokenCSRF()
+            "X-CSRFToken": getCSRFToken()
         },
         body: JSON.stringify({ username, password })
     })
@@ -537,7 +537,7 @@ vlp_signupForm.addEventListener('submit', function(e) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            "X-CSRFToken": getTokenCSRF()
+            "X-CSRFToken": getCSRFToken()
         },
         body: JSON.stringify({ username, password, email })
     })

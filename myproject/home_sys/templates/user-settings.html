@@ -104,7 +104,7 @@
                 formData.append('username', new_username);
                 formData.append('pseudo', new_pseudo);
                 formData.append('email', new_email);
-                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour sécuriser la requête
+                formData.append('csrfmiddlewaretoken', getCSRFToken());  // CSRF token pour sécuriser la requête
 
                 // On envoie les données via AJAX
 				$.ajaxSetup({
@@ -146,7 +146,7 @@
             // Crée un objet FormData pour envoyer le fichier
             var formData = new FormData();
             formData.append('avatar', avatar_file);  // Ajoute le fichier avatar
-            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');  // CSRF token pour la sécurité
+            formData.append('csrfmiddlewaretoken', getCSRFToken());  // CSRF token pour la sécurité
 
             // On envoie les données via AJAX
             $.ajax({

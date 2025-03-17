@@ -94,7 +94,7 @@ if [ "$1" == "b-all" ]; then
 
 
     IP=$(hostname -I | awk '{print $1}')
-    
+
     if grep -q "^HOST_IP=" .env; then
         # Si HOST_IP existe, mettre à jour sa valeur avec sed
         sed -i "s/^HOST_IP=.*/HOST_IP=\"$IP\"/" .env

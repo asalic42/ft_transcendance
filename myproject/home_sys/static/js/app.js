@@ -1,5 +1,5 @@
 // Sécurité CSRF cookies
-function getTokenCSRF() {
+function getCSRFToken() {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         document.cookie.split(';').forEach(cookie => {
@@ -27,22 +27,108 @@ function normalizeUrl(url) {
             return '/';
         }
     }
-    
     // For relative paths, ensure they start with a single '/'
     let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
     let normalizedPath = cleanedUrl ? '/' + cleanedUrl : '/';
     console.log("Normalized URL (relative):", normalizedPath);
     return normalizedPath;
 }
+    
+/* ----------------------------------- AWE-GAME-RAPH ----------------------------------------- */
+
+// Recup le csrf token definit plus tot dans le code
+/* function getCSRFToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        ?.split('=')[1] || '';
+} */
+
+var waschan = false;
+let liveChanTimeout;
+
+/* document.addEventListener("DOMContentLoaded", function () {
+
+    // Ajoute /accounts/ si absent
+    function prependAccounts(url) {
+        let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
+        return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
+    }
+
+    // Fonction de chargement de page via fetch
+    // Fonction de chargement de page via fetch
+    // Ajouter une variable globale pour tracker les scripts chargés
+    
+    // Fonction de chargement de page via fetch (modifiée)
+    function loadPage(url, pushState = true) {
+        // Supprimer les anciens scripts avant de charger la nouvelle page
+    
+        if (url != "accounts/" && url != "/accounts/")
+            var finalizedUrl = prependAccounts(url);
+        else
+            var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+    
+        fetch(finalizedUrl, { 
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCSRFToken()
+            },
+            credentials: 'include'
+        })
+        .then(response => response.text())
+        .then(html => {
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(html, "text/html");
+            let newContent = doc.getElementById("content");
+    
+			// window.location.hash = finalizedUrl;
+            if (!newContent) {
+                window.location.href = finalizedUrl;
+                return;
+            }
+    
+            document.getElementById("content").innerHTML = newContent.innerHTML;
+    
+            // Gestion des scripts
+        })
+        .then(() => {
+            if (document.getElementById('mapSelection')) {
+                initializeMapButtons();
+            }
+            if (pushState) history.pushState(null, "", finalizedUrl);
+			if (url === "/accounts/channels") {
+				launch_everything();
+				waschan = true;
+			}
+			else if (waschan){
+				clearTimeout(liveChanTimeout);
+				waschan = false;
+			}
+        })
+        .catch(error => console.error("Erreur de chargement:", error));
+    }
+
+    function handleLinkClick(event) {
+        const link = event.target.closest("a");
+        if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
+            event.preventDefault();
+            let urlPath = prependAccounts(link.getAttribute("href"));
+            loadPage(urlPath);
+        }
+    }
+}); */
+
+/* ----------------------------------- [FIN] AWE-GAME-RAPH ----------------------------------------- */
+    
 
 // Ajouter une variable globale pour tracker les scripts chargés
-let loadedScripts = [];
+/* let loadedScripts = []; */
 
 // Exposer loadPage au scope global
 window.loadPage = function(url, pushState = true) {
     // Remove previously loaded scripts
-    loadedScripts.forEach(script => script.remove());
-    loadedScripts = []; // Réinitialiser le tableau
+    /* loadedScripts.forEach(script => script.remove());
+    loadedScripts = []; // Réinitialiser le tableau */
     
     // Normalize the URL to prevent duplication
     const normalizedUrl = normalizeUrl(url);
@@ -69,7 +155,7 @@ window.loadPage = function(url, pushState = true) {
     fetch(normalizedUrl, { 
         headers: {
             "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": getTokenCSRF()
+            "X-CSRFToken": getCSRFToken()
         },
         credentials: 'include'
     })
@@ -88,7 +174,7 @@ window.loadPage = function(url, pushState = true) {
         document.getElementById("content").innerHTML = newContent.innerHTML;
         
         // Exécuter les scripts
-        Array.from(newContent.querySelectorAll('script')).forEach(oldScript => {
+        /* Array.from(newContent.querySelectorAll('script')).forEach(oldScript => {
             const newScript = document.createElement('script');
             if (oldScript.src) {
                 newScript.src = oldScript.src;
@@ -97,7 +183,7 @@ window.loadPage = function(url, pushState = true) {
             }
             document.body.appendChild(newScript);
             loadedScripts.push(newScript);
-        });
+        }); */
         
         // Update browser history if requested
         if (pushState) {
@@ -113,6 +199,22 @@ window.loadPage = function(url, pushState = true) {
             
             // Force browser to acknowledge the style change
             void navbar.offsetWidth;
+        }
+
+        if (document.getElementById('mapSelection')) {
+            initializeMapButtons();
+        }
+        if (pushState) history.pushState(null, "", normalizedUrl);
+        
+        const target_url = `https://${window.location.host}/channels/`;
+
+        if (url === target_url) {
+            launch_everything();
+            waschan = true;
+        }
+        else if (waschan){
+            clearTimeout(liveChanTimeout);
+            waschan = false;
         }
     })
     .catch(error => console.error("Erreur de chargement:", error));
@@ -178,7 +280,7 @@ function handleFormSubmit(event) {
         body: formData,
         headers: {
             "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": getTokenCSRF()
+            "X-CSRFToken": getCSRFToken()
         }
     })
     .then(response => response.json())

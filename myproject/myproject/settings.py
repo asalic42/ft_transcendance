@@ -96,14 +96,15 @@ SOCIAL_AUTH_42_SCOPE = ['public']  # Vous pouvez ajuster les scopes selon vos be
 OAUTH2_AUTHORIZE_URL = 'https://api.intra.42.fr/oauth/authorize'
 
 # L'URL de redirection après autorisation
-OAUTH2_REDIRECT_URL = 'https://transcendance.42.paris/oauth/callback/complete/42/'
+OAUTH2_REDIRECT_URL = 'https://172.20.10.3:5000/oauth/callback/complete/42/'
 
 # Pour le petit délire de la map avec la localisation ip
 IP_LOCALISATION= env('MAP_IP_LOCALISATION')
 
 # URL de redirection après l'authentification
-#LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
-#LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
+# LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
+# LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
+LOGIN_URL = '/signin/'  # Ou l'URL de votre choix
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

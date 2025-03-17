@@ -13,16 +13,16 @@ blockButton.addEventListener('click', function(e) {
     // Construire l'URL correctement
     const url = `/block_user/${username}/`;
     // Récupérer le token CSRF
-    const csrfToken = getCookie('csrftoken');
-    if (!csrfToken) {
-        console.error("CSRF token non trouvé !");
-        alert("Erreur : CSRF token manquant.");
-        return;
-    }
+    // const csrfToken = getCookie('csrftoken');
+    // if (!csrfToken) {
+    //     console.error("CSRF token non trouvé !");
+    //     alert("Erreur : CSRF token manquant.");
+    //     return;
+    // }
     fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken,
+			'X-CSRFToken': getCSRFToken(),
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({})
@@ -70,17 +70,17 @@ addButton.addEventListener('click', function(e) {
     const url = `/add_friend/${username}/`;
 
     // Récupérer le token CSRF
-    const csrfToken = getCookie('csrftoken');
-    if (!csrfToken) {
-        console.error("CSRF token non trouvé !");
-        alert("Erreur : CSRF token manquant.");
-        return;
-    }
+    // const csrfToken = getCookie('csrftoken');
+    // if (!csrfToken) {
+        // // console.error("CSRF token non trouvé !");
+        // // alert("Erreur : CSRF token manquant.");
+    //     // return;
+    // }
 
     fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken,
+			'X-CSRFToken': getCSRFToken(),
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({})
@@ -122,18 +122,3 @@ addButton.addEventListener('click', function(e) {
         alert("Une erreur s'est produite lors de l'ajout de l'ami. Veuillez réessayer.");
     });
 });
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
