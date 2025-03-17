@@ -32,13 +32,25 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+#################################################################
+
+IP_ADDR = os.environ.get("HOST_IP")
+
+#################################################################
+
+
 ALLOWED_HOSTS = [
-	"172.20.10.3"
+	IP_ADDR,
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://172.20.10.3:5000",
+    f"https://{IP_ADDR}:5000",
 ]
+
+# Cookie CSRF
+CSRF_COOKIE_SAMESITE = 'None'
+
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL
 SECURE_SSL_REDIRECT = True
@@ -60,14 +72,12 @@ INSTALLED_APPS = [
 	'django.db.migrations.migration',
     'rest_framework',
     'social_django',
-    'loginpage',
     'home_sys',
     'channels',
     'corsheaders',
 ]
 
 AUTHENTICATION_BACKENDS = (
-    'loginpage.backends.OAuth2_42',
     'django.contrib.auth.backends.ModelBackend',  # Authentification standard Django
 )
 
@@ -78,8 +88,8 @@ environ.Env.read_env()  # Lire le fichier .env
 
 # Configuration OAuth pour 42
 
-SOCIAL_AUTH_42_KEY = env('42_CLIENT_ID')
-SOCIAL_AUTH_42_SECRET = env('42_CLIENT_SECRET')
+SOCIAL_AUTH_42_KEY = env('CLIENT_ID_42')
+SOCIAL_AUTH_42_SECRET = env('CLIENT_SECRET_42')
 SOCIAL_AUTH_42_SCOPE = ['public']  # Vous pouvez ajuster les scopes selon vos besoins
 
 # Exemple d'URL d'autorisation
@@ -142,6 +152,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

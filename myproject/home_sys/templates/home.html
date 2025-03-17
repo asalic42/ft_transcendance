@@ -10,9 +10,9 @@
 	
 	<div class="page-title-home">
 		<div class="sub-container-home">
-			<h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance ! <span class="emoji-in-title-home2">👋</span></h1>
+			<h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance... <span class="emoji-in-title-home2">👋</span></h1>
 			<ul class="feature-list">
-				<li><span class="feature-icon">📝</span> One rule, do what you want. </li>
+				<li><span class="feature-icon">📝</span> Fuck this project. </li>
 			</ul>
 		</div>
 	</div>
@@ -40,7 +40,7 @@
 							Si vous voulez modifier vos informations utilisateurs
 							rendez-vous dans les settings.
 						</p>
-						<a class="profile-go-to-settings" href="user-settings/">Je veux modifier mon profil</a>
+						<a class="profile-go-to-settings" href="{% url 'settings_user' %}">Je veux modifier mon profil</a>
 					{% else %}
 						<p class="other-profile-text-settings-rdv">
 							Vous pouvez ajouter {{profile_user.username}} en ami(e)

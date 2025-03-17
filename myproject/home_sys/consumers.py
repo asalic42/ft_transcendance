@@ -23,6 +23,7 @@ import logging
 from .utils import add_pong_logic
 from .models import *
 import math
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 
 """ Other functions utils """
@@ -1683,7 +1684,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				name = [pair[0]['username'], pair[1]['username']]
 				index = 0
 				for player_in_pair in pair:
-					game_link = f"https://172.20.10.3:5000/accounts/game-distant/{game_id}/{self.tournament_id}"
+					game_link = f"https://{settings.IP_ADDR}/game-distant/{game_id}/{self.tournament_id}"
 					print(f'On envoie le lien "{game_link}" à {player_in_pair["channel_name"]} and round nb is at {TournamentConsumer.roundNb[self.tournament_id]}')
 					print(f'name: {name}')
 					print(f'name[index]: {name[index]}')

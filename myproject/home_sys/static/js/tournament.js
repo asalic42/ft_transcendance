@@ -9,7 +9,7 @@ socket.onopen = function() {
 
 socket.onclose = function socket_close() {
 	alert("Tournament is full, running or there has been an error.")
-	window.location.href = "https://172.20.10.3:5000/accounts/game-mode-pong/"
+	window.location.href = `https://${window.location.host}/game-mode-pong/`
 }
 
 function startButton(link, name) {
@@ -69,7 +69,7 @@ socket.onmessage = function(event) {
 		}
 		if (data.type === "tournament_cancelled") {
 			alert("Tournament is cancelled. Someone disconnected.");
-			window.location.href = "https://172.20.10.3:5000/accounts/game-mode-pong/"
+			window.location.href = `https://${window.location.host}/game-mode-pong/`
 		}
 		if (data.type === "user_list") {
 			span.textContent = "Users connected to tournament: ";
@@ -85,7 +85,7 @@ socket.onmessage = function(event) {
 			}
 
 			sleep(1000);
-			window.location.href = "https://172.20.10.3:5000/accounts/game-mode-pong/"
+			window.location.href = `https://${window.location.host}/game-mode-pong/`
 		}
     } catch (error) {
         console.error("Erreur de parsing des données du WebSocket :", error);
@@ -102,7 +102,7 @@ async function getCurrentPlayerId() { // à lancer au chargement de la page;
 		return cachedUserId;
 	}
 	try {
-		const response = await fetch('/accounts/api/current-user/', {
+		const response = await fetch('/api/current-user/', {
 			credentials: 'same-origin'
 		});
 		const data = await response.json();

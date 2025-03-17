@@ -50,6 +50,7 @@
                     <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}">
                     Logout
                 </button>
+
                 <button class="settings-delete-account" onclick="window.location.href='{% url 'delete_account' %}'">
                     <img class="delete-svg" src="{% static 'images/delete-profile-svgrepo-com.svg' %}">    
                     Delete
@@ -58,6 +59,9 @@
         </div>
     </div>
 
+
+
+    <!-- POUR TOUT LE RESTE -->
     <script>
 
         let update_var = {value: false};

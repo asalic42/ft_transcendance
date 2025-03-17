@@ -1,8 +1,6 @@
-let statusSocket;
-
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function fetchAllUsersStatus() {
-	fetch("/accounts/api/user-status/") // Remplacez par l'URL de votre endpoint Django
+	fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
 		.then(response => response.json())
 		.then(users => {
 			// console.log("Users status fetched:", users);
@@ -21,16 +19,16 @@ function fetchAllUsersStatus() {
 }
 
 function connectWebSocket() {
-	statusSocket = new WebSocket("wss://172.20.10.3:5000/ws/status/");
+	const socketStatus = new WebSocket(`wss://${window.location.host}/ws/status/`);
 
-	statusSocket.onopen = function(e) {
+	socketStatus.onopen = function(e) {
 		console.log("WebSocket connection established");
 
 		// Récupérer les statuts de tous les utilisateurs dès que la connexion WebSocket est établie
 		fetchAllUsersStatus();
 	};
 
-	statusSocket.onmessage = function(e) {
+	socketStatus.onmessage = function(e) {socketStatus
 		// console.log("WebSocket message received:", e.data);
 		const data = JSON.parse(e.data);
 		const userElement = document.getElementById(`user-${data.user_id}`);
@@ -44,12 +42,12 @@ function connectWebSocket() {
 		}
 	};
 
-	statusSocket.onclose = function(e) {
+	socketStatus.onclose = function(e) {
 		console.error('WebSocket closed unexpectedly. Reconnecting...');
 		setTimeout(connectWebSocket, 5000); // Reconnecter après 5 secondes
 	};
 
-	statusSocket.onerror = function(e) {
+	socketStatus.onerror = function(e) {
 		console.error('WebSocket error:', e);
 	};
 }
