@@ -1,0 +1,23 @@
+[À FAIRE]:
+
+    - [API 42]:
+    │
+    │   - Monter un serveur publique temporaire (ngrok)
+    │   - Faire en sorte que le "redirect uri" de 42 prenne sa source sur l'url du SPT (serveur publique temporaire)
+    │   - Créer une vue sur le oauth/callback/ qui va venir extraire l'adr IP de la machine et créer un lien dynamique
+    └   - rediriger l'utilisateur sur ce lien dynamique
+
+    - [SPA]:
+    │
+    │   - Monter le SPA quand :
+    │   │
+    │   │   [DE: LOGIN-PAGE > HOME-SYS]
+    │   │   │
+    │   │   │   - L'utilisateur se login, gérer la passerelle entre l'app: <| loginpage - home_sys |>
+    │   │   └   - Si l'authentification échoue
+    │   │
+    │   │   [DE: HOME-SYS > LOGIN-PAGE]
+    │   │   │
+    │   │   └   - L'utilisateur se logout
+    │   └        
+    └

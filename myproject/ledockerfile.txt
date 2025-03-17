@@ -1,0 +1,32 @@
+# Dockerfile
+FROM python:3.10.12
+
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    jq \
+    libpq-dev \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer ngrok
+RUN wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O /tmp/ngrok.tgz \
+    && tar -xzf /tmp/ngrok.tgz -C /usr/local/bin \
+    && rm /tmp/ngrok.tgz
+
+# Définir le répertoire de travail
+WORKDIR /app/
+
+# Copier le fichier de dépendances
+COPY requirements.txt .
+
+# Installer les dépendances Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copier tout le reste du code
+COPY . .
+
+# Commande par défaut
+CMD ["sh", "entrypoint.sh"]
