@@ -1,4 +1,4 @@
-import { PongGame } from './game.js';
+// import { PongGame } from './game.js';
 // import { PongDistantGame, RoomGameManager } from './game-distant.js';
 
 // Router simplifié
@@ -34,12 +34,12 @@ class Router {
     async handleRouteChange() {
 
         const currentPath = window.location.pathname;
-        const isGamePage = this.isOnGamePage(currentPath);
+        // const isGamePage = this.isOnGamePage(currentPath);
         // const isRoomSelect = currentPath.match('/accounts/game-distant-choice');
         // const isDistantGame = currentPath.match(/^\/accounts\/game-distant\/(\d+)\/(\d+)\/?/);
     
-        if (isGamePage)
-            this.enterLocalGame();
+        // if (isGamePage)
+            // this.enterLocalGame();
         // else if (isRoomSelect)
             // await this.handleRoomSelection();
         // else if (isDistantGame)
@@ -248,4 +248,4 @@ class Router {
     }
 };
 
-export const gameRouter = new Router();
+// export const gameRouter = new Router();

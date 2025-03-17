@@ -128,10 +128,10 @@ function addMessageListener() {
 
 	const invite = document.getElementById('invite-button');
 	invite.addEventListener('click', async (event) => {
-		const msg = `https://192.168.1.117:5000/accounts/game-distant/${cachedUserId}/`;
+		const msg = `https://172.20.10.2:5000/accounts/game-distant/${cachedUserId}/`;
 		postMessage(currentChan, msg, true);
 		await invite_button();
-		window.open(`https://192.168.1.117:5000/accounts/game-distant/${cachedUserId}/`, '_blank').focus();
+		window.open(`https://172.20.10.2:5000/accounts/game-distant/${cachedUserId}/`, '_blank').focus();
 	});
 }
 

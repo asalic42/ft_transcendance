@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		else
 			var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
 
-
         return fetch(finalizedUrl, { 
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
@@ -49,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Réexécution des scripts intégrés
 			Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
 				const newScript = document.createElement('script');
+                newScript.type = oldScript.type || 'module';
 				if (oldScript.src) {
 					// Add cache-buster to prevent stale scripts
 					newScript.src = oldScript.src + '?t=' + Date.now();
@@ -66,13 +66,40 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Erreur de chargement:", error));
     }
 
-    function handleLinkClick(event) {
+    async function handleLinkClick(event) {
         const link = event.target.closest("a");
         if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
             event.preventDefault();
             let urlPath = prependAccounts(link.getAttribute("href"));
+            console.log("url = ", urlPath);
             loadPage(urlPath);
+            if (urlPath.includes("game-distant-choice")) {
+                console.log("je charge les ROOMS !");
+                await gameDistantRoute();
+            }
         }
+    }
+
+    async function gameDistantRoute() {
+        // const {RoomGameManager} = await import('./game-distant.js');
+
+        if (!window.RoomGameManager) {
+            const module = await import('./game-distant.js');
+            window.RoomGameManager = module.RoomGameManager;
+            await new Promise(resolve => {
+                const checkEl = () => {
+                    if (document.getElementById('rooms-list'))
+                        resolve();
+                    else
+                    setTimeout(checkEl, 50);
+                };
+                checkEl();
+            });
+        }
+
+        // new RoomGameManager();
+        new window.RoomGameManager();
+        
     }
 
     function handleFormSubmit(event) {

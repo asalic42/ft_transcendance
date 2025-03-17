@@ -33,11 +33,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-	"192.168.1.117"
+	"172.20.10.2"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://192.168.1.117:5000",
+    "https://172.20.10.2:5000",
 ]
 # SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Connexion SSL

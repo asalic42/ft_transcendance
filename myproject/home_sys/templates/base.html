@@ -16,11 +16,11 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
         {% comment %} Game Scripts {% endcomment %}
-    	<script type="module" src="{% static 'js/game.js' %}"></script>
-	    <script type="module" src="{% static 'js/game-distant.js' %}"></script>
+    	<script src="{% static 'js/game.js' %}"></script>
+	    {% comment %} <script type="module" src="{% static 'js/game-distant.js' %}"></script> {% endcomment %}
 
         <script src="{% static 'js/game-bot.js' %}"></script>
-    	<script type="module" src="{% static 'js/router.js' %}"></script>
+    	<script src="{% static 'js/router.js' %}"></script>
 
     </head>
     <body>
@@ -220,7 +220,7 @@
             }; {% endcomment %}
         {% comment %} </script> {% endcomment %}
 
-        <script src="{% static 'js/app.js' %}"></script>
+        <script type="module" src="{% static 'js/app.js' %}"></script>
     </body>
 
         

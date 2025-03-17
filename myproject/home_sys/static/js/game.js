@@ -1,10 +1,10 @@
-import { gameRouter } from './router.js'
+// import { gameRouter } from './router.js'
 
 // (function() {
 // 
 	// if (window.PongGame) return ;
 
-	export class PongGame {
+	class PongGame {
 		constructor() {
 			this.initState();
 			this.keyHandler = this.handleKey.bind(this);
@@ -516,10 +516,10 @@ import { gameRouter } from './router.js'
 	// 	}
 	//   };
 
-	document.addEventListener("DOMContentLoaded", function() {
-		if (window.location.pathname.includes('/accounts/game'))
-			gameRouter.init();
-	});
+	// document.addEventListener("DOMContentLoaded", function() {
+	// 	if (window.location.pathname.includes('/accounts/game'))
+	// 		gameRouter.init();
+	// });
 
 // }) ();
 

@@ -1102,6 +1102,8 @@ def create_current_game(request, sender_id):
 @login_required
 def get_rooms(request):
 	rooms = CurrentGame.objects.all().values("game_id")
+	print("list room: ", list(rooms))
+	sys.stdout.flush()
 	return JsonResponse(list(rooms), safe=False)
 
 @login_required
@@ -1111,10 +1113,14 @@ def create_room(request):
 		data = json.loads(request.body)
 		game_id = data.get('gameId')
 
+		print("DEBUG 1")
+		sys.stdout.flush()
 		if not game_id:
 			return JsonResponse({'error': 'gameId manquant'}, status=400)
 		
-		new_room = CurrentGame.objects.create(
+		print("DEBUG 2")
+		sys.stdout.flush()
+		new_room, _ = CurrentGame.objects.get_or_create(
 			game_id=game_id
 		)
 

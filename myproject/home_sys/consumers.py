@@ -486,9 +486,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 			if current_time - last_update >= update_interval:
 				ball = self.game.ball
 
-				print("JE SUIS LA")
-				sys.stdout.flush()
-
 				# Maj ball coords
 				ball['coords']['x'] += ball['vector']['vx'] * self.game.multiplyer
 				ball['coords']['y'] += ball['vector']['vy'] * self.game.multiplyer
