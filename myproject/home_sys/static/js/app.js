@@ -1,17 +1,20 @@
 import { PongDistantGame } from './game-distant.js';
+import { PongGame } from './game.js';
 
 // Recup le csrf token definit plus tot dans le code
-function getCSRFToken() {
-    return document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrftoken='))
-        ?.split('=')[1] || '';
-}
+// function getCSRFToken() {
+//     return document.cookie
+//         .split('; ')
+//         .find(row => row.startsWith('csrftoken='))
+//         ?.split('=')[1] || '';
+// }
 
 document.addEventListener("DOMContentLoaded", function () {
 
     let gameDistant = false;
     let gameRoom = false;
+    let gamePong = false;
+
     // Ajoute /accounts/ si absent
     function prependAccounts(url) {
         let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
@@ -80,35 +83,57 @@ document.addEventListener("DOMContentLoaded", function () {
                 loadPage(urlPath);
                 
                 if (urlPath.includes("game-distant-choice")) {
-                    console.log("je charge les ROOMS !");
                     gameRoom = true;
                     await gameDistantRoute();
                 }
-
-
                 else if (urlPath.includes("/game-distant/")) {
-                    console.log("je rentre dans jeu !");
                     gameDistant = true;
                 }
-
-
+                else if (urlPath === '/accounts/game' || urlPath === '/accounts/game/') {
+                    gamePong = true;
+                    await gameRoute();
+                }
                 else {
-                    console.log("HELLO HELLO");
                     if (gameDistant && PongDistantGame.currentGame) {
-                        console.log("je passe par ici !");
                         PongDistantGame.currentGame.closeSocket();
                         gameDistant = false;
                     }
-                    else if (gameRoom)
+                    else if (gameRoom) {
                         window.RoomGameManager = null;
+                        gameRoom = false;
+                    }
+                    else if (gamePong) {
+                        window.PongGame = null;
+                        gamePong = false;
+                    }
                 }
             }
     }
 
-    async function gameDistantRoute() {
-        // const {RoomGameManager} = await import('./game-distant.js');
+    async function gameRoute() {
 
-        console.log("je suis dans GAMEDISTANTROUTE et window machin vaut: ", window.RoomGameManager);
+        // console.log("window Pong= ", window.PongGame);
+        if (!window.PongGame) {
+            const module = await import('./game.js');
+            window.PongGame = module.PongGame;
+            await new Promise(resolve => {
+                const checkEl = () => {
+                    if (document.getElementById('canvas-container'))
+                        resolve();
+                    else
+                    setTimeout(checkEl, 50);
+                };
+                checkEl();
+            });
+        }
+        new window.PongGame();
+        PongGame.currentGame.initGame();
+
+    }
+
+    async function gameDistantRoute() {
+
+        // console.log("je suis dans GAMEDISTANTROUTE et window machin vaut: ", window.RoomGameManager);
         if (!window.RoomGameManager) {
             const module = await import('./game-distant.js');
             window.RoomGameManager = module.RoomGameManager;
@@ -122,10 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 checkEl();
             });
         }
-
-        // new RoomGameManager();
         new window.RoomGameManager();
-        
     }
 
     function handleFormSubmit(event) {

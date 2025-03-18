@@ -53,7 +53,7 @@ class PongGame:
 		self.players = {}
 		self.reset_game()
 		self.is_running = False
-		self.is_over = False
+		# self.is_over = False
 		self.multiplyer = 0
 		self.bounce = 0
 		self.reported_to_tournament = False  # <-- Nouveau drapeau
@@ -269,12 +269,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'scores': initial_state_game['scores']
 		}))
 		if len(self.game.players) == 1 and not self.game.is_running:
+			print("j'attends un joueur la")
+			sys.stdout.flush()
 			await self.create_current_game()
 
-		if len(self.game.players) == 2 and not self.game.is_running and not self.game.is_over:
-			print("nous sommes 2")
+		if len(self.game.players) == 2 and not self.game.is_running:
+			print("game lancee !!!")
 			sys.stdout.flush()
-
 			self.game.is_running = True
 			await self.delete_current_game()
 			await self.send_game_state()
@@ -283,16 +284,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 	# Deconnexion du serveur
 	async def disconnect(self, close_code):
 		self.game.is_running = False
-		self.game.is_over = True
+		# self.game.is_over = False
 	
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
 			
-			# Marquer le perdant
-			if player_number == 1:
-				self.game.scores['p2'] = 1
-			else:
-				self.game.scores['p1'] = 1
+			self.game.scores['p2'] = 0
+			self.game.scores['p1'] = 0
 	
 			# Envoyer game_won aux joueurs
 			await self.channel_layer.group_send(
@@ -378,15 +376,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 						await self.send(text_data=json.dumps({'type': 'game_error'}))
 					
 					self.game.is_running = True
-					self.game.is_over = False
+					# self.game.is_over = False
 					await self.channel_layer.group_send(
 						self.room_group_name, {
 						'type': 'new_game',
 						**game_state
 					})
 	
-					print("SOMMES NOUS DEUX ???")
-					sys.stdout.flush()
 					asyncio.create_task(self.start_game())
 					return
 			except json.JSONDecodeError:
@@ -766,7 +762,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 		game_was_running = self.game.is_running
 		self.game.is_running = False
-		self.game.is_over = True
+		# self.game.is_over = True
 		
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']

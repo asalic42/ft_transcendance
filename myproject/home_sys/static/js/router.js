@@ -1,4 +1,3 @@
-// import { PongGame } from './game.js';
 // import { PongDistantGame, RoomGameManager } from './game-distant.js';
 
 // Router simplifié

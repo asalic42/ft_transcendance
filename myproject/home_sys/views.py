@@ -1091,7 +1091,7 @@ def user_status(request):
 @login_required
 def create_current_game(request, sender_id):
 	try:
-		created = CurrentGame.objects.get_or_create(game_id=sender_id)
+		created = CurrentGame.objects.create(game_id=sender_id)
 		if created:
 			return (render(request, 'game-distant.html', {'game_id':sender_id}))
 		else:
@@ -1102,8 +1102,6 @@ def create_current_game(request, sender_id):
 @login_required
 def get_rooms(request):
 	rooms = CurrentGame.objects.all().values("game_id")
-	print("list room: ", list(rooms))
-	sys.stdout.flush()
 	return JsonResponse(list(rooms), safe=False)
 
 @login_required

@@ -1,16 +1,13 @@
-// import { gameRouter } from './router.js'
+	export class PongGame {
+		static currentGame = null;
 
-// (function() {
-// 
-	// if (window.PongGame) return ;
-
-	class PongGame {
 		constructor() {
 			this.initState();
 			this.keyHandler = this.handleKey.bind(this);
 		}
-
+		
 		initState() {
+			PongGame.currentGame = this;
 			this.animationId = 0;
 			this.frameTime = {counter : 0, time : 0};
 			this.totalframeTime = {counter : 0, time : 0};
@@ -22,7 +19,7 @@
 			this.ball = null;
 		}
 
-		start() {
+		initGame() {
 
 			this.setupDOM();
 			this.setupListeners();
@@ -74,6 +71,7 @@
 			if (document.getElementById('game').getContext('2d')) {
 				document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 			}
+			PongGame.currentGame = null
 			this.initState();
 		}
 
@@ -356,7 +354,7 @@
 			if (this.stop)
 				this.stopGame();
 			setTimeout(() => {
-				this.start();
+				this.initGame();
 			}, 50);
 		}
 
@@ -368,158 +366,3 @@
 			return result;
 		}
 	}
-
-	// window.PongGame = PongGame;
-
-	// // Router simplifié
-	// var router = {
-	// 	currentGame: null,
-
-	// 	init: function() {
-	// 	  // Détecter les changements d'URL initiaux
-	// 		window.addEventListener('popstate', this.handleRouteChange.bind(this));
-		
-	// 	  // Intercepter les clics sur les liens
-	// 		document.body.addEventListener('click', (e) => {
-	// 			const link = e.target.closest('a');
-	// 			if (link && link.href) {
-	// 				e.preventDefault();
-	// 				this.navigate(new URL(link.href, window.location.origin));
-	// 			}
-	// 		});
-
-	// 		this.handleRouteChange();
-	// 	},
-
-	// 	navigate: function(url) {
-	// 		if (new URL(url).pathname === window.location.pathname) return;
-
-	// 		history.pushState({}, '', url);
-	// 		this.handleRouteChange();
-	// 	},
-	
-	// 	handleRouteChange: function() {
-	// 	  const currentPath = window.location.pathname;
-	// 	  const isGamePage = this.isOnGamePage(currentPath);
-	// 	  const isDistantGame = currentPath.match(/^\/accounts\/game-distant\/(\d+)\/(\d+)\/?/);
-		
-	// 	  if (isGamePage)
-	// 		this.enterLocalGame();
-	// 	  else if (isDistantGame)
-	// 		this.handleDistantGame();
-	// 	  else
-	// 	  	this.exitGame();
-	// 	},
-	
-	// 	isOnGamePage: function(path) {
-	// 		const normalizedPath = path.replace(/\/$/, '');
-	// 		return (normalizedPath === '/accounts/game' || normalizedPath === '/accounts/game/'); // Adaptez à votre URL de jeu
-	// 	},
-
-	// 	handleDistantGame: function(match) {
-	// 		if (this.currentGame) {
-	//             this.currentGame.stopGame();
-	//             this.currentGame = null;
-	//         }
-
-	// 		this.injectTemplate(() => {
-	// 			this.waitElementsDom(() => {
-	// 				if (!this.currentGame) {
-	// 					this.currentGame = new PongDistantGame();
-	// 					console.log("DEBUT DISTANT GAME !!");
-	// 					this.currentGame.start();
-	// 				}
-	// 			});
-	// 		});
-	// 	},
-
-	// 	enterLocalGame: function() {
-
-	// 		if (this.currentGame) {
-	//             this.currentGame.stopGame();
-	//             this.currentGame = null;
-	//         }
-	// 		this.injectTemplate(() => {
-	// 			this.waitElementsDom(() => {
-	// 				if (!this.currentGame) {
-	// 					this.currentGame = new PongGame();
-	// 					console.log("AUSSI ICI");
-	// 					this.currentGame.start();
-	// 				}
-	// 			});
-	// 		});
-	// 	},
-
-	// 	waitElementsDom: function(callback) {
-	// 		const checkEl = () => {
-	// 			if (document.getElementById('game') && document.getElementById('scoreP1') && document.getElementById('scoreP2')) {
-	// 				callback();
-	// 			} else {
-	// 				setTimeout(checkEl, 50);
-	// 			}
-	// 		};
-	// 		checkEl();
-	// 	},
-
-	// 	injectTemplate: function(callback) {
-	// 		const content = document.getElementById('content');
-
-	// 		const newContent = document.createElement('div');
-
-	// 		newContent.innerHTML = `
-	// 			<link rel="stylesheet" href="/static/css/game-style.css">
-
-	// 			<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
-
-	// 			<div class="scores" id="scores">
-	// 				<h3 id="title">Player 1</h3>
-	// 				<h3 id="scoreP1">0</h3>
-	// 				<h3 id="scoreP2">0</h3>
-	// 				<h3 id="title">Player 2</h3>
-	// 			</div>
-
-	// 			<div id="canvas-container">
-	// 				<canvas width="1920" height="850" id="game"></canvas>
-	// 				<div id="button-container">
-	// 					<button id="replay-button" style="display: none;">Play again !</button>
-	// 				</div>
-	// 				<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-	// 					<svg width="1100" height="150">
-	// 						<text x="50%" y="50%" dy=".35em" text-anchor="middle">
-	// 							Player 1 Wins !
-	// 						</text>
-	// 					</svg>
-	// 				</div>
-	// 				<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
-	// 					<svg width="1100" height="150" id="svg-wrapper-player2">
-	// 						<text x="50%" y="50%" dy=".35em" text-anchor="middle">
-	// 							Player 2 Wins !
-	// 						</text>
-	// 					</svg>
-	// 				</div>
-	// 			</div>
-	// 		`;
-
-	// 		content.appendChild(newContent);
-	// 		if (!document.getElementById("canvas-container")) console.log("canvas-container n'existe pas");
-	// 		setTimeout(callback, 10);
-	// 	},
-
-	// 	exitGame: function() {
-	// 		if (this.currentGame) {
-	// 			this.currentGame.stopGame();
-	// 			this.currentGame = null;
-	// 		}
-
-	// 		const gameElements = document.querySelectorAll('#canvas-container, #scores, #fps');
-	// 		gameElements.forEach(el => el.remove());
-	// 	}
-	//   };
-
-	// document.addEventListener("DOMContentLoaded", function() {
-	// 	if (window.location.pathname.includes('/accounts/game'))
-	// 		gameRouter.init();
-	// });
-
-// }) ();
-
