@@ -14,15 +14,15 @@ function notif_getAddFriendResponse(baliseName, url, dataStatus) {
 			.then(data => {
 				if (data.status === `blocked`) {
 					alert(`Impossible d'accepter car vous êtes bloqué par cet utilisateur.`);
-					location.reload(); // Recharger la page pour mettre à jour la liste
+					loadPage("/notifications/"); // Recharger la page pour mettre à jour la liste
 				}
 				else if (data.status === `unblockBefore`) {
 					alert(`Pour accepter la demande d'ami de cet utilisateur, veuillez le débloquer.`);
-					location.reload();
+					loadPage("/notifications/"); // Recharger la page pour mettre à jour la liste
 				}
 				else if (data.status === `friend_added`) {
 					alert(`L'Utilisateur <${username}> a bien été ajouté en ami !`);
-					location.reload();
+					loadPage("/notifications/"); // Recharger la page pour mettre à jour la liste
 				}
 				else {
 					alert('Erreur : ' + data.message);
@@ -53,7 +53,7 @@ function notif_getReponse(baliseName, url, dataStatus, msgStart, msgEnd) {
 				}
 				if (data.status === `${dataStatus}`) {
 					alert(`${msgStart} ${username} ${msgEnd}`);
-					location.reload(); // Recharger la page pour mettre à jour la liste
+					loadPage("/notifications/"); // Recharger la page pour mettre à jour la liste
 				} else {
 					alert('Erreur : ' + data.message);
 				}

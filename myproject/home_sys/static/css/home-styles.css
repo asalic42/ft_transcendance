@@ -14,10 +14,20 @@ button {
     cursor: pointer;
 }
 
+
+
 .profile-button {
 	background-color: green;
 	color: white;
 	transition:	 all 0.1s ease;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-left: 10px;
+	text-decoration: none;
 }
 
 .online-status {
