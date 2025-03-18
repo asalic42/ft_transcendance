@@ -49,7 +49,7 @@ var wasNotif = false;
 var wasSettings = false;
 let liveChanTimeout;
 let SettingsTimeout;
-
+let liveChat;
 
 // Ajouter une variable globale pour tracker les scripts chargés
 /* let loadedScripts = []; */
@@ -92,7 +92,7 @@ window.loadPage = function(url, pushState = true) {
         let doc = parser.parseFromString(html, "text/html");
         let newContent = doc.getElementById("content");
 
-        if (!newContent) {
+        if (!newContent) {	
             console.error("No content element found in response HTML");
             window.location.href = normalizedUrl;
             return;
@@ -100,11 +100,8 @@ window.loadPage = function(url, pushState = true) {
         
         document.getElementById("content").innerHTML = newContent.innerHTML;
         
-        // Update browser history if requested
-        if (pushState) {
-            history.pushState(null, "", normalizedUrl);
-        }
-        
+		if (pushState) history.pushState(null, "", normalizedUrl);
+
         // Double-check navbar visibility after content is loaded
         const currentPath = window.location.pathname;
         const isLoginPageNow = currentPath === '/' || currentPath === '';
@@ -119,38 +116,43 @@ window.loadPage = function(url, pushState = true) {
         if (document.getElementById('mapSelection')) {
             initializeMapButtons();
         }
-        if (pushState) history.pushState(null, "", normalizedUrl);
         
 		const profileName = document.getElementById('accounts_link').href;
-		console.log(`profileName: ${profileName}`)
-		if (/^https:\/\/[^/]+\/profile\/.+$/.test(url))
-			console.log("wildcard is working");
-		if (url === `https://${window.location.host}/channels/`) {
+		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
+			launch_profile();
+		
+		if (url === `https://${window.location.host}/deleteAccount/` || url === '/deleteAccount/')
+			delete_acc();
+		if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
+			console.log("launching chanl")
             launch_everything();
             waschan = true;
         }
-		else if (/^https:\/\/[^/]+\/profile\/.+$/.test(url) && url != profileName)
-            launch_profile();
-		else if (url === `https://${window.location.host}/notifications/`) {
+		else if (waschan) {
+			clearTimeout(liveChanTimeout);
+			clearInterval(liveChat);
+			console.log("closing chanl")
+            waschan = false;
+		}
+		
+		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
 			connectWebSocket_notif_page();
 			wasNotif = true 
-		}
-		else if (url === `https://${window.location.host}/user-settings/`) {
-			launch_settings();
-			wasSettings = true 
 		}
 		else if (wasNotif) {
 			notif_close();
 			wasNotif = false;
 		}
-        else if (waschan){
-            clearTimeout(liveChanTimeout);
-            waschan = false;
-        }
+		
+		if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
+			launch_settings();
+			wasSettings = true 
+		}
 		else if (wasSettings){
             clearTimeout(SettingsTimeout);
             wasSettings = false;
         }
+		console.log('waschan' + waschan);
     })
     .catch(error => console.error("Erreur de chargement:", error));
 };
@@ -172,8 +174,7 @@ window.reinitCoreScripts = function() {
 
 // Single function to handle all link clicks for SPA navigation
 function handleLinkClick(event) {
-    const link = event.target.closest("a");
-    
+    let link = event.target.closest("a");
     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
     if (link && link.href && 
         (new URL(link.href).origin === window.location.origin) && 
@@ -260,8 +261,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("popstate - Setting navbar display to:", isLoginPage ? 'none' : 'flex');
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
-        
-        loadPage(window.location.pathname, false);
+		loadPage(window.location.pathname, false);	
     });
 
     // Initial navbar setup
@@ -276,4 +276,6 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("Initial load - Setting navbar display to:", isLoginPage ? 'none' : 'flex');
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
+	if (window.location.pathname != '/')
+		loadPage(window.location.pathname, false);	
 });

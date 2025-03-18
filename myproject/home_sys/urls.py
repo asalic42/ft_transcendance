@@ -58,14 +58,14 @@ urlpatterns = [
     path('api/map/<int:map_id>/', map_view, name="map_view"),
     path('api/rooms/', get_rooms, name="get_rooms"),
     
-    path('get-ip-info/', get_ip_info, name='get_ip_info'),
+    path('deleteAccount/get-ip-info/', get_ip_info, name='get_ip_info'),
     path('user-settings/', settings_user, name='settings_user'),
     path('user-settings/check_username/', check_username, name='check_username'),
     path('user-settings/check_email/', check_email, name='check_email'),
     path('user-settings/check_pseudo/', check_pseudo, name='check_pseudo'),
     path('user-settings/check_pp/<int:idU>/', check_pp, name='check_pp'),
     path('user-settings/update-user/', update_user_info	, name='update_user_info'),
-    path('upload-avatar/', upload_avatar, name='upload_avatar'),
+    path('user-settings/upload-avatar/', upload_avatar, name='upload_avatar'),
     
     # Endpoints pour les channels
     path('api/post_chan/', post_chan, name="post_chan"),

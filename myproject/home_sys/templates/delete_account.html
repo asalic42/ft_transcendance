@@ -5,26 +5,21 @@
 
 <div id="content">
     <div class="test-delete">
-        <form method="post" class="delete_my_account" action="{% url 'delete_account' %}">
-            {% csrf_token %}
-        
-            <div class="content-delete">
-                
-                <!-- Image -->
-                <img class="imgDelete" id="randomImage" src="" alt="Random Image">
-                
-                <!-- Texte -->
-                <div class="sub_imgDelete">
-                    <h2 class="test-test">You wouldn't dare</h2>
-                    <p>Click here and we'll forget all about this little incident.</p>
-                    <button onclick="window.location.href='{% url 'home' %}'" class="button-delete-1" type="button" >I slipped hahahahaha</button>
-                    <p class="userrefused">Click here and we'll find you, we've got your <span class="partie-text">ip address</span> buddy </p>
-                    <button class="button-delete-2" type="submit">i delete my account</button>
-                    <div id="map"></div>
-                </div>
-            </div>
-        </form>
-        
+		<div class="delete_my_account">
+			<div class="content-delete">
+				
+				<img class="imgDelete" id="randomImage" src="" alt="Random Image">
+	
+				<div class="sub_imgDelete">
+					<h2 class="test-test">You wouldn't dare</h2>
+					<p>Click here and we'll forget all about this little incident.</p>
+					<a href="{% url 'home' %}" class="button-delete-1">I slipped hahahahaha</a>
+					<p class="userrefused">Click here and we'll find you, we've got your <span class="partie-text">ip address</span> buddy </p>
+					<a class="button-delete-2" href="{% url 'delete_success' %}">I want to be locked out</a>
+					<div id="map"></div>
+				</div>
+			</div>
+		</div>
     </div>
 
     <style>
@@ -145,67 +140,14 @@
 
     </style>
 
-    <script>
-        // List of image paths
-        const images = [
-            "{% static 'images/petit_billet.jpg' %}",
-            "{% static 'images/on_peut_s_arranger.jpg' %}",
-            "{% static 'images/triste.jpg' %}"
-        ];
-
-        // Pick a random image
-        const randomImage = images[Math.floor(Math.random() * images.length)];
-
-        // Set the 'src' of the img tag
-        document.getElementById('randomImage').src = randomImage;
-
-        // Récupérer les éléments
-        const button = document.querySelector('.button-delete-2');
-        const hiddenElement = document.getElementById('map');
-        const spanText = document.querySelector('.partie-text');
-        const testTest = document.querySelector('.test-test');
-
-        // Ajouter un événement mouseover pour afficher l'élément
-        button.addEventListener('mouseover', function() {
-            hiddenElement.style.opacity = '1'; // Affiche l'élément
-            hiddenElement.style.pointerEvents = 'auto';
-            spanText.style.color = '#000000';
-            spanText.style.fontWeight = 'bold';
-            spanText.style.fontSize = '18px';
-            testTest.style.marginTop = "-70px";
-            testTest.style.opacity = "0";
-            testTest.style.pointerEvents = "none";
-        });
-
-    </script>
-
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-      // Fonction pour obtenir la localisation de l'IP via l'API ipinfo.io
-      fetch(`https://${window.location.host}/get-ip-info`)  // Remplacez "YOUR_API_KEY" par votre clé API gratuite
-        .then(response => response.json())
-        .then(data => {
-          const ipLocation = data.loc.split(',');
-          const latitude = parseFloat(ipLocation[0]);
-          const longitude = parseFloat(ipLocation[1]);
-        
-          // Initialisation de la carte Leaflet
-          const map = L.map('map').setView([latitude, longitude], 13);
-        
-          // Ajout d'un fond de carte (OpenStreetMap)
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }).addTo(map);
-      
-          // Ajout d'un marqueur à la localisation de l'utilisateur
-          L.marker([latitude, longitude]).addTo(map)
-            .bindPopup('You are just here 😈.')
-            .openPopup();
-        })
-        .catch(error => {
-          console.error("Erreur lors de la récupération des données IP :", error);
-        });
-    </script>
 </div>
+<script>
+	const images = [
+		"{% static 'images/petit_billet.jpg' %}",
+		"{% static 'images/on_peut_s_arranger.jpg' %}",
+		"{% static 'images/triste.jpg' %}"
+	];
+</script>
+
 
 {% endblock %}
