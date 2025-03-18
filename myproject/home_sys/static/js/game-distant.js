@@ -20,53 +20,7 @@ export class RoomGameManager {
 			const userId = document.getElementById('new-room').getAttribute('data-user-id');
 			this.createRoom(userId);
 		});
-
-		// document.getElementById('rooms-list').addEventListener('click', (e) => {
-		// 	console.log("listener JOIN actif");
-		// 	const roomLink = e.target.closest('.room-link');
-		// 	if (roomLink) {
-		// 		e.preventDefault();
-		// 		console.log("room ID: ", roomLink.dataset.gameId);
-		// 		this.joinRoom(roomLink.dataset.gameId);
-		// 	}
-		// });
 	}
-
-	// async loadRooms() {
-	// 	console.log("LOAD ROOMS");
-	// 	try {
-	// 		const rooms = await this.apiGet('/accounts/api/rooms/');
-
-	// 		const tmp = document.createDocumentFragment();
-	// 		if (rooms.length === 0) {
-	// 			const p = document.createElement('p');
-	// 			p.textContent = "Aucune Room";
-	// 			tmp.appendChild(p);
-	// 		}
-	// 		else {
-	// 			rooms.forEach(room => {
-	// 				const link = document.createElement('a');
-	// 				link.href = `game-distant/${room.game_id}/0`;
-	// 				link.className = 'game-distant room-link';
-	// 				link.dataset.gameId = room.gameId;
-
-	// 				const span = document.createElement('span');
-	// 				span.className = "game-mode";
-	// 				span.textContent = `Room ${room.game_id}`;
-
-	// 				link.appendChild(span);
-	// 				tmp.appendChild(link);
-	// 			})
-	// 		}
-
-	// 		document.getElementById('rooms-list').replaceChildren(tmp);
-
-	// 		console.log("HTML bien ajoute !!!");
-	// 	} catch (error) {
-	// 		console.error('Error loading rooms: ', error);
-	// 		document.getElementById('rooms-list').innerHTML = '<p>Erreur de chargement</p>';
-	// 	}
-	// }
 
 	loadRooms() {
 		console.log("LOAD ROOMS");
@@ -80,7 +34,8 @@ export class RoomGameManager {
 				} else {
 					rooms.forEach(room => {
 						console.log("ROOM numero: ", room.game_id);
-						const link = document.createElement('div');
+						const link = document.createElement('a');
+						link.href = `/game-distant/${room.game_id}/0`;
 						link.className = 'game-distant room-link';
 						link.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
 						link.addEventListener('click', () => this.joinRoom(room.game_id));
@@ -91,85 +46,86 @@ export class RoomGameManager {
 			})
 			.catch(error => {
 				console.error('Error loading rooms: ', error);
-				// document.addEventListener('rooms-list').innerHTML = '<p class="error">Erreur de chargement</p>';
 			});
 	}
 
 	chargingGame() {
 		// const response = await fetch("game-distant");
-		const html = `
-            <link rel="stylesheet" href="/static/css/game-style.css">
+		return new Promise((resolve) => {
+			const html = `
+            	<link rel="stylesheet" href="/static/css/game-style.css">
 
-            <h3 class="scores" id="fps">Fps : 0</h3>
+            	<h3 class="scores" id="fps">Fps : 0</h3>
 
-            <a href="game-distant-choice" class="game-distant">
-            	<span class="game-mode">Retour</span>
-            </a>
+            	<a href="game-distant-choice" class="game-distant">
+            		<span class="game-mode">Retour</span>
+            	</a>
 
-            <div class="scores" id="scores">
+            	<div class="scores" id="scores">
 
-            	<h3 id="title-p1">Player 1</h3>
-            	<h3 id="scoreP1">0</h3>
-            	<h3 id="scoreP2">0</h3>
-            	<h3 id="title-p2">Player 2</h3>
-            </div>
+            		<h3 id="title-p1">Player 1</h3>
+            		<h3 id="scoreP1">0</h3>
+            		<h3 id="scoreP2">0</h3>
+            		<h3 id="title-p2">Player 2</h3>
+            	</div>
 
-            <div id="canvas-container">
-                <canvas width="1920" height="850" id="game"></canvas>
-                <div id="button-container">
-                    <button id="replay-button" style="display: none;">Play again !</button>
-                </div>
-                <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-                    <svg width="1100" height="150" id="svg-wrapper-player1">
-                        <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
-                    </svg>
-                </div>
-                <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
-                    <svg width="1100" height="150" id="svg-wrapper-player2">
-                        <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
-                    </svg>
-                </div>
-                <div id="overlay">
-                    <h1 id="countdown">3</h1>
-                </div>
-            </div>
+            	<div id="canvas-container">
+            	    <canvas width="1920" height="850" id="game"></canvas>
+            	    <div id="button-container">
+            	        <button id="replay-button" style="display: none;">Play again !</button>
+            	    </div>
+            	    <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+            	        <svg width="1100" height="150" id="svg-wrapper-player1">
+            	            <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
+            	        </svg>
+            	    </div>
+            	    <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+            	        <svg width="1100" height="150" id="svg-wrapper-player2">
+            	            <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
+            	        </svg>
+            	    </div>
+            	    <div id="overlay">
+            	        <h1 id="countdown">3</h1>
+            	    </div>
+            	</div>
 
-            <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
-        `;
-		document.getElementById('content').innerHTML = html;
+            	<h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
+       		`;
+			document.getElementById('content').innerHTML = html;
+			setTimeout(resolve, 50);
+		});
 	}
 
 	async createRoom(gameId) {
 		console.log("CREATE A ROOM");
 		try {
-			// await this.apiPost('/accounts/api/create-room/', gameId);
 			await fetch(`/accounts/create_current_game/${gameId}/`)
-			this.chargingGame();
+			await this.chargingGame();
 			new PongDistantGame(gameId, 0);
 		} catch (error) {
 			console.error("Error when creating a room: ", error);
 		}
 	}
 
-	joinRoom(gameId) {
+	async joinRoom(gameId) {
 		console.log("JOIN A ROOM: ", gameId);
-		this.chargingGame();
+		await this.chargingGame();
 		new PongDistantGame(gameId, 0);
 	}
 
 	// utils/api.js
-	async apiGet(url) {
-		try {
-		  	const response = await fetch(url, {
-				credentials: 'include'
-			});
-		 	if (!response.ok) throw new Error('Erreur réseau');
-		  	return await response.json();
-		} catch (error) {
-		  	console.error('API GET Error:', error);
-		  	throw error;
-		}
-	}
+	// async apiGet(url) {
+	// 	try {
+	// 	  	const response = await fetch(url, {
+	// 			credentials: 'include'
+	// 		});
+	// 	 	if (!response.ok) throw new Error('Erreur réseau');
+	// 	  	return await response.json();
+	// 	} catch (error) {
+	// 	  	console.error('API GET Error:', error);
+	// 	  	throw error;
+	// 	}
+	// }
 
 	getCookie() {
 		return document.cookie
@@ -203,9 +159,11 @@ export class RoomGameManager {
 }
 
 export class PongDistantGame {
+	static currentGame = null;
 
 	constructor(gameId, id_t) {
 		console.log("JE COMMENCE LE PONG");
+		PongDistantGame.currentGame = this;
 		this.initState();
 		this.keyHandler = this.handleKey.bind(this);
 		this.socket = new WebSocket(`wss://${window.location.host}/ws/pong/${gameId}/${id_t}`);
@@ -225,6 +183,7 @@ export class PongDistantGame {
 				p2: 0
 			}
 		};
+		// this.keyHandler = this.handleKey.bind(this);
 		this.compteur = 0;
 		this.setupDOM();
 	}
@@ -233,12 +192,13 @@ export class PongDistantGame {
 		const safeShow = (id) => {
 			const element = document.getElementById(id);
 			if (element) element.style.display = 'flex';
-			console.log("je suis la bitch");
 		};
 		['scores', 'scoreP1', 'scoreP2', 'fps', 'canvas-container'].forEach(safeShow);
 
 		document.getElementById("scoreP1").textContent = "0";
 		document.getElementById("scoreP2").textContent = "0";
+		console.log("SETUP listeners");
+		this.setupListeners();
 	}
 
 	// Arrete le jeu
@@ -246,8 +206,8 @@ export class PongDistantGame {
 		if (disconnected.style.display === "block") {
 			disconnected.style.display = "none"; 
 		}
-		window.removeEventListener('keydown', this.keyHandler);
-		window.removeEventListener('keyup', this.keyHandler);
+		// window.removeEventListener('keydown', this.keyHandler);
+		// window.removeEventListener('keyup', this.keyHandler);
 		this.keyHandler = null;
 		if (document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
@@ -265,7 +225,6 @@ export class PongDistantGame {
 
 	handleServerOpen() {
 		console.log("Connexion réussie au WebSocket");
-		this.setupListeners();
 	}
 
 	handleServerMessage(event) {
@@ -275,6 +234,7 @@ export class PongDistantGame {
 			if (data.type == "countdown") {
 				this.countdownBeforeGame(data);
 			}
+			
 			else if (data.type == "game_won"){
 				if (data.loser == 2)
 					this.winnerWindow(1);
@@ -510,6 +470,14 @@ export class PongDistantGame {
 			this.socket.send(JSON.stringify({action: "restart_game"}));
 		} else {
 			console.log("Echec");
+		}
+	}
+
+	closeSocket() {
+		if (this.socket && this.socket.readyState == WebSocket.OPEN) {
+			this.socket.close();
+			console.log("Socket ferme !");
+			PongDistantGame.currentGame = null;
 		}
 	}
 }

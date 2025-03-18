@@ -1,3 +1,5 @@
+import { PongDistantGame } from './game-distant.js';
+
 // Recup le csrf token definit plus tot dans le code
 function getCSRFToken() {
     return document.cookie
@@ -8,6 +10,7 @@ function getCSRFToken() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
+    let gameDistant = false;
     // Ajoute /accounts/ si absent
     function prependAccounts(url) {
         let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
@@ -68,16 +71,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function handleLinkClick(event) {
         const link = event.target.closest("a");
-        if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
-            event.preventDefault();
-            let urlPath = prependAccounts(link.getAttribute("href"));
-            console.log("url = ", urlPath);
-            loadPage(urlPath);
-            if (urlPath.includes("game-distant-choice")) {
-                console.log("je charge les ROOMS !");
-                await gameDistantRoute();
+
+            if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
+                event.preventDefault();
+                let urlPath = prependAccounts(link.getAttribute("href"));
+                console.log("url = ", urlPath);
+                loadPage(urlPath);
+                
+                if (urlPath.includes("game-distant-choice")) {
+                    console.log("je charge les ROOMS !");
+                    await gameDistantRoute();
+                }
+                else if (urlPath.includes("/game-distant/")) {
+                    console.log("je rentre dans jeu !");
+                    gameDistant = true;
+                }
+                else {
+                    console.log("HELLO HELLO");
+                    if (gameDistant && PongDistantGame.currentGame) {
+                        console.log("je passe par ici !");
+                        PongDistantGame.currentGame.closeSocket();
+                        gameDistant = false;
+                    }
+                }
             }
-        }
     }
 
     async function gameDistantRoute() {
