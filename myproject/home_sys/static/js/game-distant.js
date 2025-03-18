@@ -57,10 +57,6 @@ export class RoomGameManager {
 
             	<h3 class="scores" id="fps">Fps : 0</h3>
 
-            	<a href="game-distant-choice" class="game-distant">
-            		<span class="game-mode">Retour</span>
-            	</a>
-
             	<div class="scores" id="scores">
 
             		<h3 id="title-p1">Player 1</h3>
@@ -113,48 +109,11 @@ export class RoomGameManager {
 		new PongDistantGame(gameId, 0);
 	}
 
-	// utils/api.js
-	// async apiGet(url) {
-	// 	try {
-	// 	  	const response = await fetch(url, {
-	// 			credentials: 'include'
-	// 		});
-	// 	 	if (!response.ok) throw new Error('Erreur réseau');
-	// 	  	return await response.json();
-	// 	} catch (error) {
-	// 	  	console.error('API GET Error:', error);
-	// 	  	throw error;
-	// 	}
-	// }
-
 	getCookie() {
 		return document.cookie
 			.split('; ')
 			.find(row => row.startsWith('csrftoken='))
 			?.split('=')[1] || '';
-	}
-
-	async apiPost(url, gameId) {
-		try {
-			console.log("gameId : ", gameId);
-		  	const response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'X-CSRFToken': this.getCookie()
-				},
-				body: JSON.stringify({
-					gameId: gameId
-				}),
-				credentials: "include"
-		  	});
-
-		  	if (!response.ok) throw new Error('Erreur réseau');
-				return await response.json();
-		} catch (error) {
-			console.error('API POST Error:', error);
-			throw error;
-		}
 	}
 }
 
@@ -165,7 +124,7 @@ export class PongDistantGame {
 		console.log("JE COMMENCE LE PONG");
 		PongDistantGame.currentGame = this;
 		this.initState();
-		this.keyHandler = this.handleKey.bind(this);
+		this.setupListeners();
 		this.socket = new WebSocket(`wss://${window.location.host}/ws/pong/${gameId}/${id_t}`);
 		this.initSocket();
 	}
@@ -183,7 +142,6 @@ export class PongDistantGame {
 				p2: 0
 			}
 		};
-		// this.keyHandler = this.handleKey.bind(this);
 		this.compteur = 0;
 		this.setupDOM();
 	}
@@ -198,7 +156,6 @@ export class PongDistantGame {
 		document.getElementById("scoreP1").textContent = "0";
 		document.getElementById("scoreP2").textContent = "0";
 		console.log("SETUP listeners");
-		this.setupListeners();
 	}
 
 	// Arrete le jeu
@@ -206,9 +163,6 @@ export class PongDistantGame {
 		if (disconnected.style.display === "block") {
 			disconnected.style.display = "none"; 
 		}
-		// window.removeEventListener('keydown', this.keyHandler);
-		// window.removeEventListener('keyup', this.keyHandler);
-		this.keyHandler = null;
 		if (document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
@@ -237,9 +191,9 @@ export class PongDistantGame {
 			
 			else if (data.type == "game_won"){
 				if (data.loser == 2)
-					this.winnerWindow(1);
+					this.winnerWindow(1, true);
 				else 
-					this.winnerWindow(2);
+					this.winnerWindow(2, true);
 				document.getElementById("disconnected").style.display = "block";
 			}
 			
@@ -401,10 +355,10 @@ export class PongDistantGame {
 			document.getElementById("scoreP2").innerText = this.gameState.scores.p2;
 
 			if (this.gameState.scores.p1 >= 5) {
-				this.winnerWindow(1);
+				this.winnerWindow(1, false);
 			}
 			else if (this.gameState.scores.p2 >= 5) {
-				this.winnerWindow(2);
+				this.winnerWindow(2, false);
 			}
 		}
 	}
@@ -429,7 +383,7 @@ export class PongDistantGame {
 		this.stopGame();
 	}
 
-	async winnerWindow(player) {
+	async winnerWindow(player, deco) {
 
 		document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		
@@ -447,7 +401,8 @@ export class PongDistantGame {
 			winner2Text.style.display = "block";
 		}
 		this.drawInnerRectangle("#23232e");
-		this.newGame(player);
+		if (!deco)
+			this.newGame(player);
 	}
 	
 	newGame(player) {
@@ -478,6 +433,9 @@ export class PongDistantGame {
 			this.socket.close();
 			console.log("Socket ferme !");
 			PongDistantGame.currentGame = null;
+			window.removeEventListener('keydown', this.keyHandler);
+			window.removeEventListener('keyup', this.keyHandler);
+
 		}
 	}
 }

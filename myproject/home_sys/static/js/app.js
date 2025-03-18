@@ -11,6 +11,7 @@ function getCSRFToken() {
 document.addEventListener("DOMContentLoaded", function () {
 
     let gameDistant = false;
+    let gameRoom = false;
     // Ajoute /accounts/ si absent
     function prependAccounts(url) {
         let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
@@ -80,12 +81,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 if (urlPath.includes("game-distant-choice")) {
                     console.log("je charge les ROOMS !");
+                    gameRoom = true;
                     await gameDistantRoute();
                 }
+
+
                 else if (urlPath.includes("/game-distant/")) {
                     console.log("je rentre dans jeu !");
                     gameDistant = true;
                 }
+
+
                 else {
                     console.log("HELLO HELLO");
                     if (gameDistant && PongDistantGame.currentGame) {
@@ -93,6 +99,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         PongDistantGame.currentGame.closeSocket();
                         gameDistant = false;
                     }
+                    else if (gameRoom)
+                        window.RoomGameManager = null;
                 }
             }
     }
@@ -100,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
     async function gameDistantRoute() {
         // const {RoomGameManager} = await import('./game-distant.js');
 
+        console.log("je suis dans GAMEDISTANTROUTE et window machin vaut: ", window.RoomGameManager);
         if (!window.RoomGameManager) {
             const module = await import('./game-distant.js');
             window.RoomGameManager = module.RoomGameManager;
