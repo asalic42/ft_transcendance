@@ -67,14 +67,11 @@ function launch_everything() {
 				const response = await fetch(`/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 				const data = await response.json();
 
-				if (data.status === 'error') {
-					throw new Error("Chan already exist"); // Channel exists
+				if (data.status !== 'error') {
+					openCenter(nameChan, nameChan);
 				}
-				openCenter(nameChan, nameChan);
 			}
-			catch (error) {
-				console.error(error);
-			}
+			catch (error) {}
 		});
 	});
 
