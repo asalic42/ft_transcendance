@@ -187,11 +187,11 @@ def signin(request):
 
 # Déconnexion de l'utilisateur
 def signout(request):
-	logout(request)
-	return JsonResponse({
-		'status': 'success',
-		'redirect': reverse('index')
-	})
+    logout(request)
+    return JsonResponse({
+        'status': 'success',
+        'redirect': f'https://{settings.IP_ADDR}:5000/'
+    })
 
 
 from django.http import JsonResponse
@@ -321,11 +321,6 @@ def load_template(request, page, **kwargs):
 			'map_id': kwargs.get('map_id')
 		}
 
-	elif page == "signout":
-		print("je suis bien la bitch")
-		sys.stdout.flush()
-		return (redirect('signin'))
-
 	else:
 		context = {}
 
@@ -360,16 +355,6 @@ def home(request):
 		'offline_users': offline_users,
 	}
 	return render(request, 'home.html', context)
-
-"""
-|
-|   Pour le sign out,
-|   la déconnection d'un user, on redirige sur la page du sign in.
-|
-"""
-def signout(request):
-	logout(request)
-	return (redirect('home'))
 
 """
 [-------------------------------------------------------------------------]

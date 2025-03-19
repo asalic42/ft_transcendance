@@ -13,6 +13,7 @@ urlpatterns = [
     path('check_username/', check_username, name='check_username'),
     path('check_email/', check_email, name='check_email'),
     path('check_pseudo/', check_pseudo, name='check_pseudo'),
+    path('check_password_solidity/', check_password_solidity, name='check_password_solidity'),
 
 
     # --- Template loading routes ---
@@ -23,7 +24,7 @@ urlpatterns = [
     path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
 
     # --- Authentication routes ---
-    path('signout/', signout, name='signout'),
+    path('user-settings/signout/', signout, name='signout'),
     path('deleteAccount/', delete_account, name='delete_account'),
     path('deleteSuccess/', delete_success, name='delete_success'),
 

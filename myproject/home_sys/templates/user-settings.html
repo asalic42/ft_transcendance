@@ -2,11 +2,14 @@
 
 {% load static %}
 
+
 {% block content %}
 
 <div id="content">
-	<link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home-styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/settings.css' %}">
+    
+    <div id="videoContainer" style="width: 100vw; height: 100vh; display: none; position: fixed; top: 0; left: 0; z-index: 1000; background-color: black;"></div>
 
     <div class="page-title">
 		<div class="sub-container">
@@ -46,7 +49,7 @@
                     Update, et Save.
                 </p>
 
-                <button class="settings-logout" onclick="window.location.href='{% url 'signout' %}'">
+                <button class="settings-logout">
                     <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}">
                     Logout
                 </button>

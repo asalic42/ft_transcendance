@@ -139,6 +139,10 @@ window.loadPage = function(url, pushState = true) {
 			connectWebSocket_notif_page();
 			wasNotif = true 
 		}
+		else if (url === `https://${window.location.host}/user-settings/`) {
+			launch_settings();
+			wasSettings = true 
+		}
 		else if (wasNotif) {
 			notif_close();
 			wasNotif = false;

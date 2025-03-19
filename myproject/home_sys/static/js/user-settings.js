@@ -3,10 +3,6 @@ function launch_settings() {
 
 	const buttonUpdateSave = document.querySelector(".update-or-save");
 
-	const inputUsername = document.querySelector(".settings-username");
-	const inputPseudo = document.querySelector(".settings-pseudo");
-	const inputEmail = document.querySelector(".settings-email");
-
 	const allInputs = document.querySelectorAll(".settings-user-info input");
 
 	buttonUpdateSave.addEventListener('click', function(e) {
@@ -104,6 +100,68 @@ function launch_settings() {
 	});
 
 
+	const signoutButton = document.querySelector(".settings-logout");
+
+	signoutButton.addEventListener("click", function () {
+		fetch(`signout/`)
+			.then(response => response.json())
+			.then(data => {
+				console.log("[LOGOUT] DATA : ", data.success);
+				console.log("[LOGOUT] DATA REDIRECT: ", data.redirect);
+				if (data.status === 'success') {
+					// Créer un élément vidéo
+
+					var videoContainer = document.getElementById('videoContainer');
+
+					var video = document.createElement('video');
+					video.src = '/static/videos/turnoffscreen.mp4';
+					video.autoplay = true;
+					video.muted = true;
+					video.loop = false;
+					video.style.width = '100%';
+					video.style.height = '100%';
+					video.style.objectFit = 'cover';
+
+					// Ajouter un événement pour détecter la fin de la vidéo
+					video.addEventListener('ended', function () {
+
+						const textElement = document.createElement('span');
+						textElement.textContent = 'Seems like you need to refresh or reopen a new page buddy.';
+						textElement.style.position = 'absolute'; // Position absolue pour le superposer
+						textElement.style.top = '50%'; // Centrer verticalement
+						textElement.style.left = '50%'; // Centrer horizontalement
+						textElement.style.transform = 'translate(-50%, -50%)'; // Centrer parfaitement
+						textElement.style.color = 'white'; // Couleur du texte
+						textElement.style.fontSize = '24px'; // Taille du texte
+						textElement.style.zIndex = '1000'; // S'assurer qu'il est au-dessus de la vidéo
+						textElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Fond semi-transparent
+						textElement.style.padding = '10px'; // Espacement autour du texte
+						textElement.style.borderRadius = '5px'; // Coins arrondis
+					
+						// Ajouter l'élément texte au conteneur de la vidéo
+						videoContainer.appendChild(textElement);
+					});
+
+					// Ajouter la vidéo au conteneur
+					videoContainer.innerHTML = ''; // S'assurer que le conteneur est vide avant d'ajouter la vidéo
+					videoContainer.appendChild(video);
+
+					// Afficher le conteneur et le positionner au-dessus de tout
+					videoContainer.style.display = 'block';
+					videoContainer.style.position = 'fixed'; // Position fixe pour couvrir toute la fenêtre
+					videoContainer.style.top = '0';
+					videoContainer.style.left = '0';
+					videoContainer.style.zIndex = '1000'; // Un z-index élevé pour être au-dessus de tout
+					videoContainer.style.backgroundColor = 'black'; // Fond noir pour éviter les artefacts
+
+					// Lancer la vidéo (au cas où l'autoplay ne fonctionne pas)
+					video.play().catch(function (error) {
+						console.error('La lecture automatique a échoué :', error);
+					});
+				}
+			})
+			.catch(error => console.error('[LOGOUT] Error during signout:', error));
+	});
 
 	/* ------ Pour vérifier si le user/email est valide et est non pris ------ */
 
