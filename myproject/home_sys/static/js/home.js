@@ -18,7 +18,9 @@ function fetchAllUsersStatus() {
 		.catch(error => console.error('Error fetching users status:', error));
 }
 
-function connectWebSocket() {
+
+
+/* function connectWebSocket() {
 	const socketStatus = new WebSocket(`wss://${window.location.host}/ws/status/`);
 
 	socketStatus.onopen = function(e) {
@@ -50,6 +52,61 @@ function connectWebSocket() {
 	socketStatus.onerror = function(e) {
 		console.error('WebSocket error:', e);
 	};
-}
+} */
 
-connectWebSocket();
+//connectWebSocket();
+
+
+function fetchOnlineUsers() {
+    fetch('/api/online-users')
+      .then(response => response.json())
+      .then(data => {
+        const userList = document.getElementById('user-list');
+        const emptyState = document.getElementById('empty-state');
+        
+        // Vider la liste actuelle d'utilisateurs
+		if (userList)
+        	userList.innerHTML = '';
+        
+        // Si des utilisateurs sont en ligne
+        if (data.online_users.length > 0) {
+			if (emptyState)
+          		emptyState.style.display = 'none';
+          	
+			data.online_users.forEach(user => {
+            const userCard = document.createElement('div');
+            userCard.classList.add('user-card');
+            
+            const userAvatar = document.createElement('img');
+            userAvatar.classList.add('user-avatar');
+            userAvatar.src = user.image;
+            userAvatar.alt = user.username;
+            
+            const userName = document.createElement('p');
+            userName.classList.add('user-name');
+            userName.textContent = user.username;
+
+            const profileButton = document.createElement('a');
+            profileButton.classList.add('profile-button');
+            profileButton.href = `https://${window.location.host}/profile/${user.username}`;
+            profileButton.textContent = 'profile';
+
+            userCard.appendChild(userAvatar);
+            userCard.appendChild(userName);
+            userCard.appendChild(profileButton);
+            
+			if (userList)
+            	userList.appendChild(userCard);
+          });
+        } else {
+			if (emptyState)
+          		emptyState.style.display = 'block';
+        }
+      });
+  }
+
+  // Appeler la fonction pour récupérer les utilisateurs en ligne au chargement de la page
+  document.addEventListener('DOMContentLoaded', fetchOnlineUsers);
+  
+  // Optionnel : mettre à jour la liste toutes les 30 secondes
+  setInterval(fetchOnlineUsers, 500);

@@ -106,8 +106,6 @@ function launch_settings() {
 		fetch(`signout/`)
 			.then(response => response.json())
 			.then(data => {
-				console.log("[LOGOUT] DATA : ", data.success);
-				console.log("[LOGOUT] DATA REDIRECT: ", data.redirect);
 				if (data.status === 'success') {
 					// Créer un élément vidéo
 
@@ -137,9 +135,28 @@ function launch_settings() {
 						textElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Fond semi-transparent
 						textElement.style.padding = '10px'; // Espacement autour du texte
 						textElement.style.borderRadius = '5px'; // Coins arrondis
-					
-						// Ajouter l'élément texte au conteneur de la vidéo
+
+						const buttonElement = document.createElement('button');
+						buttonElement.textContent = 'Take me home darling';
+						buttonElement.style.position = 'absolute'; // Position absolue pour le superposer
+						buttonElement.style.top = 'calc(50% + 40px)'; // Placer le bouton sous le texte
+						buttonElement.style.left = '50%'; // Centrer horizontalement
+						buttonElement.style.transform = 'translateX(-50%)'; // Centrer parfaitement
+						buttonElement.style.padding = '10px 20px'; // Espacement autour du texte du bouton
+						buttonElement.style.fontSize = '18px'; // Taille du texte du bouton
+						buttonElement.style.color = '#fff'; // Couleur du texte du bouton
+						buttonElement.style.backgroundColor = '#007bff'; // Couleur de fond du bouton
+						buttonElement.style.border = 'none'; // Pas de bordure
+						buttonElement.style.borderRadius = '5px'; // Coins arrondis
+						buttonElement.style.cursor = 'pointer'; // Curseur pointer pour indiquer que c'est cliquable
+
+						// Ajouter un événement pour rediriger lors du clic
+						buttonElement.addEventListener('click', function () {
+							window.location.href = 'https://www.youtube.com/watch?v=FiARsQSlzDc';
+						});
+
 						videoContainer.appendChild(textElement);
+						videoContainer.appendChild(buttonElement);
 					});
 
 					// Ajouter la vidéo au conteneur
@@ -154,10 +171,6 @@ function launch_settings() {
 					videoContainer.style.zIndex = '1000'; // Un z-index élevé pour être au-dessus de tout
 					videoContainer.style.backgroundColor = 'black'; // Fond noir pour éviter les artefacts
 
-					// Lancer la vidéo (au cas où l'autoplay ne fonctionne pas)
-					video.play().catch(function (error) {
-						console.error('La lecture automatique a échoué :', error);
-					});
 				}
 			})
 			.catch(error => console.error('[LOGOUT] Error during signout:', error));

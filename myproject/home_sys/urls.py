@@ -31,6 +31,8 @@ urlpatterns = [
     # --- API endpoints ---
     path('api/current-user/', get_current_user_id, name='current_user_id'),
     path('api/user-status/', user_status, name='user-status'),
+
+    path('api/online-users/', get_online_users, name='get_online_users'),
     # ... keep other API endpoints ...
 
     # --- Generic template loader (MUST BE LAST) ---

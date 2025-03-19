@@ -76,10 +76,10 @@ function getCookie(name) {
 
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function notif_fetchAllUsersStatus() {
-	fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
+	
+	fetch("/api/user-status/")
 		.then(response => response.json())
 		.then(users => {
-			console.log("Users status fetched:", users);
 			users.forEach(user => {
 				const userElement = document.getElementById(`user-${user.id}`);
 				if (userElement) {
@@ -94,7 +94,9 @@ function notif_fetchAllUsersStatus() {
 		.catch(error => console.error('Error fetching users status:', error));
 }
 
-var statusSocket;
+setInterval(notif_fetchAllUsersStatus, 500);
+
+
 function connectWebSocket_notif_page() {
 	notif_getAddFriendResponse(".add-it", "accept_friend_request", "friend_added");
 	notif_getReponse(".decline-it", "decline_friend_request", "friend_request_declined", "Demande d'ami de", "refusée.");
@@ -103,38 +105,4 @@ function connectWebSocket_notif_page() {
 	notif_getReponse(".remove-user-blocked", "remove_blocked_user", "blocked_user_removed", "Le user", "est débloqué.");
 	/* notif_getReponse(".invite-friend", "invite_friend", "game_invitation_send", "L'invitation envers le user", "a bien été envoyée."); */
 	notif_getReponse(".decline-invitation", "invitation_declined", "game_invitation_declined", "La demande du user", "a bien été refusée.");
-	
-	statusSocket = new WebSocket(`wss://${window.location.host}/ws/status/`);
-
-	statusSocket.onopen = function(e) {
-		console.log("WebSocket connection established");
-
-		// Récupérer les statuts de tous les utilisateurs dès que la connexion WebSocket est établie
-		notif_fetchAllUsersStatus();
-	};
-
-	statusSocket.onmessage = function(e) {
-		console.log("WebSocket message received:", e.data);
-		const data = JSON.parse(e.data);
-		const userElement = document.getElementById(`user-${data.user_id}`);
-		console.log("User Element : ", userElement);
-		if (userElement) {
-			if (data.is_online) {
-				userElement.classList.add("active");
-			} else {
-				userElement.classList.remove("active");
-			}
-		}
-	};
-
-	statusSocket.onclose = function(e) {
-	};
-
-	statusSocket.onerror = function(e) {
-		console.error('WebSocket error:', e);
-	};
-}
-
-function notif_close() {
-	statusSocket.close();
 }

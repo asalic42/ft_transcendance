@@ -1320,7 +1320,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 logger = logging.getLogger(__name__)
 
-class StatusConsumer(AsyncWebsocketConsumer):
+""" class StatusConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		self.user = self.scope['user']
 		if self.user.is_authenticated:
@@ -1362,24 +1362,85 @@ class FriendRequestConsumer(AsyncWebsocketConsumer):
 			)
 
 	async def send_friend_request(self, event):
-		"""
-		Cette méthode reçoit un message du signal et envoie une notification WebSocket
-		pour signaler à l'utilisateur récepteur qu'il a une nouvelle demande d'ami.
-		"""
 		# Envoi de la notification à l'utilisateur récepteur
 		await self.send(text_data=json.dumps({
 			'type': 'friend_request',  # Type de message, à gérer côté front-end
 			'message': 'Vous avez une nouvelle demande d\'ami!',
 			'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
-		}))
+		})) """
 
+
+from .models import Users
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+""" class StatusConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            # Mettre à jour le statut de l'utilisateur à 'online'
+            try:
+                user_profile = Users.objects.get(user=self.user)
+                user_profile.is_online = True
+                user_profile.save()
+
+                # Accepter la connexion WebSocket
+                await self.accept()
+                await self.channel_layer.group_add("status_updates", self.channel_name)
+
+                logger.info(f"User {self.user.id} connected to WebSocket and is online.")
+
+                # Notifier tous les clients de la mise à jour du statut
+                await self.send_status_update(self.user.id, True)
+            except Users.DoesNotExist:
+                logger.error(f"User profile for {self.user.id} not found.")
+        
+    async def disconnect(self, close_code):
+        if hasattr(self, 'user') and self.user.is_authenticated:
+            # Mettre à jour le statut de l'utilisateur à 'offline'
+            try:
+                user_profile = Users.objects.get(user=self.user)
+                user_profile.is_online = False
+                user_profile.save()
+
+                # Quitter le groupe de mise à jour de statut
+                await self.channel_layer.group_discard("status_updates", self.channel_name)
+
+                logger.info(f"User {self.user.id} disconnected from WebSocket and is offline.")
+
+                # Notifier tous les clients de la mise à jour du statut
+                await self.send_status_update(self.user.id, False)
+            except Users.DoesNotExist:
+                logger.error(f"User profile for {self.user.id} not found.")
+
+    async def send_status_update(self, user_id, is_online):
+        # Envoyer un message de mise à jour du statut à tous les clients
+        await self.channel_layer.group_send(
+            "status_updates",
+            {
+                'type': 'user_status_update',
+                'user_id': user_id,
+                'is_online': is_online,
+            }
+        )
+
+    async def user_status_update(self, event):
+        # Envoyer les données de mise à jour de statut à ce client
+        await self.send(text_data=json.dumps({
+            'user_id': event["user_id"],
+            'is_online': event["is_online"],
+        }))
+        logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
+ """
 """ 
 
 	Pour les notifs sur l'onglet notifications
 
 """
 
-class NotificationConsumer(AsyncWebsocketConsumer):
+""" class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def connect(self):
         self.user = self.scope['user']
@@ -1405,7 +1466,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'type': 'update_status',
             'has_unread_notifications': event['has_unread_notifications'],
         }))
-
+ """
 """ """ """ """ """ """ """ """
 """ NOTIFICATIONS PUSH """
 """ Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """

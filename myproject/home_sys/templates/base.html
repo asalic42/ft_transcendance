@@ -20,6 +20,7 @@
 		<script src="{% static 'js/notifications.js'%}"></script>
 		<script src="{% static 'js/user-settings.js'%}"></script>
 		<script src="{% static 'js/delete.js'%}"></script>
+        <script src="{% static 'js/home.js' %}"></script>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 
@@ -170,26 +171,8 @@
 
         </style>
         
-        
-        {% comment %} <script>
-    		function getCookie(name) {
-    			let cookieValue = null;
-    			if (document.cookie && document.cookie !== '') {
-    				const cookies = document.cookie.split(';');
-    				for (let i = 0; i < cookies.length; i++) {
-    					const cookie = cookies[i].trim();
-    					if (cookie.substring(0, name.length + 1) === (name + '=')) {
-    						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-    						break;
-    					}
-    				}
-    			}
-    			return cookieValue;
-    		}
-    		const csrftoken = getCookie('csrftoken');
-    	</script> {% endcomment %}
-{% comment %} 
-        <script>
+        {% comment %}
+        <!-- <script>
 
             const notificationSocket = new WebSocket(
                 'wss://' + window.location.host + '/ws/notifications/'
@@ -214,34 +197,10 @@
 
             notificationSocket.onerror = function (e) {
                 console.error('Erreur WebSocket :', e);
-            }; {% endcomment %}
-
-            {% comment %} // Notif Channels {% endcomment %}
-            {% comment %} const notificationChatSocket = new WebSocket(
-                'wss://' + window.location.host + '/ws/notifications-chat/'
-            );
-
-            notificationChatSocket.onopen = function (e) {
-                console.log("WebSocket connecté avec succès !");
-            };
-
-            notificationChatSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data);
-
-                if (data.type === 'update_status') {
-                    const notif = document.querySelector('.notification-chat');
-                    notif.classList.toggle("active", data.has_unread_chat);
-                }
-            };
-
-            notificationChatSocket.onclose = function (e) {
-                console.error('WebSocket fermé de manière inattendue');
-            };
-
-            notificationChatSocket.onerror = function (e) {
-                console.error('Erreur WebSocket :', e);
-            }; {% endcomment %}
-        {% comment %} </script> {% endcomment %}
+            }; 
+        </script>
+    -->
+    {% endcomment %}
 
 
     </body>
