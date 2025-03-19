@@ -151,6 +151,7 @@
 	margin-top: -20px;
 	background: linear-gradient(to right, #aa3196, #721bb9);
 	border-radius: 10px;
+	text-decoration: none;
 }
 
 .profile-go-to-settings:hover {
@@ -583,4 +584,8 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.other-profile-text-settings-rdv {
+	color: black;
 }

@@ -46,7 +46,10 @@ function normalizeUrl(url) {
 
 var waschan = false;
 var wasNotif = false;
+var wasSettings = false;
 let liveChanTimeout;
+let SettingsTimeout;
+
 
 // Ajouter une variable globale pour tracker les scripts chargés
 /* let loadedScripts = []; */
@@ -132,6 +135,10 @@ window.loadPage = function(url, pushState = true) {
 			connectWebSocket_notif_page();
 			wasNotif = true 
 		}
+		else if (url === `https://${window.location.host}/user-settings/`) {
+			launch_settings();
+			wasSettings = true 
+		}
 		else if (wasNotif) {
 			notif_close();
 			wasNotif = false;
@@ -139,6 +146,10 @@ window.loadPage = function(url, pushState = true) {
         else if (waschan){
             clearTimeout(liveChanTimeout);
             waschan = false;
+        }
+		else if (wasSettings){
+            clearTimeout(SettingsTimeout);
+            wasSettings = false;
         }
     })
     .catch(error => console.error("Erreur de chargement:", error));

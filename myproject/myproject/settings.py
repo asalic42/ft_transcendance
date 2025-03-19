@@ -104,7 +104,7 @@ IP_LOCALISATION= env('MAP_IP_LOCALISATION')
 # URL de redirection après l'authentification
 # LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 # LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
-LOGIN_URL = '/signin/'  # Ou l'URL de votre choix
+LOGIN_URL = '/'  # Ou l'URL de votre choix
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
