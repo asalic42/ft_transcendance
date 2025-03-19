@@ -135,6 +135,6 @@ function connectWebSocket_notif_page() {
 	};
 }
 
-function notif_close () {
+function notif_close() {
 	statusSocket.close();
 }

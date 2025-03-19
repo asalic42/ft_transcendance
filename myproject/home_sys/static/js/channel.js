@@ -1,33 +1,32 @@
-let chatVisible = false;
-let currentChan;
-let lastMessageId = 0;
-let liveChat;
-let liveChan;
-let blockedUsersList = null;
-// let isLoadingChannels = false;
-// let unreadMsg = {};
-
-// Recup l'user courant
-let userElement = null;
-let username = null;
-let userid = null;
 // console.log(`Current username is ${username}`);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 //! MONITORING
 
 async function checkChannels() {
+	// await getCurrentPlayerId();
+	if (typeof userid === 'undefined' || userid === null) {
+        userid = await getCurrentPlayerId();
+    }
 	await loadChannels();
-
 	liveChanTimeout = setTimeout(checkChannels, 2000);
 }
 
 function launch_everything() {
-
-	userElement = document.getElementById('current-username');
-	username = userElement.getAttribute('data-username');
-	userid = parseInt(userElement.getAttribute('data-user-id'), 10);
+	let chatVisible = false;
+	let currentChan;
+	let lastMessageId = 0;
+	let liveChan;
+	let blockedUsersList = null;
+	let userid = null;
+	// let isLoadingChannels = false;
+	// let unreadMsg = {};
+	
+	// Recup l'user courant
+	const userElement = document.getElementById('current-username');
+	let username = userElement.getAttribute('data-username');
 
 	checkChannels();
 
@@ -43,7 +42,7 @@ function launch_everything() {
 		if (!currentPVCallback) return;
 
 		const selectedFriendId = friendSelect.value;
-		const channelName = "TestValue" + cachedUserId + selectedFriendId; // Générer le nom du canal
+		const channelName = "TestValue" + userid + selectedFriendId; // Générer le nom du canal
 
 		// Validation
 		if (!selectedFriendId) {
@@ -102,6 +101,8 @@ function launch_everything() {
 
 // Cliquer sur un channel deja creer
 function clickToChannel(chanItem, printName, nameChan) {
+	chatVisible = false;
+	liveChat = 0;
 	chanItem.addEventListener('click', async () => {
 		openCenter(printName, nameChan);
 	});
@@ -131,10 +132,10 @@ function addMessageListener() {
 
 	const invite = document.getElementById('invite-button');
 	invite.addEventListener('click', async (event) => {
-		const msg = `https://${window.location.host}/game-distant/${cachedUserId}/`;
+		const msg = `https://${window.location.host}/game-distant/${userid}/`;
 		postMessage(currentChan, msg, true);
 		await invite_button();
-		window.open(`https://${window.location.host}/game-distant/${cachedUserId}/`, '_blank').focus();
+		loadPage(`https://${window.location.host}/game-distant/${userid}/`);
 	});
 }
 
@@ -145,7 +146,7 @@ async function addChannelToList(nameChan, pv, idChan) {
 	if (existingChannel) return;
 	if (pv) {
 
-		var result = await doesUserHaveAccessToChan(idChan, cachedUserId);
+		var result = await doesUserHaveAccessToChan(idChan, userid);
 		if (!result.success)
 			return;
 		chanList = document.getElementById('friends');
@@ -319,8 +320,11 @@ async function addMessage(mess, sender, id, is_link) {
 	}
 
 	const usernameElement = document.createElement('span');
+	// const sender = messImage.nextElementSibling.textContent;
+	// window.location.href = `/profile/${sender}`;
+	// usernameElement.innerHTML = `<a href="/profile/${sender}">
 	usernameElement.innerHTML = `<img src='${pp}' id="caca">
-								 <p class="name">${sender}</p>`;
+								<p class="name">${sender}</p>`;
 
 	var messElement;
 	if (is_link) {
@@ -349,7 +353,8 @@ async function addMessage(mess, sender, id, is_link) {
     messImages.forEach(function (messImage) {
         messImage.addEventListener('click', async function () {
 			const sender = messImage.nextElementSibling.textContent;
-            window.location.href = `/profile/${sender}`;
+			loadPage(`/profile/${sender}`);
+            // window.location.href = `/profile/${sender}`;
         });
     });
 
@@ -487,7 +492,7 @@ async function addPvChan(chanId, amiName) {
 		},
 		body: JSON.stringify({
 			id_chan: chanId,
-			id_u1: cachedUserId,
+			id_u1: userid,
 			id_u2: pk,
 		})
 	});
@@ -502,7 +507,7 @@ async function addChannelToDb(currentChan, pv, ami) {
 	try {
 		// Si c'est un canal privé, vérifie d'abord s'il en existe déjà un
 		if (pv) {
-			const checkResponse = await fetch(`/api/check_private_channel/${cachedUserId}/${ami}/`);
+			const checkResponse = await fetch(`/api/check_private_channel/${userid}/${ami}/`);
 			const checkData = await checkResponse.json();
 
 			if (checkData.exists) {
@@ -549,7 +554,6 @@ async function loadChannels() {
 	// if (isLoadingChannels) return; // Si déjà en cours de chargement, ne rien faire
 
 	try {
-		await getCurrentPlayerId();
 		await getBlocked();
 
 		const response = await fetch('/api/get_chans/', {
@@ -571,7 +575,7 @@ async function loadChannels() {
 }
 
 async function invite_button() {
-	fetch(`/create_current_game/${cachedUserId}/`)
+	fetch(`/create_current_game/${userid}/`)
 		.then(response => {
 			if (!response.ok) {
 				throw new Error('Erreur réseau');
@@ -591,7 +595,7 @@ async function postMessage(currentChan, mess, is_link) {
 		let result;
 		let user2 = null;
 		if (is_private) {
-			result = await doesUserHaveAccessToChan(chanId.id, cachedUserId);
+			result = await doesUserHaveAccessToChan(chanId.id, userid);
 			user2 = result.id_u2;
 		}
 
@@ -604,9 +608,9 @@ async function postMessage(currentChan, mess, is_link) {
 			},
 			body: JSON.stringify({
 				channel_name: currentChan,
-				sender: username,
+				sender: document.getElementById('current-username').getAttribute('data-username'),
 				message: mess,
-				idSender: cachedUserId,
+				idSender: userid,
 				is_link: is_link,
 				user2: user2
 			})
@@ -629,18 +633,17 @@ async function postMessage(currentChan, mess, is_link) {
 	}
 }
 
-let cachedUserId = null;
 async function getCurrentPlayerId() { // à lancer au chargement de la page;
-	if (cachedUserId !== null) {
-		return cachedUserId;
+	if (typeof userid !== 'undefined' && userid !== null) {
+		return userid;
 	}
 	try {
 		const response = await fetch('/api/current-user/', {
 			credentials: 'same-origin'
 		});
 		const data = await response.json();
-		cachedUserId = data.userId;
-		return cachedUserId;
+		userid = data.userId;
+		return userid;
 	} catch (error) {
 		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
 		return null;
@@ -655,7 +658,7 @@ async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				idUser: cachedUserId, //  L'id du jouueur logged
+				idUser: userid, //  L'id du jouueur logged
 				idBlocked: idBlocked, //  L'id de l'utilidateur qui va être bloqué
 			})
 		});
@@ -669,7 +672,7 @@ async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 }
 
 function getBlocked() {
-	fetch(`/api/get_blocked/${cachedUserId}/`)
+	fetch(`/api/get_blocked/${userid}/`)
 		.then(response => {
 			if (!response.ok) {
 				throw new Error('Erreur réseau');
@@ -692,7 +695,7 @@ async function post_deblock(a) {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				idUser: cachedUserId, //  L'id du jouueur logged
+				idUser: userid, //  L'id du jouueur logged
 				idBlocked: a, //  L'id de l'utilidateur qui va être débloqué
 			})
 		});

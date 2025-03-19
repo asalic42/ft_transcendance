@@ -80,7 +80,7 @@ function launch_settings() {
 
 		// On envoie les données via AJAX
 		$.ajax({
-			url: '{% url "upload_avatar" %}',  // URL de la vue pour uploader l'avatar
+			url: '/user-settings/upload-avatar/',  // URL de la vue pour uploader l'avatar
 			type: 'POST',
 			data: formData,
 			processData: false,  // Important : ne pas traiter les données
