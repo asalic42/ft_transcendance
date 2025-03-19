@@ -151,6 +151,10 @@ async function addChannelToList(nameChan, pv, idChan) {
 	else
 		chanList = document.getElementById('channels-list');
 
+	if (!chanList) {
+		console.error("chanList n'existe pas !");
+		return;
+	}
 	if (!chanList.querySelector(`#channel-${nameChan}`)) {
 		const chanItem = document.createElement('div');
 		chanItem.id = `channel-${nameChan}`;
@@ -189,7 +193,7 @@ async function openCenter(printName, nameChan) {
 
 	liveChat = setInterval(() => {
 		liveChatFetch();
-	}, 500);
+	}, 250);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

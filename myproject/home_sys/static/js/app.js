@@ -123,39 +123,36 @@ window.loadPage = function(url, pushState = true) {
 		
 		if (url === `https://${window.location.host}/deleteAccount/` || url === '/deleteAccount/')
 			delete_acc();
-		if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
+		
+		if (waschan) {
+			clearTimeout(liveChanTimeout);
+			clearInterval(liveChat);
+			console.log("closing chanl")
+			waschan = false;
+		}
+		else if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
 			console.log("launching chanl")
             launch_everything();
             waschan = true;
         }
-		else if (waschan) {
-			clearTimeout(liveChanTimeout);
-			clearInterval(liveChat);
-			console.log("closing chanl")
-            waschan = false;
-		}
 		
-		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
-			connectWebSocket_notif_page();
-			wasNotif = true 
-		}
-		else if (url === `https://${window.location.host}/user-settings/`) {
-			launch_settings();
-			wasSettings = true 
-		}
-		else if (wasNotif) {
+		if (wasNotif) {
 			notif_close();
 			wasNotif = false;
 		}
-		
-		if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
+		else if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
+			connectWebSocket_notif_page();
+			wasNotif = true 
+		}
+
+		if (wasSettings){
+			clearTimeout(SettingsTimeout);
+			wasSettings = false;
+		}
+		else if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
 			launch_settings();
 			wasSettings = true 
 		}
-		else if (wasSettings){
-            clearTimeout(SettingsTimeout);
-            wasSettings = false;
-        }
 		console.log('waschan' + waschan);
     })
     .catch(error => console.error("Erreur de chargement:", error));
