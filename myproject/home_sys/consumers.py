@@ -132,7 +132,7 @@ class PongGame:
 			'ball_coords': self.ball['coords'],
 			'player1_coords': player1_coords,
 			'player2_coords': player2_coords,
-			'scores': self.scores
+			'scores': self.scores,
 		}
 
 dont_raise = False
@@ -190,8 +190,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 			print(f"self.id_t {self.id_t}")
 			sys.stdout.flush()
 			if (self.id_t != 0):
-				# print(f"launching T save, game_data.pk:{game_data['pk']}" )
-				# sys.stdout.flush()
 				await self.addTgame(game_data['pk'])
 				tournament_group = f"tournament_{self.id_t}"
 				if self.game.reported_to_tournament is False:
@@ -268,14 +266,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'player2_coords': initial_state_game['player2_coords'],
 			'scores': initial_state_game['scores']
 		}))
+
 		if len(self.game.players) == 1 and not self.game.is_running:
-			print("j'attends un joueur la")
-			sys.stdout.flush()
 			await self.create_current_game()
 
 		if len(self.game.players) == 2 and not self.game.is_running:
-			print("game lancee !!!")
-			sys.stdout.flush()
 			self.game.is_running = True
 			await self.delete_current_game()
 			await self.send_game_state()
@@ -289,8 +284,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
 			
-			self.game.scores['p2'] = 0
-			self.game.scores['p1'] = 0
+			self.game.reset_game()
 	
 			# Envoyer game_won aux joueurs
 			await self.channel_layer.group_send(
@@ -343,7 +337,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			# Si player == 1 on accepte ses nouvelles coords
 			if player_number == 1 and 'player1_coords' in data:
 				new_y1 = current_coords['y1'] + (data['player1_coords']['y1'] * self.game.multiplyer)
-				new_y1 = max(10, min(new_y1, 860))
+				new_y1 = max(10, min(new_y1, 760))
 
 				current_coords['y1'] = new_y1
 				current_coords['y2'] = new_y1 + 80
@@ -351,7 +345,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			# Si player == 2 on accepte ses nouvelles coords
 			elif player_number == 2 and 'player2_coords' in data:
 				new_y1 = current_coords['y1'] + (data['player2_coords']['y1'] * self.game.multiplyer)
-				new_y1 = max(10, min(new_y1, 860))
+				new_y1 = max(10, min(new_y1, 760))
 
 				current_coords['y1'] = new_y1
 				current_coords['y2'] = new_y1 + 80
@@ -412,7 +406,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'ball_coords': event['ball_coords'],
 			'player1_coords': event['player1_coords'],
 			'player2_coords': event['player2_coords'],
-			'scores': event['scores']
+			'scores': event['scores'],
 		}))
 
 	# Envoyer les mises à jour à WebSocket pour un Replay
@@ -550,9 +544,9 @@ class PongConsumer(AsyncWebsocketConsumer):
 					await self.add_pong_serializer()
 
 				try:
-					await self.send_game_state()
 					elapsed = asyncio.get_event_loop().time() - current_time
 					remaining_time = update_interval - elapsed
+					await self.send_game_state()
 					self.game.multiplyer = remaining_time / update_interval
 					if remaining_time > 0:
 						await asyncio.sleep(remaining_time)  # ⬅️ LE SLEEP EST ICI !

@@ -55,8 +55,6 @@ export class RoomGameManager {
 			const html = `
             	<link rel="stylesheet" href="/static/css/game-style.css">
 
-            	<h3 class="scores" id="fps">Fps : 0</h3>
-
             	<div class="scores" id="scores">
 
             		<h3 id="title-p1">Player 1</h3>
@@ -89,6 +87,7 @@ export class RoomGameManager {
        		`;
 			document.getElementById('content').innerHTML = html;
 			setTimeout(resolve, 50);
+			console.log("HTML CHARGED");
 		});
 	}
 
@@ -123,16 +122,18 @@ export class PongDistantGame {
 	constructor(gameId, id_t) {
 		console.log("JE COMMENCE LE PONG dans la room: ", gameId);
 		PongDistantGame.currentGame = this;
+		
+		this.keyHandler = this.handleKey.bind(this);
 		this.initState();
-		this.setupListeners();
+		
+		this.currentPlayer = null;
 		this.socket = new WebSocket(`wss://${window.location.host}/ws/pong/${gameId}/${id_t}`);
 		this.initSocket();
 	}
 
 	initState() {
-		this.counter = 3;
 		this.keys = {};                        // Players bars
-		this.currentPlayer = null;
+		this.counter = 3;
 		this.gameState = {
 			player1_coords: null,
 			player2_coords: null,
@@ -144,6 +145,7 @@ export class PongDistantGame {
 		};
 		this.compteur = 0;
 		this.setupDOM();
+		this.setupListeners();
 	}
 
 	setupDOM() {
@@ -151,15 +153,17 @@ export class PongDistantGame {
 			const element = document.getElementById(id);
 			if (element) element.style.display = 'flex';
 		};
-		['scores', 'scoreP1', 'scoreP2', 'fps', 'canvas-container'].forEach(safeShow);
+		['scores', 'scoreP1', 'scoreP2', 'canvas-container'].forEach(safeShow);
 
 		document.getElementById("scoreP1").textContent = "0";
 		document.getElementById("scoreP2").textContent = "0";
-		console.log("SETUP listeners");
 	}
 
 	// Arrete le jeu
 	stopGame() {
+		window.removeEventListener('keydown',  this.keyHandler);
+		window.removeEventListener('keyup',  this.keyHandler);
+
 		if (disconnected.style.display === "block") {
 			disconnected.style.display = "none"; 
 		}
@@ -186,6 +190,15 @@ export class PongDistantGame {
 			const data = JSON.parse(event.data);
 	
 			if (data.type == "countdown") {
+				const winner1Text = document.getElementById("wrapper-player1");
+				const winner2Text = document.getElementById("wrapper-player2");
+				const button = document.getElementById("replay-button");
+				const disco = document.getElementById("disconnected");
+
+				disco.style.display = "none";
+				button.style.display = "none";
+				winner1Text.style.display = 'none';
+				winner2Text.style.display = 'none';
 				this.countdownBeforeGame(data);
 			}
 			
@@ -238,13 +251,13 @@ export class PongDistantGame {
 	}
 
 	setupListeners() {
-		this.keyHandler = (e) => this.handleKey(e);
 		window.addEventListener('keydown', this.keyHandler);
 		window.addEventListener('keyup', this.keyHandler);
 	}
 
 	handleKey(e) {
 		this.keys[e.key] = (e.type === 'keydown');
+		// e.preventDefault();
 	}
 
 	countdownBeforeGame(data) {
@@ -309,7 +322,7 @@ export class PongDistantGame {
 		document.getElementById("game").getContext('2d').fillStyle = '#ED4EB0';
 		document.getElementById("game").getContext('2d').fillRect(document.getElementById("game").width / 2, 0, 5, document.getElementById("game").height);
 	
-		console.log('Drawing player');
+		// console.log('Drawing player');
 		this.drawPlayer();
 		this.drawBall();
 	}
@@ -318,7 +331,6 @@ export class PongDistantGame {
 		const moveData = {};
 		if (this.keys["ArrowUp"] || this.keys["ArrowDown"]) {
 			const moveValue = this.keys["ArrowUp"] ? -10 : 10;
-	
 			if (this.currentPlayer === 1) {
 				moveData.player1_coords = { y1: moveValue };			
 			} else if (this.currentPlayer === 2) {
@@ -339,15 +351,7 @@ export class PongDistantGame {
 		if (data.scores) this.gameState.scores = data.scores;
 	
 		this.sendPlayerMove();
-		this.compteur++;
-
-		let end = Date.now();
-		if (end - start > 1000) {
-			document.getElementById("fps").innerText = "Fps: " + this.compteur;
-			this.compteur = 0;
-			start = Date.now();
-		}
-
+	
 		document.getElementById("game").getContext('2d').clearRect(0, 0, document.getElementById("game").width, document.getElementById("game").height);
 		this.update();
 		
@@ -380,8 +384,8 @@ export class PongDistantGame {
 		else {
 			this.drawOuterRectangle("#C42021");
 		}
-		
 		this.stopGame();
+		this.setupListeners();
 	}
 
 	async winnerWindow(player, deco) {
@@ -402,8 +406,8 @@ export class PongDistantGame {
 			winner2Text.style.display = "block";
 		}
 		this.drawInnerRectangle("#23232e");
-		if (!deco)
-			this.newGame(player); 
+		if (deco == false)
+			this.newGame(player);
 	}
 
 	newGame(player) {
@@ -432,11 +436,12 @@ export class PongDistantGame {
 	closeSocket() {
 		if (this.socket && this.socket.readyState == WebSocket.OPEN) {
 			this.socket.close();
-			console.log("Socket ferme !");
-			PongDistantGame.currentGame = null;
 
 			window.removeEventListener('keydown', this.keyHandler);
 			window.removeEventListener('keyup', this.keyHandler);
+
+			console.log("Socket ferme !");
+			PongDistantGame.currentGame = null;
 
 			this.stopGame();
 		}

@@ -112,7 +112,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function gameRoute() {
 
-        // console.log("window Pong= ", window.PongGame);
         if (!window.PongGame) {
             const module = await import('./game.js');
             window.PongGame = module.PongGame;
