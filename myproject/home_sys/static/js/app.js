@@ -55,14 +55,16 @@ let liveChat;
 let homefetch;
 let notiffetch;
 
+
+let errorprint;
 // Ajouter une variable globale pour tracker les scripts chargés
-/* let loadedScripts = []; */
+/* getCSRFTokenlet loadedScripts = []; */
 
 // Exposer loadPage au scope global
 window.loadPage = function(url, pushState = true) {
 
     // Normalize the URL to prevent duplication
-    const normalizedUrl = normalizeUrl(url);
+    const normalizedUrl = url;
 
     // Vérifier si on est sur la page de login ou non
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
@@ -195,7 +197,7 @@ window.loadPage = function(url, pushState = true) {
 // Exposer reinitCoreScripts au scope global - but don't re-attach event handlers
 window.reinitCoreScripts = function() {
     // Initialize any components, but don't re-attach the same event listeners
-    // This prevents duplicate handlers
+    // This prevents duplicate handlersloadPage
     
     // Force navbar display based on current URL
     const currentPath = window.location.pathname;
@@ -210,13 +212,29 @@ window.reinitCoreScripts = function() {
 // Single function to handle all link clicks for SPA navigation
 function handleLinkClick(event) {
     let link = event.target.closest("a");
+
+    if (link)
+        errorprint = link.getAttribute('href');
+
     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
     if (link && link.href && 
-        (new URL(link.href).origin === window.location.origin) && 
+        (new URL(link.href).host === window.location.host) && 
         !link.hasAttribute("data-full-reload") &&
         !link.hasAttribute("data-spa-ignore")) {
         
         event.preventDefault();
+
+        if (errorprint)
+        {
+            let normalizedUrl = errorprint.match(/^\/(.*?)\/$/);
+            if (normalizedUrl)
+                normalizedUrl = normalizedUrl[1];
+            else
+            {
+                normalizedUrl = errorprint;
+            }
+            loadPage(`https://${window.location.host}/${normalizedUrl}`);
+        }
         loadPage(link.href);
     }
 }
