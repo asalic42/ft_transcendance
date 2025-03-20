@@ -374,6 +374,7 @@
 /* Conteneur principal */
 .game-history-container {
     max-height: 430px; /* Limite la hauteur pour rendre la section scrollable */
+	width: 400px;
     overflow-y: auto; /* Active le défilement vertical */
     padding: 20px;
     background: linear-gradient(135deg, #1a1a1a, #4b1248); /* Dégradé violet foncé */
@@ -680,7 +681,7 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	width: 70px;
+	width: 40px;
 	height: 70px;
 	background-color: #3e3e3e;
 	border-radius: 10px;

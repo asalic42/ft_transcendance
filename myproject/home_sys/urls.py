@@ -20,8 +20,32 @@ urlpatterns = [
     path('profile/<str:username>/', load_template, {'page': 'profile'}, name='profile'),
     path('channels/', load_template, {'page': 'channels'}, name='channels'),
     path('notifications/', load_template, {'page': 'notifications'}, name='notifications'),
+
+    # Game url
+    path('game/', load_template, {'page': 'game'}, name='game'),
     path('game-choice/', load_template, {'page': 'game-choice'}, name='game-choice'),
+    path('game-mode-pong/', load_template, {'page': 'game-mode-pong'}, name='game-mode-pong'),
+    path('game-type-pong/', load_template, {'page': 'game-type-pong'}, name='game-type-pong'),
+    path('game-bot/', load_template, {'page': 'game-bot'}, name='game-bot'),
+    path('game-distant-choice/', load_template, {'page': 'game-distant-choice'}, name='game-distant-choice'),
+    path('game-distant/<int:game_id>/<int:id_t>/', load_template, {'page': 'game-distant'}, name='game-distant'),
+
+    # Other Game url
+    path('other_game_choice/', load_template, {'page': 'other_game_choice'}, name='other_game_choice'),
+    path('other_game/', load_template, {'page': 'other_game'}, name='other_game'),
+    path('other_game_multi_room/', load_template, {'page': 'other_game_multi_room'}, name='other_game_multi_room'),
     path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
+    path('map_choice/', load_template, {'page': 'map_choice'}, name='map_choice'),
+
+    # Tournament url
+    path('tournament-choice/', load_template, {'page': 'tournament_choice'}, name='tournament_choice'),
+
+    # Route générique pour toute autre page nécessitant un rendu (ex: about, contact, etc.)
+    path('<str:page>/', load_template, name='load_template'),
+    # path('login/', include('loginpage.urls', namespace='loginpage')),
+
+    # --- Routes pour les actions et API (inchangées) ---
+    path('signout/', signout, name='signout'),
 
     # --- Authentication routes ---
     path('user-settings/signout/', signout, name='signout'),
@@ -60,6 +84,10 @@ urlpatterns = [
     path('api/add_pong/', add_pong, name='add_solo_casse_brique'),
     path('api/map/<int:map_id>/', map_view, name="map_view"),
     path('api/rooms/', get_rooms, name="get_rooms"),
+    path('api/create-room/', create_room, name="create-room"),
+
+    # path('get-ip-info/', get_ip_info, name='get_ip_info'),
+    # path('user-settings/', settings_user, name='settings_user'),
     
     path('deleteAccount/get-ip-info/', get_ip_info, name='get_ip_info'),
     path('user-settings/', settings_user, name='settings_user'),

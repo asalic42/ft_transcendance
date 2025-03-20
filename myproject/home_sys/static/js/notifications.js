@@ -63,17 +63,6 @@ function notif_getReponse(baliseName, url, dataStatus, msgStart, msgEnd) {
 	});
 }
 
-function getCookie(name) {
-	const cookies = document.cookie.split(';');
-	for (let cookie of cookies) {
-		const [cookieName, cookieValue] = cookie.trim().split('=');
-		if (cookieName === name) {
-			return decodeURIComponent(cookieValue);
-		}
-	}
-	return null;
-}
-
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function notif_fetchAllUsersStatus() {
 
@@ -92,6 +81,18 @@ function notif_fetchAllUsersStatus() {
 			});
 		})
 		.catch(error => {return null;});
+
+	const testTalk = document.querySelector(".talk-friend");
+
+		if (testTalk)
+		{
+			/* Récupérer le user et construire l'url pour la chan priv */
+			testTalk.addEventListener("click", function() {
+				loadPage(`https://${window.location.host}/channels/`)
+			})
+		}
+		
+		
 }
 
 

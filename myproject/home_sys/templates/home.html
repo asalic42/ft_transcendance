@@ -31,20 +31,19 @@
 						<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
 					</div>
 				{% else %}
-					<p>Vous n'êtes pas connecté.</p>
+					<p>You're not connected.</p>
 				{% endif %}
 		
 				<div class="profile-separator">
 					{% if request.user == user %}
 						<p class="profile-text-settings-rdv">
-							Si vous voulez modifier vos informations utilisateurs
-							rendez-vous dans les settings.
+							If you want to modify your user information, go to the settings 
 						</p>
-						<a class="profile-go-to-settings" href="{% url 'settings_user' %}">Je veux modifier mon profil</a>
+						<a class="profile-go-to-settings" href="{% url 'settings_user' %}">I want to update my profile</a>
 					{% else %}
 						<p class="other-profile-text-settings-rdv">
-							Vous pouvez ajouter {{profile_user.username}} en ami(e)
-							ou décider de le/la bloquer.
+							You can add {{profile_user.username}} to friends
+							or decide to block him/her.
 						</p>
 					
 						<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>

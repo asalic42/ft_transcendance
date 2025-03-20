@@ -152,7 +152,6 @@ async function addChannelToList(nameChan, pv, idChan) {
 		chanList = document.getElementById('channels-list');
 
 	if (!chanList) {
-		console.error("chanList n'existe pas !");
 		return;
 	}
 	if (!chanList.querySelector(`#channel-${nameChan}`)) {
@@ -684,7 +683,7 @@ function getBlocked() {
 			blockedUsersList = data.blocked_users_ids;
 		})
 		.catch(error => {
-			console.error('Erreur lors de la récupération des données :', error);
+			return null;
 		});
 }
 

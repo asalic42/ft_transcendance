@@ -1,15 +1,13 @@
+	export class PongGame {
+		static currentGame = null;
 
-(function() {
-
-	if (window.PongGame) return ;
-
-	class PongGame {
 		constructor() {
 			this.initState();
 			this.keyHandler = this.handleKey.bind(this);
 		}
-
+		
 		initState() {
+			PongGame.currentGame = this;
 			this.animationId = 0;
 			this.frameTime = {counter : 0, time : 0};
 			this.totalframeTime = {counter : 0, time : 0};
@@ -21,11 +19,7 @@
 			this.ball = null;
 		}
 
-		start() {
-
-			console.log("START");
-			this.count = {p1: 0, p2: 0};
-			this.stop = false;
+		initGame() {
 
 			this.setupDOM();
 			this.setupListeners();
@@ -77,12 +71,12 @@
 			if (document.getElementById('game').getContext('2d')) {
 				document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 			}
+			PongGame.currentGame = null
 			this.initState();
 		}
 
 		// Dessine le rectangle exterieur de l'aire de jeu
 		drawOuterRectangle(color) {
-			// if (!this.context) console.log("je n'existe pas");
 			document.getElementById('game').getContext('2d').fillStyle = color;
 			document.getElementById('game').getContext('2d').beginPath();
 			document.getElementById('game').getContext('2d').roundRect(0, 0, document.getElementById('game').width, document.getElementById('game').height, 10);
@@ -112,14 +106,12 @@
 		
 			document.getElementById('game').getContext('2d').fillStyle = '#ED4EB0';
 			document.getElementById('game').getContext('2d').fillRect(document.getElementById('game').width / 2, 0, 5, document.getElementById('game').height);
-		
-			console.log('Creating player...');
 		}
 
 		// Creer la balle au debut du jeu
 		createBall(vx) {
+			
 			// Balls coords
-
 			this.ball = {coords : {x : document.getElementById('game').width / 2, y : document.getElementById('game').height / 2},
 						const_vector : {vx : vx, vy : Math.floor(this.getRandomArbitrary(-10, 10))},
 						vector : {},
@@ -360,61 +352,9 @@
 			if (this.stop)
 				this.stopGame();
 			setTimeout(() => {
-				this.start();
+				this.initGame();
 			}, 50);
 		}
-
-		// Get player ID from database
-		// async getCurrentPlayerId() {
-		// 	if (this.cachedUserId !== null) {
-		// 		return this.cachedUserId;
-		// 	}
-		// 	try {
-		// 		const response = await fetch('/accounts/api/current-user/', {
-		// 			credentials: 'same-origin'
-		// 		});
-		// 		const data = await response.json();
-		// 		this.cachedUserId = data.userId;
-		// 		console.log("user ID = ", this.cachedUserId);
-		// 		return this.cachedUserId;
-		// 	} catch (error) {
-		// 		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
-		// 		return null;
-		// 	}
-		// }
-
-		// Add player stats to database
-		// async addNewGame(id_player1, id_player2) {
-		// 	// console.log("id_player dans addNewGame: ", id_player);
-		// 	try {
-		// 		const response = await fetch('/accounts/api/add_pong/', {
-		// 			method: 'POST',
-		// 			headers: {
-		// 				'Content-Type': 'application/json',
-		// 				'X-CSRFToken': getCSRFToken()
-		// 			},
-		// 			credentials: 'include',
-		// 			body: JSON.stringify({  // Convertit les données en JSON
-		// 				id_p1: id_player1,
-		// 				id_p2: id_player2,
-		// 				is_bot_game: false,
-		// 				score_p1: this.count.p1,
-		// 				score_p2: this.count.p2,
-		// 				difficulty: this.user_option,
-		// 				bounce_nb: this.bounce,
-		// 			})
-		// 		});
-			
-		// 		if (!response.ok) {
-		// 			const text = await response.text();
-		// 			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`); }
-				
-		// 		const result = await response.json();
-		// 		console.log('Nouveau jeu ajouté:', result);
-		// 	} catch (error) {
-		// 		console.error('Erreur:', error);
-		// 	}
-		// }
 
 		// Donne une direction aleatoire a la balle
 		getRandomArbitrary(min, max) {
@@ -424,151 +364,3 @@
 			return result;
 		}
 	}
-
-	window.PongGame = PongGame;
-
-	// Router simplifié
-	var router = {
-		currentGame: null,
-
-		init: function() {
-		  // Détecter les changements d'URL initiaux
-			window.addEventListener('popstate', this.handleRouteChange.bind(this));
-		
-		  // Intercepter les clics sur les liens
-			document.body.addEventListener('click', (e) => {
-				console.log("je passe par la moi !");
-				const link = e.target.closest('a');
-				if (link && link.href) {
-					e.preventDefault();
-					this.navigate(new URL(link.href, window.location.origin));
-				}
-			});
-
-			this.handleRouteChange();
-		},
-
-		navigate: function(url) {
-			if (new URL(url).pathname === window.location.pathname) return;
-
-			history.pushState({}, '', url);
-			this.handleRouteChange();
-		},
-	
-		handleRouteChange: function() {
-		  const currentPath = window.location.pathname;
-		  const isGamePage = this.isOnGamePage(currentPath);
-		
-		  if (isGamePage) {
-			console.log("here !");
-			this.enterGame();
-		  }
-		  else
-		  	this.exitGame();
-		},
-	
-		isOnGamePage: function(path) {
-			const normalizedPath = path.replace(/\/$/, '');
-			console.log("normalized = ", normalizedPath);
-			return (normalizedPath === '/game' || normalizedPath === '/game/'); // Adaptez à votre URL de jeu
-		},
-
-		enterGame: function() {
-
-			if (this.currentGame) {
-	            this.currentGame.stopGame();
-	            this.currentGame = null;
-	        }
-			this.injectTemplate(() => {
-				this.waitElementsDom(() => {
-					if (!this.currentGame) {
-						this.currentGame = new PongGame();
-						console.log("AUSSI ICI");
-						this.currentGame.start();
-					}
-				});
-			});
-		},
-
-		waitElementsDom: function(callback) {
-			const checkEl = () => {
-				if (document.getElementById('game') && document.getElementById('scoreP1') && document.getElementById('scoreP2')) {
-					callback();
-				} else {
-					setTimeout(checkEl, 50);
-				}
-			};
-			checkEl();
-		},
-
-		injectTemplate: function(callback) {
-			const content = document.getElementById('content');
-
-			// const oldContent = content.querySelector('#canvas-container');
-			// if (oldContent) oldContent.remove();
-
-			// const oldContainer = content.querySelector('#canvas-container');
-			// const oldScores = content.querySelector('#scores');
-			// const oldFps = content.querySelector('#fps');
-			
-			// if (oldContainer) oldContainer.remove();
-			// if (oldScores) oldScores.remove();
-			// if (oldFps) oldFps.remove();
-
-			const newContent = document.createElement('div');
-
-			newContent.innerHTML = `
-				<link rel="stylesheet" href="/static/css/game-style.css">
-
-				<h3 class="scores" id="fps">Fps : 0 | Avg Fps : </h3>
-
-				<div class="scores" id="scores">
-					<h3 id="title">Player 1</h3>
-					<h3 id="scoreP1">0</h3>
-					<h3 id="scoreP2">0</h3>
-					<h3 id="title">Player 2</h3>
-				</div>
-
-				<div id="canvas-container">
-					<canvas width="1920" height="850" id="game"></canvas>
-					<div id="button-container">
-						<button id="replay-button" style="display: none;">Play again !</button>
-					</div>
-					<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
-						<svg width="1100" height="150">
-							<text x="50%" y="50%" dy=".35em" text-anchor="middle">
-								Player 1 Wins !
-							</text>
-						</svg>
-					</div>
-					<div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
-						<svg width="1100" height="150" id="svg-wrapper-player2">
-							<text x="50%" y="50%" dy=".35em" text-anchor="middle">
-								Player 2 Wins !
-							</text>
-						</svg>
-					</div>
-				</div>
-			`;
-
-			content.appendChild(newContent);
-			if (!document.getElementById("canvas-container")) console.log("canvas-container n'existe pas");
-			setTimeout(callback, 10);
-		},
-
-		exitGame: function() {
-			if (this.currentGame) {
-				this.currentGame.stopGame();
-				this.currentGame = null;
-			}
-
-			const gameElements = document.querySelectorAll('#canvas-container, #scores, #fps');
-			gameElements.forEach(el => el.remove());
-		}
-	  };
-
-	document.addEventListener("DOMContentLoaded", function() {
-		router.init();
-	});
-}) ();
-

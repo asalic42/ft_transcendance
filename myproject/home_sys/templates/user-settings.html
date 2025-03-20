@@ -37,7 +37,7 @@
                     <span class="settings-email" style="color: black">📧 :<input id="s-email" type="text" class="settings-email" disabled placeholder="{{ request.user.email }}"> </span>
                 </div>
             {% else %}
-                <p>Vous n'êtes pas connecté.</p>
+                <p>You're not connected.</p>
             {% endif %}
 
             <button class="update-or-save">Update</button>
@@ -45,8 +45,7 @@
             <div class="settings-separator">
 
                 <p class="settings-text-settings-rdv">
-                    Pour modifier vos informations, cliquez sur
-                    Update, et Save.
+                    To update your information, click on Update, then Save.
                 </p>
 
                 <button class="settings-logout">
@@ -56,7 +55,7 @@
 
                 <button class="settings-delete-account" onclick="window.location.href='{% url 'delete_account' %}'">
                     <img class="delete-svg" src="{% static 'images/delete-profile-svgrepo-com.svg' %}">    
-                    Cut access
+                    delete
                 </button>
             </div>
         </div>

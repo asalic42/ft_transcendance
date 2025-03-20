@@ -11,8 +11,11 @@ from django.conf import settings
 from django.db.models import Q
 from .models import *
 import json, requests
+import uuid
 from .utils import add_pong_logic, send_notification_to_user
+import logging
 
+logger = logging.getLogger(__name__)
 ###############################################################################
 
 from django.shortcuts import render, redirect
@@ -375,6 +378,12 @@ def load_template(request, page, **kwargs):
 			'game_id': kwargs.get('game_id'),
 			'map_id': kwargs.get('map_id')
 		}
+	
+	elif page == "game-distant":
+		context = {
+			'game_id': kwargs.get('game_id'),
+			'id_t': kwargs.get('id_t')
+		}
 
 	else:
 		context = {}
@@ -538,6 +547,7 @@ def casse_brique_room_choice(request):
 	tour = casse_brique_room.objects.all()
 	return render(request, 'other_game_multi_room.html', {'all_games':tour}) """
 
+@login_required
 def other_game_choice(request):
 	return (render(request, 'other_game_choice.html'))
 
@@ -1345,11 +1355,10 @@ def user_status(request):
 	
 	return JsonResponse(list(users), safe=False)
 
-
 @login_required
 def create_current_game(request, sender_id):
 	try:
-		created = CurrentGame.objects.get_or_create(game_id=sender_id)
+		created = CurrentGame.objects.create(game_id=sender_id)
 		if created:
 			return (render(request, 'game-distant.html', {'game_id':sender_id}))
 		else:
@@ -1360,6 +1369,34 @@ def create_current_game(request, sender_id):
 @login_required
 def get_rooms(request):
 	rooms = CurrentGame.objects.all().values("game_id")
+	return JsonResponse(list(rooms), safe=False)
+
+@login_required
+@require_http_methods(["POST"])
+def create_room(request):
+	try:
+		data = json.loads(request.body)
+		game_id = data.get('gameId')
+
+		print("DEBUG 1")
+		sys.stdout.flush()
+		if not game_id:
+			return JsonResponse({'error': 'gameId manquant'}, status=400)
+		
+		print("DEBUG 2")
+		sys.stdout.flush()
+		new_room, _ = CurrentGame.objects.get_or_create(
+			game_id=game_id
+		)
+
+		return JsonResponse({
+			'game_id': str(new_room.game_id)
+		})
+	
+	except json.JSONDecodeError:
+		return JsonResponse({'error': 'Donnes JSON invalides'}, status=400)
+	except Exception as e:
+		return JsonResponse({'error': str(e)}, status=500)
 	return JsonResponse({"rooms": list(rooms)})
 
 # views.py

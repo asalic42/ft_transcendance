@@ -34,20 +34,19 @@
 							<span class="profile-email" style="color: black">📧 : {{ user.email }}</span>
 						</div>
 					{% else %}
-						<p class="if-no-game">Vous n'êtes pas connecté.</p>
+						<p class="if-no-game">You are not connected.</p>
 					{% endif %}
 
 					<div class="profile-separator">
 						{% if request.user == user %}
 							<p class="profile-text-settings-rdv">
-								Si vous voulez modifier vos informations utilisateurs
-								rendez-vous dans les settings.
+								If you want to modify your user information, go to the settings
 							</p>
-							<a class="profile-go-to-settings" href=" {% url 'settings_user' %}">Je veux modifier mon profil</a>
+							<a class="profile-go-to-settings" href=" {% url 'settings_user' %}">I want to update my profile</a>
 						{% else %}
 							<p class="other-profile-text-settings-rdv" style="color: black;">
-								Vous pouvez ajouter {{profile_user.username}} en ami(e)
-								ou décider de le/la bloquer.
+								You can add {{profile_user.username}} to friends
+								or decide to block him/her.
 							</p>
 					
 							<button class="other-profile-add-friend" data-username="{{ user.username }}">ADD👥</button>
@@ -59,7 +58,7 @@
 			</div>
 
 			<div class="game-history-container">
-				<h2>Historique des parties</h2>
+				<h2>Game History</h2>
 
 				<div class="game-history-section">
 					<h3>Tournament</h3>
@@ -86,12 +85,12 @@
 						</div>
 					</div>
 					{% empty %}
-						<p class="if-no-game">Vous n'avez pas encore joué de tournois</p>
+						<p class="if-no-game">You haven't played any tournaments yet.</p>
 					{% endfor %}
 				</div>
 
 				<div class="game-history-section">
-					<h3>Parties Pong</h3>
+					<h3>Pong Games</h3>
 					{% if games_P %}
 						{% for game in games_P %}
 							<!-- Tout ce qui est dates et heures -->
@@ -133,13 +132,13 @@
 							</div>
 						{% endfor %}
 					{% else %}
-						<p class="if-no-game">Aucune partie Pong jouée</p>
+						<p class="if-no-game">No Pong game played</p>
 					{% endif %}
 				</div>
 
 	
 				<div class="game-history-section">
-					<h3>Parties Solo Casse-Briques</h3>
+					<h3>Solo Breakout Games</h3>
 					{% if games_S_CB %}
 						{% for game in games_S_CB %}
 							<!-- Date -->
@@ -167,12 +166,12 @@
 							</div>
 						{% endfor %}
 					{% else %}
-						<p class="if-no-game">Aucune partie Solo Casse-Briques jouée</p>
+						<p class="if-no-game">No Solo Breakout game played</p>
 					{% endif %}
 				</div>
 				
 				<div class="game-history-section">
-					<h3>Parties Multi Casse-Briques</h3>
+					<h3>Multiplayer Breakout Games</h3>
 					{% if games_M_CB %}
 						{% for game in games_M_CB %}
 							<!-- Date -->
@@ -182,7 +181,7 @@
 							<div class="cb-history">
 								<!-- Adversaire -->
 								<div class="cb-opponent">
-									<span>Adversaire : 
+									<span>Opponent : 
 										{% if game.id_p1 == user.users %}
 											{{ game.id_p2.name }}
 										{% else %}
@@ -204,12 +203,12 @@
 								
 								<!-- Carte -->
 								<div class="cb-map">
-									<span>Carte : {{ game.map }}</span>
+									<span>Map : {{ game.map }}</span>
 								</div>
 							</div>
 						{% endfor %}
 					{% else %}
-						<p class="if-no-game">Aucune partie Multi Casse-Briques jouée</p>
+						<p class="if-no-game">No Multiplayer Breakout game played</p>
 					{% endif %}
 				</div>
 				<div class="blur-overlay"></div>

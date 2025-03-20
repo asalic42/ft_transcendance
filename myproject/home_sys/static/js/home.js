@@ -18,8 +18,6 @@ function fetchAllUsersStatus() {
 		.catch(error => console.error('Error fetching users status:', error));
 }
 
-
-
 /* function connectWebSocket() {
 	const socketStatus = new WebSocket(`wss://${window.location.host}/ws/status/`);
 

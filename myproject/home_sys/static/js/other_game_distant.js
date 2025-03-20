@@ -47,7 +47,7 @@ let start;
 
 // WebSocket concerns
 
-const socket = new WebSocket(`wss://172.20.10.3:5000/ws/casse-brique/${game_id}/${map_id}`);
+const socket = new WebSocket(`wss://172.20.10.2:5000/ws/casse-brique/${game_id}/${map_id}`);
 
 socket.onopen = function () {
 	console.log("Connexion au Socket !");
@@ -174,7 +174,6 @@ function drawBall(ball, context) {
 
 // Remise a 0 pour une nouvelle game
 function game_restarted(data) {
-	console.log("je suis la !");
 	context1.clearRect(0, 0, table1.width, table1.height);
 	context2.clearRect(0, 0, table2.width, table2.height);
 
