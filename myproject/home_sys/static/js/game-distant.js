@@ -24,7 +24,7 @@ export class RoomGameManager {
 	async loadRooms() {
 		// console.log("LOAD ROOMS");
 
-		fetch('/accounts/api/rooms/')
+		fetch('/api/rooms/')
 			.then(response => response.json())
 			.then(rooms => {
 				const container = document.getElementById('rooms-list');
@@ -94,7 +94,7 @@ export class RoomGameManager {
 	async createRoom(gameId) {
 		// console.log("CREATE A ROOM");
 		try {
-			await fetch(`/accounts/create_current_game/${gameId}/`)
+			await fetch(`/create_current_game/${gameId}/`)
 			await this.chargingGame();
 			new PongDistantGame(gameId, 0);
 		} catch (error) {

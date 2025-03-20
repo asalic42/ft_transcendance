@@ -1,30 +1,32 @@
-let chatVisible = false;
-let currentChan;
-let lastMessageId = 0;
-let liveChat;
-let liveChan;
-let blockedUsersList = null;
-// let unreadMsg = {};
-
-// Recup l'user courant
-const userElement = document.getElementById('current-username');
-const username = userElement.getAttribute('data-username');
-const userid = parseInt(userElement.getAttribute('data-user-id'), 10);
 // console.log(`Current username is ${username}`);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 //! MONITORING
 
-let liveChanTimeout;
-
 async function checkChannels() {
+	// await getCurrentPlayerId();
+	if (typeof userid === 'undefined' || userid === null) {
+        userid = await getCurrentPlayerId();
+    }
 	await loadChannels();
-
 	liveChanTimeout = setTimeout(checkChannels, 2000);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+function launch_everything() {
+	let chatVisible = false;
+	let currentChan;
+	let lastMessageId = 0;
+	let liveChan;
+	let blockedUsersList = null;
+	let userid = null;
+	// let isLoadingChannels = false;
+	// let unreadMsg = {};
+	
+	// Recup l'user courant
+	const userElement = document.getElementById('current-username');
+	let username = userElement.getAttribute('data-username');
 
 	checkChannels();
 
@@ -40,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		if (!currentPVCallback) return;
 
 		const selectedFriendId = friendSelect.value;
-		const channelName = "TestValue" + cachedUserId + selectedFriendId; // Générer le nom du canal
+		const channelName = "TestValue" + userid + selectedFriendId; // Générer le nom du canal
 
 		// Validation
 		if (!selectedFriendId) {
@@ -62,17 +64,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		setChannelName(async function (nameChan) {
 			addChannelToDb(nameChan, 0, "")
 			try {
-				const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
+				const response = await fetch(`/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 				const data = await response.json();
 
-				if (data.status === 'error') {
-					throw new Error("Chan already exist"); // Channel exists
+				if (data.status !== 'error') {
+					openCenter(nameChan, nameChan);
 				}
-				openCenter(nameChan, nameChan);
 			}
-			catch (error) {
-				console.error(error);
-			}
+			catch (error) {}
 		});
 	});
 
@@ -82,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			const result = await addChannelToDb(nameChan, 1, ami);
 			if (!result) return;
 			try {
-				const response = await fetch(`/accounts/api/chan_exist/${encodeURIComponent(nameChan)}/`);
+				const response = await fetch(`/api/chan_exist/${encodeURIComponent(nameChan)}/`);
 				const data = await response.json();
 
 				if (data.status === 'error') {
@@ -95,10 +94,12 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 		});
 	});
-});
+}
 
 // Cliquer sur un channel deja creer
 function clickToChannel(chanItem, printName, nameChan) {
+	chatVisible = false;
+	liveChat = 0;
 	chanItem.addEventListener('click', async () => {
 		openCenter(printName, nameChan);
 	});
@@ -128,10 +129,10 @@ function addMessageListener() {
 
 	const invite = document.getElementById('invite-button');
 	invite.addEventListener('click', async (event) => {
-		const msg = `https://172.20.10.2:5000/accounts/game-distant/${cachedUserId}/`;
+		const msg = `https://${window.location.host}/game-distant/${userid}/`;
 		postMessage(currentChan, msg, true);
 		await invite_button();
-		window.open(`https://172.20.10.2:5000/accounts/game-distant/${cachedUserId}/`, '_blank').focus();
+		loadPage(`https://${window.location.host}/game-distant/${userid}/`);
 	});
 }
 
@@ -142,7 +143,7 @@ async function addChannelToList(nameChan, pv, idChan) {
 	if (existingChannel) return;
 	if (pv) {
 
-		var result = await doesUserHaveAccessToChan(idChan, cachedUserId);
+		var result = await doesUserHaveAccessToChan(idChan, userid);
 		if (!result.success)
 			return;
 		chanList = document.getElementById('friends');
@@ -277,7 +278,7 @@ function reversePopCenterChat() {
 }
 
 function getPP(userId) {
-	return fetch(`/accounts/user-settings/check_pp/${userId}/`)
+	return fetch(`/user-settings/check_pp/${userId}/`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
 			return response.json(); // Parse JSON first
@@ -316,8 +317,11 @@ async function addMessage(mess, sender, id, is_link) {
 	}
 
 	const usernameElement = document.createElement('span');
+	// const sender = messImage.nextElementSibling.textContent;
+	// window.location.href = `/profile/${sender}`;
+	// usernameElement.innerHTML = `<a href="/profile/${sender}">
 	usernameElement.innerHTML = `<img src='${pp}' id="caca">
-								 <p class="name">${sender}</p>`;
+								<p class="name">${sender}</p>`;
 
 	var messElement;
 	if (is_link) {
@@ -346,7 +350,8 @@ async function addMessage(mess, sender, id, is_link) {
     messImages.forEach(function (messImage) {
         messImage.addEventListener('click', async function () {
 			const sender = messImage.nextElementSibling.textContent;
-            window.location.href = `/accounts/profile/${sender}`;
+			loadPage(`/profile/${sender}`);
+            // window.location.href = `/profile/${sender}`;
         });
     });
 
@@ -367,7 +372,7 @@ async function addMessage(mess, sender, id, is_link) {
 
 // Add channel to the right channel's list
 async function doesUserHaveAccessToChan(idC, idU) {
-	return fetch(`/accounts/api/doesUserHaveAccessToChan/${idC}/${idU}`)
+	return fetch(`/api/doesUserHaveAccessToChan/${idC}/${idU}`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
 			return response.json(); // Parse JSON first
@@ -400,14 +405,14 @@ function setChannelNamePV(callback) {
 // Live chat with AJAX system
 async function liveChatFetch() {
 	try {
-		const response = await fetch(`/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
+		const response = await fetch(`/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`, {
 			headers: {
 				'Content-Type': 'application/json',
 			},
 		});
 
 		if (!response.ok) {
-			console.log("Erreur du fetch " + `/accounts/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`);
+			console.log("Erreur du fetch " + `/api/live_chat/?channel_name=${encodeURIComponent(currentChan)}&last_message=${lastMessageId}`);
 		}
 
 		const data = await response.json();
@@ -426,7 +431,7 @@ async function liveChatFetch() {
 
 function get_chan_id(nameChan) {
 	console.log("avant fetch: ", currentChan);
-	return fetch(`/accounts/api/get_chan_id/${nameChan}/`)
+	return fetch(`/api/get_chan_id/${nameChan}/`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
 			return response.json(); // Parse JSON first
@@ -440,7 +445,7 @@ function get_chan_id(nameChan) {
 }
 
 function is_chan_private(idChan) {
-	return fetch(`/accounts/api/is_chan_private/${idChan}/`)
+	return fetch(`/api/is_chan_private/${idChan}/`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
 			return response.json(); // Parse JSON first
@@ -458,7 +463,7 @@ function is_chan_private(idChan) {
 }
 
 function getNameById(id) {
-	return fetch(`/accounts/api/getNameById/${id}/`)
+	return fetch(`/api/getNameById/${id}/`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
 			return response.json(); // Parse JSON first
@@ -475,16 +480,16 @@ async function addPvChan(chanId, amiName) {
 	// const userData = await getIdByName(amiName);
 	pk = amiName;
 
-	const response = await fetch('/accounts/api/postPv/', {
+	const response = await fetch('/api/postPv/', {
 		method: 'POST',
 		credentials: 'same-origin',
 		headers: {
-			'X-CSRFToken': csrftoken,  // Use the function directly
+			'X-CSRFToken': getCSRFToken(),  // Use the function directly
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
 			id_chan: chanId,
-			id_u1: cachedUserId,
+			id_u1: userid,
 			id_u2: pk,
 		})
 	});
@@ -499,7 +504,7 @@ async function addChannelToDb(currentChan, pv, ami) {
 	try {
 		// Si c'est un canal privé, vérifie d'abord s'il en existe déjà un
 		if (pv) {
-			const checkResponse = await fetch(`/accounts/api/check_private_channel/${cachedUserId}/${ami}/`);
+			const checkResponse = await fetch(`/api/check_private_channel/${userid}/${ami}/`);
 			const checkData = await checkResponse.json();
 
 			if (checkData.exists) {
@@ -509,11 +514,11 @@ async function addChannelToDb(currentChan, pv, ami) {
 		}
 
 		// Continue avec la création du canal si aucun doublon n'est trouvé
-		const response = await fetch('/accounts/api/post_chan/', {
+		const response = await fetch('/api/post_chan/', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': csrftoken,
+				'X-CSRFToken': getCSRFToken(),
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
@@ -541,16 +546,14 @@ async function addChannelToDb(currentChan, pv, ami) {
 
 // Load channels that already exists and get them from db
 // When UserChan table created, use it
-let isLoadingChannels = false;
 
 async function loadChannels() {
-	if (isLoadingChannels) return; // Si déjà en cours de chargement, ne rien faire
+	// if (isLoadingChannels) return; // Si déjà en cours de chargement, ne rien faire
 
 	try {
-		await getCurrentPlayerId();
 		await getBlocked();
 
-		const response = await fetch('/accounts/api/get_chans/', {
+		const response = await fetch('/api/get_chans/', {
 			headers: {
 				'Content-Type': 'application/json',
 			}
@@ -565,13 +568,11 @@ async function loadChannels() {
 		}
 	} catch (error) {
 		console.error('Erreur: ', error);
-	} finally {
-		isLoadingChannels = false;
 	}
 }
 
 async function invite_button() {
-	fetch(`/accounts/create_current_game/${cachedUserId}/`)
+	fetch(`/create_current_game/${userid}/`)
 		.then(response => {
 			if (!response.ok) {
 				throw new Error('Erreur réseau');
@@ -591,22 +592,22 @@ async function postMessage(currentChan, mess, is_link) {
 		let result;
 		let user2 = null;
 		if (is_private) {
-			result = await doesUserHaveAccessToChan(chanId.id, cachedUserId);
+			result = await doesUserHaveAccessToChan(chanId.id, userid);
 			user2 = result.id_u2;
 		}
 
-		const response = await fetch('/accounts/api/post_message/', {
+		const response = await fetch('/api/post_message/', {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
-				'X-CSRFToken': csrftoken,  // Use the function directly
+				'X-CSRFToken': getCSRFToken(),  // Use the function directly
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 				channel_name: currentChan,
-				sender: username,
+				sender: document.getElementById('current-username').getAttribute('data-username'),
 				message: mess,
-				idSender: cachedUserId,
+				idSender: userid,
 				is_link: is_link,
 				user2: user2
 			})
@@ -629,18 +630,17 @@ async function postMessage(currentChan, mess, is_link) {
 	}
 }
 
-let cachedUserId = null;
 async function getCurrentPlayerId() { // à lancer au chargement de la page;
-	if (cachedUserId !== null) {
-		return cachedUserId;
+	if (typeof userid !== 'undefined' && userid !== null) {
+		return userid;
 	}
 	try {
-		const response = await fetch('/accounts/api/current-user/', {
+		const response = await fetch('/api/current-user/', {
 			credentials: 'same-origin'
 		});
 		const data = await response.json();
-		cachedUserId = data.userId;
-		return cachedUserId;
+		userid = data.userId;
+		return userid;
 	} catch (error) {
 		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
 		return null;
@@ -649,13 +649,13 @@ async function getCurrentPlayerId() { // à lancer au chargement de la page;
 
 async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 	try {
-		const response = await fetch('/accounts/api/post_blocked/', {
+		const response = await fetch('/api/post_blocked/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				idUser: cachedUserId, //  L'id du jouueur logged
+				idUser: userid, //  L'id du jouueur logged
 				idBlocked: idBlocked, //  L'id de l'utilidateur qui va être bloqué
 			})
 		});
@@ -669,7 +669,7 @@ async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 }
 
 function getBlocked() {
-	fetch(`/accounts/api/get_blocked/${cachedUserId}/`)
+	fetch(`/api/get_blocked/${userid}/`)
 		.then(response => {
 			if (!response.ok) {
 				throw new Error('Erreur réseau');
@@ -686,13 +686,13 @@ function getBlocked() {
 
 async function post_deblock(a) {
 	try {
-		const response = await fetch('/accounts/api/post_deblock/', {
+		const response = await fetch('/api/post_deblock/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				idUser: cachedUserId, //  L'id du jouueur logged
+				idUser: userid, //  L'id du jouueur logged
 				idBlocked: a, //  L'id de l'utilidateur qui va être débloqué
 			})
 		});
@@ -704,7 +704,6 @@ async function post_deblock(a) {
 		console.error('Erreur: ', error);
 	}
 }
-
 // Fonction pour marquer une notif comme lue
 // function markAsRead() {
 // 	if (notificationChatSocketSocket.readyState == WebSocket.OPEN) {
@@ -713,4 +712,4 @@ async function post_deblock(a) {
 // 			'channel_name': currentChan,
 // 		}));
 // 	}
-// }
+// }getto

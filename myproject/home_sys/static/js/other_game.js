@@ -485,7 +485,7 @@ export class CasseBriqueGame {
 	async addNewGame(id_player) {
 		console.log("Appel de addnewgame");
 		try {
-			const response = await fetch('/accounts/api/add_solo_casse_brique/', {
+			const response = await fetch('/api/add_solo_casse_brique/', {
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: {
@@ -516,7 +516,7 @@ export class CasseBriqueGame {
 			return this.cachedUserId;
 		}
 		try {
-			const response = await fetch('/accounts/api/current-user/', {
+			const response = await fetch('/api/current-user/', {
 				credentials: 'same-origin'
 			});
 			const data = await response.json();
@@ -529,7 +529,7 @@ export class CasseBriqueGame {
 	}
 
 	async fetchMap(mapId) {
-		return fetch(`/accounts/api/map/${mapId}/`)
+		return fetch(`/api/map/${mapId}/`)
 		.then(response => response.text())
 		.then(mapData => {
 			const mapLines = mapData.split('\n');

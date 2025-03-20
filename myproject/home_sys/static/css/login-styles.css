@@ -34,6 +34,15 @@ body {
   overflow: hidden;
 }
 
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+
 
 /* --------------------- VIDEO ----------------------- */
 
@@ -198,7 +207,8 @@ body {
     transition: all 0.3s ease;
   }
 
-  .signin-container.shake {
+  .signin-container.shake,
+  .signup-container.shake {
     animation: shake 0.2s ease-out;
   }
 
@@ -647,7 +657,7 @@ body {
     └───┴────────┘
 */
 
-  .form1 button {
+  .form1 .bt-container button {
     font-family: "Lilita One", sans-serif;
     display: block;
     margin: 0 auto;
@@ -664,7 +674,7 @@ body {
     /* transition: all 0.3s ease; */              /* Transition fluide de toutes les propriétés sur 0.3s */
   }
 
-  .form2 button {
+  .form2 .bt-container button {
     font-family: "Lilita One", sans-serif;
     display: block;
     margin: 0 auto;
@@ -686,7 +696,7 @@ body {
     └───┴────────────────┘
 */
 
-  .form1 button:enabled {
+  .form1 .bt-container button:enabled {
     scale: 1;
     margin-top: 10%;
     font-family: "Lilita One", sans-serif;
@@ -700,7 +710,7 @@ body {
     transition: all 0.3s ease;
   }
 
-  .form2 button:enabled {
+  .form2 .bt-container button:enabled {
     scale: 1;
     margin-top: 0%;
     font-family: "Lilita One", sans-serif;
@@ -720,8 +730,8 @@ body {
     └───┴──────────────────────────────────┘
 */
 
-  .form1 button:enabled:hover,
-  .form2 button:enabled:hover {
+  .form1 .bt-container button:enabled:hover,
+  .form2 .bt-container button:enabled:hover {
     width: 200px;
     padding-right: 20px;
     background-color: var(--theme-color);
@@ -735,14 +745,14 @@ body {
     └───┴──────────────┘
 */
 
-  .form1 button::after {
+  .form1 .bt-container button::after {
     content: "😎​";                    /* L'emoji à ajouter */
     position: absolute;
     opacity: 0;                       /* L'emoji est caché au départ */
     transition: all 0.3s ease;        /* Transition douce pour l'emoji */
   }
 
-  .form2 button::after {
+  .form2 .bt-container button::after {
     content: "📋​";                    /* L'emoji à ajouter */
     position: absolute;
     opacity: 0;                       /* L'emoji est caché au départ */
@@ -755,8 +765,8 @@ body {
     └───┴────────────────────────────────────────┘
 */
 
-  .form1 button:enabled:hover::after,
-  .form2 button:enabled:hover::after {
+  .form1 .bt-container button:enabled:hover::after,
+  .form2 .bt-container button:enabled:hover::after {
     animation: anim-right-appear 0.5s ease forwards;
     left: 90%;
     opacity: 1;
@@ -822,6 +832,11 @@ body {
   margin-left: 24%;
 }
 
+.next-sign-form-signin span {
+  color: #ccc;
+  font-size: 12px;
+}
+
 .next-sign-form-signup {
   position: relative;
   width: auto;
@@ -835,7 +850,6 @@ body {
     margin-top: 15px;
 }
 
-.next-sign-form-signin span,
 .next-sign-form-signup span {
   position: absolute;
   color: #ccc;
@@ -883,6 +897,7 @@ body {
   visibility: hidden;
   opacity: 0;
 }
+
 
 .error-message.show {
   visibility: visible;
@@ -960,26 +975,40 @@ body {
 
 /* ------------------------------ 42 BUTTON ------------------------------ */
 
-.button42 {
-  font-family: "Jersey 10", serif;
-  font-style: normal;
-  border-radius: 10px;
-  border-color: transparent;
-  font-size: 35px;
-  width: 50px; /* Ajustez cette valeur pour changer la taille */
-  height: 50px; /* Ajustez cette valeur pour changer la taille */
-  display: flex; /* Utilisez Flexbox pour centrer le contenu */
-  justify-content: center; /* Centre horizontalement */
-  align-items: center; /* Centre verticalement */
-  transition: all 0.5s ease;
-  background-color: #ece7ec;
-  border: 2px solid black;
-  box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.8);
+#span42 {
+  display: inline-block;
+  position: relative;
+  font-size: 20px;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
-.button42:hover {
-  pointer-events: all;
-  cursor: pointer;
-  transform: scale(1.05);
-  box-shadow: 0px 0px 20px 2px rgb(230, 8, 181);
+.login-error {
+  content: "";
+  opacity: 0;
+  transition: all 1s ease;
+}
+
+.login-error.show {
+  color: #ff4444;
+  font-size: 12px;
+  margin-bottom: 15px;
+  text-align: center;
+  opacity: 1;
+}
+
+/*------------------------------------------------*/
+
+.fake-link {
+  background: none; /* Pas de fond */
+  border: none; /* Pas de bordure */
+  color: blue; /* Couleur du lien */
+  text-decoration: underline; /* Soulignement */
+  cursor: pointer; /* Curseur en forme de main */
+  padding: 0; /* Pas de marge interne */
+  font: inherit; /* Utilise la police du parent */
+}
+
+.fake-link:hover {
+  color: darkblue; /* Couleur au survol */
 }

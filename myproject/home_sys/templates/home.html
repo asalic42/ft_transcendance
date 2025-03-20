@@ -10,9 +10,9 @@
 	
 	<div class="page-title-home">
 		<div class="sub-container-home">
-			<h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance ! <span class="emoji-in-title-home2">👋</span></h1>
+			<h1><span class="emoji-in-title-home">👋</span> Welcome to ft_transcendance... <span class="emoji-in-title-home2">👋</span></h1>
 			<ul class="feature-list">
-				<li><span class="feature-icon">📝</span> One rule, do what you want. </li>
+				<li><span class="feature-icon">📝</span> Fuck this project. </li>
 			</ul>
 		</div>
 	</div>
@@ -40,7 +40,7 @@
 							Si vous voulez modifier vos informations utilisateurs
 							rendez-vous dans les settings.
 						</p>
-						<a class="profile-go-to-settings" href="user-settings/">Je veux modifier mon profil</a>
+						<a class="profile-go-to-settings" href="{% url 'settings_user' %}">Je veux modifier mon profil</a>
 					{% else %}
 						<p class="other-profile-text-settings-rdv">
 							Vous pouvez ajouter {{profile_user.username}} en ami(e)
@@ -58,26 +58,12 @@
 		<!-- Online Users -->
 		<div class="online-users">
 			<h2>Online</h2>
-			{% for user in online_users %}
-				{% if forloop.last %}
-					<div class="user-card last">
-				{% else %}
-					<div class="user-card">
-				{% endif %}
-						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
-						<p class="user-name">{{ user }}</p>
-						{% if request.user != user %}
-							<a class="profile-button" href="{% url 'profile' user %}">
-								profile
-							</a>
-						{% endif %}
-						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
-					</div>
-			{% empty %}
-				<div class="empty-state">
-					<p>Looks like no one's online.</p>
-				</div>
-			{% endfor %}
+			<div id="user-list">
+				<!-- Les utilisateurs seront ajoutés ici -->
+			</div>
+			<div id="empty-state" class="empty-state">
+				<p>Looks like no one's online.</p>
+			</div>
 		</div>
 	
 		<!-- Offline Users -->
@@ -92,7 +78,7 @@
 						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
 						<p class="user-name">{{ user }}</p>
 						<a class="profile-button" href="{% url 'profile' user %}">
-							profile
+							Profile
 						</a>
 						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
 					</div>

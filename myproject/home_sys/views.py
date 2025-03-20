@@ -16,6 +16,269 @@ from .utils import add_pong_logic, send_notification_to_user
 import logging
 
 logger = logging.getLogger(__name__)
+###############################################################################
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.views.decorators.cache import never_cache
+from django.contrib import messages
+
+
+# Page d'accueil
+@never_cache
+def index(request):
+	if request.user.is_authenticated:
+		return redirect('home')
+		
+	storage = messages.get_messages(request)
+	storage.used = True
+	return render(request, 'login.html')
+
+
+# Inscription d'un utilisateur
+#@never_cache
+#def signup(request):
+#	if request.user.is_authenticated:
+#		return redirect('home')
+#	
+#	if request.method == 'POST':
+#		username = request.POST.get('username')
+#		email = request.POST.get('email')
+#		password = request.POST.get('password')
+#
+#		# Vérifier si un utilisateur existe déjà avec ce nom d'utilisateur ou cet email
+#		if User.objects.filter(username=username).exists():
+#			return HttpResponse("Ce nom d'utilisateur est déjà pris.", status=400)
+#		if User.objects.filter(email=email).exists():
+#			return HttpResponse("Cet email est déjà utilisé.", status=400)
+#
+#		# Créer un nouvel utilisateur
+#		user = User.objects.create_user(username=username, email=email, password=password)
+#		user.save()
+#
+#		userauth = authenticate(request, username=username, password=password)
+#		login(request, userauth)
+#		return (redirect('home'))
+#	
+#	return redirect('home')
+
+@never_cache
+def signup(request):
+	if request.user.is_authenticated:
+		return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+		
+	if request.method == 'POST':
+		# Check content type to determine how to get the data
+		content_type = request.META.get('CONTENT_TYPE', '')
+		if 'application/json' in content_type:
+			# Handle JSON data
+			import json
+			try:
+				data = json.loads(request.body)
+				username = data.get('username')
+				password = data.get('password')
+				email = data.get('email')
+			except json.JSONDecodeError:
+				return JsonResponse({
+					'status': 'error',
+					'message': 'Invalid JSON data'
+				}, status=400)
+		else:
+			# Handle form data
+			username = request.POST.get('username')
+			password = request.POST.get('password')
+			email = request.POST.get('email')
+			
+		# Check if a user already exists with this username or email
+		if User.objects.filter(username=username).exists():
+			return JsonResponse({
+				'status': 'error',
+				'message': 'Ce nom d\'utilisateur est déjà pris.'
+			}, status=400)
+			
+		if User.objects.filter(email=email).exists():
+			return JsonResponse({
+				'status': 'error',
+				'message': 'Cet email est déjà utilisé.'
+			}, status=400)
+			
+		# Create a new user
+		user = User.objects.create_user(username=username, email=email, password=password)
+		user.save()
+		
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+			return JsonResponse({
+				'status': 'success',
+				'redirect': reverse('home'),
+				'user': {
+					'id': user.id,
+					'username': user.username,
+					# other user fields you need
+				},
+				'online_count': Users.objects.filter(is_online=True).count()
+			})
+		else:
+			return JsonResponse({'status': 'unauthenticated'})
+			"""  return JsonResponse({
+				'status': 'error',
+				'message': 'Invalid credentials'
+			}, status=400) """
+			
+	# GET requests can return minimal data needed for the signup form
+	return JsonResponse({'status': 'unauthenticated'})
+
+
+
+from django.template.loader import render_to_string
+from django.urls import reverse
+
+
+def signin(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+        
+    if request.method == 'POST':
+        content_type = request.META.get('CONTENT_TYPE', '')
+        
+        if 'application/json' in content_type:
+            import json
+            try:
+                data = json.loads(request.body)
+                username = data.get('username')
+                password = data.get('password')
+            except json.JSONDecodeError:
+                return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+        else:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+
+            # Mettre à jour le statut de l'utilisateur à 'online'
+            try:
+                user_profile = Users.objects.get(user=user)
+                user_profile.is_online = True
+                user_profile.save()
+
+                return JsonResponse({
+                    'status': 'success',
+                    'redirect': reverse('home'),
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                    },
+                    'online_count': Users.objects.filter(is_online=True).count()
+                })
+            except Users.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User profile not found.'})
+        else:
+            return JsonResponse({'status': 'unauthenticated'})
+    
+    return JsonResponse({'status': 'unauthenticated'})
+
+
+
+""" def signin(request):
+	if request.user.is_authenticated:
+		return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+		
+	if request.method == 'POST':
+		# Check content type to determine how to get the data
+		content_type = request.META.get('CONTENT_TYPE', '')
+		
+		if 'application/json' in content_type:
+			# Handle JSON data
+			import json
+			try:
+				data = json.loads(request.body)
+				username = data.get('username')
+				password = data.get('password')
+			except json.JSONDecodeError:
+				return JsonResponse({
+					'status': 'error',
+					'message': 'Invalid JSON data'
+				}, status=400)
+		else:
+			# Handle form data
+			username = request.POST.get('username')
+			password = request.POST.get('password')
+		
+		# Continue with authentication
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
+			login(request, user)
+			return JsonResponse({
+				'status': 'success',
+				'redirect': reverse('home'),
+				'user': {
+					'id': user.id,
+					'username': user.username,
+					# other user fields you need
+				},
+				'online_count': Users.objects.filter(is_online=True).count()
+			})
+		else:
+			return JsonResponse({'status': 'unauthenticated'})
+			#return JsonResponse({
+			#	'status': 'error',
+			#	'message': 'Invalid credentials'
+			#}, status=400)
+		
+	# GET requests can return minimal data needed for the login form
+	return JsonResponse({'status': 'unauthenticated'}) """
+
+
+# Déconnexion de l'utilisateur
+def signout(request):
+	if request.user.is_authenticated:
+		try:
+			user_profile = Users.objects.get(user=request.user)
+			user_profile.is_online = False
+			user_profile.save()
+		except Users.DoesNotExist:
+			pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
+
+	logout(request)
+	return JsonResponse({
+        'status': 'success',
+        'redirect': f'https://{settings.IP_ADDR}:5000/'
+    })
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from zxcvbn import zxcvbn as passwordscore
+
+@require_GET
+def check_username(request):
+	username = request.GET.get('username', '')
+	if (User.objects.filter(username=username).exists()):
+		return (JsonResponse({'is_taken' : True}))
+	return (JsonResponse({'data' : False}))
+
+
+@require_GET
+def check_email(request):
+	email = request.GET.get('email', '')
+	if (User.objects.filter(email=email).exists()):
+		return (JsonResponse({'is_taken' : True}))
+	return (JsonResponse({'data' : False}))
+
+@require_GET
+def check_password_solidity(request):
+	password = request.GET.get('password', '')
+	return (JsonResponse({'data' : passwordscore(password)['score']}))
+
+#######################################################################################################
+
+
 
 @login_required
 @never_cache
@@ -122,9 +385,6 @@ def load_template(request, page, **kwargs):
 			'id_t': kwargs.get('id_t')
 		}
 
-	elif page == "signout":
-		return (redirect('loginpage:sign_in'))
-
 	else:
 		context = {}
 
@@ -143,9 +403,12 @@ def load_template(request, page, **kwargs):
 |
 """
 
+from django.template.loader import render_to_string
+
 @login_required
 @never_cache
 def home(request):
+	
 	# Récupérer les utilisateurs et pré-calculer leur statut
 	users = Users.objects.all()
 	online_users = users.filter(is_online=True)
@@ -156,16 +419,6 @@ def home(request):
 		'offline_users': offline_users,
 	}
 	return render(request, 'home.html', context)
-
-"""
-|
-|   Pour le sign out,
-|   la déconnection d'un user, on redirige sur la page du sign in.
-|
-"""
-def signout(request):
-	logout(request)
-	return (redirect('sign_in'))
 
 """
 [-------------------------------------------------------------------------]
@@ -179,32 +432,31 @@ def signout(request):
 |   Une fois effacé, on redirige sur la page de "compte effacé avec succès"
 |
 """
+@ensure_csrf_cookie
 @login_required
 def delete_account(request):
-
-	if (request.method == 'POST'):
-		user = request.user
-		user.delete()
-		print(f"Del {user} --> Success.")
-		
-		request.session['deletion_request'] = True  # P1(1/2) : Protection pour que l'utilisateur ne puisse accéder à la page suivante que si il en a fait la requête
-		return (redirect('delete_success'))
-
-	return (render(request, 'delete_account.html'))
-
-"""
-|
-|   Redirige sur la page correspondante quand le compte est effacé avec succès.
-|
-"""
+	return render(request, 'delete_account.html')
 
 def delete_success(request):
-
-	try:
-		del request.session['deletion_request']
-	except:
-		return (redirect('home'))
-	return (render(request, 'delete_success.html'))
+	# Vérifier si l'utilisateur est authentifié avant de continuer
+	if request.user.is_authenticated:
+		user = request.user
+		# Stocker des informations pour afficher dans le template si nécessaire
+		username = user.username  # ou autre info que vous voulez conserver
+		
+		# Désactiver le mot de passe
+		user.set_unusable_password()
+		user.save()
+		
+		# Déconnecter l'utilisateur
+		from django.contrib.auth import logout
+		logout(request)
+		
+		# Passer les informations au template
+		return render(request, 'delete_success.html', {'username': username})
+	else:
+		# Rediriger vers une page publique si non authentifié
+		return render(request, 'delete_success.html')
 
 @login_required
 def settings_user(request):
@@ -295,6 +547,7 @@ def casse_brique_room_choice(request):
 	tour = casse_brique_room.objects.all()
 	return render(request, 'other_game_multi_room.html', {'all_games':tour}) """
 
+@login_required
 def other_game_choice(request):
 	return (render(request, 'other_game_choice.html'))
 
@@ -429,6 +682,7 @@ def does_channel_exist(request, asked_name):
 	except Chans.DoesNotExist:
 		return JsonResponse({'status': 'error'})
 
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def post_chan(request):
 	try:
@@ -473,6 +727,7 @@ def get_messages(request):
 	except Exception as e:
 		return JsonResponse({'status': 'error', 'message': 'Erreur lors de la recup des messages'}, status=500)
 
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def post_message(request):
 	try:
@@ -542,6 +797,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import Users
 
+@ensure_csrf_cookie
 @login_required
 def update_user_info(request):
 	if request.method == 'POST':
@@ -619,6 +875,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .models import Users
 
+@ensure_csrf_cookie
 @login_required
 def upload_avatar(request):
 	if request.method == 'POST':
@@ -850,6 +1107,7 @@ def check_duplicate_private_channel(request, user1_id, user2_id):
 		})
 	return JsonResponse({'exists': False})
 
+@ensure_csrf_cookie
 @require_http_methods(["POST"])
 def	postPv(request):
 	try:
@@ -876,6 +1134,7 @@ def getNameById(request, idU):
 # Configurez le logger
 # logger = logging.getLogger(__name__)
 
+@ensure_csrf_cookie
 @login_required
 def add_friend(request, username):
 	if request.method == 'POST':
@@ -941,6 +1200,7 @@ def notification_page(request):
 
 	return render(request, 'notifications.html', context)
 
+@ensure_csrf_cookie
 @login_required
 def accept_friend_request(request, username):
 	if request.method == 'POST':
@@ -967,6 +1227,7 @@ def accept_friend_request(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def decline_friend_request(request, username):
 	if request.method == 'POST':
@@ -982,6 +1243,7 @@ def decline_friend_request(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def block_user(request, username):
 	if request.method == 'POST':
@@ -1012,6 +1274,7 @@ def block_user(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def remove_friend(request, username):
 	if request.method == 'POST':
@@ -1030,6 +1293,7 @@ def remove_friend(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def remove_blocked_user(request, username):
 	if request.method == 'POST':
@@ -1046,6 +1310,7 @@ def remove_blocked_user(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def invite_friend(request, username):
 	if request.method == 'POST':
@@ -1065,6 +1330,7 @@ def invite_friend(request, username):
 			return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 	return JsonResponse({'status': 'error', 'message': 'Méthode non autorisée'}, status=405)
 
+@ensure_csrf_cookie
 @login_required
 def invitation_declined(request, username):
 	if request.method == 'POST':
@@ -1086,6 +1352,7 @@ from .models import Users
 
 def user_status(request):
 	users = Users.objects.all().values('id', 'is_online')
+	
 	return JsonResponse(list(users), safe=False)
 
 @login_required
@@ -1130,3 +1397,14 @@ def create_room(request):
 		return JsonResponse({'error': 'Donnes JSON invalides'}, status=400)
 	except Exception as e:
 		return JsonResponse({'error': str(e)}, status=500)
+	return JsonResponse({"rooms": list(rooms)})
+
+# views.py
+from django.http import JsonResponse
+from .models import User
+
+def get_online_users(request):
+    online_users = Users.objects.filter(is_online=True)  # Assurez-vous d'avoir un champ is_online pour cela.
+    users_data = [{"username": users.name, "image": users.image.url} for users in online_users]
+	
+    return JsonResponse({"online_users": users_data})

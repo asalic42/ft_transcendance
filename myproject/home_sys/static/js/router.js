@@ -115,7 +115,7 @@
 
 // 	//             <div class="page">
 // 	//             	<div class="rectangle"></div>
-// 	//             	<a href="game-type-pong" class="retour">
+// 	//             	<a href="{% url 'game-type-pong' %}" class="retour">
 // 	//             		<span class="game-mode" id="retour" >Retour</span>
 // 	//             	</a>
 // 	//             	<h1 class="title">Choix de la room</h1>
@@ -147,7 +147,7 @@
 
 //     //         <h3 class="scores" id="fps">Fps : 0</h3>
 
-//     //         <a href="game-distant-choice" class="game-distant">
+//     //         <a href="{% url 'game-distant-choice' %}" class="game-distant">
 //     //         	<span class="game-mode">Retour</span>
 //     //         </a>
 

@@ -1,237 +1,203 @@
 @font-face {
-	/*  Creation d'un font externe */
-	font-family: 'BungeeShade-Regular';
-	src: url(../fonts/BungeeShade-Regular.ttf);
+    /*  Creation d'un font externe */
+    font-family: 'BungeeShade-Regular';
+    src: url(../fonts/BungeeShade-Regular.ttf);
 }
 
 @font-face {
-	/*  Creation d'un font externe */
-	font-family: 'coolvetica-condensed-rg';
-	src: url(../fonts/coolvetica-condensed-rg.otf);
+    /*  Creation d'un font externe */
+    font-family: 'coolvetica-condensed-rg';
+    src: url(../fonts/coolvetica-condensed-rg.otf);
 }
 
 @font-face {
-	font-family: Namaku;
-	src: url("../fonts/Namaku.ttf");
+    font-family: Namaku;
+    src: url("../fonts/Namaku.ttf");
 }
 
 @font-face {
-	font-family: Thunder-VF;
-	src: url("../fonts/Thunder-VF.ttf");
+    font-family: Thunder-VF;
+    src: url("../fonts/Thunder-VF.ttf");
 }
 
 @font-face {
-	font-family: Thunder-SemiBold;
-	src: url("../fonts/Thunder-SemiBoldLC.otf");
+    font-family: Thunder-SemiBold;
+    src: url("../fonts/Thunder-SemiBoldLC.otf");
 }
 
 :root {
     /* Définit les variables globales pour la taille de police et les couleurs */
-    
     font-size: 16px;                    /* Taille de police de base */
-    font-family: 'Open Sans';               /*  Police de caractère par défaut */
-    --text-primary: var(--font-color);          /* Couleur primaire du texte */
-    --text-secondary: #ececec;        /* Couleur secondaire du texte */
-    --bg-primary: #23232e;            /* Couleur de fond primaire */
-    --bg-secondary: #141418;          /* Couleur de fond secondaire */
-	--bg-site: #2B2B3B;
-	--font-color: #d8d8d8;
-    --transition-time: 400ms           /* Pour le temps de transitions */
-    /* top: 0px; */
+    font-family: 'Open Sans';           /* Police de caractère par défaut */
+    --text-primary: var(--font-color);  /* Couleur primaire du texte */
+    --text-secondary: #ececec;          /* Couleur secondaire du texte */
+    --bg-primary: #23232e;              /* Couleur de fond primaire */
+    --bg-secondary: #141418;            /* Couleur de fond secondaire */
+    --bg-site: #2B2B3B;
+    --font-color: #d8d8d8;
+    --transition-time: 400ms;           /* Pour le temps de transitions */
 }
 
 body {
     /* Styles généraux pour le corps de la page */
-
-    color: black;                      /* Couleur du texte par défaut */
-	background-color: #2B2B3B;
-	background: linear-gradient(to bottom right, #2B2B3B, #323247);
-	height: 1080px;
-	overflow: hidden;
-    margin: 0;                           /* Supprime la marge par défaut */
-    padding: 0;                          /* Supprime le remplissage par défaut */
+    color: black;                       /* Couleur du texte par défaut */
+    background-color: #2B2B3B;
+    background: linear-gradient(to bottom right, #2B2B3B, #323247);
+    height: 1080px;
+    overflow: hidden;
+    margin: 0;                          /* Supprime la marge par défaut */
+    padding: 0;                         /* Supprime le remplissage par défaut */
 }
 
 main {
     /* Styles pour la section principale du contenu */
-
     margin-left: 6rem;                  /* Espace à gauche pour décaler le contenu */
-    margin-right: 6rem;                  /* Espace à gauche pour décaler le contenu */
+    margin-right: 6rem;                 /* Espace à droite pour décaler le contenu */
     padding: 1rem;                      /* Remplissage intérieur */
     transition: margin-left 400ms ease;
 }
 
 .navbar {
     /* Styles pour la barre de navigation */
-
     width: 5em;                         /* Largeur initiale de la barre de navigation */
     height: 100vh;                      /* Hauteur de la barre de navigation égale à la hauteur de la fenêtre */
     position: fixed;                    /* Position fixe pour qu'elle reste en place lors du défilement */
-    
-    /* Couleur de fond primaire */
+    background-color: var(--bg-primary); /* Couleur de fond primaire */
+    z-index: 10;                        /* Assure que la navbar est au-dessus des autres éléments */
+    transition:  all 400ms ease;
+    border-right: 1px solid rgba(128, 128, 128, 0.2); /* Bordure subtile */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Ombre subtile */
+}
 
-    background-color: var(--bg-primary);
+.navbar:hover {
+    width: 16rem;                       /* Augmente la largeur au survol */
+    background-color: var(--bg-secondary); /* Change la couleur de fond au survol */
+}
 
-     /* Transition douce lors du changement de largeur */
-
-	z-index: 10;
-    transition: width 400ms ease;
-    border-right: 0px solid var(--bg-secondary);
+.navbar:hover .nav-icon {
+    width: 270px;
 }
 
 .navbar-nav {
     /* Styles pour la liste de navigation */
-    
     list-style: none;                   /* Supprime les puces de la liste */
-    padding: 0;                         /* Supprime le remplissage */
+    padding: 5px;                       /* Supprime le remplissage */
     margin: 0;                          /* Supprime la marge */
     display: flex;                      /* Utilise flexbox pour l'agencement */
     flex-direction: column;             /* Dispose les éléments en colonne */
     align-items: center;                /* Centre les éléments horizontalement */
     height: 100%;                       /* Prend toute la hauteur disponible */
-	gap: 10px;
+    gap: 10px;                          /* Espace entre les éléments */
 }
 
 .nav-item {
     /* Styles pour chaque élément de navigation */
-
+    margin-left: -15%;
     width: 100%;                        /* Prend toute la largeur disponible */
+    transition: all 200ms ease;
 }
 
 .nav-item:last-child {
     /* Espace supplémentaire pour le dernier élément */
-
     margin-top: auto;                   /* Pousse le dernier élément vers le bas */
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1); /* Fond légèrement clair au survol */
+    border-radius: 8px;                 /* Coins arrondis */
 }
 
 .nav-icon {
     /* Styles pour les liens et icônes de navigation */
-
     display: flex;                      /* Utilise flexbox pour centrer le contenu */
     align-items: center;                /* Centre verticalement le contenu */
     height: 5rem;                       /* Hauteur fixe */
     color: var(--text-primary);         /* Couleur du texte primaire */
     text-decoration: none;              /* Supprime le soulignement des liens */
-    transition: 200ms;                  /* Transition douce pour les changements d'état */
+    transition: all 200ms ease;
+    width: 80px;
+}
+
+.nav-icon:hover {
+    color: var(--text-secondary);       /* Change la couleur du texte au survol */
+    border-radius: 8px;                 /* Coins arrondis au survol */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre au survol */
 }
 
 .link-text {
     /* Styles pour le texte des liens */
-
-    opacity: 0;                     /* Cacher le texte par défaut */
-    visibility: hidden;             /* Invisible par défaut */
-    margin-left: 1rem;             /* Espace à gauche */
-    transition: opacity 400ms ease, visibility 400ms ease;
+    opacity: 0;                         /* Cacher le texte par défaut */
+    visibility: hidden;                 /* Invisible par défaut */
+    margin-left: 1rem;                  /* Espace à gauche */
+    transition: opacity 400ms ease, visibility 400ms ease, margin-left 400ms ease;
+    font-size: 1rem;                    /* Taille de police légèrement augmentée */
+    font-weight: 500;                   /* Texte en gras */
 }
 
 .navbar:hover .link-text {
-    opacity: 1;                     /* Rendre visible lors du survol */
-    visibility: visible;            /* Rendre visible */
+    opacity: 1;                         /* Rendre visible lors du survol */
+    visibility: visible;                /* Rendre visible */
+    margin-left: 1.5rem;                /* Augmente l'espacement lors du survol */
 }
-
-
-
-.link-text {
-    /* Styles pour le texte des liens */
-
-    opacity: 0;                     /* Cacher le texte par défaut */
-    visibility: hidden;             /* Invisible par défaut */
-    margin-left: 1rem;             /* Espace à gauche */
-    transition: opacity 400ms ease, visibility 400ms ease;
-}
-
-.navbar:hover .link-text {
-    opacity: 1;                     /* Rendre visible lors du survol */
-    visibility: visible;            /* Rendre visible */
-}
-
-
 
 .nav-icon svg {
     /* Styles pour les icônes SVG dans les liens */
-
     min-width: 2rem;                    /* Largeur minimale de l'icône */
     margin: 0 1.5rem;                   /* Espace à gauche et à droite */
 }
 
 .nav-icon lord-icon {
     /* Styles spécifiques pour l'icône Lordicon */
-
-    width: 24px;                        /* Largeur fixe */
-    height: 24px;                       /* Hauteur fixe */
+    width: 28px;                        /* Largeur fixe */
+    height: 28px;                       /* Hauteur fixe */
     min-width: 2rem;                    /* Largeur minimale */
     margin: 0 1.5rem;                   /* Espace à gauche et à droite */
-    --lord-icon-primary: #C2C2C2;     /* Couleur primaire de l'icône */
+    --lord-icon-primary: #C2C2C2;       /* Couleur primaire de l'icône */
     --lord-icon-secondary: #C2C2C2;     /* Couleur secondaire de l'icône */
-
-    /* Transition douce pour les changements */
-
     transition: width 500ms ease, height 500ms ease, --lord-icon-primary 500ms ease;
 }
 
 .nav-icon:hover lord-icon {
     /* Styles lors du survol d'une icône Lordicon */
-
-    width: 48px;                        /* Double la largeur */
-    height: 48px;                       /* Double la hauteur */
-    --lord-icon-primary: #ED4EB0;     /* Change la couleur primaire au survol */
+    width: 36px;                        /* Augmente la largeur */
+    height: 36px;                       /* Augmente la hauteur */
+    --lord-icon-primary: #ED4EB0;       /* Change la couleur primaire au survol */
     --lord-icon-secondary: #ED4EB0;     /* Change la couleur secondaire au survol */
 }
 
-.nav-icon:hover {
-    /* Styles pour l'icône lors du survol */
-
-    background: var(--bg-secondary);    /* Change le fond au survol */
-    color: var(--text-secondary);       /* Change la couleur du texte au survol */
-}
-
-.navbar:hover {
-    /* Styles pour la barre de navigation lors du survol */
-
-    width: 16rem;                       /* Augmente la largeur au survol */
-}
-
-/* Ajoute cette règle pour déplacer le contenu principal */
-.navbar:hover + main {
-    margin-left: 19rem;                 /* Déplace le contenu principal à droite */
-}
-
-
 .logo {
     /* Styles pour le logo */
-    
     font-weight: bold;                  /* Gras */
     text-transform: uppercase;          /* Met le texte en majuscules */
     text-align: center;                 /* Centre le texte */
     color: var(--text-secondary);       /* Couleur du texte secondaire */
     background: var(--bg-secondary);    /* Couleur de fond secondaire */
-    font-size: 1.5rem;                  /* Taille de police */
+    font-size: 2rem;                    /* Taille de police */
     letter-spacing: 0.3ch;              /* Espace entre les lettres */
-    width: 100%;                        /* Prend toute la largeur */
-}
-
-.logo span {
-    /* Styles pour les SPAN */
-
-    color: #ececec;                   /* Définit la couleur */
+    width: 100px;                         /* Prend toute la largeur */
+    margin-left: -30px;
+    margin-top: -5px;
+    transition: background-color 400ms ease, color 400ms ease;
 }
 
 .logo svg {
     /* Styles pour les SVG du logo */
-
-    fill: #ffffff;                    /* Couleur de remplissage initiale */
+    fill: #ffffff;                      /* Couleur de remplissage initiale */
     transform: rotate(0deg);            /* Positionnement initial */
+    margin-left: 40px;
+    transition: transform 500ms ease, fill 200ms ease, margin-left 500ms ease;
+}
 
-    /* Transition douce pour la rotation et la couleur */
-    
-    transition: transform 500ms ease, fill 200ms ease, margin-left 500ms;
+.navbar:hover .nlogo {
+    margin-left: -90px;
+    background-color: var(--bg-primary);
 }
 
 .navbar:hover .logo svg {
     /* Styles pour le SVG du logo lors du survol de la barre de navigation */
-
-    margin-left: 12rem;
-    fill: #ED4EB0;                    /* Change la couleur de remplissage au survol */
+    margin-left: 11rem;
+    fill: #ED4EB0;                      /* Change la couleur de remplissage au survol */
+    background-color: transparent;
     transform: rotate(-180deg);         /* Fait pivoter le logo au survol */
 }
 
@@ -239,9 +205,68 @@ main {
     display: inline;
     position: absolute;
     left: -999px;
-    transition: 400ms;
+    transition: 400ms ease;
+    font-family: 'Poppins', sans-serif; /* Utilise une police plus moderne */
 }
 
-.navbar:hover .logo-text{
+.navbar:hover .logo-text {
     left: 0px;
+    color: #ED4EB0;                     /* Change la couleur du texte au survol */
+}
+
+.notification-status {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: blueviolet;
+    margin-left: 2rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.notification-status.active {
+    opacity: 1;
+    margin-left: 1.8rem;
+    margin-top: 1.2rem;
+    transform: scale(1.2);              /* Agrandit légèrement la notification */
+}
+
+.navbar:hover .notification-status.active {
+    margin-left: 4rem;
+    margin-top: 0.17rem;
+}
+
+#top-border {
+    visibility: hidden;
+    width: 0px;
+    margin-left: 10px;
+    border-top: 2px solid rgba(128, 128, 128, 0.3); /* Bordure plus subtile */
+    transition: all 400ms ease;
+}
+
+.navbar:hover #top-border {
+    visibility: visible;
+    margin-left: 30px;
+    width: 220px;
+    border-color: rgba(128, 128, 128, 0.6); /* Change la couleur de la bordure au survol */
+}
+
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+.navbar:hover + main {
+    margin-left: 19em;
 }

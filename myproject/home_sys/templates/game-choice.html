@@ -11,15 +11,14 @@
     <div class="page">
         <h1 class="title">Choix du jeu</h1>
         <div class="mode-choices">
-            <a href="game-mode-pong" class="game-mode">
+            <a href="{% url 'game-mode-pong' %}" class="game-mode">
                 <span>Pong</span>
             </a>
-    		<a href="other_game_choice" class="game-mode">
+    		<a href="{% url 'other_game_choice' %}" class="game-mode">
                 <span>Casse Briques</span>
             </a>
         </div>
     </div>
-
 </div>
 
 {% endblock %}

@@ -10,18 +10,18 @@
 
     <div class="page">
         <div class="rectangle"></div>
-    	<a href="game-choice" class="retour">
+    	<a href="{% url 'game-choice' %}" class="retour">
     		<span class="game-mode" id="retour" >Retour</span>
     	</a>
         <h1 class="title">Choix du mode de jeu</h1>
         <div class="mode-choices">
-            <a href="game-type-pong" class="game">
+            <a href="{% url 'game-type-pong' %}" class="game">
                 <span class="game-mode">1v1</span>
             </a>
-            <a href="game-bot" class="game-bot">
+            <a href="{% url 'game-bot' %}" class="{% url 'game-bot' %}">
                 <span class="game-mode">Solo</span>
             </a>
-    		<a href="tournament_choice" class="tournament">
+    		<a href="{% url 'tournament_choice' %}" class="tournament">
                 <span class="game-mode">Tournois</span>
             </a>
         </div>

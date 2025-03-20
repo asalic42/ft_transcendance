@@ -18,23 +18,35 @@
         {% comment %} Game Scripts {% endcomment %}
     	<script type="module" src="{% static 'js/game.js' %}"></script>
 	    <script type="module" src="{% static 'js/game-distant.js' %}"></script>
-
+{% comment %}  {% endcomment %}
         <script src="{% static 'js/game-bot.js' %}"></script>
 	    <script src="{% static 'js/other_game.js' %}"></script>
         
-    	<script src="{% static 'js/router.js' %}"></script>
+    	{% comment %} <script src="{% static 'js/router.js' %}"></script> {% endcomment %}
+        <script type="module" src="{% static 'js/app.js' %}"></script>
+		<script src="{% static 'js/profile.js'%}"></script>
+		<script type="module"src="{% static 'js/channel.js'%}"></script>
+		<script src="{% static 'js/notifications.js'%}"></script>
+		<script src="{% static 'js/user-settings.js'%}"></script>
+		<script src="{% static 'js/delete.js'%}"></script>
+        <script src="{% static 'js/home.js' %}"></script>
+		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
 
     </head>
     <body>
     	{% csrf_token %}
     	<meta name="csrf-token" content="{{ csrf_token }}">	
+        
         <nav class="navbar">
 
             <ul class="navbar-nav">
 
                 <li class="logo" style="margin-bottom: 10px;">
-                    <a href="#" class="nav-icon">
-                        <span class="link-text logo-text">42Project</span>
+                    <a href="" class="nav-icon nlogo">
+                        <span class="link-text logo-text">
+                            Navbar
+                        </span>
                         <svg xmlns="http://www.w3.org/2000/svg" height="124px" viewBox="0 -960 960 960" width="124px" fill="#5f6368">
                             <path d="M383-480 200-664l56-56 240 240-240 240-56-56 183-184Zm264 0L464-664l56-56 240 240-240 240-56-56 183-184Z"/>
                         </svg>
@@ -43,7 +55,7 @@
 
             <!-- HOME -->
                 <li class="nav-item">
-                    <a href="home" class="nav-icon">
+                    <a href="{% url 'home' %}" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/wmwqvixz.json"
                             trigger="hover"
@@ -55,7 +67,7 @@
 
     		<!-- GAME -->
     			<li class="nav-item">
-    				<a href="game-choice/" class="nav-icon">
+    				<a href="{% url 'game-choice' %}" class="nav-icon">
     					<lord-icon
     						src="https://cdn.lordicon.com/caxgkjgi.json"
     						trigger="hover"
@@ -65,21 +77,9 @@
     				</a>
     			</li>
 
-            <!-- PROFILE -->
-                <li class="nav-item">
-    				<a href="{% url 'profile' request.user.username %}" class="nav-icon">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/hrjifpbq.json"
-                            trigger="hover"
-                            target=".nav-item">
-                        </lord-icon>
-                        <span class="link-text">Utilisateur</span>
-                    </a>
-                </li>
-
             <!-- CHATROOM -->
                 <li class="nav-item">
-                    <a href="channels" class="nav-icon">
+                    <a href="{% url 'channels' %}" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/ayhtotha.json"
                             trigger="hover"
@@ -94,19 +94,32 @@
                     </a>
                 </li>
 
+            
+            <!-- PROFILE -->
+            	<li class="nav-item">
+				{% if request.user.is_authenticated%}
+					<a href="{% url 'profile' request.user.username %}" class="nav-icon" id="accounts_link">
+				{% else %}
+					<a class="nav-icon" id="accounts_link">
+				{% endif %}
+				
+                        <lord-icon
+                            src="https://cdn.lordicon.com/hrjifpbq.json"
+                            trigger="hover"
+                            target=".nav-item">
+                        </lord-icon>
+                        <span class="link-text">Utilisateur</span>
+                    </a>
+                </li>
+
             <!-- NOTIFICATION(S) -->
                 <li class="nav-item">
-                    <a href="notifications" class="nav-icon">
+                    <a href="{% url 'notifications' %}" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/lznlxwtc.json"
                             trigger="hover"
                             target=".nav-item">
                         </lord-icon>
-                        {% if request.user.users.has_unread_notifications %}
-                            <div class="notification-status active"></div>
-                        {% else %}
-                            <div class="notification-status"></div>
-                        {% endif %}
                         <span class="link-text">Notifications</span>
                     </a>
                 </li>
@@ -114,11 +127,9 @@
             <!-- SETTINGS -->
                 <li class="nav-item">
     				<div id="top-border" style="
-    					width: 85%;
-    					MARGIN: 0 auto;
     					border-top: 2px solid rgba(128, 128, 128, 0.8);">
     				</div>
-                    <a href="user-settings" class="nav-icon">
+                    <a href="{% url 'settings_user' %}" class="nav-icon">
                         <lord-icon
                             src="https://cdn.lordicon.com/ifsxxxte.json"
                             trigger="hover"
@@ -136,39 +147,8 @@
             {% endblock %}
         </main>
 
-        <style>
-            .notification-status {
-                position: absolute;
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                scale: 0.1;
-                margin-left: -10px;
-                margin-top: 0px;
-                display: none;
-                transition: 0.5s all ease;
-            }
-
-            .notification-status.active {
-                display: block;
-                background-color: blueviolet;
-                animation: anim-notif-status 0.5s forwards;
-            }
-
-            @keyframes anim-notif-status {
-    			0% {scale: 0.1}
-    			30% {scale: 0.5}
-    			40% {scale: 0.2}
-                100% {scale: 0.2}
-    		}
-
-        </style>
-
-        {% comment %} <script>
-    		
-    	</script> {% endcomment %}
-{% comment %} 
-        <script>
+        {% comment %}
+        <!-- <script>
 
             const notificationSocket = new WebSocket(
                 'wss://' + window.location.host + '/ws/notifications/'
@@ -193,36 +173,12 @@
 
             notificationSocket.onerror = function (e) {
                 console.error('Erreur WebSocket :', e);
-            }; {% endcomment %}
+            }; 
+        </script>
+    -->
+    {% endcomment %}
 
-            {% comment %} // Notif Channels {% endcomment %}
-            {% comment %} const notificationChatSocket = new WebSocket(
-                'wss://' + window.location.host + '/ws/notifications-chat/'
-            );
 
-            notificationChatSocket.onopen = function (e) {
-                console.log("WebSocket connecté avec succès !");
-            };
-
-            notificationChatSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data);
-
-                if (data.type === 'update_status') {
-                    const notif = document.querySelector('.notification-chat');
-                    notif.classList.toggle("active", data.has_unread_chat);
-                }
-            };
-
-            notificationChatSocket.onclose = function (e) {
-                console.error('WebSocket fermé de manière inattendue');
-            };
-
-            notificationChatSocket.onerror = function (e) {
-                console.error('Erreur WebSocket :', e);
-            }; {% endcomment %}
-        {% comment %} </script> {% endcomment %}
-
-        <script type="module" src="{% static 'js/app.js' %}"></script>
     </body>
 
         
@@ -256,5 +212,4 @@
                     .catch(error => console.error("Erreur de navigation: ", error));
             }); 
         });{% endcomment %}
-   
 </html>
