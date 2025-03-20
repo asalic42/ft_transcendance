@@ -257,7 +257,6 @@ export class PongDistantGame {
 
 	handleKey(e) {
 		this.keys[e.key] = (e.type === 'keydown');
-		// e.preventDefault();
 	}
 
 	countdownBeforeGame(data) {

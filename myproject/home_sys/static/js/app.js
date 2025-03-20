@@ -1,5 +1,6 @@
 import { PongDistantGame } from './game-distant.js';
 import { PongGame } from './game.js';
+// import { CasseBriqueGame } from './other-game.js';
 
 // Recup le csrf token definit plus tot dans le code
 // function getCSRFToken() {
@@ -14,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let gameDistant = false;
     let gameRoom = false;
     let gamePong = false;
+    let gameCasseBrique = false;
 
     // Ajoute /accounts/ si absent
     function prependAccounts(url) {
@@ -93,6 +95,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     gamePong = true;
                     await gameRoute();
                 }
+                else if (urlPath === '/accounts/other_game' ) {
+                    gameCasseBrique = true;
+                    await gameCasseBriqueRoute();
+                }
                 else {
                     if (gameDistant && PongDistantGame.currentGame) {
                         PongDistantGame.currentGame.closeSocket();
@@ -106,8 +112,29 @@ document.addEventListener("DOMContentLoaded", function () {
                         window.PongGame = null;
                         gamePong = false;
                     }
+                    else if (gameCasseBrique) {
+                        window.CasseBriqueGame = null;
+                        gameCasseBrique = false;
+                    }
                 }
             }
+    }
+
+    async function gameCasseBriqueRoute() {
+        if (!window.CasseBriqueGame) {
+            const module = await import('./other_game.js');
+            window.CasseBriqueGame = module.CasseBriqueGame;
+            await new Promise(resolve => {
+                const checkEl = () => {
+                    if (document.getElementById('mapSelection'))
+                        resolve();
+                    else
+                    setTimeout(checkEl, 50);
+                };
+                checkEl();
+            });
+        }
+        new window.CasseBriqueGame();
     }
 
     async function gameRoute() {
@@ -157,7 +184,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // Cas particulier si besoin (exemple pour LevelForm)
         if (form.id === "LevelForm") {
             loadPage(location.pathname).then(() => {
-                console.log("j'appelle BOT ici");
                 const bot_game = new BotGame();
                 bot_game.start();
             });
