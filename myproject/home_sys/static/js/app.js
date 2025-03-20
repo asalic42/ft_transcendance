@@ -64,7 +64,7 @@ let errorprint;
 window.loadPage = function(url, pushState = true) {
 
     // Normalize the URL to prevent duplication
-    const normalizedUrl = url;
+    const normalizedUrl = normalizeUrl(url);
 
     // Vérifier si on est sur la page de login ou non
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
@@ -132,41 +132,34 @@ window.loadPage = function(url, pushState = true) {
 		
 		if (url === `https://${window.location.host}/deleteAccount/` || url === '/deleteAccount/')
 			delete_acc();
-
-		if (url === `https://${window.location.host}/channels/` || url === '/channels/')
-        {
-			console.log("launching chanl");
+		
+		if (waschan) {
+			clearTimeout(liveChanTimeout);
+			clearInterval(liveChat);
+			console.log("closing chanl")
+			waschan = false;
+		}
+		else if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
+			console.log("launching chanl")
             launch_everything();
             waschan = true;
         }
-
-		else if (waschan)
-        {
-			clearTimeout(liveChanTimeout);
-			clearInterval(liveChat);
-			console.log("closing chanl");
-            waschan = false;
-		}
-
-		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/')
-        {
-			connectWebSocket_notif_page();
-			wasNotif = true;
-		}
-		else if (url === `https://${window.location.host}/user-settings/`)
-        {
-			launch_settings();
-			wasSettings = true;
-		}
-
-		else if (wasNotif)
-        {
+		
+		if (wasNotif) {
+			notif_close();
             clearInterval(notiffetch);
 			wasNotif = false;
 		}
-		
-		if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/')
-        {
+		else if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
+			connectWebSocket_notif_page();
+			wasNotif = true
+		}
+
+		if (wasSettings){
+			clearTimeout(SettingsTimeout);
+			wasSettings = false;
+		}
+		else if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
 			launch_settings();
 			wasSettings = true;
 		}
@@ -209,32 +202,15 @@ window.reinitCoreScripts = function() {
     }
 };
 
-// Single function to handle all link clicks for SPA navigation
 function handleLinkClick(event) {
     let link = event.target.closest("a");
-
-    if (link)
-        errorprint = link.getAttribute('href');
-
     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
     if (link && link.href && 
-        (new URL(link.href).host === window.location.host) && 
+        (new URL(link.href).origin === window.location.origin) && 
         !link.hasAttribute("data-full-reload") &&
         !link.hasAttribute("data-spa-ignore")) {
         
         event.preventDefault();
-
-        if (errorprint)
-        {
-            let normalizedUrl = errorprint.match(/^\/(.*?)\/$/);
-            if (normalizedUrl)
-                normalizedUrl = normalizedUrl[1];
-            else
-            {
-                normalizedUrl = errorprint;
-            }
-            loadPage(`https://${window.location.host}/${normalizedUrl}`);
-        }
         loadPage(link.href);
     }
 }
