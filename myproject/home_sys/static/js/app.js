@@ -146,7 +146,6 @@ window.loadPage = function(url, pushState = true) {
         }
 		
 		if (wasNotif) {
-			notif_close();
             clearInterval(notiffetch);
 			wasNotif = false;
 		}
