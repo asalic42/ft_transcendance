@@ -589,3 +589,127 @@
 .other-profile-text-settings-rdv {
 	color: black;
 }
+
+
+/* ----------------------------- HCB */
+
+.pong-date, .cb-date {
+	width: auto;
+	height: auto;
+	background-color: black;
+	color: white;
+	padding: 5px 10px;
+	border-radius: 5px;
+	margin-bottom: 10px;
+	display: inline-block;
+}
+
+.pong-history, .cb-history {
+	display: flex;
+	align-items: center;
+	border: 2px solid #000000;
+	justify-content: space-between;
+	border-radius: 10px;
+	margin-bottom: 10px;
+	background-color: #252323;
+}
+
+.pong-history {
+	padding: 10px;
+}
+
+.player-score {
+	margin: 0 10px;
+	padding: 10px;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.player-image {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin-right: 10px;
+	border: 1px solid #ddd;
+}
+
+.versus-image {
+	width: 50px;
+	height: 50px;
+	margin: 0 10px;
+}
+
+.bot-image {
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	margin-left: 10px;
+}
+
+.player-name {
+	padding: 10px;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.cb-map, .cb-score, .cb-opponent {
+	padding: 10px;
+	font-size: 16px;
+	color: #555;
+}
+
+.if-no-game {
+	font-style: italic;
+	color: #888;
+}
+
+/* ------------- MAP choosen */
+
+.cb-map, .cb-score {
+	display: flex;
+	align-items: center;
+	background-color: #3e3e3e;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+.map-choosen, .score-game {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 70px;
+	height: 70px;
+	background-color: #3e3e3e;
+	border-radius: 10px;
+	border: 2px solid #3e3e3e;
+}
+
+.map-label, .score-label {
+	font-size: 14px;
+	font-weight: bold;
+	color: #ecf0f1;
+	margin-bottom: 5px;
+}
+
+.map-icon, .score-icon {
+	width: 50px;
+	height: 50px;
+	filter: drop-shadow(0 0 5px rgba(174, 188, 26, 0.7));
+	transition: transform 0.3s ease;
+}
+
+.map-icon:hover, .score-icon:hover {
+	transform: scale(1.1);
+}
+
+.map-name, .score-get {
+	font-size: 16px;
+	padding-right: 20px;
+	font-weight: bold;
+	color: #ecf0f1;
+	text-shadow: 0 0 5px rgba(38, 39, 39, 0.7);
+}
+

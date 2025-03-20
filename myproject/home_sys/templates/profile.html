@@ -45,7 +45,7 @@
 							</p>
 							<a class="profile-go-to-settings" href=" {% url 'settings_user' %}">Je veux modifier mon profil</a>
 						{% else %}
-							<p class="other-profile-text-settings-rdv">
+							<p class="other-profile-text-settings-rdv" style="color: black;">
 								Vous pouvez ajouter {{profile_user.username}} en ami(e)
 								ou décider de le/la bloquer.
 							</p>
@@ -141,64 +141,73 @@
 				<div class="game-history-section">
 					<h3>Parties Solo Casse-Briques</h3>
 					{% if games_S_CB %}
-						<table>
-							<thead>
-								<tr>
-									<th>Date</th>
-									<th>Carte</th>
-									<th>Score</th>
-								</tr>
-							</thead>
-							<tbody>
-							{% for game in games_S_CB %}
-								<tr>
-									<td>{{ game.date|date:"d/m/Y H:i" }}</td>
-									<td>{{ game.id_map }}</td>
-									<td>{{ game.score }}</td>
-								</tr>
-							{% endfor %}
-							</tbody>
-						</table>
+						{% for game in games_S_CB %}
+							<!-- Date -->
+							<div class="cb-date">{{ game.date|date:"d/m/Y H:i" }}</div>
+						
+							<!-- Container pour l'affichage des scores -->
+							<div class="cb-history">
+								<!-- Carte -->
+								<div class="cb-map">
+									<div class="map-choosen">
+										<span class="map-label">Map</span>
+										<img src="{% static 'images/flash-card.png' %}" alt="Map Icon" class="map-icon">
+									</div>
+								</div>
+								<span class="map-name">ID : {{ game.id_map }}</span>
+								
+								<!-- Score -->
+								<div class="cb-score">
+									<div class="score-game">
+										<span class="score-label">Score</span>
+										<img src="{% static 'images/score.png' %}" alt="Score Icon" class="score-icon">
+									</div>
+								</div>
+								<span class="score-get">{{ game.score }}</span>
+							</div>
+						{% endfor %}
 					{% else %}
 						<p class="if-no-game">Aucune partie Solo Casse-Briques jouée</p>
 					{% endif %}
 				</div>
-	
+				
 				<div class="game-history-section">
 					<h3>Parties Multi Casse-Briques</h3>
 					{% if games_M_CB %}
-						<table>
-							<thead>
-								<tr>
-									<th>Date</th>
-									<th>Adversaire</th>
-									<th>Score</th>
-									<th>Carte</th>
-								</tr>
-							</thead>
-							<tbody>
-							{% for game in games_M_CB %}
-								<tr>
-									<td>{{ game.date|date:"d/m/Y H:i" }}</td>
-									<td>
+						{% for game in games_M_CB %}
+							<!-- Date -->
+							<div class="cb-date">{{ game.date|date:"d/m/Y H:i" }}</div>
+						
+							<!-- Container pour l'affichage des scores -->
+							<div class="cb-history">
+								<!-- Adversaire -->
+								<div class="cb-opponent">
+									<span>Adversaire : 
 										{% if game.id_p1 == user.users %}
 											{{ game.id_p2.name }}
 										{% else %}
 											{{ game.id_p1.name }}
 										{% endif %}
-									</td>
-									<td>
+									</span>
+								</div>
+								
+								<!-- Score -->
+								<div class="cb-score">
+									<span>Score : 
 										{% if game.id_p1 == user.users %}
 											{{ game.score_p1 }} - {{ game.score_p2 }}
 										{% else %}
 											{{ game.score_p2 }} - {{ game.score_p1 }}
 										{% endif %}
-									</td>
-									<td>{{ game.map }}</td>
-								</tr>
-							{% endfor %}
-							</tbody>
-						</table>
+									</span>
+								</div>
+								
+								<!-- Carte -->
+								<div class="cb-map">
+									<span>Carte : {{ game.map }}</span>
+								</div>
+							</div>
+						{% endfor %}
 					{% else %}
 						<p class="if-no-game">Aucune partie Multi Casse-Briques jouée</p>
 					{% endif %}
