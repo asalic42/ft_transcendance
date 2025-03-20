@@ -1122,7 +1122,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 
 	""" """ """ """ """ """ """ """ """ """
-	""" Sender Messages"""
+	""" 		Sender Messages			"""
 	""" """ """ """ """ """ """ """ """ """
 	async def send_game_state(self, time):
 		try:
@@ -1191,7 +1191,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		}))
 
 	""" """ """ """ """ """ """ """
-	""" Start the game """
+	"""    	Start the game 		"""
 	""" """ """ """ """ """ """ """
 	async def start_game_send(self, event):
 		await self.send(text_data=json.dumps({
@@ -1433,7 +1433,7 @@ logger = logging.getLogger(__name__)
             'is_online': event["is_online"],
         }))
         logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
- """
+"""
 """ 
 
 	Pour les notifs sur l'onglet notifications
@@ -1466,7 +1466,7 @@ logger = logging.getLogger(__name__)
             'type': 'update_status',
             'has_unread_notifications': event['has_unread_notifications'],
         }))
- """
+"""
 """ """ """ """ """ """ """ """
 """ NOTIFICATIONS PUSH """
 """ Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """
