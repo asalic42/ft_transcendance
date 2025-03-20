@@ -109,4 +109,4 @@ function fetchOnlineUsers() {
   document.addEventListener('DOMContentLoaded', fetchOnlineUsers);
   
   // Optionnel : mettre à jour la liste toutes les 30 secondes
-  setInterval(fetchOnlineUsers, 500);
+  homefetch = setInterval(fetchOnlineUsers, 500);

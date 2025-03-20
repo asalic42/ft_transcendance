@@ -173,7 +173,7 @@ function launch_settings() {
 
 				}
 			})
-			.catch(error => console.error('[LOGOUT] Error during signout:', error));
+			.catch(error => {return null;});
 	});
 
 	/* ------ Pour vérifier si le user/email est valide et est non pris ------ */

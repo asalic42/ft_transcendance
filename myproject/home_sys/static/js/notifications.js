@@ -76,7 +76,7 @@ function getCookie(name) {
 
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function notif_fetchAllUsersStatus() {
-	
+
 	fetch("/api/user-status/")
 		.then(response => response.json())
 		.then(users => {
@@ -91,10 +91,8 @@ function notif_fetchAllUsersStatus() {
 				}
 			});
 		})
-		.catch(error => console.error('Error fetching users status:', error));
+		.catch(error => {return null;});
 }
-
-setInterval(notif_fetchAllUsersStatus, 500);
 
 
 function connectWebSocket_notif_page() {
@@ -106,3 +104,5 @@ function connectWebSocket_notif_page() {
 	/* notif_getReponse(".invite-friend", "invite_friend", "game_invitation_send", "L'invitation envers le user", "a bien été envoyée."); */
 	notif_getReponse(".decline-invitation", "invitation_declined", "game_invitation_declined", "La demande du user", "a bien été refusée.");
 }
+
+notiffetch = setInterval(notif_fetchAllUsersStatus, 500);

@@ -47,28 +47,32 @@ function normalizeUrl(url) {
 var waschan = false;
 var wasNotif = false;
 var wasSettings = false;
+var washome = false;
+
 let liveChanTimeout;
 let SettingsTimeout;
 let liveChat;
+let homefetch;
+let notiffetch;
 
 // Ajouter une variable globale pour tracker les scripts chargés
 /* let loadedScripts = []; */
 
 // Exposer loadPage au scope global
 window.loadPage = function(url, pushState = true) {
-    
+
     // Normalize the URL to prevent duplication
     const normalizedUrl = normalizeUrl(url);
-    
+
     // Vérifier si on est sur la page de login ou non
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
     const navbar = document.querySelector('.navbar');
-    
+
     // Debug logs
     console.log("Loading page:", normalizedUrl);
     console.log("isLoginPage detected as:", isLoginPage);
     console.log("navbar element exists:", navbar !== null);
-    
+
     // Set navbar visibility before loading content
     if (navbar) {
         console.log("Current navbar display style:", navbar.style.display);
@@ -78,7 +82,7 @@ window.loadPage = function(url, pushState = true) {
         // Force browser to acknowledge the style change
         void navbar.offsetWidth;
     }
-    
+
     fetch(normalizedUrl, { 
         headers: {
             "X-Requested-With": "XMLHttpRequest",
@@ -92,20 +96,22 @@ window.loadPage = function(url, pushState = true) {
         let doc = parser.parseFromString(html, "text/html");
         let newContent = doc.getElementById("content");
 
-        if (!newContent) {	
+        if (!newContent)
+        {	
             console.error("No content element found in response HTML");
             window.location.href = normalizedUrl;
             return;
         }
-        
+
         document.getElementById("content").innerHTML = newContent.innerHTML;
-        
+
 		if (pushState) history.pushState(null, "", normalizedUrl);
 
         // Double-check navbar visibility after content is loaded
         const currentPath = window.location.pathname;
         const isLoginPageNow = currentPath === '/' || currentPath === '';
-        if (navbar) {
+        if (navbar)
+        {
             console.log("After content loaded - Setting navbar display to:", isLoginPageNow ? 'none' : 'flex');
             navbar.style.display = isLoginPageNow ? 'none' : 'flex';
             
@@ -113,50 +119,75 @@ window.loadPage = function(url, pushState = true) {
             void navbar.offsetWidth;
         }
 
-        if (document.getElementById('mapSelection')) {
+        if (document.getElementById('mapSelection'))
+        {
             initializeMapButtons();
         }
-        
+
 		const profileName = document.getElementById('accounts_link').href;
 		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
 			launch_profile();
 		
 		if (url === `https://${window.location.host}/deleteAccount/` || url === '/deleteAccount/')
 			delete_acc();
-		if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
-			console.log("launching chanl")
+
+		if (url === `https://${window.location.host}/channels/` || url === '/channels/')
+        {
+			console.log("launching chanl");
             launch_everything();
             waschan = true;
         }
-		else if (waschan) {
+
+		else if (waschan)
+        {
 			clearTimeout(liveChanTimeout);
 			clearInterval(liveChat);
-			console.log("closing chanl")
+			console.log("closing chanl");
             waschan = false;
 		}
-		
-		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
+
+		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/')
+        {
 			connectWebSocket_notif_page();
-			wasNotif = true 
+			wasNotif = true;
 		}
-		else if (url === `https://${window.location.host}/user-settings/`) {
+		else if (url === `https://${window.location.host}/user-settings/`)
+        {
 			launch_settings();
-			wasSettings = true 
+			wasSettings = true;
 		}
-		else if (wasNotif) {
-			notif_close();
+
+		else if (wasNotif)
+        {
+            clearInterval(notiffetch);
 			wasNotif = false;
 		}
 		
-		if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
+		if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/')
+        {
 			launch_settings();
-			wasSettings = true 
+			wasSettings = true;
 		}
-		else if (wasSettings){
+
+		else if (wasSettings)
+        {
             clearTimeout(SettingsTimeout);
             wasSettings = false;
         }
-		console.log('waschan' + waschan);
+
+        if (url === `https://${window.location.host}/home/` || url === '/home/')
+        {
+            fetchAllUsersStatus();
+            washome = true;
+        }
+
+        else if (washome)
+        {
+            clearInterval(homefetch);
+            washome = false;
+        }
+
+        console.log('waschan' + waschan);
     })
     .catch(error => console.error("Erreur de chargement:", error));
 };
