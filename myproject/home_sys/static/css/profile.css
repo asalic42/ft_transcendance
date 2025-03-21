@@ -35,7 +35,7 @@
 .profile-container {
 	display: flex;
 	flex: 1;
-	margin-top: 5%;
+	margin-top: 2%;
 	margin-right: 50px;
 	justify-content: center; /* Centre horizontalement */
 	align-items: center;
@@ -58,27 +58,6 @@
 	scale: 1.15;
 	box-shadow: 0px 0px 10px 2px rgba(194, 0, 0, 0.74);
 	cursor: pointer;
-}
-
-.profile-box {
-	display: flex;
-	width: 450px;
-	height: 530px;
-	background-color: #888888;
-	border-radius: 10px;
-	border: 2px solid black;
-	flex-direction: column; /* Permet d'empiler les éléments */
-	justify-content: center; /* Centre le contenu verticalement */
-	align-items: center; /* Centre le contenu horizontalement */
-	text-align: center; /* Centre le texte à l'intérieur */
-	box-shadow: -10px 10px #23232e;
-	background: linear-gradient(to right, #aa3196, #9159c0);
-	transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
-}
-
-.profile-box:hover {
-	transform: translateY(-5px);
-	box-shadow: 0 0px 35px rgba(237, 78, 176, 0.5);
 }
 
 .profile-separator {
@@ -245,14 +224,6 @@
 	font-weight: bold;
 }
 
-.profile-container {
-	display: flex;
-	flex: 1;
-	margin-top: 5%;
-	justify-content: center;
-	align-items: center;
-}
-
 .other-profile-add-friend {
 	padding-left: 16px;
 	padding-right: 16px;
@@ -285,6 +256,7 @@
 	text-align: center; /* Centre le texte à l'intérieur */
 	box-shadow: -10px 10px #14141e;
 	background: linear-gradient(to right, #aa3196, #9159c0);
+    margin-top: 60px;
 	transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
 }
 
