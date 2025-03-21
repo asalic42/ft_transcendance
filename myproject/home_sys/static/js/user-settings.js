@@ -195,7 +195,7 @@ function launch_settings() {
 					}
 				})
 				.catch(error => {
-					console.error('Erreur lors de la vérification du pseudo:', error);
+					return null;
 				});
 		}
 	}

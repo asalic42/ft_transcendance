@@ -386,7 +386,6 @@ async function doesUserHaveAccessToChan(idC, idU) {
 			return { success: false, data };
 		})
 		.catch(error => {
-			console.log(error);
 			return { success: false, data: null };
 		});
 }
@@ -428,7 +427,7 @@ async function liveChatFetch() {
 			}
 		}
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -443,7 +442,7 @@ function get_chan_id(nameChan) {
 			return data; // Return for downstream use
 		})
 		.catch(error => {
-			throw error; // Re-throw for handling in addMessage
+			throw null; // Re-throw for handling in addMessage
 		});
 }
 
@@ -461,7 +460,7 @@ function is_chan_private(idChan) {
 				return false;
 		})
 		.catch(error => {
-			throw error; // Re-throw for handling in addMessage
+			throw null; // Re-throw for handling in addMessage
 		});
 }
 
@@ -475,7 +474,7 @@ function getNameById(id) {
 			return data; // Return for downstream use
 		})
 		.catch(error => {
-			throw error; // Re-throw for handling in addMessage
+			throw null; // Re-throw for handling in addMessage
 		});
 }
 
@@ -542,8 +541,7 @@ async function addChannelToDb(currentChan, pv, ami) {
 		addChannelToList(currentChan, pv, chanId);
 		return 1;
 	} catch (error) {
-		console.error('Erreur: ', error);
-		return 0;
+		return null;
 	}
 }
 
@@ -570,7 +568,7 @@ async function loadChannels() {
 			});
 		}
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -629,7 +627,7 @@ async function postMessage(currentChan, mess, is_link) {
 
 	} catch (error) {
 		alert("Wow ! That's a long message. It should work better if it shrinks down.");
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -667,7 +665,7 @@ async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 		}
 		const data = await response.json();
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -704,7 +702,7 @@ async function post_deblock(a) {
 		}
 		const data = await response.json();
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 // Fonction pour marquer une notif comme lue

@@ -1,3 +1,9 @@
+window.addEventListener('unhandledrejection', (event) => {
+    event.preventDefault();
+});
+
+console.error = () => {};
+
 import { PongDistantGame } from './game-distant.js';
 import { PongGame } from './game.js';
 // import { Bot}
@@ -37,20 +43,9 @@ function normalizeUrl(url) {
     // For relative paths, ensure they start with a single '/'
     let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
     let normalizedPath = cleanedUrl ? '/' + cleanedUrl : '/';
-    // console.log("Normalized URL (relative):", normalizedPath);
     return normalizedPath;
 }
     
-/* ----------------------------------- AWE-GAME-RAPH ----------------------------------------- */
-
-// Recup le csrf token definit plus tot dans le code
-/* function getCSRFToken() {
-    return document.cookie
-        .split('; ')
-        .find(row => row.startsWith('csrftoken='))
-        ?.split('=')[1] || '';
-} */
-
 var waschan = false;
 var wasNotif = false;
 var wasSettings = false;
@@ -61,109 +56,6 @@ var gameRoom = false;
 var gamePong = false;
 var gameCasseBrique = false;
 var gameBot = false;
-
-    // Ajoute /accounts/ si absent
-    // function prependAccounts(url) {
-    //     let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
-    //     return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
-    // }
-
-    // // Fonction de chargement de page via fetch
-    // async function loadPage(url, pushState = true) {
-	// 	if (url != "accounts/" && url != "/accounts/")
-	// 		var finalizedUrl = prependAccounts(url);
-	// 	else
-	// 		var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
-
-    //     return fetch(finalizedUrl, { 
-    //         headers: {
-    //             "X-Requested-With": "XMLHttpRequest",
-    //         },
-    //         credentials: 'include'
-    //     })
-    //     .then(response => response.text())
-    //     .then(html => {
-    //         let parser = new DOMParser();
-    //         let doc = parser.parseFromString(html, "text/html");
-    //         let newContent = doc.getElementById("content");
-
-    //         if (!newContent) {
-    //             window.location.href = finalizedUrl;
-    //             return;
-    //         }
-    //         document.getElementById("content").innerHTML = newContent.innerHTML;
-
-	// 		if (document.getElementById('mapSelection')) {
-	// 			// Ensure the script has run (safety check)
-	// 			if (typeof initializeMapButtons === 'function') {
-	// 				initializeMapButtons();
-	// 			}
-	// 		}
-    //         // Réexécution des scripts intégrés
-	// 		Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
-	// 			const newScript = document.createElement('script');
-    //             newScript.type = oldScript.type || 'module';
-	// 			if (oldScript.src) {
-	// 				// Add cache-buster to prevent stale scripts
-	// 				newScript.src = oldScript.src + '?t=' + Date.now();
-	// 				newScript.async = false;
-	// 			} else {
-	// 			    newScript.textContent = oldScript.textContent;
-	// 			}
-	// 			document.body.appendChild(newScript);
-	// 			// Remove the script after execution to avoid clutter
-	// 			newScript.onload = () => newScript.remove();
-	// 		});
-
-    //         if (pushState) history.pushState(null, "", finalizedUrl);
-    //     })
-    //     .catch(error => console.error("Erreur de chargement:", error));
-    // }
-
-    // async function handleLinkClick(event) {
-    //     const link = event.target.closest("a");
-
-    //         if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
-    //             event.preventDefault();
-    //             let urlPath = prependAccounts(link.getAttribute("href"));
-    //             console.log("url = ", urlPath);
-    //             loadPage(urlPath);
-                
-    //             if (urlPath.includes("game-distant-choice")) {
-    //                 gameRoom = true;
-    //                 await gameDistantRoute();
-    //             }
-    //             else if (urlPath.includes("/game-distant/")) {
-    //                 gameDistant = true;
-    //             }
-    //             else if (urlPath === '/accounts/game' || urlPath === '/accounts/game/') {
-    //                 gamePong = true;
-    //                 await gameRoute();
-    //             }
-    //             else if (urlPath === '/accounts/other_game' ) {
-    //                 gameCasseBrique = true;
-    //                 await gameCasseBriqueRoute();
-    //             }
-    //             else {
-    //                 if (gameDistant && PongDistantGame.currentGame) {
-    //                     PongDistantGame.currentGame.closeSocket();
-    //                     gameDistant = false;
-    //                 }
-    //                 else if (gameRoom) {
-    //                     window.RoomGameManager = null;
-    //                     gameRoom = false;
-    //                 }
-    //                 else if (gamePong) {
-    //                     window.PongGame = null;
-    //                     gamePong = false;
-    //                 }
-    //                 else if (gameCasseBrique) {
-    //                     window.CasseBriqueGame = null;
-    //                     gameCasseBrique = false;
-    //                 }
-    //             }
-    //         }
-    // }
 
 async function gameCasseBriqueRoute() {
     if (!window.CasseBriqueGame) {
@@ -237,19 +129,6 @@ async function gameBotRoute() {
     BotGame.currentGame.start();
 }
 
-// function handleFormSubmit(event) {
-//     event.preventDefault();
-//     const form = event.target.closest("form");
-//     if (!form) return;
-//     // Cas particulier si besoin (exemple pour LevelForm)
-//     if (form.id === "LevelForm") {
-//         loadPage(location.pathname).then(() => {
-//             const bot_game = new BotGame();
-//             bot_game.start();
-//         });
-//     }
-// }
-
 let liveChanTimeout;
 let SettingsTimeout;
 let liveChat;
@@ -271,15 +150,9 @@ window.loadPage = function(url, pushState = true) {
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
     const navbar = document.querySelector('.navbar');
 
-    // Debug logs
-    // console.log("Loading page:", normalizedUrl);
-    // console.log("isLoginPage detected as:", isLoginPage);
-    // console.log("navbar element exists:", navbar !== null);
 
     // Set navbar visibility before loading content
     if (navbar) {
-        // console.log("Current navbar display style:", navbar.style.display);
-        // console.log("Setting navbar display to:", isLoginPage ? 'none' : 'flex');
         navbar.style.display = isLoginPage ? 'none' : 'flex';
         
         // Force browser to acknowledge the style change
@@ -315,7 +188,6 @@ window.loadPage = function(url, pushState = true) {
         const isLoginPageNow = currentPath === '/' || currentPath === '';
         if (navbar)
         {
-            // console.log("After content loaded - Setting navbar display to:", isLoginPageNow ? 'none' : 'flex');
             navbar.style.display = isLoginPageNow ? 'none' : 'flex';
             
             // Force browser to acknowledge the style change
@@ -332,11 +204,9 @@ window.loadPage = function(url, pushState = true) {
 		if (waschan) {
 			clearTimeout(liveChanTimeout);
 			clearInterval(liveChat);
-			console.log("closing chanl")
 			waschan = false;
 		}
 		else if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
-			console.log("launching chanl")
             launch_everything();
             waschan = true;
         }
@@ -395,7 +265,6 @@ window.loadPage = function(url, pushState = true) {
 
         console.log("url = ", url);
         if (url === `https://${window.location.host}/game/` || url === `https://${window.location.host}/game`) {
-            console.log("je suis ici : ", url);
             gamePong = true;
             gameRoute();
         }
@@ -412,10 +281,10 @@ window.loadPage = function(url, pushState = true) {
             window.CasseBriqueGame = null;
             gameCasseBrique = false;
         }
-            
-        // console.log('waschan' + waschan);
     })
-    .catch(error => console.error("Erreur de chargement:", error));
+    .catch(() => {
+        return null;
+    });
 };
 
 // Exposer reinitCoreScripts au scope global - but don't re-attach event handlers
@@ -428,7 +297,6 @@ window.reinitCoreScripts = function() {
     const isLoginPageNow = currentPath === '/' || currentPath === '';
     const navbar = document.querySelector('.navbar');
     if (navbar) {
-        // console.log("Reinit - Setting navbar display to:", isLoginPageNow ? 'none' : 'flex');
         navbar.style.display = isLoginPageNow ? 'none' : 'flex';
     }
 };
@@ -523,11 +391,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const isLoginPage = currentUrl === '/' || currentUrl === '';
         const navbar = document.querySelector('.navbar');
         
-        // console.log("popstate - Current URL:", currentUrl);
-        // console.log("popstate - Is login page:", isLoginPage);
-        
         if (navbar) {
-            // console.log("popstate - Setting navbar display to:", isLoginPage ? 'none' : 'flex');
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
 		loadPage(window.location.pathname, false);	
@@ -538,11 +402,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const isLoginPage = currentUrl === '/' || currentUrl === '';
     const navbar = document.querySelector('.navbar');
     
-    // console.log("Initial load - Current URL:", currentUrl);
-    // console.log("Initial load - Is login page:", isLoginPage);
-    
     if (navbar) {
-        // console.log("Initial load - Setting navbar display to:", isLoginPage ? 'none' : 'flex');
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
 	if (window.location.pathname != '/')
