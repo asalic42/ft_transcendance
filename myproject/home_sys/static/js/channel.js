@@ -152,7 +152,7 @@ async function addChannelToList(nameChan, pv, idChan) {
 		chanList = document.getElementById('channels-list');
 
 	if (!chanList) {
-		console.error("chanList n'existe pas !");
+		// console.error("chanList n'existe pas !");
 		return;
 	}
 	if (!chanList.querySelector(`#channel-${nameChan}`)) {

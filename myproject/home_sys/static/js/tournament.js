@@ -1,106 +1,26 @@
-const socket = new WebSocket(`wss://${window.location.host}/ws/tournament/${id_t}`);
 
-socket.onopen = function() {
-    console.log("Connexion réussie au WebSocket");
-	span = document.createElement('span');
-	span.classList.add('player_list');
-	document.getElementById('square').appendChild(span);
-}
-
-socket.onclose = function socket_close() {
-	alert("Tournament is full, running or there has been an error.")
-	window.location.href = `https://${window.location.host}/game-mode-pong/`
-}
-
-function startButton(link, name) {
+function startButton(link, name, message) {
+	const playersContainer = document.getElementById('square');
+	
+	if (!playersContainer) {
+		return setTimeout(() => startButton(link, name, message), 100); // Réessayer après 100ms
+	}
+	
 	const button = document.getElementById('bt');
 	// button.style.display = "none";
 	document.getElementById('opponant').innerText = `You are going to face ${name}`
 	function sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
-	sleep(4000)
 	button.removeAttribute("disabled");
 	button.textContent = 'Ouvrir le jeu dans un nouvel onglet';
 	button.style = "position: relative; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;";
-	button.onclick = function() {
-		window.open(link, '_blank');
-		button.textContent = "Everyone needs to finish their game first.";
-		button.style.background = "red";
-		button.disabled = "disabled";
-		document.getElementById("loader").style.display = 'block';
-	};
+	document.getElementById("loader").style.display = 'block';
+	document.getElementById('button_id').href = link;
+	document.getElementById("message").innerHTML = message;
 }
 
-socket.onmessage = function(event) {
-    try {
-        const data = JSON.parse(event.data);
-        console.log("Message reçu:", data);
-
-        if (data.type === "game_link") {
-			document.getElementById("loader").style.display = 'none';
-			startButton(data.link, data.name_op)
-			document.getElementById("message").innerHTML = data.message;
-		}
-		if (data.type === 'result') {
-			document.getElementById('bt').style.display = "none";
-			document.getElementById('title').innerText = "Le tournois est fini, voici les résultats :"
-			const playerId = data.player_id;
-			const score = data.score;
-			const name = data.name;
-	
-			// Create or update player element
-			playerElement = document.createElement('div');
-			playerElement.id = `player-${playerId}`;
-			playerElement.classList.add('player-info'); // Add a class for styling
-			document.getElementById('players-container').appendChild(playerElement); // Add to the container
-	
-			// Update name and score
-			nameElement = document.createElement('span');
-			nameElement.classList.add('name');
-			playerElement.appendChild(nameElement);
-
-			scoreElement = document.createElement('span');
-			scoreElement.classList.add('score');
-			playerElement.appendChild(scoreElement);
-
-			nameElement.textContent = playerId === cachedUserId ? "You" : name; // "You" for current user
-			scoreElement.textContent = ": " + score;
-		}
-		if (data.type === "tournament_cancelled") {
-			alert("Tournament is cancelled. Someone disconnected.");
-			window.location.href = `https://${window.location.host}/game-mode-pong/`
-		}
-		if (data.type === "user_list") {
-			span.textContent = "Users connected to tournament: ";
-			data.data.forEach(function (name, index) {
-				span.textContent += name + "\n";
-			  });
-			console.log(span);
-		}
-		if (data.type === "already") {
-			alert("This tournament already ran.")
-			function sleep(ms) {
-				return new Promise(resolve => setTimeout(resolve, ms));
-			}
-
-			sleep(1000);
-			window.location.href = `https://${window.location.host}/game-mode-pong/`
-		}
-    } catch (error) {
-        console.error("Erreur de parsing des données du WebSocket :", error);
-    }
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-	getCurrentPlayerId()
-});
-
-let cachedUserId = null;
 async function getCurrentPlayerId() { // à lancer au chargement de la page;
-	if (cachedUserId !== null) {
-		return cachedUserId;
-	}
 	try {
 		const response = await fetch('/api/current-user/', {
 			credentials: 'same-origin'
@@ -112,4 +32,102 @@ async function getCurrentPlayerId() { // à lancer au chargement de la page;
 		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
 		return null;
 	}
+}
+
+
+function launch_tournament() {
+	let cachedUserId = getCurrentPlayerId; // à lancer au chargement de la page;
+	const id_t = document.querySelector('.container').dataset.idT;
+	window.id_t_t = id_t;
+	if (window.socket_t == null)
+		window.socket_t = new WebSocket(`wss://${window.location.host}/ws/tournament/${id_t}`);
+
+	window.socket_t.onopen = function() {
+		span = document.createElement('span');
+		span.classList.add('player_list');
+		document.getElementById('square').appendChild(span);
+	}
+	
+	window.socket_t.onclose = function() {
+		alert("Tournament is full, finished or there has been an error.")
+		loadPage(`game-mode-pong/`);
+	}
+
+	window.socket_t.onmessage = function(event) {
+		try {
+			const data = JSON.parse(event.data);
+			if (data.type === "game_link") {
+				const str = new String(data.link);
+				window.game_id_t = Number(str.substring(14, 19)); 
+				if (document.getElementById("loader"))
+					document.getElementById("loader").style.display = 'none';
+				startButton(data.link, data.name_op, data.message);
+			}
+			if (data.type === 'result') {
+				function print_result() {
+					
+					if (!document.getElementById('square')) {
+						return setTimeout(() => print_result(), 100); // Réessayer après 100ms
+					}
+					
+					document.getElementById('bt').style.display = "none";
+					document.getElementById('title').innerText = "Le tournois est fini, voici les résultats :"
+					const playerId = data.player_id;
+					const score = data.score;
+					const name = data.name;
+					
+					// Create or update player element
+					playerElement = document.createElement('div');
+					playerElement.id = `player-${playerId}`;
+					playerElement.classList.add('player-info'); // Add a class for styling
+					document.getElementById('players-container').appendChild(playerElement); // Add to the container
+			
+					// Update name and score
+					nameElement = document.createElement('span');
+					nameElement.classList.add('name');
+					playerElement.appendChild(nameElement);
+					
+					scoreElement = document.createElement('span');
+					scoreElement.classList.add('score');
+					playerElement.appendChild(scoreElement);
+					
+					nameElement.textContent = playerId === cachedUserId ? "You" : name; // "You" for current user
+					scoreElement.textContent = ": " + score;
+				}
+				print_result();
+
+				function sleep(ms) {
+					return new Promise(resolve => setTimeout(resolve, ms));
+				}
+	
+				sleep(5000);
+				alert('Tournament is finished. Thanks.');
+				sleep(1000);
+				loadPage(`game-mode-pong/`);
+			}
+			if (data.type === "tournament_cancelled") {
+				alert("Tournament is cancelled. Someone disconnected.");
+				window.socket_t.onclose = function(){}
+				loadPage(`/game-mode-pong/`);
+			}
+			if (data.type === "user_list") {
+				span.textContent = "Users connected to tournament: ";
+				data.data.forEach(function (name, index) {
+					span.textContent += name + "\n";
+				});
+			}
+			if (data.type === "already") {
+				alert("This tournament already ran.")
+				function sleep(ms) {
+					return new Promise(resolve => setTimeout(resolve, ms));
+				}
+	
+				sleep(1000);
+				loadPage(`game-mode-pong/`);
+			}
+		} catch (error) {
+			console.error("Erreur de parsing des données du WebSocket :", error);
+		}
+	}
+	
 }

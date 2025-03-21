@@ -58,26 +58,12 @@
 		<!-- Online Users -->
 		<div class="online-users">
 			<h2>Online</h2>
-			{% for user in online_users %}
-				{% if forloop.last %}
-					<div class="user-card last">
-				{% else %}
-					<div class="user-card">
-				{% endif %}
-						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
-						<p class="user-name">{{ user }}</p>
-						{% if request.user != user %}
-							<a class="profile-button" href="{% url 'profile' user %}">
-								profile
-							</a>
-						{% endif %}
-						<!-- <div class="online-status" id="user-{{ user.id }}"></div> -->
-					</div>
-			{% empty %}
-				<div class="empty-state">
-					<p>Looks like no one's online.</p>
-				</div>
-			{% endfor %}
+			<div id="user-list">
+				<!-- Les utilisateurs seront ajoutés ici -->
+			</div>
+			<div id="empty-state" class="empty-state">
+				<p>Looks like no one's online.</p>
+			</div>
 		</div>
 	
 		<!-- Offline Users -->

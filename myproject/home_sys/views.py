@@ -11,8 +11,11 @@ from django.conf import settings
 from django.db.models import Q
 from .models import *
 import json, requests
+import uuid
 from .utils import add_pong_logic, send_notification_to_user
+import logging
 
+logger = logging.getLogger(__name__)
 ###############################################################################
 
 from django.shortcuts import render, redirect
@@ -136,6 +139,53 @@ from django.urls import reverse
 
 
 def signin(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+        
+    if request.method == 'POST':
+        content_type = request.META.get('CONTENT_TYPE', '')
+        
+        if 'application/json' in content_type:
+            import json
+            try:
+                data = json.loads(request.body)
+                username = data.get('username')
+                password = data.get('password')
+            except json.JSONDecodeError:
+                return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+        else:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+
+            # Mettre à jour le statut de l'utilisateur à 'online'
+            try:
+                user_profile = Users.objects.get(user=user)
+                user_profile.is_online = True
+                user_profile.save()
+
+                return JsonResponse({
+                    'status': 'success',
+                    'redirect': reverse('home'),
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                    },
+                    'online_count': Users.objects.filter(is_online=True).count()
+                })
+            except Users.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User profile not found.'})
+        else:
+            return JsonResponse({'status': 'unauthenticated'})
+    
+    return JsonResponse({'status': 'unauthenticated'})
+
+
+
+""" def signin(request):
 	if request.user.is_authenticated:
 		return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
 		
@@ -182,13 +232,21 @@ def signin(request):
 			#}, status=400)
 		
 	# GET requests can return minimal data needed for the login form
-	return JsonResponse({'status': 'unauthenticated'})
+	return JsonResponse({'status': 'unauthenticated'}) """
 
 
 # Déconnexion de l'utilisateur
 def signout(request):
-    logout(request)
-    return JsonResponse({
+	if request.user.is_authenticated:
+		try:
+			user_profile = Users.objects.get(user=request.user)
+			user_profile.is_online = False
+			user_profile.save()
+		except Users.DoesNotExist:
+			pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
+
+	logout(request)
+	return JsonResponse({
         'status': 'success',
         'redirect': f'https://{settings.IP_ADDR}:5000/'
     })
@@ -320,9 +378,42 @@ def load_template(request, page, **kwargs):
 			'game_id': kwargs.get('game_id'),
 			'map_id': kwargs.get('map_id')
 		}
+	
+	elif page == "game-distant":
+		context = {
+			'game_id': kwargs.get('game_id'),
+			'id_t': kwargs.get('id_t')
+		}
 
+	elif page == "tournament_choice":
+		context = {
+			'all_games': tournament_room.objects.all(),
+		}
+
+
+	elif page == "tournament":
+		existing_ids = set(Tournaments.objects.values_list('id', flat=True))
+		waiting_room = set(tournament_room.objects.values_list('tournament_id', flat=True))
+		next_id = 1
+		print(f'setting {template_name}')
+
+		while next_id in existing_ids or next_id in waiting_room:
+			next_id += 1
+	
+		context = {
+			'id_t': next_id
+		}
+	elif page == "tournament_page_id":
+		print(f"Chargement du tournoi {kwargs.get('id_t')}")
+		sys.stdout.flush()  # Force l'affichage du print si le serveur bufferise les logs
+		template_name = "tournament.html"
+		page = "tournament"
+		context = {
+			'id_t': kwargs.get('id_t')
+		}	
 	else:
-		context = {}
+		context = {
+		}
 
 	# Vérifier l'existence du template dans le répertoire
 	template_path = os.path.join(settings.BASE_DIR, 'home_sys', 'templates', f"{page}.html")
@@ -483,6 +574,7 @@ def casse_brique_room_choice(request):
 	tour = casse_brique_room.objects.all()
 	return render(request, 'other_game_multi_room.html', {'all_games':tour}) """
 
+@login_required
 def other_game_choice(request):
 	return (render(request, 'other_game_choice.html'))
 
@@ -1287,13 +1379,13 @@ from .models import Users
 
 def user_status(request):
 	users = Users.objects.all().values('id', 'is_online')
+	
 	return JsonResponse(list(users), safe=False)
-
 
 @login_required
 def create_current_game(request, sender_id):
 	try:
-		created = CurrentGame.objects.get_or_create(game_id=sender_id)
+		created = CurrentGame.objects.create(game_id=sender_id)
 		if created:
 			return (render(request, 'game-distant.html', {'game_id':sender_id}))
 		else:
@@ -1304,4 +1396,42 @@ def create_current_game(request, sender_id):
 @login_required
 def get_rooms(request):
 	rooms = CurrentGame.objects.all().values("game_id")
+	return JsonResponse(list(rooms), safe=False)
+
+@login_required
+@require_http_methods(["POST"])
+def create_room(request):
+	try:
+		data = json.loads(request.body)
+		game_id = data.get('gameId')
+
+		print("DEBUG 1")
+		sys.stdout.flush()
+		if not game_id:
+			return JsonResponse({'error': 'gameId manquant'}, status=400)
+		
+		print("DEBUG 2")
+		sys.stdout.flush()
+		new_room, _ = CurrentGame.objects.get_or_create(
+			game_id=game_id
+		)
+
+		return JsonResponse({
+			'game_id': str(new_room.game_id)
+		})
+	
+	except json.JSONDecodeError:
+		return JsonResponse({'error': 'Donnes JSON invalides'}, status=400)
+	except Exception as e:
+		return JsonResponse({'error': str(e)}, status=500)
 	return JsonResponse({"rooms": list(rooms)})
+
+# views.py
+from django.http import JsonResponse
+from .models import User
+
+def get_online_users(request):
+    online_users = Users.objects.filter(is_online=True)  # Assurez-vous d'avoir un champ is_online pour cela.
+    users_data = [{"username": users.name, "image": users.image.url} for users in online_users]
+	
+    return JsonResponse({"online_users": users_data})

@@ -1,568 +1,596 @@
-const BALL_SPEED_INCREMENT = 0.075;
-const BALL_INITIAL_SPEED = 9;
+class CasseBriqueGame {
+	currentGame = null;
 
-// Variables
-var mapTab = [];
-var table;
-var context;
-var canvasContainer = document.getElementById("canvas-container");
-var frameTime = {counter : 0, time : 0};
-var totalframeTime = {counter : 0, time : 0};
-var percentage = 0;
-var fps = document.getElementById("fps");
-var	blocksDestroyed = 0;
-var score = document.getElementById("title");
-var gameOver = document.getElementById("gameOver");
-var mapSelection = document.getElementById('mapSelection');
-var game = document.querySelector('.game');
-var count = 0;
-var health = 5;
-var cachedUserId = null;
-var id=0;
-var selectedMap;
-var block_arr = [];
-var user_option = 2;
-var keys = {};
-
-class block {
-	x1; y1; width; height; state;
-	constructor(x1, y1, width, height, state) {
-		this.x1 = x1;
-		this.y1 = y1;
-		this.width = width;
-		this.height = height;
-		this.state = state;
+	constructor() {
+		this.keyHandler = this.handleKey.bind(this);
+		this.initState();
+		this.selectMap();
 	}
-}
 
-//! Init
+	initState() {
+		CasseBriqueGame.currentGame = this;
+		this.macro_ballSpeedIncr = 0.075;
+		this.macro_ballInitialSpeed = 9;
 
-mapSelection.addEventListener('click', (event) => {
-	if (event.target.tagName === 'BUTTON') {
-		selectedMap = event.target.dataset.map
-		console.log(selectedMap)
-		launch(selectedMap);
+		this.frameTime = { counter : 0, time : 0 };
+		this.totalframeTime = { counter : 0, time : 0 };
+		this.percentage = 0;
+
+		this.mapTab = [];
+		this.selectedMap;
+
+		this.count = 0;
+		this.health = 5;
+		this.cachedUserId = null;
+		this.stop = false;
+		this.animationId = 0;
+		this.keys = {};
+
+		this.blocksDestroyed = 0;
+		this.block_arr = [];
+
+		this.ball = null;
+		this.player1Coords = null;
+
+		this.setupListeners();
 	}
-});
-// var selectedMap;
-// function initializeMapButtons() {
-//     const mapButtons = document.querySelectorAll('.mapButton[data-map-id]');
-// 	console.log("initialized")
-//     mapButtons.forEach(button => {
-//         button.addEventListener('click', function() {
-//             const mapId = this.getAttribute('data-map-id');
-//             document.getElementById("map-choice").style.display = "none";
-//             selectedMap = parseInt(mapId);
-//             console.log(selectedMap);
-//             launch(selectedMap);
-//         });
-//     });
-// }
-
-// initializeMapButtons();
-
-async function launch (idMap) {
-	table = document.getElementById("game");
-	context = table.getContext("2d");
 	
-	await fetchMap(idMap);
-	// fps.style.display = 'flex';
-	// title.style.display = 'flex';
-	Array.from(document.getElementsByClassName("game")).forEach(element => element.style.display = 'flex');
-	mapSelection.style.display ='none';
+	selectMap() {
 
-	createBlocks();
-	createBall();
-}
+		document.getElementById('map-choice').addEventListener('click', (event) => {
+			if (event.target.closest('.mapButton')) {
+				this.selectedMap = event.target.dataset.mapId
+				console.log(this.selectedMap)
+				this.launchGame(this.selectedMap);
+			}
+		});
+	}
 
-function createBlocks() {
-	var start_x = table.width / 8;
-	var start_y = table.height / 24;
-	var x = start_x - 5
-	var y = start_y - 5;
-	var width = start_x - 5;
-	var height = start_y - 5;
+	async launchGame(mapId) {
+			
+		await this.fetchMap(mapId);
 
-	for (var i = 0; i < 6; i++) {
-		for (var j = 0; j < 12; j++) {
-			block_arr.push(new block(x, y + start_y + start_y, width, height, mapTab[j][i]))
-			y += start_y;
+		document.getElementById("fps").style.display = 'flex';
+		document.getElementById("score").style.display = 'flex';
+		Array.from(document.getElementsByClassName("game")).forEach(element => element.style.display = 'flex');
+		document.getElementById('mapSelection').style.display ='none';
+		
+		this.update();
+
+		this.createBlocks();
+		this.createBall(Math.floor(this.getRandomArbitrary(-11, 0)));
+	}
+
+	setupListeners() {
+
+		this.keyHandler = (e) => this.handleKey(e);
+		window.addEventListener('keydown', this.keyHandler);
+		window.addEventListener('keyup', this.keyHandler);
+	}
+
+	handleKey(e) {
+		this.keys[e.key] = (e.type === 'keydown');
+	}
+
+	// CREATE game's stuff
+	createBlocks() {
+		var start_x = document.getElementById("game").width / 8;
+		var start_y = document.getElementById("game").height / 24;
+		var x = start_x - 5
+		var y = start_y - 5;
+		var width = start_x - 5;
+		var height = start_y - 5;
+	
+		for (var i = 0; i < 6; i++) {
+			for (var j = 0; j < 12; j++) {
+				this.block_arr.push({
+					x1: x,
+					y1: y + start_y + start_y,
+					width: width,
+					height: height,
+					state: this.mapTab[j][i]
+				});
+				y += start_y;
+			}
+			x += start_x;
+			y = start_y - 5;
 		}
-		x += start_x;
-		y = start_y - 5;
 	}
-}
-
-function createBall(vy) {
-	// Balls coords
-	var ball = {coords : {x : (table.height / 2), y : table.height - 70},
-				const_vector : {vy : BALL_INITIAL_SPEED, vx : BALL_INITIAL_SPEED, speed: BALL_INITIAL_SPEED},
-				vector : {},
-				radius : 13,
-				hit_horizontal : 0,
-				hit_vertical : 0,
-				hit_player : 0};
-
-	ball.vector = { vx: ball.const_vector.vx, vy: ball.const_vector.vy, total : ball.const_vector.vy + ball.const_vector.vx};
-
-	// Initials points player 1
-	var player1Coords = {y1 : table.height - 50, x1 : (table.height / 2) - 60, y2 : table.height - 35, x2 : (table.height / 2) + 60, const_vx : 20, vx : 20};
-
-	launchAnim(ball, player1Coords, Date.now());
-	if (isGameOver())
-		winnerWindow();
-}
-
-//! Players related stuff
-
-function movePlayer(player1Coords) {
-
-	if (keys["q"] && player1Coords.x1 - player1Coords.vx > 0) {
-		player1Coords.x1 -= player1Coords.vx;
-		player1Coords.x2 -= player1Coords.vx;
-	}
-	if (keys["d"] && player1Coords.x2 + player1Coords.vx < table.height) {
-		player1Coords.x1 += player1Coords.vx;
-		player1Coords.x2 += player1Coords.vx;
-	}
-}
-
-function drawPlayer(player1Coords, color) {
 	
-	movePlayer(player1Coords);
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(player1Coords.x1, player1Coords.y1, 120, player1Coords.y2 - player1Coords.y1, 7);
-	context.fill();
-	context.closePath();
-}
+	// vy remplace BALL_INITIAL_SPEED !!!
+	createBall(vy) {
+		// Balls coords
+		this.ball = { coords : { x : (document.getElementById("game").height / 2), y : document.getElementById("game").height - 70 },
+					const_vector : { vy : vy, vx : this.macro_ballInitialSpeed, speed: this.macro_ballInitialSpeed },
+					vector : {},
+					radius : 13,
+					hit_horizontal : 0,
+					hit_vertical : 0,
+					hit_player : 0 };
+	
+		this.ball.vector = { vx: this.ball.const_vector.vx, vy: this.ball.const_vector.vy, total : this.ball.const_vector.vy + this.ball.const_vector.vx };
+	
+		// Initials points player 1
+		this.player1Coords = { y1 : document.getElementById("game").height - 50, x1 : (document.getElementById("game").height / 2) - 60, y2 : document.getElementById("game").height - 35, x2 : (document.getElementById("game").height / 2) + 60, const_vx : 20, vx : 20 };
+	
+		this.gameLoop(Date.now());
+		if (this.isGameOver())
+			this.winnerWindow();
+	}
+	
+	// DRAWING Ball & Player & Blocks & Area
+	drawPlayer() {
+		
+		this.movePlayer();
+		document.getElementById("game").getContext("2d").fillStyle = "#ED4EB0";
+		document.getElementById("game").getContext("2d").beginPath();
+		document.getElementById("game").getContext("2d").roundRect(this.player1Coords.x1, this.player1Coords.y1, 120, this.player1Coords.y2 - this.player1Coords.y1, 7);
+		document.getElementById("game").getContext("2d").fill();
+		document.getElementById("game").getContext("2d").closePath();
+	}
 
-function isBallHittingPlayer(ball, player1Coords) {
+	drawBlocks() {
+		for (let k = 0; k < this.block_arr.length; k++) {
+			if (this.block_arr[k].state) {
+				document.getElementById("game").getContext("2d").beginPath();
+				switch (this.block_arr[k].state) {
+					case 5:
+						document.getElementById("game").getContext("2d").fillStyle = "green";
+						break;
+					case 4:
+						document.getElementById("game").getContext("2d").fillStyle = "yellow";
+						break;
+					case 3:
+						document.getElementById("game").getContext("2d").fillStyle = "orange";
+						break;
+					case 2:
+						document.getElementById("game").getContext("2d").fillStyle = "red";
+						break;
+					case 1:
+						document.getElementById("game").getContext("2d").fillStyle = "darkred";
+						break;
+				}
+				document.getElementById("game").getContext("2d").roundRect(this.block_arr[k].x1, this.block_arr[k].y1, this.block_arr[k].width, this.block_arr[k].height, 10);
+				document.getElementById("game").getContext("2d").fill();
+			}
+		}
+	}
+	
+	drawOuterRectangle(color) {
+		document.getElementById("game").getContext("2d").fillStyle = color;
+		document.getElementById("game").getContext("2d").beginPath();
+		document.getElementById("game").getContext("2d").roundRect(0, 0, document.getElementById("game").width, document.getElementById("game").height, 10);
+		document.getElementById("game").getContext("2d").fill();
+		document.getElementById("game").getContext("2d").closePath();
+	}
+	
+	drawInnerRectangle(color) {
+		document.getElementById("game").getContext("2d").fillStyle = color;
+		document.getElementById("game").getContext("2d").beginPath();
+		document.getElementById("game").getContext("2d").roundRect(5, 5, document.getElementById("game").width - 10, document.getElementById("game").height - 10, 8);
+		document.getElementById("game").getContext("2d").fill();
+		document.getElementById("game").getContext("2d").closePath();
+	}
 
-	if (ball.hit_player > 0 && ball.hit_player < 15) {
-		ball.hit_player++;
+	update() {
+		this.drawOuterRectangle("#ED4EB0");
+		this.drawInnerRectangle("#23232e");
+	}
+	
+	drawBall() {
+		document.getElementById("game").getContext("2d").beginPath();
+		document.getElementById("game").getContext("2d").fillStyle = 'white';
+		document.getElementById("game").getContext("2d").arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius, Math.PI * 2, false);
+		document.getElementById("game").getContext("2d").fill();
+		document.getElementById("game").getContext("2d").closePath();
+		
+		document.getElementById("game").getContext("2d").beginPath();
+		document.getElementById("game").getContext("2d").fillStyle = "#23232e";
+		document.getElementById("game").getContext("2d").arc(this.ball.coords.x, this.ball.coords.y, this.ball.radius - 2, Math.PI * 2, false);
+		document.getElementById("game").getContext("2d").fill();
+		document.getElementById("game").getContext("2d").stroke();
+		document.getElementById("game").getContext("2d").closePath();
+	}
+	
+	// COLLISION Wall & Blocks & Player
+	isBallHittingPlayer() {
+
+		if (this.ball.hit_player > 0 && this.ball.hit_player < 15) {
+			this.ball.hit_player++;
+			return false;
+		}
+	
+		if (this.ball.hit_player >= 15)
+			this.ball.hit_player = 0;
+	
+		if (this.ball.coords.x + this.ball.radius / 2 >= this.player1Coords.x1 && this.ball.coords.x - this.ball.radius / 2 <= this.player1Coords.x2 &&
+				this.ball.coords.y + this.ball.radius >= this.player1Coords.y1 &&
+				this.ball.coords.y + this.ball.radius <= this.player1Coords.y2) {
+					this.ball.hit_player = 1;
+					this.incrementBallSpeed();
+					return true;
+				}
+	
 		return false;
 	}
 
-	if (ball.hit_player >= 15)
-		ball.hit_player = 0;
-
-	if (ball.coords.x + ball.radius / 2 >= player1Coords.x1 && ball.coords.x - ball.radius / 2 <= player1Coords.x2 &&
-			ball.coords.y + ball.radius >= player1Coords.y1 &&
-			ball.coords.y + ball.radius <= player1Coords.y2) {
-				ball.hit_player = 1;
-				incrementBallSpeed(ball);
-				return true;
-			}
-
-	return false;
-}
-
-function rangeSlide(value) {
-	document.getElementById('rangeValue').innerHTML = value;
-	user_option = value;
-}
-
-//! Ball
-
-function incrementBallSpeed(ball) {
-	ball.const_vector.speed += BALL_SPEED_INCREMENT;
-	const speedRatio = ball.const_vector.speed / Math.sqrt(ball.const_vector.vx ** 2 + ball.const_vector.vy ** 2);
-	ball.const_vector.vx *= speedRatio;
-	ball.const_vector.vy *= speedRatio;
-	ball.vector.vx = ball.const_vector.vx;
-	ball.vector.vy = ball.const_vector.vy;
-}
-
-function drawBall(ball) {
-	context.beginPath();
-	context.fillStyle = 'white';
-	context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
-	context.fill();
-	context.closePath();
+	isBallHittingWall() {
+		// Collision avec les murs gauche ou droit
+		if ((this.ball.coords.x - this.ball.radius <= 0 || this.ball.coords.x + this.ball.radius >= document.getElementById("game").width) && this.ball.hit_horizontal === 0) {
+			this.ball.hit_horizontal = 1;
+			this.ball.const_vector.vx = -this.ball.const_vector.vx;
+			this.ball.vector.vx = this.ball.const_vector.vx;
+			this.incrementBallSpeed();
 	
-	context.beginPath();
-	context.fillStyle = "#23232e";
-	context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);
-	context.fill();
-	context.stroke();
-	context.closePath();
-}
-
-function isBallHittingWall(ball) {
-	// Collision avec les murs gauche ou droit
-	if ((ball.coords.x - ball.radius <= 0 || ball.coords.x + ball.radius >= table.width) && ball.hit_horizontal === 0) {
-		ball.hit_horizontal = 1;
-		ball.const_vector.vx = -ball.const_vector.vx;
-		ball.vector.vx = ball.const_vector.vx;
-		incrementBallSpeed(ball);
-
-		// Ajuster la position pour que la balle ne colle pas au mur
-		if (ball.coords.x - ball.radius <= 0) {
-			ball.coords.x = ball.radius;
-		} else if (ball.coords.x + ball.radius >= table.width) {
-			ball.coords.x = table.width - ball.radius;
-		}
-	}
-
-	// Collision avec le plafond
-	if (ball.coords.y - ball.radius <= 0 && ball.hit_vertical === 0) {
-		ball.hit_vertical = 1;
-		ball.const_vector.vy = -ball.const_vector.vy;
-		ball.vector.vy = ball.const_vector.vy;
-		incrementBallSpeed(ball);
-
-		// Ajuster la position pour que la balle ne colle pas au plafond
-		ball.coords.y = ball.radius;
-	}
-
-	if (ball.hit_horizontal > 0) ball.hit_horizontal++;
-	if (ball.hit_vertical > 0) ball.hit_vertical++;
-
-	if (ball.hit_horizontal > 5) ball.hit_horizontal = 0;
-	if (ball.hit_vertical > 5) ball.hit_vertical = 0;
-}
-
-function handlePlayerCollision(ball, player1Coords) {
-	const intersection = ((player1Coords.x1 + 60 - ball.coords.x) / -60);
-	ball.const_vector.vx = Math.max(-1, Math.min(1, intersection)) * Math.abs(ball.const_vector.vy);
-	ball.const_vector.vy = -ball.const_vector.vy;
-	incrementBallSpeed(ball);
-
-	ball.vector.vx = ball.const_vector.vx;
-	ball.vector.vy = ball.const_vector.vy;
-}
-
-
-function moveBall(ball, player1Coords) {
-	const steps = 5; // Subdiviser le mouvement en étapes
-	const stepX = ball.vector.vx / steps;
-	const stepY = ball.vector.vy / steps;
-
-	for (let i = 0; i < steps; i++) {
-		ball.coords.x += stepX;
-		ball.coords.y += stepY;
-
-		if (isBallHittingPlayer(ball, player1Coords)) {
-			handlePlayerCollision(ball, player1Coords);
-		}
-
-		isBallHittingWall(ball);
-		isBallHittingblock(ball);
-	}
-
-	drawBall(ball);
-}
-
-function isBallHittingblock(ball) {
-	for (let k = 0; k < block_arr.length; k++) {
-		if (!block_arr[k].state) continue;
-
-		// Calcul des coordonnées futures de la balle
-		var ballFutureX = ball.coords.x + ball.const_vector.vx;
-		var ballFutureY = ball.coords.y + ball.const_vector.vy;
-
-		if (((ballFutureX + ball.radius >= block_arr[k].x1 && ballFutureX - ball.radius <= block_arr[k].x1 + block_arr[k].width)) &&
-			((ballFutureY + ball.radius >= block_arr[k].y1 && ballFutureY - ball.radius <= block_arr[k].y1 + block_arr[k].height))) {
-
-			const hitLeftOrRight = ball.coords.x <= block_arr[k].x1 || ball.coords.x >= block_arr[k].x1 + block_arr[k].width;
-			const hitTopOrBottom = ball.coords.y <= block_arr[k].y1 || ball.coords.y >= block_arr[k].y1 + block_arr[k].height;
-
-			if (hitLeftOrRight && hitTopOrBottom) {
-				// Collision sur un coin
-				ball.const_vector.vx = -ball.const_vector.vx;
-				ball.const_vector.vy = -ball.const_vector.vy;
-			} else if (hitLeftOrRight) {
-				// Collision sur les côtés gauche/droite
-				ball.const_vector.vx = -ball.const_vector.vx;
-				// Ajuster la position
-				if (ball.coords.x <= block_arr[k].x1) {
-					ball.coords.x = block_arr[k].x1 - ball.radius;
-				} else {
-					ball.coords.x = block_arr[k].x1 + block_arr[k].width + ball.radius;
-				}
-			} else if (hitTopOrBottom) {
-				// Collision sur les côtés haut/bas
-				ball.const_vector.vy = -ball.const_vector.vy;
-				// Ajuster la position
-				if (ball.coords.y <= block_arr[k].y1) {
-					ball.coords.y = block_arr[k].y1 - ball.radius;
-				} else {
-					ball.coords.y = block_arr[k].y1 + block_arr[k].height + ball.radius;
-				}
+			// Ajuster la position pour que la balle ne colle pas au mur
+			if (this.ball.coords.x - this.ball.radius <= 0) {
+				this.ball.coords.x = this.ball.radius;
+			} else if (this.ball.coords.x + this.ball.radius >= document.getElementById("game").width) {
+				this.ball.coords.x = document.getElementById("game").width - this.ball.radius;
 			}
-
-			ball.vector.vx = ball.const_vector.vx;
-			ball.vector.vy = ball.const_vector.vy;
-
-			incrementBallSpeed(ball);
-
-			block_arr[k].state--;
-			console.log(`block_arr[k].state ${block_arr[k].state}`);
-			if (!block_arr[k].state) {
-				blocksDestroyed++;
-			}
-			count += Math.abs(5 - block_arr[k].state);
-			break;
 		}
-	}
-}
-
-
-function isGameOver() {
-	if (blocksDestroyed == 73) {
-		return true;
-	}
-	if (health <= 0) {
-		return true;
-	}
-	return false;
-}
-
-
-function isEnd(ball) {
-	if (blocksDestroyed == 72) {
-		blocksDestroyed++;
-		createBall(Math.floor(getRandomArbitrary(-11, 0)));
-		return true;
-	}
-	if (ball.coords.y + ball.radius >= table.height) {
-		health--;
-		createBall(Math.floor(getRandomArbitrary(-11, 0)));
-		return true;
-	}
-	return false;
-}
-
-//! Loop func
-function launchAnim(ball, player1Coords, start) {
-	if (document.hidden) return;
-
-	timeRelatedStuff(ball, start);
-	adaptVectorsToFps(ball, player1Coords);
-	start = Date.now();
-	context.clearRect(0, 0, table.width, table.height);
 	
-	update();
-	drawPlayer(player1Coords, "#ED4EB0");
-	if (isEnd(ball))
-		return;
-	drawBlocks();
-	moveBall(ball, player1Coords);
-	score.innerText = "Score : " + count;
-	id = requestAnimationFrame(function () {launchAnim(ball, player1Coords, start);});
-}
-
-//! Fps related stuff
-
-bot_time = -1;
-function timeRelatedStuff(ball, start) {
-	end = Date.now();
-	let elapsedTime = end - start; // Temps réel pris par la frame
-	frameTime.counter++;
-	frameTime.time += elapsedTime;
-
-
-	if (frameTime.time > 250) {
-		totalframeTime.counter += frameTime.counter;
-		totalframeTime.time += 250
-		fps.innerText = "Fps : " + (frameTime.counter * 4) + " | Avg Fps : " + (totalframeTime.counter * (1000 / totalframeTime.time)).toPrecision(3);
-		frameTime.counter = 0;
-		frameTime.time = 0;
+		// Collision avec le plafond
+		if (this.ball.coords.y - this.ball.radius <= 0 && this.ball.hit_vertical === 0) {
+			this.ball.hit_vertical = 1;
+			this.ball.const_vector.vy = -this.ball.const_vector.vy;
+			this.ball.vector.vy = this.ball.const_vector.vy;
+			this.incrementBallSpeed();
+	
+			// Ajuster la position pour que la balle ne colle pas au plafond
+			this.ball.coords.y = this.ball.radius;
+		}
+	
+		if (this.ball.hit_horizontal > 0) this.ball.hit_horizontal++;
+		if (this.ball.hit_vertical > 0) this.ball.hit_vertical++;
+	
+		if (this.ball.hit_horizontal > 5) this.ball.hit_horizontal = 0;
+		if (this.ball.hit_vertical > 5) this.ball.hit_vertical = 0;
 	}
-	percentage = (elapsedTime / 16.66).toPrecision(5); // Percentage of the time the frame took to render, based of the time it SHOULD have taken to render
-}
-
-function adaptVectorsToFps(ball, player1Coords) {
-	ball.vector.vx = ball.const_vector.vx * percentage;
-	ball.vector.vy = ball.const_vector.vy * percentage;
-	player1Coords.vx = player1Coords.const_vx * percentage;
-}
-
-async function winnerWindow() {
-	if (window.hidden) return;
-	console.log(winnerWindow);
-	context.clearRect(0, 0, table.width, table.height);
-	gameOver.style.display = "flex";
-	drawOuterRectangle("#C42021");
-	if (blocksDestroyed == 73) {
-		drawOuterRectangle("#365FA0");
-		gameOver.style.color = "#365FA0";
-		gameOver.textContent = "Omg ! You won !";
-		document.getElementById("replay-button").style.color = "#365FA0";
-		console.log("You won, exterior.");
+	
+	handlePlayerCollision() {
+		const intersection = ((this.player1Coords.x1 + 60 - this.ball.coords.x) / -60);
+		this.ball.const_vector.vx = Math.max(-1, Math.min(1, intersection)) * Math.abs(this.ball.const_vector.vy);
+		this.ball.const_vector.vy = -this.ball.const_vector.vy;
+		this.incrementBallSpeed();
+	
+		this.ball.vector.vx = this.ball.const_vector.vx;
+		this.ball.vector.vy = this.ball.const_vector.vy;
 	}
-	drawInnerRectangle("#23232e");
+	
+	isBallHittingblock() {
+		for (let k = 0; k < this.block_arr.length; k++) {
+			if (!this.block_arr[k].state) continue;
+	
+			// Calcul des coordonnées futures de la balle
+			var ballFutureX = this.ball.coords.x + this.ball.const_vector.vx;
+			var ballFutureY = this.ball.coords.y + this.ball.const_vector.vy;
+	
+			if (((ballFutureX + this.ball.radius >= this.block_arr[k].x1 && ballFutureX - this.ball.radius <= this.block_arr[k].x1 + this.block_arr[k].width)) &&
+				((ballFutureY + this.ball.radius >= this.block_arr[k].y1 && ballFutureY - this.ball.radius <= this.block_arr[k].y1 + this.block_arr[k].height))) {
+	
+				const hitLeftOrRight = this.ball.coords.x <= this.block_arr[k].x1 || this.ball.coords.x >= this.block_arr[k].x1 + this.block_arr[k].width;
+				const hitTopOrBottom = this.ball.coords.y <= this.block_arr[k].y1 || this.ball.coords.y >= this.block_arr[k].y1 + this.block_arr[k].height;
+	
+				if (hitLeftOrRight && hitTopOrBottom) {
+					// Collision sur un coin
+					this.ball.const_vector.vx = -this.ball.const_vector.vx;
+					this.ball.const_vector.vy = -this.ball.const_vector.vy;
+				} else if (hitLeftOrRight) {
+					// Collision sur les côtés gauche/droite
+					this.ball.const_vector.vx = -this.ball.const_vector.vx;
+					// Ajuster la position
+					if (this.ball.coords.x <= this.block_arr[k].x1) {
+						this.ball.coords.x = this.block_arr[k].x1 - this.ball.radius;
+					} else {
+						this.ball.coords.x = this.block_arr[k].x1 + this.block_arr[k].width + this.ball.radius;
+					}
+				} else if (hitTopOrBottom) {
+					// Collision sur les côtés haut/bas
+					this.ball.const_vector.vy = -this.ball.const_vector.vy;
+					// Ajuster la position
+					if (this.ball.coords.y <= this.block_arr[k].y1) {
+						this.ball.coords.y = this.block_arr[k].y1 - this.ball.radius;
+					} else {
+						this.ball.coords.y = this.block_arr[k].y1 + this.block_arr[k].height + this.ball.radius;
+					}
+				}
+	
+				this.ball.vector.vx = this.ball.const_vector.vx;
+				this.ball.vector.vy = this.ball.const_vector.vy;
+	
+				this.incrementBallSpeed();
+	
+				this.block_arr[k].state--;
+				console.log(`block_arr[k].state ${this.block_arr[k].state}`);
+				if (!this.block_arr[k].state) {
+					this.blocksDestroyed++;
+				}
+				this.count += Math.abs(5 - this.block_arr[k].state);
+				break;
+			}
+		}
+	}
 
-	cancelAnimationFrame(id);
-	try {
-		const playerId = await getCurrentPlayerId();
-		if (!playerId) {
-			console.error('Impossible de sauvegarder le score : utilisateur non connecté');
-			showReplayButton();  // Au lieu de replay() directement
+	// MOVE Player & Ball
+	movePlayer() {
+
+		if (this.keys["q"] && this.player1Coords.x1 - this.player1Coords.vx > 0) {
+			this.player1Coords.x1 -= this.player1Coords.vx;
+			this.player1Coords.x2 -= this.player1Coords.vx;
+		}
+		if (this.keys["d"] && this.player1Coords.x2 + this.player1Coords.vx < document.getElementById("game").height) {
+			this.player1Coords.x1 += this.player1Coords.vx;
+			this.player1Coords.x2 += this.player1Coords.vx;
+		}
+	}
+	
+	moveBall() {
+		const steps = 5; // Subdiviser le mouvement en étapes
+		const stepX = this.ball.vector.vx / steps;
+		const stepY = this.ball.vector.vy / steps;
+	
+		for (let i = 0; i < steps; i++) {
+			this.ball.coords.x += stepX;
+			this.ball.coords.y += stepY;
+	
+			if (this.isBallHittingPlayer()) {
+				this.handlePlayerCollision();
+			}
+	
+			this.isBallHittingWall();
+			this.isBallHittingblock();
+		}
+		this.drawBall();
+	}
+
+	//! Loop func
+	gameLoop(start) {
+		if (this.stop)
 			return;
-		}
-		
-		// Attendre que l'ajout du score soit terminé
-		await addNewGame(playerId, count);
-		
-	} catch (error) {
-		console.error('Erreur lors de la sauvegarde du score:', error);
-	}
-	showReplayButton();
-}
 
-// Séparer l'affichage du bouton replay de son action
-function showReplayButton() {
-	const button = document.getElementById("replay-button");
-	if (button) {
-		button.style.display = "flex";
-		// button.style.color = "#C42021";
-		button.addEventListener("click", () => {
-			window.location.reload();
-		});
-	}
-}
+		const frame = () => {
 
-
-//! Tools
-function getRandomArbitrary(min, max) {
-	var result = Math.random() * (max - min) + min;
-	if (result >= -8 && result <= 8)
-		return getRandomArbitrary(min, max);
-	return result;
-}
-
-function drawBlocks() {
-	for (let k = 0; k < block_arr.length; k++) {
-		if (block_arr[k].state) {
-			context.beginPath();
-			switch (block_arr[k].state) {
-				case 5:
-					context.fillStyle = "green";
-					break;
-				case 4:
-					context.fillStyle = "yellow";
-					break;
-				case 3:
-					context.fillStyle = "orange";
-					break;
-				case 2:
-					context.fillStyle = "red";
-					break;
-				case 1:
-					context.fillStyle = "darkred";
-					break;
+			if (this.stop || !document.getElementById("game")) {
+				cancelAnimationFrame(this.animationId);
+				return ;
 			}
-			context.roundRect(block_arr[k].x1, block_arr[k].y1, block_arr[k].width, block_arr[k].height, 10);
-			context.fill();
-		}
-	}
-}
 
-function drawOuterRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(0, 0, table.width, table.height, 10);
-	context.fill();
-	context.closePath();
-}
+			this.timeRelatedStuff(start);
+			this.adaptVectorsToFps();
+			start = Date.now();
+			document.getElementById("game").getContext("2d").clearRect(0, 0, document.getElementById("game").width, document.getElementById("game").height);
 
-function drawInnerRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
-	context.fill();
-	context.closePath();
-}
+			this.update();
+			this.drawPlayer();
+			if (this.isPoint())
+				return;
 
+			this.drawBlocks();
+			this.moveBall();
+			document.getElementById("score").innerText = "Score : " + this.count;
 
-window.addEventListener("keydown", (event) => {
-	keys[event.key] = true;
-});
-
-window.addEventListener("keyup", (event) => {
-	keys[event.key] = false;
-});
-
-function update() {
-	drawOuterRectangle("#ED4EB0");
-	drawInnerRectangle("#23232e");
-}
-
-//! API STUFF
-
-async function getCurrentPlayerId() {
-	if (cachedUserId !== null) {
-		return cachedUserId;
-	}
-	try {
-		const response = await fetch('/api/current-user/', {
-			credentials: 'same-origin'
-		});
-		const data = await response.json();
-		cachedUserId = data.userId;
-		return cachedUserId;
-	} catch (error) {
-		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
-		return null;
-	}
-}
-
-async function addNewGame(id_player, score) {
-	console.log("Appel de addnewgame");
-	try {
-		const response = await fetch('/api/add_solo_casse_brique/', {
-			method: 'POST',
-			credentials: 'same-origin',
-			headers: {
-				// 'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				id_player: id_player,
-				id_map: selectedMap,
-				score: score
-			})
-		});
-
-		if (!response.ok) {
-			const text = await response.text();
-			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+			this.animationId = requestAnimationFrame(frame);
 		}
 
-		const result = await response.json();
-		console.log('Nouveau jeu ajouté:', result);
-	} catch (error) {
-		console.error('Erreur:', error);
-	}
-}
+		this.animationId = requestAnimationFrame(frame);
+	}	
 
-async function fetchMap(mapId) {
-	return fetch(`/api/map/${mapId}/`)
-	.then(response => response.text())
-	.then(mapData => {
-		const mapLines = mapData.split('\n');
-		mapLines.forEach(function (element) {
-			mapTab.push(element.split('').map(x=>Number(x)));
-			mapTab[mapTab.length - 1].forEach(function (number) {
-				if (number == 0)
-					blocksDestroyed++;
+	// CHECKS game over
+	isPoint() {
+		if (this.blocksDestroyed == 72) {
+			this.blocksDestroyed++;
+			this.createBall(Math.floor(this.getRandomArbitrary(-11, 0)));
+			return true;
+		}
+		if (this.ball.coords.y + this.ball.radius >= document.getElementById("game").height) {
+			this.health--;
+			this.createBall(Math.floor(this.getRandomArbitrary(-11, 0)));
+			return true;
+		}
+		return false;
+	}
+
+	isGameOver() {
+		if (this.blocksDestroyed == 73) {
+			this.stop = true;
+			return true;
+		}
+		if (this.health <= 0) {
+			this.stop = true;
+			return true;
+		}
+		return false;
+	}
+
+	async winnerWindow() {
+		if (window.hidden)
+			return;
+		document.getElementById("game").getContext("2d").clearRect(0, 0, document.getElementById("game").width, document.getElementById("game").height);
+		document.getElementById("gameOver").style.display = "flex";
+		this.drawOuterRectangle("#C42021");
+		if (this.blocksDestroyed == 73) {
+			this.drawOuterRectangle("#365FA0");
+			document.getElementById("gameOver").style.color = "#365FA0";
+			document.getElementById("gameOver").textContent = "Omg ! You won !";
+			document.getElementById("replay-button").style.color = "#365FA0";
+			console.log("You won, exterior.");
+		}
+		this.drawInnerRectangle("#23232e");
+	
+		cancelAnimationFrame(this.animationId);
+
+
+		try {
+			const playerId = await this.getCurrentPlayerId();
+			if (!playerId) {
+				console.error('Impossible de sauvegarder le score : utilisateur non connecté');
+				this.showReplayButton();  // Au lieu de replay() directement
+				return;
+			}
+			
+			// Attendre que l'ajout du score soit terminé
+			await this.addNewGame(playerId);
+			
+		} catch (error) {
+			console.error('Erreur lors de la sauvegarde du score:', error);
+		}
+		this.showReplayButton();
+	}
+	
+	// Séparer l'affichage du bouton replay de son action
+	showReplayButton() {
+		const button = document.getElementById("replay-button");
+		if (button) {
+			button.style.display = "flex";
+			button.style.color = "#C42021";
+			button.addEventListener("click", () => {
+				button.style.display = "none";
+				document.getElementById("gameOver").style.display = "none";
+				this.restartGame();
 			});
-		});
-	})
-	.catch(error => {
-		console.error('Erreur lors de la récupération des données de la carte:', error);
-	});
-}
-
-window.addEventListener("visibilitychange", handleQuitPlayer);
-
-function handleQuitPlayer() {
-	if (window.hidden) {
-		cancelAnimationFrame(id);
-		console.log("j'ai quit");
+		}
 	}
-	else
-		console.log("je suis la moi");
+
+	stopGame() {
+		this.stop = true;
+
+		if (this.animationId) {
+			cancelAnimationFrame(this.animationId);
+			this.animationId = null;
+		}
+
+		window.removeEventListener('keydown', this.keyHandler);
+		window.removeEventListener('keyup', this.keyHandler);
+		this.keyHandler = null;
+
+		if (document.getElementById('game').getContext('2d')) {
+			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
+		}
+
+		CasseBriqueGame.currentGame = null;
+	}
+
+	restartGame() {
+		if (this.stop) {
+			console.log("je RESTART le jeu. go MAP");
+			this.stopGame();
+			this.keyHandler = this.handleKey.bind(this);
+			this.initState();
+			this.launchGame(this.selectedMap);
+		}
+	}
+
+	// API stuff
+	async addNewGame(id_player) {
+		console.log("Appel de addnewgame");
+		try {
+			const response = await fetch('/api/add_solo_casse_brique/', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'X-CSRFToken': this.getCookie(),  // Use the function directly
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id_player: id_player,
+					id_map: this.selectedMap,
+					score: this.count
+				})
+			});
+	
+			if (!response.ok) {
+				const text = await response.text();
+				throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+			}
+	
+			const result = await response.json();
+			console.log('Nouveau jeu ajouté:', result);
+		} catch (error) {
+			console.error('Erreur:', error);
+		}
+	}
+
+	async getCurrentPlayerId() {
+		if (this.cachedUserId !== null) {
+			return this.cachedUserId;
+		}
+		try {
+			const response = await fetch('/api/current-user/', {
+				credentials: 'same-origin'
+			});
+			const data = await response.json();
+			this.cachedUserId = data.userId;
+			return this.cachedUserId;
+		} catch (error) {
+			console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+			return null;
+		}
+	}
+
+	async fetchMap(mapId) {
+		return fetch(`/api/map/${mapId}/`)
+		.then(response => response.text())
+		.then(mapData => {
+			const mapLines = mapData.split('\n');
+			mapLines.forEach((element) => {
+				const row = element.split('').map(x => Number(x))
+				this.mapTab.push(row);
+				row.forEach((number) => {
+					if (number === 0)
+						this.blocksDestroyed++;
+				});
+			});
+		})
+		.catch(error => {
+			console.error('Erreur lors de la récupération des données de la carte:', error);
+		});
+	}
+
+	getCookie() {
+		return document.cookie
+			.split('; ')
+			.find(row => row.startsWith('csrftoken='))
+			?.split('=')[1] || '';
+	}
+
+	// Utils functions
+	incrementBallSpeed() {
+		this.ball.const_vector.speed += this.macro_ballSpeedIncr;
+		const speedRatio = this.ball.const_vector.speed / Math.sqrt(this.ball.const_vector.vx ** 2 + this.ball.const_vector.vy ** 2);
+		this.ball.const_vector.vx *= speedRatio;
+		this.ball.const_vector.vy *= speedRatio;
+		this.ball.vector.vx = this.ball.const_vector.vx;
+		this.ball.vector.vy = this.ball.const_vector.vy;
+	}
+
+	timeRelatedStuff(start) {
+		let end = Date.now();
+		let elapsedTime = end - start; // Temps réel pris par la frame
+		this.frameTime.counter++;
+		this.frameTime.time += elapsedTime;
+	
+	
+		if (this.frameTime.time > 250) {
+			this.totalframeTime.counter += this.frameTime.counter;
+			this.totalframeTime.time += 250
+			document.getElementById("fps").innerText = "Fps : " + (this.frameTime.counter * 4) + " | Avg Fps : " + (this.totalframeTime.counter * (1000 / this.totalframeTime.time)).toPrecision(3);
+			this.frameTime.counter = 0;
+			this.frameTime.time = 0;
+		}
+		this.percentage = (elapsedTime / 16.66).toPrecision(5); // Percentage of the time the frame took to render, based of the time it SHOULD have taken to render
+	}
+	
+	adaptVectorsToFps() {
+		this.ball.vector.vx = this.ball.const_vector.vx * this.percentage;
+		this.ball.vector.vy = this.ball.const_vector.vy * this.percentage;
+		this.player1Coords.vx = this.player1Coords.const_vx * this.percentage;
+	}
+
+	getRandomArbitrary(min, max) {
+		var result = Math.random() * (max - min) + min;
+		if (result >= -8 && result <= 8)
+			return this.getRandomArbitrary(min, max);
+		return result;
+	}
 }

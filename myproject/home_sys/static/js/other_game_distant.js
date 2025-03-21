@@ -174,7 +174,6 @@ function drawBall(ball, context) {
 
 // Remise a 0 pour une nouvelle game
 function game_restarted(data) {
-	console.log("je suis la !");
 	context1.clearRect(0, 0, table1.width, table1.height);
 	context2.clearRect(0, 0, table2.width, table2.height);
 

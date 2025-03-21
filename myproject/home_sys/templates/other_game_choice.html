@@ -10,13 +10,16 @@
 
 	<div class="page">
 		<div class="rectangle"></div>
+		<a href="{% url 'game-choice' %}" class="retour">
+			<span class="game-mode" id="retour" >Retour</span>
+		</a>
 		<h1 class="title">Choix du mode de jeu</h1>
 		<div class="mode-choices">
 
-			<a href="other_game/" class="casse-brique">
+			<a href="{% url 'other_game' %}" class="casse-brique">
 				<span class="game-mode">Solo</span>
 			</a>
-			<a href="other_game_multi_room/" class="casse-brique-multi">
+			<a href="{% url 'other_game_multi_room' %}" class="casse-brique-multi">
 				<span class="game-mode">1v1</span>
 			</a>
 		</div>

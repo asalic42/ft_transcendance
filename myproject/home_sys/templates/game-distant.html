@@ -6,22 +6,17 @@
 
 <div id="content">
     <link rel="stylesheet" href="{% static 'css/game-style.css' %}">
-
-    <h3 class="scores" id="fps">Fps : 0</h3>
-
-    <a href="game-distant-choice" class="game-distant">
-    	<span class="game-mode">Retour</span>
-    </a>
-
+	<div class="container" data-id-t="{{id_t}}">
     <div class="scores" id="scores">
     
     	<h3 id="title-p1">Player 1</h3>
     	<h3 id="scoreP1">0</h3>
     	<h3 id="scoreP2">0</h3>
     	<h3 id="title-p2">Player 2</h3>
+
     </div>
 
-    <div id="canvas-container">
+    <div id="canvas-container" display="block">
         <canvas width="1920" height="850" id="game"></canvas>
         <div id="button-container">
             <button id="replay-button" style="display: none;">Play again !</button>
@@ -43,13 +38,7 @@
 
     <h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
 
-    <script>
-    	var gameId = "{{ game_id }}";
-    	{% block script %}
-    	    var id_t = 0;
-    	{% endblock %}
-    </script>
-
-    <script src="{% static 'js/game-distant.js' %}"></script>
+    {% comment %} <script src="{% static 'js/game-distant.js' %}"></script> {% endcomment %}
 </div>
+
 {% endblock %}

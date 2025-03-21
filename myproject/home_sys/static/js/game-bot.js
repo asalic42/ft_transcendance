@@ -502,157 +502,158 @@
 	}
 
 	window.BotGame = BotGame;
-
-function replay(player) {
-	const button = document.getElementById("replay-button");
-	button.style.display = "block";
-
-	if (player == 1)
-		button.style.color = "#C42021";
-	else
-		button.style.color = "#365FA0";
-	button.addEventListener("click", () => {
-		restart_game();
-	});
-}
-
-function restart_game() {
-	cancelAnimationFrame(id);
-
-	document.getElementById("wrapper-player1").style.display = "none";
-	document.getElementById("wrapper-player2").style.display = "none";
-	document.getElementById("replay-button").style.display = "none";
-
-	frameTime = {counter : 0, time : 0};
-	totalframeTime = {counter : 0, time : 0};
-	bounce = 0;
-	count_p1 = 0;
-	count_p2 = 0;
-	stop = 0;
-	percentage = 0;
-	cachedUserId = null;
-
-	document.getElementById("scoreP1").innerText = "0";
-	document.getElementById("scoreP2").innerText = "0";
-
-	context.clearRect(0, 0, table.width, table.height);
-	createBall(Math.floor(getRandomArbitrary(-11, 11)));
-}
-
-//! Tools
-function bot_getRandomArbitrary(min, max) {
-	var result = Math.random() * (max - min) + min;
-	return result;
-}
-
-function getRandomArbitrary(min, max) {
-	var result = Math.random() * (max - min) + min;
-	if (result >= -9 && result <= 9)
-		return getRandomArbitrary(min, max);
-	return result;
-}
-
-function drawOuterRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(0, 0, table.width, table.height, 10);
-	context.fill();
-	context.closePath();
-}
-
-function drawInnerRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
-	context.fill();
-	context.closePath();
-}
-
-const keys = {};
-
-window.addEventListener("keydown", (event) => {
-	keys[event.key] = true;
 });
 
-window.addEventListener("keyup", (event) => {
-	keys[event.key] = false;
-});
+// function replay(player) {
+// 	const button = document.getElementById("replay-button");
+// 	button.style.display = "block";
 
-function update() {
-	drawOuterRectangle("#ED4EB0");
-	drawInnerRectangle("#23232e");
+// 	if (player == 1)
+// 		button.style.color = "#C42021";
+// 	else
+// 		button.style.color = "#365FA0";
+// 	button.addEventListener("click", () => {
+// 		restart_game();
+// 	});
+// }
 
-	context.fillStyle = '#ED4EB0';
-	context.fillRect(table.width / 2, 0, 5, table.height);
-}
+// function restart_game() {
+// 	cancelAnimationFrame(id);
 
-async function getCurrentPlayerId() {
-	if (cachedUserId !== null) {
-		return cachedUserId;
-	}
-	try {
-		const response = await fetch('/api/current-user/', {
-			credentials: 'same-origin'
-		});
-		const data = await response.json();
-		cachedUserId = data.userId;
-		return cachedUserId;
-	} catch (error) {
-		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
-		return null;
-	}
-}
+// 	document.getElementById("wrapper-player1").style.display = "none";
+// 	document.getElementById("wrapper-player2").style.display = "none";
+// 	document.getElementById("replay-button").style.display = "none";
 
-async function addNewGame(id_player) {
-	console.log("Appel de addnewgame");
-	try {
-		const response = await fetch('/api/add_pong/', {
-			method: 'POST',
-			credentials: 'same-origin',
-			headers: {
-				'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({  // Convertit les données en JSON
-				id_p1: id_player,
-				id_p2: null,
-				is_bot_game: true,
-				score_p1: count_p1,
-				score_p2: count_p2,
-				difficulty: user_option,
-				bounce_nb: bounce,
-			})
-		});
+// 	frameTime = {counter : 0, time : 0};
+// 	totalframeTime = {counter : 0, time : 0};
+// 	bounce = 0;
+// 	count_p1 = 0;
+// 	count_p2 = 0;
+// 	stop = 0;
+// 	percentage = 0;
+// 	cachedUserId = null;
 
-		if (!response.ok) {
-			const text = await response.text();
-			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);		}
+// 	document.getElementById("scoreP1").innerText = "0";
+// 	document.getElementById("scoreP2").innerText = "0";
 
-		const result = await response.json();
-		console.log('Nouveau jeu ajouté:', result);
-	} catch (error) {
-		console.error('Erreur:', error);
-	}
-}
+// 	context.clearRect(0, 0, table.width, table.height);
+// 	createBall(Math.floor(getRandomArbitrary(-11, 11)));
+// }
 
-document.addEventListener("beforeunload", function() {
-	console.log("je suis la ! bitch");
-	cancelAnimationFrame(id);
-	document.getElementById("wrapper-player1").style.display = "none";
-	document.getElementById("wrapper-player2").style.display = "none";
-	document.getElementById("replay-button").style.display = "none";
+// //! Tools
+// function bot_getRandomArbitrary(min, max) {
+// 	var result = Math.random() * (max - min) + min;
+// 	return result;
+// }
 
-	frameTime = {counter : 0, time : 0};
-	totalframeTime = {counter : 0, time : 0};
-	bounce = 0;
-	count_p1 = 0;
-	count_p2 = 0;
-	stop = 0;
-	percentage = 0;
-	cachedUserId = null;
+// function getRandomArbitrary(min, max) {
+// 	var result = Math.random() * (max - min) + min;
+// 	if (result >= -9 && result <= 9)
+// 		return getRandomArbitrary(min, max);
+// 	return result;
+// }
 
-	document.getElementById("scoreP1").innerText = "0";
-	document.getElementById("scoreP2").innerText = "0";
+// function drawOuterRectangle(color) {
+// 	context.fillStyle = color;
+// 	context.beginPath();
+// 	context.roundRect(0, 0, table.width, table.height, 10);
+// 	context.fill();
+// 	context.closePath();
+// }
 
-	context.clearRect(0, 0, table.width, table.height);
-})
+// function drawInnerRectangle(color) {
+// 	context.fillStyle = color;
+// 	context.beginPath();
+// 	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
+// 	context.fill();
+// 	context.closePath();
+// }
+
+// const keys = {};
+
+// window.addEventListener("keydown", (event) => {
+// 	keys[event.key] = true;
+// });
+
+// window.addEventListener("keyup", (event) => {
+// 	keys[event.key] = false;
+// });
+
+// function update() {
+// 	drawOuterRectangle("#ED4EB0");
+// 	drawInnerRectangle("#23232e");
+
+// 	context.fillStyle = '#ED4EB0';
+// 	context.fillRect(table.width / 2, 0, 5, table.height);
+// }
+
+// async function getCurrentPlayerId() {
+// 	if (cachedUserId !== null) {
+// 		return cachedUserId;
+// 	}
+// 	try {
+// 		const response = await fetch('/api/current-user/', {
+// 			credentials: 'same-origin'
+// 		});
+// 		const data = await response.json();
+// 		cachedUserId = data.userId;
+// 		return cachedUserId;
+// 	} catch (error) {
+// 		console.error('Erreur lors de la récupération de l\'ID utilisateur:', error);
+// 		return null;
+// 	}
+// }
+
+// async function addNewGame(id_player) {
+// 	console.log("Appel de addnewgame");
+// 	try {
+// 		const response = await fetch('/api/add_pong/', {
+// 			method: 'POST',
+// 			credentials: 'same-origin',
+// 			headers: {
+// 				'X-CSRFToken': getCookie('csrftoken'),  // Use the function directly
+// 				'Content-Type': 'application/json',
+// 			},
+// 			body: JSON.stringify({  // Convertit les données en JSON
+// 				id_p1: id_player,
+// 				id_p2: null,
+// 				is_bot_game: true,
+// 				score_p1: count_p1,
+// 				score_p2: count_p2,
+// 				difficulty: user_option,
+// 				bounce_nb: bounce,
+// 			})
+// 		});
+
+// 		if (!response.ok) {
+// 			const text = await response.text();
+// 			throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);		}
+
+// 		const result = await response.json();
+// 		console.log('Nouveau jeu ajouté:', result);
+// 	} catch (error) {
+// 		console.error('Erreur:', error);
+// 	}
+// }
+
+// document.addEventListener("beforeunload", function() {
+// 	console.log("je suis la ! bitch");
+// 	cancelAnimationFrame(id);
+// 	document.getElementById("wrapper-player1").style.display = "none";
+// 	document.getElementById("wrapper-player2").style.display = "none";
+// 	document.getElementById("replay-button").style.display = "none";
+
+// 	frameTime = {counter : 0, time : 0};
+// 	totalframeTime = {counter : 0, time : 0};
+// 	bounce = 0;
+// 	count_p1 = 0;
+// 	count_p2 = 0;
+// 	stop = 0;
+// 	percentage = 0;
+// 	cachedUserId = null;
+
+// 	document.getElementById("scoreP1").innerText = "0";
+// 	document.getElementById("scoreP2").innerText = "0";
+
+// 	context.clearRect(0, 0, table.width, table.height);
+// });

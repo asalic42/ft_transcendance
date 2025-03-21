@@ -54,14 +54,14 @@ class PongGame:
 		self.players = {}
 		self.reset_game()
 		self.is_running = False
-		self.is_over = False
+		# self.is_over = False
 		self.multiplyer = 0
 		self.bounce = 0
 		self.reported_to_tournament = False  # <-- Nouveau drapeau
 
 	def reset_game(self):
 		self.ball = {
-			'coords': {'x': 960, 'y': 475},
+			'coords': {'x': 960, 'y': 425},
 			'vector': {'vx': get_random_arbitrary(-10, 10), 'vy': get_random_arbitrary(-10, 10)},
 			'radius': 13
 		}
@@ -71,9 +71,9 @@ class PongGame:
 			player_number = player['number']
 			player['coords'] =  {
 				'x1': 92 if player_number == 1 else 1820,
-				'y1': 435,
+				'y1': 385,
 				'x2': 100 if player_number == 1 else 1828,
-				'y2': 515,
+				'y2': 465,
 				'vy': 30
 			}
 
@@ -90,9 +90,9 @@ class PongGame:
 					  
 		initial_coords = {
 			'x1': 92 if player_number == 1 else 1820,
-			'y1': 435,
+			'y1': 385,
 			'x2': 100 if player_number == 1 else 1828,
-			'y2': 515,
+			'y2': 465,
 			'vy': 10
 		}
 
@@ -133,7 +133,7 @@ class PongGame:
 			'ball_coords': self.ball['coords'],
 			'player1_coords': player1_coords,
 			'player2_coords': player2_coords,
-			'scores': self.scores
+			'scores': self.scores,
 		}
 
 dont_raise = False
@@ -191,8 +191,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 			print(f"self.id_t {self.id_t}")
 			sys.stdout.flush()
 			if (self.id_t != 0):
-				# print(f"launching T save, game_data.pk:{game_data['pk']}" )
-				# sys.stdout.flush()
 				await self.addTgame(game_data['pk'])
 				tournament_group = f"tournament_{self.id_t}"
 				if self.game.reported_to_tournament is False:
@@ -269,10 +267,11 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'player2_coords': initial_state_game['player2_coords'],
 			'scores': initial_state_game['scores']
 		}))
+
 		if len(self.game.players) == 1 and not self.game.is_running:
 			await self.create_current_game()
 
-		if len(self.game.players) == 2 and not self.game.is_running and not self.game.is_over:
+		if len(self.game.players) == 2 and not self.game.is_running:
 			self.game.is_running = True
 			await self.delete_current_game()
 			await self.send_game_state()
@@ -281,16 +280,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 	# Deconnexion du serveur
 	async def disconnect(self, close_code):
 		self.game.is_running = False
-		self.game.is_over = True
+		# self.game.is_over = False
 	
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
 			
-			# Marquer le perdant
-			if player_number == 1:
-				self.game.scores['p2'] = 1
-			else:
-				self.game.scores['p1'] = 1
+			self.game.reset_game()
 	
 			# Envoyer game_won aux joueurs
 			await self.channel_layer.group_send(
@@ -343,7 +338,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			# Si player == 1 on accepte ses nouvelles coords
 			if player_number == 1 and 'player1_coords' in data:
 				new_y1 = current_coords['y1'] + (data['player1_coords']['y1'] * self.game.multiplyer)
-				new_y1 = max(10, min(new_y1, 860))
+				new_y1 = max(10, min(new_y1, 760))
 
 				current_coords['y1'] = new_y1
 				current_coords['y2'] = new_y1 + 80
@@ -351,7 +346,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			# Si player == 2 on accepte ses nouvelles coords
 			elif player_number == 2 and 'player2_coords' in data:
 				new_y1 = current_coords['y1'] + (data['player2_coords']['y1'] * self.game.multiplyer)
-				new_y1 = max(10, min(new_y1, 860))
+				new_y1 = max(10, min(new_y1, 760))
 
 				current_coords['y1'] = new_y1
 				current_coords['y2'] = new_y1 + 80
@@ -376,7 +371,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 						await self.send(text_data=json.dumps({'type': 'game_error'}))
 					
 					self.game.is_running = True
-					self.game.is_over = False
+					# self.game.is_over = False
 					await self.channel_layer.group_send(
 						self.room_group_name, {
 						'type': 'new_game',
@@ -412,7 +407,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'ball_coords': event['ball_coords'],
 			'player1_coords': event['player1_coords'],
 			'player2_coords': event['player2_coords'],
-			'scores': event['scores']
+			'scores': event['scores'],
 		}))
 
 	# Envoyer les mises à jour à WebSocket pour un Replay
@@ -545,14 +540,14 @@ class PongConsumer(AsyncWebsocketConsumer):
 							'vy': 30
 						}
 
-				if self.game.scores['p1'] >= 1 or self.game.scores['p2'] >= 1:
+				if self.game.scores['p1'] >= 5 or self.game.scores['p2'] >= 5:
 					self.game.is_running = False
 					await self.add_pong_serializer()
 
 				try:
-					await self.send_game_state()
 					elapsed = asyncio.get_event_loop().time() - current_time
 					remaining_time = update_interval - elapsed
+					await self.send_game_state()
 					self.game.multiplyer = remaining_time / update_interval
 					if remaining_time > 0:
 						await asyncio.sleep(remaining_time)  # ⬅️ LE SLEEP EST ICI !
@@ -762,7 +757,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 		game_was_running = self.game.is_running
 		self.game.is_running = False
-		self.game.is_over = True
+		# self.game.is_over = True
 		
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
@@ -1320,7 +1315,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 logger = logging.getLogger(__name__)
 
-class StatusConsumer(AsyncWebsocketConsumer):
+""" class StatusConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		self.user = self.scope['user']
 		if self.user.is_authenticated:
@@ -1362,24 +1357,85 @@ class FriendRequestConsumer(AsyncWebsocketConsumer):
 			)
 
 	async def send_friend_request(self, event):
-		"""
-		Cette méthode reçoit un message du signal et envoie une notification WebSocket
-		pour signaler à l'utilisateur récepteur qu'il a une nouvelle demande d'ami.
-		"""
 		# Envoi de la notification à l'utilisateur récepteur
 		await self.send(text_data=json.dumps({
 			'type': 'friend_request',  # Type de message, à gérer côté front-end
 			'message': 'Vous avez une nouvelle demande d\'ami!',
 			'from_user': event['from_user'],  # Nom de l'utilisateur qui a envoyé la demande
-		}))
+		})) """
 
+
+from .models import Users
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+""" class StatusConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        if self.user.is_authenticated:
+            # Mettre à jour le statut de l'utilisateur à 'online'
+            try:
+                user_profile = Users.objects.get(user=self.user)
+                user_profile.is_online = True
+                user_profile.save()
+
+                # Accepter la connexion WebSocket
+                await self.accept()
+                await self.channel_layer.group_add("status_updates", self.channel_name)
+
+                logger.info(f"User {self.user.id} connected to WebSocket and is online.")
+
+                # Notifier tous les clients de la mise à jour du statut
+                await self.send_status_update(self.user.id, True)
+            except Users.DoesNotExist:
+                logger.error(f"User profile for {self.user.id} not found.")
+        
+    async def disconnect(self, close_code):
+        if hasattr(self, 'user') and self.user.is_authenticated:
+            # Mettre à jour le statut de l'utilisateur à 'offline'
+            try:
+                user_profile = Users.objects.get(user=self.user)
+                user_profile.is_online = False
+                user_profile.save()
+
+                # Quitter le groupe de mise à jour de statut
+                await self.channel_layer.group_discard("status_updates", self.channel_name)
+
+                logger.info(f"User {self.user.id} disconnected from WebSocket and is offline.")
+
+                # Notifier tous les clients de la mise à jour du statut
+                await self.send_status_update(self.user.id, False)
+            except Users.DoesNotExist:
+                logger.error(f"User profile for {self.user.id} not found.")
+
+    async def send_status_update(self, user_id, is_online):
+        # Envoyer un message de mise à jour du statut à tous les clients
+        await self.channel_layer.group_send(
+            "status_updates",
+            {
+                'type': 'user_status_update',
+                'user_id': user_id,
+                'is_online': is_online,
+            }
+        )
+
+    async def user_status_update(self, event):
+        # Envoyer les données de mise à jour de statut à ce client
+        await self.send(text_data=json.dumps({
+            'user_id': event["user_id"],
+            'is_online': event["is_online"],
+        }))
+        logger.info(f"Sent status update for user {event['user_id']}: {event['is_online']}")
+ """
 """ 
 
 	Pour les notifs sur l'onglet notifications
 
 """
 
-class NotificationConsumer(AsyncWebsocketConsumer):
+""" class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def connect(self):
         self.user = self.scope['user']
@@ -1405,7 +1461,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'type': 'update_status',
             'has_unread_notifications': event['has_unread_notifications'],
         }))
-
+ """
 """ """ """ """ """ """ """ """
 """ NOTIFICATIONS PUSH """
 """ Affiche un point rose sur l'onglet "CHANNELS" lorsque l'utilisateur a recu un message """
@@ -1684,7 +1740,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				name = [pair[0]['username'], pair[1]['username']]
 				index = 0
 				for player_in_pair in pair:
-					game_link = f"https://{settings.IP_ADDR}/game-distant/{game_id}/{self.tournament_id}"
+					game_link = f"/game-distant/{game_id}/{self.tournament_id}"
 					print(f'On envoie le lien "{game_link}" à {player_in_pair["channel_name"]} and round nb is at {TournamentConsumer.roundNb[self.tournament_id]}')
 					print(f'name: {name}')
 					print(f'name[index]: {name[index]}')

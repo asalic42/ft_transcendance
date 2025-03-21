@@ -7,29 +7,28 @@
 <div id="content">
 
 	<link rel="stylesheet" href="{% static 'css/game-mode-style.css' %}">
-
+	
 	<div class="page">
 		<div class="rectangle"></div>
-		<a href="game-distant-choice" class="retour">
+		<a href="{% url 'game-type-pong' %}" class="retour">
 			<span class="game-mode" id="retour" >Retour</span>
 		</a>
 		<h1 class="title">Choix de la room</h1>
 		<div class="mode-choices">
 
-			<button class="game-distant" id="distant" data-user-id={{ request.user.id }}>
+			<a href="{% url 'game-distant' request.user.id 0 %}" class="game-distant" id="new-room" data-user-id="{{ request.user.id }}">
 				<span class="game-mode">New game</span>
-			</button>
+			</a>
+			
 			<div id="test">
-				<div id="test">
-					<h2 id='text'> Join room : </h2>
-					<div id="rooms-list">
-						<p>Chargement des rooms...</p>
-					</div>
-				</div>
+				<h2 id='text'> Join room :</h2>
+				<div id="rooms-list"></div>
 			</div>
-		</div>
 
+		</div>
 	</div>
+    {% comment %} <script type="module" src="{% static 'js/game-distant.js' %}"></script> {% endcomment %}
+
 </div>
 
 {% endblock %}

@@ -99,6 +99,7 @@ h3 {
 	align-items: center;
 	display: none;
 	color: white;
+	margin-bottom: 20px;
 	text-align: center;
 }
 
@@ -211,7 +212,7 @@ svg {
 	color: white;
 };
 
-.retour {
+/* .retour {
 	height: 10%;
 	padding-right: 85%;
 	top: 30px;
@@ -231,7 +232,7 @@ svg {
 	padding-right: 85%;
 	top: 30px;
 	position: relative;
-}
+} */
 
 a {
 	text-decoration: none;

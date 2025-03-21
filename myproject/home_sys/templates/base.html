@@ -14,12 +14,23 @@
 
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="{% static 'js/app.js' %}"></script>
+
+        {% comment %} Game Scripts {% endcomment %}
+    	<script type="module" src="{% static 'js/game.js' %}"></script>
+	    <script type="module" src="{% static 'js/game-distant.js' %}"></script>
+{% comment %}  {% endcomment %}
+        <script src="{% static 'js/game-bot.js' %}"></script>
+	    <script src="{% static 'js/other_game.js' %}"></script>
+        
+    	{% comment %} <script src="{% static 'js/router.js' %}"></script> {% endcomment %}
+        <script type="module" src="{% static 'js/app.js' %}"></script>
 		<script src="{% static 'js/profile.js'%}"></script>
 		<script src="{% static 'js/channel.js'%}"></script>
 		<script src="{% static 'js/notifications.js'%}"></script>
 		<script src="{% static 'js/user-settings.js'%}"></script>
 		<script src="{% static 'js/delete.js'%}"></script>
+        <script src="{% static 'js/home.js' %}"></script>
+        <script src="{% static 'js/tournament.js' %}"></script>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
 
@@ -110,11 +121,6 @@
                             trigger="hover"
                             target=".nav-item">
                         </lord-icon>
-                        {% if request.user.users.has_unread_notifications %}
-                            <div class="notification-status active"></div>
-                        {% else %}
-                            <div class="notification-status"></div>
-                        {% endif %}
                         <span class="link-text">Notifications</span>
                     </a>
                 </li>
@@ -142,54 +148,8 @@
             {% endblock %}
         </main>
 
-        <style>
-            .notification-status {
-                position: absolute;
-                width: 50px;
-                height: 50px;
-                border-radius: 50%;
-                scale: 0.1;
-                margin-left: -10px;
-                margin-top: 0px;
-                display: none;
-                transition: 0.5s all ease;
-            }
-
-            .notification-status.active {
-                display: block;
-                background-color: blueviolet;
-                animation: anim-notif-status 0.5s forwards;
-            }
-
-            @keyframes anim-notif-status {
-    			0% {scale: 0.1}
-    			30% {scale: 0.5}
-    			40% {scale: 0.2}
-                100% {scale: 0.2}
-    		}
-
-        </style>
-        
-        
-        {% comment %} <script>
-    		function getCookie(name) {
-    			let cookieValue = null;
-    			if (document.cookie && document.cookie !== '') {
-    				const cookies = document.cookie.split(';');
-    				for (let i = 0; i < cookies.length; i++) {
-    					const cookie = cookies[i].trim();
-    					if (cookie.substring(0, name.length + 1) === (name + '=')) {
-    						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-    						break;
-    					}
-    				}
-    			}
-    			return cookieValue;
-    		}
-    		const csrftoken = getCookie('csrftoken');
-    	</script> {% endcomment %}
-{% comment %} 
-        <script>
+        {% comment %}
+        <!-- <script>
 
             const notificationSocket = new WebSocket(
                 'wss://' + window.location.host + '/ws/notifications/'
@@ -214,34 +174,10 @@
 
             notificationSocket.onerror = function (e) {
                 console.error('Erreur WebSocket :', e);
-            }; {% endcomment %}
-
-            {% comment %} // Notif Channels {% endcomment %}
-            {% comment %} const notificationChatSocket = new WebSocket(
-                'wss://' + window.location.host + '/ws/notifications-chat/'
-            );
-
-            notificationChatSocket.onopen = function (e) {
-                console.log("WebSocket connecté avec succès !");
-            };
-
-            notificationChatSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data);
-
-                if (data.type === 'update_status') {
-                    const notif = document.querySelector('.notification-chat');
-                    notif.classList.toggle("active", data.has_unread_chat);
-                }
-            };
-
-            notificationChatSocket.onclose = function (e) {
-                console.error('WebSocket fermé de manière inattendue');
-            };
-
-            notificationChatSocket.onerror = function (e) {
-                console.error('Erreur WebSocket :', e);
-            }; {% endcomment %}
-        {% comment %} </script> {% endcomment %}
+            }; 
+        </script>
+    -->
+    {% endcomment %}
 
 
     </body>

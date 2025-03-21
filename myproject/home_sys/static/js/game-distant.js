@@ -1,315 +1,458 @@
-// Variables
-var table = document.getElementById("game");
-var	context = table.getContext("2d");
-var score_p1 = document.getElementById("scoreP1");
-var score_p2 = document.getElementById("scoreP2");
-var player1_name = document.getElementById("title-p1");
-var player2_name = document.getElementById("title-p2");
-var text_win_p1 = document.getElementById("text-p1");
-var text_win_p2 = document.getElementById("text-p2");
-var fps = document.getElementById("fps");
-var game = document.getElementById("game");
-var disconnected = document.getElementById("disconnected");
-var overlay = document.getElementById("overlay");
-var countdown = document.getElementById("countdown");
+export class RoomGameManager {
 
-var counter = 3;
-var keys = {};                        // Players bars
-let currentPlayer = null;
-let gameState = {
-	player1_coords: null,
-	player2_coords: null,
-	ball_coords: null,
-	scores: {
-		p1: 0,
-		p2: 0
+	constructor() {
+		// console.log("CONSTRUCTOR ROOM");
+
+		this.roomList = document.getElementById("rooms-list");
+		if (!this.roomList) {
+			console.error("Element #rooms-list introuvable !");
+			return ;
+		}
+		const userId = document.getElementById('new-room').getAttribute('data-user-id');
+		this.loadRooms();
+		this.initEventListenners(userId);
 	}
-};
 
-// WebSocket concerns
-const socket = new WebSocket(`wss://172.20.10.3:5000/ws/pong/${gameId}/${id_t}`);
+	initEventListenners(userId) {
+		// console.log("ADD ROOMS LISTENERS");
+		document.getElementById('new-room').addEventListener('click', (e) => {
+			e.preventDefault();
+			this.createRoom(userId);
+		});
+	}
 
-socket.onopen = function() {
-	console.log("Connexion réussie au WebSocket");
+	async loadRooms() {
+		// console.log("LOAD ROOMS");
+
+		fetch('/api/rooms/')
+			.then(response => response.json())
+			.then(rooms => {
+				const container = document.getElementById('rooms-list');
+	
+				if (rooms.length === 0) {
+					container.innerHTML = '<p>Aucune Room</p>';
+				} else {
+					rooms.forEach(room => {
+						console.log("ROOM numero: ", room.game_id);
+						const link = document.createElement('a');
+						link.href = `/game-distant/${room.game_id}/0`;
+						link.className = 'game-distant room-link';
+						link.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
+						link.addEventListener('click', () => this.joinRoom(room.game_id));
+						container.appendChild(link);
+					});
+				}
+				console.log("HTML bien ajoute !!!");
+			})
+			.catch(error => {
+				console.error('Error loading rooms: ', error);
+			});
+	}
+
+	chargingGame() {
+		// const response = await fetch("game-distant");
+		return new Promise((resolve) => {
+			const html = `
+            	<link rel="stylesheet" href="/static/css/game-style.css">
+
+            	<div class="scores" id="scores">
+
+            		<h3 id="title-p1">Player 1</h3>
+            		<h3 id="scoreP1">0</h3>
+            		<h3 id="scoreP2">0</h3>
+            		<h3 id="title-p2">Player 2</h3>
+            	</div>
+
+            	<div id="canvas-container" display="block">
+            	    <canvas width="1920" height="850" id="game"></canvas>
+            	    <div id="button-container">
+            	        <button id="replay-button" style="display: none;">Play again !</button>
+            	    </div>
+            	    <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player1">
+            	        <svg width="1100" height="150" id="svg-wrapper-player1">
+            	            <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p1"></text>
+            	        </svg>
+            	    </div>
+            	    <div class="wrapper" top="500px" left="500px" width="1100" height="150" style="display: none;" id="wrapper-player2">
+            	        <svg width="1100" height="150" id="svg-wrapper-player2">
+            	            <text x="50%" y="50%" dy=".35em" text-anchor="middle" id="text-p2"></text>
+            	        </svg>
+            	    </div>
+            	    <div id="overlay">
+            	        <h1 id="countdown">3</h1>
+            	    </div>
+            	</div>
+
+            	<h3 class="disconnected" id="disconnected">Un joueur s'est deconnecte</h3>
+       		`;
+			document.getElementById('content').innerHTML = html;
+			setTimeout(resolve, 50);
+			console.log("HTML CHARGED");
+		});
+	}
+
+	async createRoom(gameId) {
+		// console.log("CREATE A ROOM");
+		try {
+			await fetch(`/create_current_game/${gameId}/`)
+			await this.chargingGame();
+			new PongDistantGame(gameId, 0);
+		} catch (error) {
+			console.error("Error when creating a room: ", error);
+		}
+	}
+
+	async joinRoom(gameId) {
+		// console.log("JOIN A ROOM: ", gameId);
+		await this.chargingGame();
+		new PongDistantGame(gameId, 0);
+	}
+
+	getCookie() {
+		return document.cookie
+			.split('; ')
+			.find(row => row.startsWith('csrftoken='))
+			?.split('=')[1] || '';
+	}
 }
 
-let start = Date.now();
-let compteur = 0;
-socket.onmessage = function(event) {
-	try {
-		const data = JSON.parse(event.data);
-		console.log(data.type);
+export class PongDistantGame {
+	static currentGame = null;
 
-		if (data.type == "countdown") {
-			countdownBeforeGame(data);
-		}
-		else if (data.type == "game_won"){
-			if (data.loser == 2)
-				winnerWindow(1);
-			else 
-				winnerWindow(2);
-			disconnected.style.display = "block";
-		}
+	constructor(gameId, id_t) {
+		console.log("JE COMMENCE LE PONG dans la room: ", gameId);
+		PongDistantGame.currentGame = this;
 		
-		else if (data.type == "game_restarted") {
-			game_restarted(data);
-		}
+		this.keyHandler = this.handleKey.bind(this);
+		this.initState();
+		
+		this.currentPlayer = null;
+		this.socket = new WebSocket(`wss://${window.location.host}/ws/pong/${gameId}/${id_t}`);
+		this.initSocket();
+		this.id_t = id_t;
+	}
 
-		else if (data.type == "players_name") {
-			if (data.player1_name) {
-				player1_name.innerText = data.player1_name;
-				text_win_p1.textContent = player1_name.innerText + " wins !";
-			} 
+	initState() {
+		this.keys = {};                        // Players bars
+		this.counter = 3;
+		this.gameState = {
+			player1_coords: null,
+			player2_coords: null,
+			ball_coords: null,
+			scores: {
+				p1: 0,
+				p2: 0
+			}
+		};
+		this.compteur = 0;
+		this.setupDOM();
+		this.setupListeners();
+	}
+
+	setupDOM() {
+		const safeShow = (id) => {
+			const element = document.getElementById(id);
+			if (element) element.style.display = 'flex';
+		};
+		['scores', 'scoreP1', 'scoreP2', 'canvas-container'].forEach(safeShow);
+
+		if (document.getElementById("scoreP1")) document.getElementById("scoreP1").textContent = "0";
+		if (document.getElementById("scoreP2")) document.getElementById("scoreP2").textContent = "0";
+	}
+
+	// Arrete le jeu
+	stopGame() {
+		window.removeEventListener('keydown',  this.keyHandler);
+		window.removeEventListener('keyup',  this.keyHandler);
+
+		const disconnected = document.getElementById("disconnected")
+		if (disconnected && disconnected.style.display) {
+			document.getElementById("disconnected").style.display = "none"; 
+		}
+		if (document.getElementById('game')) {
+			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
+		}
+		this.initState();
+	}
+
+	// Socket concerns
+	initSocket() {
+		this.socket.onopen = () => this.handleServerOpen();
+		this.socket.onmessage = (event) => this.handleServerMessage(event);
+		this.socket.onerror = (error) => this.handleServerError(error);
+		this.socket.onclose = () => this.handleServerDisconnect();
+	}
+
+	handleServerOpen() {
+		console.log("Connexion réussie au WebSocket");
+	}
+
+	handleServerMessage(event) {
+		try {
+			const data = JSON.parse(event.data);
+	
+			if (data.type == "countdown") {
+				const winner1Text = document.getElementById("wrapper-player1");
+				const winner2Text = document.getElementById("wrapper-player2");
+				const button = document.getElementById("replay-button");
+				const disco = document.getElementById("disconnected");
+
+				disco.style.display = "none";
+				button.style.display = "none";
+				winner1Text.style.display = 'none';
+				winner2Text.style.display = 'none';
+				this.countdownBeforeGame(data);
+			}
 			
-			if (data.player2_name) {
-				player2_name.innerText = data.player2_name;
-				text_win_p2.textContent = player2_name.innerText + " wins !";
-			} 
-				
+			else if (data.type == "game_won") {
+				document.getElementById("disconnected").style.display = "block";
+				document.getElementById("overlay").style.display = "none";
+				if (data.loser == 2)
+					this.winnerWindow(1, true);
+				else 
+					this.winnerWindow(2, true);
+			}
+			
+			else if (data.type == "game_restarted") {
+				this.game_restarted();
+			}
+	
+			else if (data.type == "players_name") {
+				if (data.player1_name) {
+					document.getElementById("title-p1").innerText = data.player1_name;
+					document.getElementById("text-p1").textContent = document.getElementById("title-p1").innerText + " wins !";
+				}
+	
+				if (data.player2_name) {
+					document.getElementById("title-p2").innerText = data.player2_name;
+					document.getElementById("text-p2").textContent = document.getElementById("title-p2").innerText + " wins !";
+				}
+			}
+	
+			else if (data.type == "game_state") {
+				document.getElementById("overlay").style.display = 'none';
+				this.gameLoop(data, Date.now());
+			}
+	
+			else if (data.type == "game_error") {
+				alert("Sorry, there has been a server side error. Please, change rooms.");
+			}
+	
+		} catch (error) {
+			console.error("Erreur de parsing des données du WebSocket :", error);
 		}
+	}
 
-		else if (data.type == "game_state") {
-			overlay.style.display = 'none';
-			startGame(data);
-		}
-		else if (data.type == "game_error") {
-			cancelAnimationFrame(animation_id);
-			alert("Sorry, there has been a server side error. Please, change rooms.");
-		}
+	handleServerError(error) {
+		console.error("Erreur WebSocket:", error);
+		alert("Game is full, or there has been an error.");
+	}
 
-    } catch (error) {
-        console.error("Erreur de parsing des données du WebSocket :", error);
-    }
-};
+	handleServerDisconnect() {
+		console.log("Deconnexion du socket");
+	}
 
-socket.onclose = function() {
-	console.log("Deconnexion du socket");
-    alert("Game is full, or there has been an error.")
-};
+	setupListeners() {
+		window.addEventListener('keydown', this.keyHandler);
+		window.addEventListener('keyup', this.keyHandler);
+	}
 
-socket.onerror = function(error) {
-    console.error("Erreur WebSocket:", error);
-};
-  
-window.onload = function() {
-    document.getElementById('scores').style.display = 'flex';
-	document.getElementById('fps').style.display = 'flex';
-	document.getElementById('canvas-container').style.display = 'flex';
-}
+	handleKey(e) {
+		this.keys[e.key] = (e.type === 'keydown');
+	}
 
-window.addEventListener("beforeunload", function() {
-    if (socket.readyState === WebSocket.OPEN && id_t !== 0) {  // <-- Vérifier id_t
-        socket.send(JSON.stringify({ action: "window_closed" }));
-    }
-});
+	countdownBeforeGame(data) {
+		document.getElementById("scores").style.display = 'flex';
+		document.getElementById("canvas-container").style.display = 'flex';
+		document.getElementById("game").style.display = 'block';
+		document.getElementById("overlay").style.display = 'block';
+		document.getElementById("countdown").innerText = data.message;
+	}
 
-var animation_id;
-
-function startGame(data) {
-
-	if (data.number) currentPlayer = data.number;
-	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
-	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
-	if (data.ball_coords) gameState.ball_coords = data.ball_coords;
-	if (data.scores) gameState.scores = data.scores;
-
-	animation_id = requestAnimationFrame(() => {
-		sendPlayerMove();
-		compteur++;
-
-		let end = Date.now();
-		if (end - start > 1000) {
-			fps.innerText = "Fps: " + compteur;
-			compteur = 0;
-			start = Date.now();
-		}
-
-		context.clearRect(0, 0, table.width, table.height);
-		console.log('gameState : ' + gameState);
-		update(gameState);
+	drawOuterRectangle(color) {
+		document.getElementById("game").getContext('2d').fillStyle = color;
+		document.getElementById("game").getContext('2d').beginPath();
+		document.getElementById("game").getContext('2d').roundRect(0, 0, document.getElementById("game").width, document.getElementById("game").height, 10);
+		document.getElementById("game").getContext('2d').fill();
+		document.getElementById("game").getContext('2d').closePath();
+	}
+	
+	drawInnerRectangle(color) {
+		document.getElementById("game").getContext('2d').fillStyle = color;
+		document.getElementById("game").getContext('2d').beginPath();
+		document.getElementById("game").getContext('2d').roundRect(5, 5, document.getElementById("game").width - 10, document.getElementById("game").height - 10, 8);
+		document.getElementById("game").getContext('2d').fill();
+		document.getElementById("game").getContext('2d').closePath();
+	}
+	
+	drawPlayer() {
+		if (!this.gameState.player1_coords || !this.gameState.player2_coords) return;
+	
+		document.getElementById("game").getContext('2d').fillStyle = "#ED4EB0";
+		document.getElementById("game").getContext('2d').beginPath();
 		
-		if (gameState.scores) {
-			score_p1.innerText = gameState.scores.p1;
-			score_p2.innerText = gameState.scores.p2;
+		if (this.gameState.player1_coords) {
+			document.getElementById("game").getContext('2d').roundRect(this.gameState.player1_coords.x1, this.gameState.player1_coords.y1, 5, 80, 10);
+		}
+		if (this.gameState.player2_coords) {
+			document.getElementById("game").getContext('2d').roundRect(this.gameState.player2_coords.x1, this.gameState.player2_coords.y1, 5, 80, 10);
+		}
+		document.getElementById("game").getContext('2d').fill();
+		document.getElementById("game").getContext('2d').closePath();
+	}
+	
+	drawBall() {
+		if (!this.gameState.ball_coords) return; 
+	
+		document.getElementById("game").getContext('2d').beginPath();
+		document.getElementById("game").getContext('2d').fillStyle = 'white';
+		document.getElementById("game").getContext('2d').arc(this.gameState.ball_coords.x, this.gameState.ball_coords.y, 13, Math.PI * 2, false);
+		document.getElementById("game").getContext('2d').fill();
+		document.getElementById("game").getContext('2d').closePath();
+		
+		document.getElementById("game").getContext('2d').beginPath();
+		document.getElementById("game").getContext('2d').fillStyle = "#23232e";
+		document.getElementById("game").getContext('2d').arc(this.gameState.ball_coords.x, this.gameState.ball_coords.y, 13 - 2, Math.PI * 2, false);
+		document.getElementById("game").getContext('2d').fill();
+		document.getElementById("game").getContext('2d').stroke();
+		document.getElementById("game").getContext('2d').closePath();
+	}
+	
+	update() {
+	
+		this.drawOuterRectangle("#ED4EB0");
+		this.drawInnerRectangle("#23232e");
+	
+		document.getElementById("game").getContext('2d').fillStyle = '#ED4EB0';
+		document.getElementById("game").getContext('2d').fillRect(document.getElementById("game").width / 2, 0, 5, document.getElementById("game").height);
+	
+		// console.log('Drawing player');
+		this.drawPlayer();
+		this.drawBall();
+	}
 
-			if (gameState.scores.p1 >= 1) {
-				winnerWindow(1);
-			}
-			else if (gameState.scores.p2 >= 1) {
-				winnerWindow(2);
+	sendPlayerMove() {
+		const moveData = {};
+		if (this.keys["ArrowUp"] || this.keys["ArrowDown"]) {
+			const moveValue = this.keys["ArrowUp"] ? -10 : 10;
+			if (this.currentPlayer === 1) {
+				moveData.player1_coords = { y1: moveValue };			
+			} else if (this.currentPlayer === 2) {
+				moveData.player2_coords = { y1: moveValue };
 			}
 		}
-	})
-}
-
-function game_restarted(data) {
-	context.clearRect(0, 0, table.width, table.height);
-	if (disconnected.style.display === "block") {
-		disconnected.style.display = "none"; 
-	}
-	const button = document.getElementById("replay-button");
-    button.style.display = "none";
-	const winner1Text = document.getElementById("wrapper-player1");
-	const winner2Text = document.getElementById("wrapper-player2");
-
-	winner1Text.style.display = "none";
-	winner2Text.style.display = "none";
-	if (gameState.scores.p1 >= 1) {
-		drawOuterRectangle("#365fa0");
-	}
-	else {
-		drawOuterRectangle("#C42021");
-	}
-
-	if (data.number) currentPlayer = data.number;
-	if (data.player1_coords) gameState.player1_coords = data.player1_coords;
-	if (data.player2_coords) gameState.player2_coords = data.player2_coords;
-	if (data.ball_coords) gameState.ball_coords = data.ball_coords;
-	if (data.scores) gameState.scores = data.scores;
-
-	keys = {};
-	score_p1.innerText = 0;
-	score_p2.innerText = 0;
-}
-
-function countdownBeforeGame(data) {
-	overlay.style.display = 'block';
-	countdown.innerText = data.message;
-}
-
-function drawOuterRectangle(color) {
-    context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(0, 0, table.width, table.height, 10);
-	context.fill();
-	context.closePath();
-}
-
-function drawInnerRectangle(color) {
-	context.fillStyle = color;
-	context.beginPath();
-	context.roundRect(5, 5, table.width - 10, table.height - 10, 8);
-	context.fill();
-    context.closePath();
-}
-
-function drawPlayer(player1Coords, player2Coords) {
-	// console.log('player1Coords: ' + player1Coords);
-	// console.log('player2Coords: ' + player2Coords);
-	if (!player1Coords || !player2Coords) return;
-
-	context.fillStyle = "#ED4EB0";
-	context.beginPath();
-	// console.log("player1Coords.x1 :" + player1Coords.x1 + " player1Coords.y1: " + player1Coords.y1);
-	// console.log("player2Coords.x1 :" + player2Coords.x1 + " player2Coords.y1: " + player2Coords.y1);
-	
-	if (player1Coords) {
-        context.roundRect(player1Coords.x1, player1Coords.y1, 5, 80, 10);
-    }
-    if (player2Coords) {
-        context.roundRect(player2Coords.x1, player2Coords.y1, 5, 80, 10);
-    }
-	context.fill();
-	context.closePath();
-}
-
-function drawBall(ball) {
-	if (!ball) return; 
-
-	context.beginPath();
-    context.fillStyle = 'white';
-    context.arc(ball.x, ball.y, 13, Math.PI * 2, false);
-    context.fill();
-    context.closePath();
-	
-	context.beginPath();
-	context.fillStyle = "#23232e";
-    context.arc(ball.x, ball.y, 13 - 2, Math.PI * 2, false);
-    context.fill();
-    context.stroke();
-    context.closePath();
-}
-
-function update(gameState) {
-
-	drawOuterRectangle("#ED4EB0");
-	drawInnerRectangle("#23232e");
-
-    context.fillStyle = '#ED4EB0';
-    context.fillRect(table.width / 2, 0, 5, table.height);
-
-	console.log('drawing player');
-	drawPlayer(gameState.player1_coords, gameState.player2_coords);
-	drawBall(gameState.ball_coords);
-}
-
-window.addEventListener("keydown", (event) => {
-    keys[event.key] = true;
-});
-
-window.addEventListener("keyup", (event) => {
-    keys[event.key] = false;
-});
-
-function sendPlayerMove() {
-	const moveData = {};
-	if (keys["ArrowUp"] || keys["ArrowDown"]) {
-		const moveValue = keys["ArrowUp"] ? -10 : 10;
-
-		if (currentPlayer === 1) {
-			moveData.player1_coords = { y1: moveValue };			
-		} else if (currentPlayer === 2) {
-			moveData.player2_coords = { y1: moveValue };
+		 // N'envoyer que si on a des données à envoyer
+		if (Object.keys(moveData).length > 0 && this.socket.readyState === WebSocket.OPEN) {
+			this.socket.send(JSON.stringify(moveData));
 		}
 	}
-	 // N'envoyer que si on a des données à envoyer
-	if (Object.keys(moveData).length > 0 && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(moveData));
-    }
-}
-
-async function winnerWindow(player) {
 	
-	context.clearRect(0, 0, table.width, table.height);
-    
-	const winner1Text = document.getElementById("wrapper-player1");
-	const winner2Text = document.getElementById("wrapper-player2");
+	gameLoop(data, start) {
+		if (data.number) this.currentPlayer = data.number;
+		if (data.player1_coords) this.gameState.player1_coords = data.player1_coords;
+		if (data.player2_coords) this.gameState.player2_coords = data.player2_coords;
+		if (data.ball_coords) this.gameState.ball_coords = data.ball_coords;
+		if (data.scores) this.gameState.scores = data.scores;
+	
+		this.sendPlayerMove();
+	
+		document.getElementById("game").getContext('2d').clearRect(0, 0, document.getElementById("game").width, document.getElementById("game").height);
+		this.update();
+		
+		if (this.gameState.scores) {
+			document.getElementById("scoreP1").innerText = this.gameState.scores.p1;
+			document.getElementById("scoreP2").innerText = this.gameState.scores.p2;
 
-	winner1Text.style.display = 'none';
-	winner2Text.style.display = 'none';
-	if (player == 1) {
-        drawOuterRectangle("#365fa0");
-        winner1Text.style.display = "block";
-    }
-	else {
-        drawOuterRectangle("#C42021");
-		winner2Text.style.display = "block";
-    }
-    drawInnerRectangle("#23232e");
-	await new Promise(r => setTimeout(r, 2000));
-	if (id_t) {
-		window.close();
+			if (this.gameState.scores.p1 >= 5) {
+				this.winnerWindow(1, false);
+			}
+			else if (this.gameState.scores.p2 >= 5) {
+				this.winnerWindow(2, false);
+			}
+		}
 	}
-    newGame(player);
-}
 
-function newGame(player) {
-    const button = document.getElementById("replay-button");
-    button.style.display = "block";
+	game_restarted() {
+		
+		const button = document.getElementById("replay-button");
+		const winner1Text = document.getElementById("wrapper-player1");
+		const winner2Text = document.getElementById("wrapper-player2");
+		
+		button.style.display = "none";
+		winner1Text.style.display = "none";
+		winner2Text.style.display = "none";
+		
+		if (this.gameState.scores.p1 >= 1) {
+			this.drawOuterRectangle("#365fa0");
+		}
+		else {
+			this.drawOuterRectangle("#C42021");
+		}
+		this.stopGame();
+		this.setupListeners();
+	}
 
-	if (player == 1)
-		button.style.color = "#C42021";
-	else
-		button.style.color = "#365FA0";
+	async winnerWindow(player, deco) {
 
-	button.addEventListener("click", resetGame);
-}
+		document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
+		
+		const winner1Text = document.getElementById("wrapper-player1");
+		const winner2Text = document.getElementById("wrapper-player2");
+	
+		winner1Text.style.display = 'none';
+		winner2Text.style.display = 'none';
+		if (player == 1) {
+			this.drawOuterRectangle("#365fa0");
+			winner1Text.style.display = "block";
+		}
+		else {
+			this.drawOuterRectangle("#C42021");
+			winner2Text.style.display = "block";
+		}
+		this.drawInnerRectangle("#23232e");
+		await new Promise(r => setTimeout(r, 2000));
+		if (this.id_t) {
+			loadPage(`/tournament/${this.id_t}`);
+		}
+		if (deco == false)
+			this.newGame(player);
+	}
 
-function resetGame() {
-	if (socket.readyState === WebSocket.OPEN) {
-		console.log("Demande de reset du jeu");
-		socket.send(JSON.stringify({action: "restart_game"}));
-	} else {
-		console.log("Echec");
+	newGame(player) {
+		const button = document.getElementById("replay-button");
+		button.style.display = "block";
+	
+		if (player == 1)
+			button.style.color = "#C42021";
+		else
+			button.style.color = "#365FA0";
+	
+		button.addEventListener("click", () => {
+			this.resetGame();
+		});
+	}
+	
+	resetGame() {
+		if (this.socket.readyState === WebSocket.OPEN) {
+			console.log("Demande de reset du jeu");
+			this.socket.send(JSON.stringify({action: "restart_game"}));
+		} else {
+			console.log("Echec");
+		}
+	}
+
+	closeSocket() {
+		if (this.socket && this.socket.readyState == WebSocket.OPEN) {
+			this.socket.close();
+
+			window.removeEventListener('keydown', this.keyHandler);
+			window.removeEventListener('keyup', this.keyHandler);
+
+			console.log("Socket ferme !");
+			PongDistantGame.currentGame = null;
+
+			if (!this.id_t)
+				this.stopGame();
+		}
 	}
 }

@@ -438,6 +438,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+            let trimmedCookie = cookie.trim();
+            if (trimmedCookie.startsWith('csrftoken=')) {
+                cookieValue = trimmedCookie.split('=')[1];
+            }
+        });
+    }
+    return cookieValue;
+}
+
 // Modify the success handler in the signin form submission
 vlp_signinForm.addEventListener('submit', function(e) {
     e.preventDefault();

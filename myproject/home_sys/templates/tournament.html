@@ -7,20 +7,19 @@
 <div id="content">
 
 	<link rel="stylesheet" href="{% static 'css/tournament-style.css' %}">
-	<script>
-	var id_t = "{{id_t}}";
-	</script>
+	<div class="container" data-id-t="{{id_t}}">
 	<div class="container">
 	
 		<div class="square" id="square">
 			<h2 id="title">Bienvenue dans le systeme de tournois ! Vous êtes dans la salle {{id_t}} </h2>
 			<div class="loader" id="loader"></div>
 			<div id="players-container">
-				<button id="bt" style="display: none;">
+				<a id='button_id'>
+					<button id="bt" style="display: none;"></button>
+				</a>
 				<p id="opponant" style="font-size: 24px;"></p>
 				<p id="message" style="font-size: 32px; text-align: center;"></p>
 			</div>
 		</div>
-	<script src="{% static 'js/tournament.js' %}"></script>
 </div>
 {% endblock %}
