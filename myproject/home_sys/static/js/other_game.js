@@ -1,4 +1,4 @@
-export class CasseBriqueGame {
+class CasseBriqueGame {
 	// currentGame = null;
 
 	constructor() {

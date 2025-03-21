@@ -49,8 +49,8 @@ var gameCasseBriqueDistantRoom = false;
 
 async function gameCasseBriqueDistantRoute() {
     if (!window.CBRoomGameManager) {
-        const { CBRoomGameManager } = await import('./other_game_distant.js');
-        window.CBRoomGameManager = CBRoomGameManager;
+        // const { CBRoomGameManager } = await import('./other_game_distant.js');
+        // window.CBRoomGameManager = CBRoomGameManager;
         await new Promise(resolve => {
             const checkEl = () => {
                 if (document.getElementById('rooms-list'))
@@ -61,7 +61,7 @@ async function gameCasseBriqueDistantRoute() {
             checkEl();
         });
     }
-    new window.CBRoomGameManager();
+    new CBRoomGameManager();
 }
 
 async function gameCasseBriqueRoute() {
@@ -95,22 +95,22 @@ async function gameRoute() {
     PongGame.currentGame.initGame();
 }
 
-// async function gameDistantRoute() {
-//     if (!window.RoomGameManager) {
-//         // const module = await import('./game-distant.js');
-//         // window.RoomGameManager = module.RoomGameManager;
-//         await new Promise(resolve => {
-//             const checkEl = () => {
-//                 if (document.getElementById('rooms-list'))
-//                     resolve();
-//                 else
-//                 setTimeout(checkEl, 50);
-//             };
-//             checkEl();
-//         });
-//     }
-//     new RoomGameManager();
-// }
+async function gameDistantRoute() {
+    if (!window.RoomGameManager) {
+        // const module = await import('./game-distant.js');
+        // window.RoomGameManager = module.RoomGameManager;
+        await new Promise(resolve => {
+            const checkEl = () => {
+                if (document.getElementById('rooms-list'))
+                    resolve();
+                else
+                setTimeout(checkEl, 50);
+            };
+            checkEl();
+        });
+    }
+    new RoomGameManager();
+}
 
 // async function gameBotRoute() {
 //     console.log("je suis la bitch");
@@ -287,7 +287,6 @@ window.loadPage = function(url, pushState = true) {
         }
 
         if (url.includes(`/other_game_multi_room/`)) {
-            console.log("JE SUIS LA MOI");
             gameCasseBriqueDistantRoom = true;
             gameCasseBriqueDistantRoute();
         }

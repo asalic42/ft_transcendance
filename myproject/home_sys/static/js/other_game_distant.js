@@ -1,79 +1,46 @@
-// export class CBRoomGameManager {
-// 	constructor() {
-// 		console.log("CONSTRUCTOR ROOM");
+class CBRoomGameManager {
+	constructor() {
 
-// 		this.roomList = document.getElementById("rooms-list");
-// 		if (!this.roomList) {
-// 			console.error("Element #rooms-list introuvable !");
-// 			return ;
-// 		}
-// 		this.mapId = 0;
-// 		const userId = document.getElementById('new-room').getAttribute('data-user-id');
-// 		this.loadRooms(userId);
-// 		// this.initEventListenners(userId);
-// 	}
+		this.roomList = document.getElementById("rooms-list");
+		if (!this.roomList) {
+			console.error("Element #rooms-list introuvable !");
+			return ;
+		}
+		this.mapId = 0;
+		const userId = document.getElementById('new-room').getAttribute('data-user-id');
+		this.loadRooms(userId);
+	}
 
-// 	// initEventListenners(userId) {
-// 	// 	console.log("ADD ROOMS LISTENERS");
-// 	// 	document.getElementById('new-room').addEventListener('click', (e) => {
-// 	// 		console.log("je suis la moi !");
-// 	// 		e.preventDefault();
-// 	// 		this.createRoom(userId);
-// 	// 	});
-// 	// }
-
-// 	async loadRooms(userId) {
-// 		// console.log("LOAD ROOMS");
-
-// 		fetch('/api/cb-rooms/')
-// 			.then(response => response.json())
-// 			.then(rooms => {
-// 				const container = document.getElementById('rooms-list');
+	async loadRooms(userId) {
+		fetch('/api/cb-rooms/')
+			.then(response => response.json())
+			.then(rooms => {
+				const container = document.getElementById('rooms-list');
 	
-// 				if (rooms.length === 0) {
-// 					container.innerHTML = '<p>Aucune Room</p>';
-// 				} else {
-// 					rooms.forEach(room => {
-// 						console.log("ROOM numero: ", room.map_id);
-// 						// if (room.map_id)
-// 						this.mapId = room.map_id;
-// 						if (userId != room.game_id) {
-// 							const link = document.createElement('a');
-// 							link.href = `/other_game_multi/${room.game_id}/${room.map_id}`;
-// 							link.className = 'other_game_multi room-link';
-// 							link.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
-// 							// link.addEventListener('click', () => this.joinRoom(room.game_id, room.map_id));
-// 							container.appendChild(link);
-// 						}
-// 					});
-// 				}
-// 				console.log("HTML bien ajoute !!!");
-// 			})
-// 			.catch(error => {
-// 				console.error('Error loading rooms: ', error);
-// 			});
-// 	}
+				if (rooms.length === 0) {
+					container.innerHTML = '<p>Aucune Room</p>';
+				} else {
+					rooms.forEach(room => {
+						console.log("ROOM numero: ", room.map_id);
+						this.mapId = room.map_id;
+						if (userId != room.game_id) {
+							const link = document.createElement('a');
+							link.href = `/other_game_multi/${room.game_id}/${room.map_id}`;
+							link.className = 'other_game_multi room-link';
+							link.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
+							container.appendChild(link);
+						}
+					});
+				}
+				console.log("HTML bien ajoute !!!");
+			})
+			.catch(error => {
+				console.error('Error loading rooms: ', error);
+			});
+	}
+}
 
-// 	// async createRoom(gameId) {
-// 	// 	console.log("CREATE A ROOM");
-// 	// 	try {
-
-
-// 	// 		// await this.chargingGame();
-// 	// 		// new CasseBriqueDistantGame(gameId, this.mapId);
-// 	// 	} catch (error) {
-// 	// 		console.error("Error when creating a room: ", error);
-// 	// 	}
-// 	// }
-
-// 	// async joinRoom(gameId) {
-// 		// console.log("JOIN A ROOM: ", gameId, this.mapId);
-// 		// await this.chargingGame();
-// 		// new CasseBriqueDistantGame(gameId, this.mapId);
-// 	// }
-// }
-
-export class CasseBriqueDistantGame {
+class CasseBriqueDistantGame {
 	static currentGame = null;
 	
 	constructor(gameId, mapId) {
