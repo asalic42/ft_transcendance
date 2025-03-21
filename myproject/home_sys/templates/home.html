@@ -70,11 +70,11 @@
 			<h2>Offline</h2>
 			{% for user in offline_users %}
 				{% if forloop.last %}
-					<div class="user-card last">
+					<div class="user-card last card-{{ user.id }}">
 				{% else %}
-					<div class="user-card">
+					<div class="user-card card-{{ user.id }}">
 				{% endif %}
-						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.username }}">
+						<img class="user-avatar" src="{{ user.image.url }}" alt="{{ user.name }}">
 						<p class="user-name">{{ user }}</p>
 						<a class="profile-button" href="{% url 'profile' user %}">
 							Profile

@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.core.management import *
 from .models import *
 from django.db import connection
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.contrib.sessions.models import Session
 
 
 @receiver(post_save, sender=User)
@@ -73,81 +75,21 @@ def run_after_migrations(sender, **kwargs):
 		print('no Maps')
 
 # signals.py
-from django.contrib.auth.signals import user_logged_in, user_logged_out
-from django.dispatch import receiver
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from .models import Users
 
-@receiver(user_logged_in)
+
+""" @receiver(user_logged_in)
 def on_user_logged_in(sender, request, user, **kwargs):
-	user_profile = Users.objects.get(user=user)
-	user_profile.is_online = True
-	user_profile.save()
-
-	channel_layer = get_channel_layer()
-	async_to_sync(channel_layer.group_send)(
-		"status_updates",
-		{
-			"type": "user_status_update",
-			"user_id": user.id,
-			"is_online": True,
-		},
-	)
+    # Ajouter l'ID de session actuel à la liste des sessions actives
+    session_key = request.session.session_key
+    if session_key not in user.active_sessions:
+        user.active_sessions.append(session_key)
+        user.save()
 
 @receiver(user_logged_out)
 def on_user_logged_out(sender, request, user, **kwargs):
-	user_profile = Users.objects.get(user=user)
-	user_profile.is_online = False
-	user_profile.save()
-
-	channel_layer = get_channel_layer()
-	async_to_sync(channel_layer.group_send)(
-		"status_updates",
-		{
-			"type": "user_status_update",
-			"user_id": user.id,
-			"is_online": False,
-		},
-	)
-
-from django.db.models.signals import m2m_changed
-from django.dispatch import receiver
-from .models import Users
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-		
-@receiver(m2m_changed, sender=Users.friends_request.through)
-def send_friend_request_notification(sender, instance, action, **kwargs):
-	if action == "post_add":
-		# Marquer l'utilisateur comme ayant des notifications non lues
-		instance.has_unread_notifications = True
-		instance.save()
-
-		# Envoyer la notification via WebSocket
-		channel_layer = get_channel_layer()
-		async_to_sync(channel_layer.group_send)(
-			f"notifications_{instance.user.id}",
-			{
-				'type': 'update_notification_status',
-				'has_unread_notifications': True,
-			}
-		)
-
-
-@receiver(m2m_changed, sender=Users.invite.through)
-def send_invite_notification(sender, instance, action, **kwargs):
-	if action == "post_add":
-
-		instance.has_unread_notifications = True
-		instance.save()
-		
-		channel_layer = get_channel_layer()
-		async_to_sync(channel_layer.group_send)(
-			f"notifications_{instance.user.id}",
-			{
-				'type': 'update_notification_status',
-				'has_unread_notifications': True,
-
-			}
-		)
+    # Supprimer toutes les sessions actives pour l'utilisateur
+    for session_key in user.active_sessions:
+        Session.objects.filter(session_key=session_key).delete()
+    user.active_sessions = []
+    user.save()
+ """

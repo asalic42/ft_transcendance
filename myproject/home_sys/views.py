@@ -21,7 +21,7 @@ from django.contrib import messages
 
 from zxcvbn import zxcvbn as passwordscore
 
-from .models import Users, Pong, SoloCasseBrique, MultiCasseBrique, Tournaments, MatchsTournaments, Chans, Messages, PrivateChan, CurrentGame, Maps
+from .models import Users, Pong, SoloCasseBrique, MultiCasseBrique, Tournaments, MatchsTournaments, Chans, Messages, PrivateChan, CurrentGame, Maps #, SessionIdUser
 from .utils import add_pong_logic, send_notification_to_user
 
 logger = logging.getLogger(__name__)
@@ -126,11 +126,17 @@ def signup(request):
 			
 		# Create a new user
 		user = User.objects.create_user(username=username, email=email, password=password)
-		user.save()
 		
 		user = authenticate(request, username=username, password=password)
+		
 		if user is not None:
 			login(request, user)
+
+			#session_key = request.session.session_key
+			#if session_key not in user.active_sessions:
+			#	user.active_sessions.append(session_key)
+			#	user.save()
+
 			return JsonResponse({
 				'status': 'success',
 				'redirect': reverse('home'),
@@ -184,7 +190,13 @@ def signin(request):
         
         user = authenticate(request, username=username, password=password)
         if user is not None:
+
             login(request, user)
+
+            #session_key = request.session.session_key
+            #if session_key not in user.active_sessions:
+            #    user.active_sessions.append(session_key)
+            #    user.save()
 
             # Mettre à jour le statut de l'utilisateur à 'online'
             try:
@@ -1055,7 +1067,7 @@ def get_rooms(request):
 """
 def get_online_users(request):
     online_users = Users.objects.filter(is_online=True)
-    users_data = [{"username": users.name, "image": users.image.url} for users in online_users]
+    users_data = [{"id": users.id, "username": users.name, "image": users.image.url} for users in online_users]
 	
     return JsonResponse({"online_users": users_data})
 

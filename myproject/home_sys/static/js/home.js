@@ -36,6 +36,12 @@ function fetchOnlineUsers() {
           	
 			data.online_users.forEach(user => {
             const userCard = document.createElement('div');
+            const userCardOffline = document.querySelector(`.card-${user.id}`);
+            if (userCardOffline)
+            {
+              // pas bon, ne revient pas quand le user se logout
+                userCardOffline.style.display = "none";
+            }
             userCard.classList.add('user-card');
             
             const userAvatar = document.createElement('img');
