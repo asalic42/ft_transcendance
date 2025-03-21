@@ -60,6 +60,109 @@ var gamePong = false;
 var gameCasseBrique = false;
 var gameBot = false;
 
+// Ajoute /accounts/ si absent
+// function prependAccounts(url) {
+//     let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
+//     return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
+// }
+
+// // Fonction de chargement de page via fetch
+// async function loadPage(url, pushState = true) {
+// 	if (url != "accounts/" && url != "/accounts/")
+// 		var finalizedUrl = prependAccounts(url);
+// 	else
+// 		var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+
+//     return fetch(finalizedUrl, { 
+//         headers: {
+//             "X-Requested-With": "XMLHttpRequest",
+//         },
+//         credentials: 'include'
+//     })
+//     .then(response => response.text())
+//     .then(html => {
+//         let parser = new DOMParser();
+//         let doc = parser.parseFromString(html, "text/html");
+//         let newContent = doc.getElementById("content");
+
+//         if (!newContent) {
+//             window.location.href = finalizedUrl;
+//             return;
+//         }
+//         document.getElementById("content").innerHTML = newContent.innerHTML;
+
+// 		if (document.getElementById('mapSelection')) {
+// 			// Ensure the script has run (safety check)
+// 			if (typeof initializeMapButtons === 'function') {
+// 				initializeMapButtons();
+// 			}
+// 		}
+//         // Réexécution des scripts intégrés
+// 		Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
+// 			const newScript = document.createElement('script');
+//             newScript.type = oldScript.type || 'module';
+// 			if (oldScript.src) {
+// 				// Add cache-buster to prevent stale scripts
+// 				newScript.src = oldScript.src + '?t=' + Date.now();
+// 				newScript.async = false;
+// 			} else {
+// 			    newScript.textContent = oldScript.textContent;
+// 			}
+// 			document.body.appendChild(newScript);
+// 			// Remove the script after execution to avoid clutter
+// 			newScript.onload = () => newScript.remove();
+// 		});
+
+//         if (pushState) history.pushState(null, "", finalizedUrl);
+//     })
+//     .catch(error => console.error("Erreur de chargement:", error));
+// }
+
+// async function handleLinkClick(event) {
+//     const link = event.target.closest("a");
+
+//         if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
+//             event.preventDefault();
+//             let urlPath = prependAccounts(link.getAttribute("href"));
+//             console.log("url = ", urlPath);
+//             loadPage(urlPath);
+                
+//             if (urlPath.includes("game-distant-choice")) {
+//                 gameRoom = true;
+//                 await gameDistantRoute();
+//             }
+//             else if (urlPath.includes("/game-distant/")) {
+//                 gameDistant = true;
+//             }
+//             else if (urlPath === '/accounts/game' || urlPath === '/accounts/game/') {
+//                 gamePong = true;
+//                 await gameRoute();
+//             }
+//             else if (urlPath === '/accounts/other_game' ) {
+//                 gameCasseBrique = true;
+//                 await gameCasseBriqueRoute();
+//             }
+//             else {
+//                 if (gameDistant && PongDistantGame.currentGame) {
+//                     PongDistantGame.currentGame.closeSocket();
+//                     gameDistant = false;
+//                 }
+//                 else if (gameRoom) {
+//                     window.RoomGameManager = null;
+//                     gameRoom = false;
+//                 }
+//                 else if (gamePong) {
+//                     window.PongGame = null;
+//                     gamePong = false;
+//                 }
+//                 else if (gameCasseBrique) {
+//                     window.CasseBriqueGame = null;
+//                     gameCasseBrique = false;
+//                 }
+//             }
+//         }
+// }
+
 async function gameCasseBriqueRoute() {
     if (!window.CasseBriqueGame) {
         const module = await import('./other_game.js');
@@ -218,7 +321,7 @@ window.loadPage = function(url, pushState = true) {
 		}
         
 		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
-            deg = setInterval(fetchFriendRequests, 500);
+            connectWebSocket_notif_page();
 			wasNotif = true
 		}
 
