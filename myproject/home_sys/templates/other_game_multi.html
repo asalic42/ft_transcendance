@@ -8,13 +8,13 @@
 
 	<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
-	<h3 class="game" id="fps">Fps : 0 | Avg Fps : <span id="avg-fps">0</span></h3>
-	<h3 class="timer" id="timer" style="display: none;">Time left: 60s</h3>
+	{% comment %} <h3 class="game" id="fps">Fps : 0 | Avg Fps : <span id="avg-fps">0</span></h3> {% endcomment %}
+	<h3 class="timer" id="timer" style="color: white;">Time left: 60s</h3>
 
 	<!-- Game Player 1  -->
-	<div class="games">
+	<div class="games" id="game-cb">
 		<div class="player1" id="player1">
-			<div class="box-scores">
+			<div class="box-scores" id="box-scores">
 				<h3 class="playername" id="playername1">Player 1</h3>
 		    	<h3 class="title-game" id="title1"> 0 </h3>
 			</div>
@@ -37,7 +37,7 @@
 	<!-- Game Player 2  -->
 
 		<div class="player2" id="player2">
-			<div class="box-scores">
+			<div class="box-scores" id="box-scores">
 		    	<h3 class="title-game" id="title2"> 0 </h3>
 				<h3 class="playername" id="playername2">Player 2</h3>
 			</div>

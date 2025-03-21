@@ -755,7 +755,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	# Modification de la méthode disconnect pour gérer correctement la déconnexion
 	async def disconnect(self, close_code):
-		game_was_running = self.game.is_running
+		# game_was_running = self.game.is_running
 		self.game.is_running = False
 		# self.game.is_over = True
 		
@@ -1266,7 +1266,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				except ChannelFull:
 					print("Channel full, skipping update")
 				
-				if (self.game.timeleft >= 10):
+				if (self.game.timeleft >= 60):
 					await self.save_game_result()
 					await self.channel_layer.group_send(
 						self.room_group_name, {
@@ -1281,14 +1281,13 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	# Check si le round est fini pour chaque joueur et en demarre un autre
 	def is_round_end(self, ball_p1, ball_p2):
-
 		if ball_p1['coords']['y'] + ball_p1['radius'] >= 750:
-			if self.game.scores['p1'] > 5:
-				self.game.scores['p1'] -= 5
+			if self.game.scores['p1'] > 3:
+				self.game.scores['p1'] -= 3
 			self.reset_ball_and_player(ball_p1, 1)
 		if ball_p2['coords']['y'] + ball_p2['radius'] >= 750:
-			if self.game.scores['p1'] > 5:
-				self.game.scores['p2'] -= 5
+			if self.game.scores['p2'] > 3:
+				self.game.scores['p2'] -= 3
 			self.reset_ball_and_player(ball_p2, 2)
 	
 	def reset_ball_and_player(self, ball, player_reset):

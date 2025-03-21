@@ -1,4 +1,4 @@
-export class RoomGameManager {
+class RoomGameManager {
 
 	constructor() {
 		// console.log("CONSTRUCTOR ROOM");
@@ -107,20 +107,12 @@ export class RoomGameManager {
 		await this.chargingGame();
 		new PongDistantGame(gameId, 0);
 	}
-
-	getCookie() {
-		return document.cookie
-			.split('; ')
-			.find(row => row.startsWith('csrftoken='))
-			?.split('=')[1] || '';
-	}
 }
 
-export class PongDistantGame {
+class PongDistantGame {
 	static currentGame = null;
 
 	constructor(gameId, id_t) {
-		console.log("JE COMMENCE LE PONG dans la room: ", gameId);
 		PongDistantGame.currentGame = this;
 		
 		this.keyHandler = this.handleKey.bind(this);
@@ -164,9 +156,10 @@ export class PongDistantGame {
 		window.removeEventListener('keydown',  this.keyHandler);
 		window.removeEventListener('keyup',  this.keyHandler);
 
-		if (disconnected.style.display === "block") {
-			disconnected.style.display = "none"; 
+		if (document.getElementById('disconnected').style.display === "block") {
+			document.getElementById('disconnected').style.display = "none"; 
 		}
+
 		if (document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
@@ -342,7 +335,7 @@ export class PongDistantGame {
 		}
 	}
 	
-	gameLoop(data, start) {
+	gameLoop(data) {
 		if (data.number) this.currentPlayer = data.number;
 		if (data.player1_coords) this.gameState.player1_coords = data.player1_coords;
 		if (data.player2_coords) this.gameState.player2_coords = data.player2_coords;
@@ -425,7 +418,6 @@ export class PongDistantGame {
 	
 	resetGame() {
 		if (this.socket.readyState === WebSocket.OPEN) {
-			console.log("Demande de reset du jeu");
 			this.socket.send(JSON.stringify({action: "restart_game"}));
 		} else {
 			console.log("Echec");
@@ -440,9 +432,8 @@ export class PongDistantGame {
 			window.removeEventListener('keyup', this.keyHandler);
 
 			console.log("Socket ferme !");
+			
 			PongDistantGame.currentGame = null;
-
-			this.stopGame();
 		}
 	}
 }

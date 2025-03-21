@@ -1,5 +1,5 @@
 export class CasseBriqueGame {
-	currentGame = null;
+	// currentGame = null;
 
 	constructor() {
 		this.keyHandler = this.handleKey.bind(this);
@@ -8,7 +8,7 @@ export class CasseBriqueGame {
 	}
 
 	initState() {
-		CasseBriqueGame.currentGame = this;
+		// CasseBriqueGame.currentGame = this;
 		this.macro_ballSpeedIncr = 0.075;
 		this.macro_ballInitialSpeed = 9;
 
@@ -40,7 +40,6 @@ export class CasseBriqueGame {
 		document.getElementById('map-choice').addEventListener('click', (event) => {
 			if (event.target.closest('.mapButton')) {
 				this.selectedMap = event.target.dataset.mapId
-				console.log(this.selectedMap)
 				this.launchGame(this.selectedMap);
 			}
 		});
@@ -302,7 +301,6 @@ export class CasseBriqueGame {
 				this.incrementBallSpeed();
 	
 				this.block_arr[k].state--;
-				console.log(`block_arr[k].state ${this.block_arr[k].state}`);
 				if (!this.block_arr[k].state) {
 					this.blocksDestroyed++;
 				}
@@ -414,7 +412,6 @@ export class CasseBriqueGame {
 			document.getElementById("gameOver").style.color = "#365FA0";
 			document.getElementById("gameOver").textContent = "Omg ! You won !";
 			document.getElementById("replay-button").style.color = "#365FA0";
-			console.log("You won, exterior.");
 		}
 		this.drawInnerRectangle("#23232e");
 	
@@ -468,12 +465,11 @@ export class CasseBriqueGame {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
 
-		CasseBriqueGame.currentGame = null;
+		// CasseBriqueGame.currentGame = null;
 	}
 
 	restartGame() {
 		if (this.stop) {
-			console.log("je RESTART le jeu. go MAP");
 			this.stopGame();
 			this.keyHandler = this.handleKey.bind(this);
 			this.initState();
@@ -483,7 +479,6 @@ export class CasseBriqueGame {
 
 	// API stuff
 	async addNewGame(id_player) {
-		console.log("Appel de addnewgame");
 		try {
 			const response = await fetch('/api/add_solo_casse_brique/', {
 				method: 'POST',

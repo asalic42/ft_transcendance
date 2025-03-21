@@ -75,24 +75,24 @@ function getCookie(name) {
 }
 
 // Fonction pour récupérer les statuts de tous les utilisateurs
-function notif_fetchAllUsersStatus() {
+// function notif_fetchAllUsersStatus() {
 
-	fetch("/api/user-status/")
-		.then(response => response.json())
-		.then(users => {
-			users.forEach(user => {
-				const userElement = document.getElementById(`user-${user.id}`);
-				if (userElement) {
-					if (user.is_online) {
-						userElement.classList.add("active");
-					} else {
-						userElement.classList.remove("active");
-					}
-				}
-			});
-		})
-		.catch(error => {return null;});
-}
+// 	fetch("/api/user-status/")
+// 		.then(response => response.json())
+// 		.then(users => {
+// 			users.forEach(user => {
+// 				const userElement = document.getElementById(`user-${user.id}`);
+// 				if (userElement) {
+// 					if (user.is_online) {
+// 						userElement.classList.add("active");
+// 					} else {
+// 						userElement.classList.remove("active");
+// 					}
+// 				}
+// 			});
+// 		})
+// 		.catch(error => {return null;});
+// }
 
 
 function connectWebSocket_notif_page() {
