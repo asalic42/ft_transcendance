@@ -1,13 +1,3 @@
-""" class SPAMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        if 'app2' in request.path:
-            request.session['current_app'] = 'home_sys'
-        return self.get_response(request)
-
- """
 # middleware.py
 class SPAMiddleware:
     def __init__(self, get_response):

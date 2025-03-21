@@ -1,5 +1,10 @@
+// Au tout début du fichier
 window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault();
+    
+    if (event.reason instanceof TypeError && event.reason.message.includes('fetch')) {
+        alert("Le serveur est down...");
+    }
 });
 
 console.error = () => {};
@@ -28,12 +33,10 @@ function getCSRFToken() {
 // Normalize URL paths - make sure they start with a single '/'
 function normalizeUrl(url) {
     // If it's already a full URL with protocol and domain
-    // console.log("Processing URL:", url);
     
     if (url.includes('://')) {
         try {
             const urlObj = new URL(url);
-            // console.log("Normalized URL (full):", urlObj.pathname);
             return urlObj.pathname; // Just get the path component
         } catch (e) {
             console.error("Invalid URL:", url);
@@ -110,7 +113,6 @@ async function gameDistantRoute() {
 }
 
 async function gameBotRoute() {
-    console.log("je suis la bitch");
 
     if (!window.BotGame) {
         const module = await import('./game-bot.js');
@@ -263,7 +265,6 @@ window.loadPage = function(url, pushState = true) {
             gameDistant = false;
         }
 
-        console.log("url = ", url);
         if (url === `https://${window.location.host}/game/` || url === `https://${window.location.host}/game`) {
             gamePong = true;
             gameRoute();
@@ -310,7 +311,6 @@ function handleLinkClick(event) {
         !link.hasAttribute("data-spa-ignore")) {
         
         event.preventDefault();
-        console.log("load page bien charge !");
         loadPage(link.href);
     }
 }
@@ -326,12 +326,9 @@ function handleFormSubmit(event) {
         return;
     }
 
-    console.log("HI EVRYBODY");
     if (form.id === "LevelForm") {
-        console.log("HEY");
         loadPage(location.pathname)
 
-        console.log("JE LANCE LE BOT: ", window.location);
         if (window.location.includes("game-bot")) {
             gameBot = true;
             gameBotRoute();

@@ -613,19 +613,6 @@ function initDynamicComponents() {
     });
 }
 
-/* // Fonction pour gérer le clic sur un lien
-document.addEventListener('click', function(event) {
-    const vlp_link = event.target.closest('a');  // Trouver l'élément <a> cliqué
-    if (link && link.href) {
-        event.preventDefault();  // Empêcher le comportement par défaut du lien
-        loadPage(link.href);  // Charger la nouvelle page via AJAX
-    }
-});
- */
-
-
-
-
 
 // script.js
 // Gérer l'historique
