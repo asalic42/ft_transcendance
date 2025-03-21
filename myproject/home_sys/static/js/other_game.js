@@ -1,5 +1,4 @@
 class CasseBriqueGame {
-	// currentGame = null;
 
 	constructor() {
 		this.keyHandler = this.handleKey.bind(this);
@@ -8,7 +7,6 @@ class CasseBriqueGame {
 	}
 
 	initState() {
-		// CasseBriqueGame.currentGame = this;
 		this.macro_ballSpeedIncr = 0.075;
 		this.macro_ballInitialSpeed = 9;
 
@@ -464,8 +462,6 @@ class CasseBriqueGame {
 		if (document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
-
-		// CasseBriqueGame.currentGame = null;
 	}
 
 	restartGame() {
@@ -500,7 +496,6 @@ class CasseBriqueGame {
 			}
 	
 			const result = await response.json();
-			console.log('Nouveau jeu ajouté:', result);
 		} catch (error) {
 			console.error('Erreur:', error);
 		}

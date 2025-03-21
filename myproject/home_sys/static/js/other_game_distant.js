@@ -1,6 +1,5 @@
 class CBRoomGameManager {
 	constructor() {
-
 		this.roomList = document.getElementById("rooms-list");
 		if (!this.roomList) {
 			console.error("Element #rooms-list introuvable !");
@@ -32,7 +31,6 @@ class CBRoomGameManager {
 						}
 					});
 				}
-				console.log("HTML bien ajoute !!!");
 			})
 			.catch(error => {
 				console.error('Error loading rooms: ', error);
@@ -116,7 +114,6 @@ class CasseBriqueDistantGame {
 	
 	handleServerMessage(event) {
 		const data = JSON.parse(event.data);
-		console.log(`Message : ${data.type}`)
 	
 		if (data.type == "countdown") {
 			this.countdownBeforeGame(data);
@@ -130,7 +127,6 @@ class CasseBriqueDistantGame {
 		}
 
 		if (data.type == "game_won") {
-			console.log("JOUEUR DECO");
 			document.getElementById("overlay1").style.display = 'none';
 			document.getElementById("overlay2").style.display = 'none';
 			if (data.disconnected) {
@@ -388,7 +384,6 @@ class CasseBriqueDistantGame {
 
 	resetGame() {
 		if (this.socket.readyState === WebSocket.OPEN) {
-			console.log("Demande de reset du jeu");
 			this.socket.send(JSON.stringify({type: "restart_game"}));
 		} else {
 			console.log("Echec");
@@ -418,7 +413,6 @@ class CasseBriqueDistantGame {
 			window.removeEventListener('keydown', this.keyHandler);
 			window.removeEventListener('keyup', this.keyHandler);
 
-			console.log("Socket ferme !");
 			CasseBriqueDistantGame.currentGame = null;
 		}
 	}

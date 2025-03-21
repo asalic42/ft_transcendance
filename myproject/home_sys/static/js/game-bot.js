@@ -1,6 +1,5 @@
 class BotGame {
 	constructor(level)  {
-		console.log("level bot: ", level);
 		this.user_option = level;
 		this.initState();
 		this.keyHandler = this.handleKey.bind(this);
@@ -150,7 +149,7 @@ class BotGame {
 		}
 	}
 
-		// Dessine le joueur
+	// Dessine le joueur
 	drawPlayer() {
 		this.movePlayer();
 		this.moveBot();
@@ -162,7 +161,7 @@ class BotGame {
 		document.getElementById('bot-game').getContext('2d').closePath();
 	}
 
-		// Bouge la balle
+	// Bouge la balle
 	moveBall() {
 		// Ball is hiting a player.
 		if (!this.stop && this.isBallHittingPlayer()) {

@@ -1,3 +1,16 @@
+var waschan = false;
+var wasNotif = false;
+var wasSettings = false;
+var washome = false;
+
+var gameDistant = false;
+var gameRoom = false;
+var gamePong = false;
+var gameCasseBrique = false;
+var gameBot = false;
+var gameCasseBriqueDistant = false;
+var gameCasseBriqueDistantRoom = false;
+
 // Sécurité CSRF cookies
 function getCSRFToken() {
     let cookieValue = null;
@@ -15,12 +28,10 @@ function getCSRFToken() {
 // Normalize URL paths - make sure they start with a single '/'
 function normalizeUrl(url) {
     // If it's already a full URL with protocol and domain
-    // console.log("Processing URL:", url);
     
     if (url.includes('://')) {
         try {
             const urlObj = new URL(url);
-            // console.log("Normalized URL (full):", urlObj.pathname);
             return urlObj.pathname; // Just get the path component
         } catch (e) {
             console.error("Invalid URL:", url);
@@ -30,27 +41,11 @@ function normalizeUrl(url) {
     // For relative paths, ensure they start with a single '/'
     let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Remove leading/trailing slashes
     let normalizedPath = cleanedUrl ? '/' + cleanedUrl : '/';
-    // console.log("Normalized URL (relative):", normalizedPath);
     return normalizedPath;
 }
-    
-var waschan = false;
-var wasNotif = false;
-var wasSettings = false;
-var washome = false;
-
-var gameDistant = false;
-var gameRoom = false;
-var gamePong = false;
-var gameCasseBrique = false;
-var gameBot = false;
-var gameCasseBriqueDistant = false;
-var gameCasseBriqueDistantRoom = false;
 
 async function gameCasseBriqueDistantRoute() {
     if (!window.CBRoomGameManager) {
-        // const { CBRoomGameManager } = await import('./other_game_distant.js');
-        // window.CBRoomGameManager = CBRoomGameManager;
         await new Promise(resolve => {
             const checkEl = () => {
                 if (document.getElementById('rooms-list'))
@@ -97,8 +92,6 @@ async function gameRoute() {
 
 async function gameDistantRoute() {
     if (!window.RoomGameManager) {
-        // const module = await import('./game-distant.js');
-        // window.RoomGameManager = module.RoomGameManager;
         await new Promise(resolve => {
             const checkEl = () => {
                 if (document.getElementById('rooms-list'))
@@ -111,26 +104,6 @@ async function gameDistantRoute() {
     }
     new RoomGameManager();
 }
-
-// async function gameBotRoute() {
-//     console.log("je suis la bitch");
-
-//     if (!window.BotGame) {
-//         const module = await import('./game-bot.js');
-//         window.BotGame = module.BotGame;
-//         await new Promise(resolve => {
-//             const checkEl = () => {
-//                 if (document.getElementById('canvas-container'))
-//                     resolve();
-//                 else
-//                 setTimeout(checkEl, 50);
-//             };
-//             checkEl();
-//         });
-//     }
-//     new window.BotGame();
-//     BotGame.currentGame.start();
-// }
 
 let liveChanTimeout;
 let SettingsTimeout;
@@ -315,35 +288,9 @@ window.reinitCoreScripts = function() {
     const isLoginPageNow = currentPath === '/' || currentPath === '';
     const navbar = document.querySelector('.navbar');
     if (navbar) {
-        // console.log("Reinit - Setting navbar display to:", isLoginPageNow ? 'none' : 'flex');
         navbar.style.display = isLoginPageNow ? 'none' : 'flex';
     }
 };
-
-// function handleLinkClick(event) {
-//     let link = event.target.closest("a");
-
-//     errorprint = link.getAttribute('href');
-
-//     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
-//     if (link && link.href && 
-//         (new URL(link.href).host === window.location.host) && 
-//         !link.hasAttribute("data-full-reload") &&
-//         !link.hasAttribute("data-spa-ignore")) {
-        
-//         event.preventDefault();
-
-//         let normalizedUrl = errorprint.match(/^\/(.*?)\/$/);
-//         if (normalizedUrl)
-//             normalizedUrl = normalizedUrl[1];
-//         else
-//         {
-//             normalizedUrl = errorprint;
-//         }
-
-//         loadPage(`https://${window.location.host}/${normalizedUrl}`);
-//     }
-// }
 
 // Single function to handle all link clicks for SPA navigation
 function handleLinkClick(event) {
@@ -382,17 +329,6 @@ function handleFormSubmit(event) {
         });
         return;
     }
-
-        // console.log("JE LANCE LE BOT: ", window.location);
-        // if (window.location === `https://${window.location.host}/game-bot/` || window.location === `https://${window.location.host}/game-bot`) {
-        //     console.log("hi !");
-        //     gameBot = true;
-        //     gameBotRoute();
-        // }
-        // else if (gameBot) {
-        //     window.BotGame = null;
-        //     gameBot = false;
-        // }q
     
     // Handle standard form submissions
     event.preventDefault();
@@ -442,11 +378,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const isLoginPage = currentUrl === '/' || currentUrl === '';
         const navbar = document.querySelector('.navbar');
         
-        // console.log("popstate - Current URL:", currentUrl);
-        // console.log("popstate - Is login page:", isLoginPage);
-        
         if (navbar) {
-            // console.log("popstate - Setting navbar display to:", isLoginPage ? 'none' : 'flex');
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
 		loadPage(window.location.pathname, false);	
@@ -457,11 +389,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const isLoginPage = currentUrl === '/' || currentUrl === '';
     const navbar = document.querySelector('.navbar');
     
-    // console.log("Initial load - Current URL:", currentUrl);
-    // console.log("Initial load - Is login page:", isLoginPage);
-    
     if (navbar) {
-        // console.log("Initial load - Setting navbar display to:", isLoginPage ? 'none' : 'flex');
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
 	if (window.location.pathname != '/')

@@ -1,8 +1,6 @@
 class RoomGameManager {
 
 	constructor() {
-		// console.log("CONSTRUCTOR ROOM");
-
 		this.roomList = document.getElementById("rooms-list");
 		if (!this.roomList) {
 			console.error("Element #rooms-list introuvable !");
@@ -14,7 +12,6 @@ class RoomGameManager {
 	}
 
 	initEventListenners(userId) {
-		// console.log("ADD ROOMS LISTENERS");
 		document.getElementById('new-room').addEventListener('click', (e) => {
 			e.preventDefault();
 			this.createRoom(userId);
@@ -22,7 +19,6 @@ class RoomGameManager {
 	}
 
 	async loadRooms() {
-		// console.log("LOAD ROOMS");
 
 		fetch('/api/rooms/')
 			.then(response => response.json())
@@ -42,7 +38,6 @@ class RoomGameManager {
 						container.appendChild(link);
 					});
 				}
-				console.log("HTML bien ajoute !!!");
 			})
 			.catch(error => {
 				console.error('Error loading rooms: ', error);
@@ -50,7 +45,6 @@ class RoomGameManager {
 	}
 
 	chargingGame() {
-		// const response = await fetch("game-distant");
 		return new Promise((resolve) => {
 			const html = `
             	<link rel="stylesheet" href="/static/css/game-style.css">
@@ -87,12 +81,10 @@ class RoomGameManager {
        		`;
 			document.getElementById('content').innerHTML = html;
 			setTimeout(resolve, 50);
-			console.log("HTML CHARGED");
 		});
 	}
 
 	async createRoom(gameId) {
-		// console.log("CREATE A ROOM");
 		try {
 			await fetch(`/create_current_game/${gameId}/`)
 			await this.chargingGame();
@@ -103,7 +95,6 @@ class RoomGameManager {
 	}
 
 	async joinRoom(gameId) {
-		// console.log("JOIN A ROOM: ", gameId);
 		await this.chargingGame();
 		new PongDistantGame(gameId, 0);
 	}
@@ -314,7 +305,6 @@ class PongDistantGame {
 		document.getElementById("game").getContext('2d').fillStyle = '#ED4EB0';
 		document.getElementById("game").getContext('2d').fillRect(document.getElementById("game").width / 2, 0, 5, document.getElementById("game").height);
 	
-		// console.log('Drawing player');
 		this.drawPlayer();
 		this.drawBall();
 	}
