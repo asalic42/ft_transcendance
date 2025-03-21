@@ -1694,3 +1694,4 @@ def delete_success(request):
 @login_required
 def profile_page(request):
 	return (render(request, 'profile.html'))
+

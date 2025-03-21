@@ -1,3 +1,17 @@
+// Sécurité CSRF cookies
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+            let trimmedCookie = cookie.trim();
+            if (trimmedCookie.startsWith('csrftoken=')) {
+                cookieValue = trimmedCookie.split('=')[1];
+            }
+        });
+    }
+    return cookieValue;
+}
+
 function notif_getAddFriendResponse(baliseName, url, dataStatus) {
 	document.querySelectorAll(`${baliseName}`).forEach(button => {
 		button.addEventListener('click', function() {
@@ -14,7 +28,7 @@ function notif_getAddFriendResponse(baliseName, url, dataStatus) {
 			.then(data => {
 				if (data.status === `blocked`) {
 					alert(`Impossible d'accepter car vous êtes bloqué par cet utilisateur.`);
-					loadPage("/notifications/"); // Recharger la page pour mettre à jour la liste
+					loadPage(`https://${window.location.host}/notifications/`); // Recharger la page pour mettre à jour la liste
 				}
 				else if (data.status === `unblockBefore`) {
 					alert(`Pour accepter la demande d'ami de cet utilisateur, veuillez le débloquer.`);
@@ -91,10 +105,7 @@ function notif_fetchAllUsersStatus() {
 				loadPage(`https://${window.location.host}/channels/`)
 			})
 		}
-		
-		
 }
-
 
 function connectWebSocket_notif_page() {
 	notif_getAddFriendResponse(".add-it", "accept_friend_request", "friend_added");

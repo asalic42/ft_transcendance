@@ -16,6 +16,7 @@ urlpatterns = [
     path('check_password_solidity/', check_password_solidity, name='check_password_solidity'),
 
 
+
     # --- Template loading routes ---
     path('profile/<str:username>/', load_template, {'page': 'profile'}, name='profile'),
     path('channels/', load_template, {'page': 'channels'}, name='channels'),

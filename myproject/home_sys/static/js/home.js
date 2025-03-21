@@ -66,8 +66,9 @@ function fetchOnlineUsers() {
       });
   }
 
+// Récupérer les demandes d'amis toutes les 10 secondes
   // Appeler la fonction pour récupérer les utilisateurs en ligne au chargement de la page
   document.addEventListener('DOMContentLoaded', fetchOnlineUsers);
   
-  // Optionnel : mettre à jour la liste toutes les 30 secondes
+
   homefetch = setInterval(fetchOnlineUsers, 500);

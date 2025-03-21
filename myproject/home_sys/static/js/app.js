@@ -7,7 +7,7 @@ window.addEventListener('unhandledrejection', (event) => {
     }
 });
 
-console.error = () => {};
+//console.error = () => {};
 
 import { PongDistantGame } from './game-distant.js';
 import { PongGame } from './game.js';
@@ -137,7 +137,6 @@ let liveChat;
 let homefetch;
 let notiffetch;
 
-
 let errorprint;
 // Ajouter une variable globale pour tracker les scripts chargés
 /* getCSRFTokenlet loadedScripts = []; */
@@ -217,8 +216,9 @@ window.loadPage = function(url, pushState = true) {
             clearInterval(notiffetch);
 			wasNotif = false;
 		}
-		else if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
-			connectWebSocket_notif_page();
+        
+		if (url === `https://${window.location.host}/notifications/` || url === '/notifications/') {
+            deg = setInterval(fetchFriendRequests, 500);
 			wasNotif = true
 		}
 
