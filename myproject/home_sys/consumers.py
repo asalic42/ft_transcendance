@@ -74,7 +74,7 @@ class PongGame:
 				'y1': 385,
 				'x2': 100 if player_number == 1 else 1828,
 				'y2': 465,
-				'vy': 30
+				'vy': 3
 			}
 
 	# Add player to the game if its possible
@@ -93,7 +93,7 @@ class PongGame:
 			'y1': 385,
 			'x2': 100 if player_number == 1 else 1828,
 			'y2': 465,
-			'vy': 10
+			'vy': 3
 		}
 
 		self.players[channel_name] = {
@@ -588,7 +588,7 @@ class CasseBriqueGame:
 		self.ball = {
 			1:{
 				'coords' : {'x' : 600 / 2, 'y' : 700 -13},
-				'vector' : {'vy' : 9, 'vx' : 9, 'speed': 9},
+				'vector' : {'vy' : 9, 'vx' : 9, 'speed': 7},
 				'radius' : 13,
 				'hit_horizontal' : 0,
 				'hit_vertical' : 0,
@@ -596,7 +596,7 @@ class CasseBriqueGame:
 			},
 			2: {
 				'coords' : {'x' : 600 / 2, 'y' : 700 -13},
-				'vector' :{'vy' : 9, 'vx' : 9, 'speed': 9},
+				'vector' : {'vy' : 9, 'vx' : 9, 'speed': 7},
 				'radius' : 13,
 				'hit_horizontal' : 0,
 				'hit_vertical' : 0,
@@ -755,7 +755,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	# Modification de la méthode disconnect pour gérer correctement la déconnexion
 	async def disconnect(self, close_code):
-		game_was_running = self.game.is_running
+		# game_was_running = self.game.is_running
 		self.game.is_running = False
 		# self.game.is_over = True
 		
@@ -954,7 +954,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		# Si player == 1 on accepte ses nouvelles coords
 		if player_number == 1 and 'player1_coords' in data.get('move', {}):
 			new_x1 = current_coords['x1'] + (data['move']['player1_coords']['x1'] * self.game.multiplyer)
-			new_x1 = max(10, min(new_x1, 520))
+			new_x1 = max(10, min(new_x1, 510))
 
 			current_coords['x1'] = new_x1
 			current_coords['x2'] = new_x1 + 80
@@ -962,7 +962,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		# Si player == 2 on accepte ses nouvelles coords
 		elif player_number == 2 and 'player2_coords' in data.get('move', {}):
 			new_x1 = current_coords['x1'] + (data['move']['player2_coords']['x1'] * self.game.multiplyer)
-			new_x1 = max(10, min(new_x1, 520))
+			new_x1 = max(10, min(new_x1, 510))
 
 			current_coords['x1'] = new_x1
 			current_coords['x2'] = new_x1 + 80
@@ -1212,7 +1212,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		)
 
 		await self.send_game_state(0)
-		update_interval = 0.05
+		update_interval = 0.016
 		last_update = asyncio.get_event_loop().time()
 		print("\033[0;34m Demarrage du jeu ! \033[0m")
 		sys.stdout.flush()
@@ -1266,7 +1266,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				except ChannelFull:
 					print("Channel full, skipping update")
 				
-				if (self.game.timeleft >= 10):
+				if (self.game.timeleft >= 60):
 					await self.save_game_result()
 					await self.channel_layer.group_send(
 						self.room_group_name, {
@@ -1281,19 +1281,18 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	# Check si le round est fini pour chaque joueur et en demarre un autre
 	def is_round_end(self, ball_p1, ball_p2):
-
 		if ball_p1['coords']['y'] + ball_p1['radius'] >= 750:
-			if self.game.scores['p1'] > 5:
-				self.game.scores['p1'] -= 5
+			if self.game.scores['p1'] > 3:
+				self.game.scores['p1'] -= 3
 			self.reset_ball_and_player(ball_p1, 1)
 		if ball_p2['coords']['y'] + ball_p2['radius'] >= 750:
-			if self.game.scores['p1'] > 5:
-				self.game.scores['p2'] -= 5
+			if self.game.scores['p2'] > 3:
+				self.game.scores['p2'] -= 3
 			self.reset_ball_and_player(ball_p2, 2)
 	
 	def reset_ball_and_player(self, ball, player_reset):
 		ball['coords'] = {'x' : 600 / 2, 'y' : 700 -13}
-		ball['vector'] = {'vy' : get_random_arbitrary(-11, 0), 'vx' : get_random_arbitrary(-11, 11), 'speed': 9}
+		ball['vector'] = {'vy' : get_random_arbitrary(-9, 0), 'vx' : get_random_arbitrary(-9, 9), 'speed': 7}
 		ball['radius'] = 13
 		ball['hit_horizontal'] = 0
 		ball['hit_vertical'] = 0

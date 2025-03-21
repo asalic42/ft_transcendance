@@ -9,8 +9,8 @@
 	<link rel="stylesheet" href="{% static 'css/other_game.css' %}">
 
 	<div class="mapSelection" id="mapSelection">
-		<a href="{% url 'map_choice' %}" class="retour">
-			<span class="mapButton" id="retour" >Retour</span>
+		<a href="{% url 'other_game_choice' %}" class="retour">
+			<span class="game-mode" id="retour" >Retour</span>
 		</a>
 	    <h1 class="title">Choix de la map</h1>
 	    <div class="map-choice" id="map-choice">
@@ -33,7 +33,6 @@
 		</text>
 	</div>
 	
-	{% comment %} <script src="{% static 'js/other_game.js' %}"></script> {% endcomment %}
 </div>
 
 {% endblock %}

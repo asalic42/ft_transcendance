@@ -1,8 +1,6 @@
-export class RoomGameManager {
+class RoomGameManager {
 
 	constructor() {
-		// console.log("CONSTRUCTOR ROOM");
-
 		this.roomList = document.getElementById("rooms-list");
 		if (!this.roomList) {
 			console.error("Element #rooms-list introuvable !");
@@ -14,7 +12,6 @@ export class RoomGameManager {
 	}
 
 	initEventListenners(userId) {
-		// console.log("ADD ROOMS LISTENERS");
 		document.getElementById('new-room').addEventListener('click', (e) => {
 			e.preventDefault();
 			this.createRoom(userId);
@@ -22,7 +19,6 @@ export class RoomGameManager {
 	}
 
 	async loadRooms() {
-		// console.log("LOAD ROOMS");
 
 		fetch('/api/rooms/')
 			.then(response => response.json())
@@ -42,7 +38,6 @@ export class RoomGameManager {
 						container.appendChild(link);
 					});
 				}
-				console.log("HTML bien ajoute !!!");
 			})
 			.catch(error => {
 				console.error('Error loading rooms: ', error);
@@ -50,7 +45,6 @@ export class RoomGameManager {
 	}
 
 	chargingGame() {
-		// const response = await fetch("game-distant");
 		return new Promise((resolve) => {
 			const html = `
             	<link rel="stylesheet" href="/static/css/game-style.css">
@@ -87,12 +81,10 @@ export class RoomGameManager {
        		`;
 			document.getElementById('content').innerHTML = html;
 			setTimeout(resolve, 50);
-			console.log("HTML CHARGED");
 		});
 	}
 
 	async createRoom(gameId) {
-		// console.log("CREATE A ROOM");
 		try {
 			await fetch(`/create_current_game/${gameId}/`)
 			await this.chargingGame();
@@ -103,24 +95,15 @@ export class RoomGameManager {
 	}
 
 	async joinRoom(gameId) {
-		// console.log("JOIN A ROOM: ", gameId);
 		await this.chargingGame();
 		new PongDistantGame(gameId, 0);
 	}
-
-	getCookie() {
-		return document.cookie
-			.split('; ')
-			.find(row => row.startsWith('csrftoken='))
-			?.split('=')[1] || '';
-	}
 }
 
-export class PongDistantGame {
+class PongDistantGame {
 	static currentGame = null;
 
 	constructor(gameId, id_t) {
-		console.log("JE COMMENCE LE PONG dans la room: ", gameId);
 		PongDistantGame.currentGame = this;
 		
 		this.keyHandler = this.handleKey.bind(this);
@@ -165,11 +148,11 @@ export class PongDistantGame {
 		window.removeEventListener('keydown',  this.keyHandler);
 		window.removeEventListener('keyup',  this.keyHandler);
 
-		const disconnected = document.getElementById("disconnected")
-		if (disconnected && disconnected.style.display) {
-			document.getElementById("disconnected").style.display = "none"; 
+		if (document.getElementById('disconnected') && document.getElementById('disconnected').style.display === "block") {
+			document.getElementById('disconnected').style.display = "none"; 
 		}
-		if (document.getElementById('game')) {
+
+		if (document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
 		this.initState();
@@ -326,7 +309,6 @@ export class PongDistantGame {
 		document.getElementById("game").getContext('2d').fillStyle = '#ED4EB0';
 		document.getElementById("game").getContext('2d').fillRect(document.getElementById("game").width / 2, 0, 5, document.getElementById("game").height);
 	
-		// console.log('Drawing player');
 		this.drawPlayer();
 		this.drawBall();
 	}
@@ -334,7 +316,7 @@ export class PongDistantGame {
 	sendPlayerMove() {
 		const moveData = {};
 		if (this.keys["ArrowUp"] || this.keys["ArrowDown"]) {
-			const moveValue = this.keys["ArrowUp"] ? -10 : 10;
+			const moveValue = this.keys["ArrowUp"] ? -3 : 3;
 			if (this.currentPlayer === 1) {
 				moveData.player1_coords = { y1: moveValue };			
 			} else if (this.currentPlayer === 2) {
@@ -347,7 +329,7 @@ export class PongDistantGame {
 		}
 	}
 	
-	gameLoop(data, start) {
+	gameLoop(data) {
 		if (data.number) this.currentPlayer = data.number;
 		if (data.player1_coords) this.gameState.player1_coords = data.player1_coords;
 		if (data.player2_coords) this.gameState.player2_coords = data.player2_coords;
@@ -434,7 +416,6 @@ export class PongDistantGame {
 	
 	resetGame() {
 		if (this.socket.readyState === WebSocket.OPEN) {
-			console.log("Demande de reset du jeu");
 			this.socket.send(JSON.stringify({action: "restart_game"}));
 		} else {
 			console.log("Echec");
@@ -449,6 +430,7 @@ export class PongDistantGame {
 			window.removeEventListener('keyup', this.keyHandler);
 
 			console.log("Socket ferme !");
+			
 			PongDistantGame.currentGame = null;
 
 			if (!this.id_t)

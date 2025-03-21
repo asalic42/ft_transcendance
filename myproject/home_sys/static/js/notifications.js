@@ -96,6 +96,7 @@ function notif_fetchAllUsersStatus() {
 
 
 function connectWebSocket_notif_page() {
+	notiffetch = setInterval(notif_fetchAllUsersStatus, 500);
 	notif_getAddFriendResponse(".add-it", "accept_friend_request", "friend_added");
 	notif_getReponse(".decline-it", "decline_friend_request", "friend_request_declined", "Demande d'ami de", "refusée.");
 	notif_getReponse(".block-it", "block_user", "user_blocked", "Utilisateur", "bloqué.");
@@ -104,5 +105,3 @@ function connectWebSocket_notif_page() {
 	/* notif_getReponse(".invite-friend", "invite_friend", "game_invitation_send", "L'invitation envers le user", "a bien été envoyée."); */
 	notif_getReponse(".decline-invitation", "invitation_declined", "game_invitation_declined", "La demande du user", "a bien été refusée.");
 }
-
-notiffetch = setInterval(notif_fetchAllUsersStatus, 500);

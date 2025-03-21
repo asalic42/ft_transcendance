@@ -132,8 +132,6 @@ def signup(request):
 	# GET requests can return minimal data needed for the signup form
 	return JsonResponse({'status': 'unauthenticated'})
 
-
-
 from django.template.loader import render_to_string
 from django.urls import reverse
 
@@ -372,6 +370,12 @@ def load_template(request, page, **kwargs):
 			'users': current_user_profile,
 			'friend_requests': friend_requests,
 		}
+	
+	elif page == "other_game_multi_room":
+		all_games = casse_brique_room.objects.all() 
+		context = {
+			'all_games': all_games
+		}
 
 	elif page == "other_game_multi":
 		context = {
@@ -569,10 +573,10 @@ def tournament_choice(request):
 	tour = tournament_room.objects.all()
 	return render(request, 'tournament_choice.html', {'all_games':tour})
 
-""" @login_required
+@login_required
 def casse_brique_room_choice(request):
 	tour = casse_brique_room.objects.all()
-	return render(request, 'other_game_multi_room.html', {'all_games':tour}) """
+	return render(request, 'other_game_multi_room.html', {'all_games':tour})
 
 @login_required
 def other_game_choice(request):
@@ -1395,7 +1399,12 @@ def create_current_game(request, sender_id):
 
 @login_required
 def get_rooms(request):
-	rooms = CurrentGame.objects.all().values("game_id")
+	rooms = CurrentGame.objects.all().values('game_id')
+	return JsonResponse(list(rooms), safe=False)
+
+@login_required
+def get_cb_rooms(request):
+	rooms = casse_brique_room.objects.all().values('game_id', 'map_id')
 	return JsonResponse(list(rooms), safe=False)
 
 @login_required
@@ -1418,6 +1427,39 @@ def create_room(request):
 
 		return JsonResponse({
 			'game_id': str(new_room.game_id)
+		})
+	
+	except json.JSONDecodeError:
+		return JsonResponse({'error': 'Donnes JSON invalides'}, status=400)
+	except Exception as e:
+		return JsonResponse({'error': str(e)}, status=500)
+	return JsonResponse({"rooms": list(rooms)})
+
+@login_required
+@require_http_methods(["POST"])
+def create_cb_room(request):
+	try:
+		print("JE METS DANS LA DB LA ROOM")
+		sys.stdout.flush()
+
+		data = json.loads(request.body)
+		game_id = data.get('gameId')
+		map_id = data.get('mapId')
+
+		if not game_id:
+			return JsonResponse({'error': 'gameId manquant'}, status=400)
+		if not map_id:
+			return JsonResponse({'error': 'mapId manquant'}, status=400)
+
+		
+		new_room, _ = casse_brique_room.objects.get_or_create(
+			game_id=game_id,
+			map_id=map_id
+		)
+
+		return JsonResponse({
+			'game_id': str(new_room.game_id),
+			'map_id': str(new_room.map_id)
 		})
 	
 	except json.JSONDecodeError:

@@ -1,5 +1,4 @@
 class CasseBriqueGame {
-	currentGame = null;
 
 	constructor() {
 		this.keyHandler = this.handleKey.bind(this);
@@ -8,7 +7,6 @@ class CasseBriqueGame {
 	}
 
 	initState() {
-		CasseBriqueGame.currentGame = this;
 		this.macro_ballSpeedIncr = 0.075;
 		this.macro_ballInitialSpeed = 9;
 
@@ -40,7 +38,6 @@ class CasseBriqueGame {
 		document.getElementById('map-choice').addEventListener('click', (event) => {
 			if (event.target.closest('.mapButton')) {
 				this.selectedMap = event.target.dataset.mapId
-				console.log(this.selectedMap)
 				this.launchGame(this.selectedMap);
 			}
 		});
@@ -302,7 +299,6 @@ class CasseBriqueGame {
 				this.incrementBallSpeed();
 	
 				this.block_arr[k].state--;
-				console.log(`block_arr[k].state ${this.block_arr[k].state}`);
 				if (!this.block_arr[k].state) {
 					this.blocksDestroyed++;
 				}
@@ -414,7 +410,6 @@ class CasseBriqueGame {
 			document.getElementById("gameOver").style.color = "#365FA0";
 			document.getElementById("gameOver").textContent = "Omg ! You won !";
 			document.getElementById("replay-button").style.color = "#365FA0";
-			console.log("You won, exterior.");
 		}
 		this.drawInnerRectangle("#23232e");
 	
@@ -467,13 +462,10 @@ class CasseBriqueGame {
 		if (document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
-
-		CasseBriqueGame.currentGame = null;
 	}
 
 	restartGame() {
 		if (this.stop) {
-			console.log("je RESTART le jeu. go MAP");
 			this.stopGame();
 			this.keyHandler = this.handleKey.bind(this);
 			this.initState();
@@ -483,7 +475,6 @@ class CasseBriqueGame {
 
 	// API stuff
 	async addNewGame(id_player) {
-		console.log("Appel de addnewgame");
 		try {
 			const response = await fetch('/api/add_solo_casse_brique/', {
 				method: 'POST',
@@ -505,7 +496,6 @@ class CasseBriqueGame {
 			}
 	
 			const result = await response.json();
-			console.log('Nouveau jeu ajouté:', result);
 		} catch (error) {
 			console.error('Erreur:', error);
 		}

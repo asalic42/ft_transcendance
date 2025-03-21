@@ -316,3 +316,7 @@ h3 {
 a {
 	text-decoration: none;
 }
+
+#disconnected {
+	display: none;
+}
