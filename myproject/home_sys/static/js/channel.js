@@ -1,6 +1,3 @@
-// console.log(`Current username is ${username}`);
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 //! MONITORING
@@ -21,8 +18,6 @@ function launch_everything() {
 	let liveChan;
 	let blockedUsersList = null;
 	let userid = null;
-	// let isLoadingChannels = false;
-	// let unreadMsg = {};
 	
 	// Recup l'user courant
 	const userElement = document.getElementById('current-username');
@@ -130,7 +125,6 @@ function addMessageListener() {
 		if (msg != "") {
 			postMessage(currentChan, msg, false);
 			document.getElementById('message-input').value = '';	// Vide le champ de saisie
-			// console.log("MESSAGE ENVOYE !");
 		}
 	});
 
@@ -167,7 +161,6 @@ async function addChannelToList(nameChan, pv, idChan) {
 		chanList = document.getElementById('channels-list');
 
 	if (!chanList) {
-		// console.error("chanList n'existe pas !");
 		return;
 	}
 	if (!chanList.querySelector(`#channel-${nameChan}`)) {
@@ -201,9 +194,6 @@ async function openCenter(printName, nameChan) {
 	const chatContainer = document.getElementById('chat-page');
 	chatContainer.innerHTML = ``;
 
-	// onChannelOpening(currentChan);
-	// markAsRead()
-
 	if (liveChat) clearInterval(liveChat);
 
 	liveChat = setInterval(() => {
@@ -214,6 +204,7 @@ async function openCenter(printName, nameChan) {
 //////////////////////////////////////////////////////////////////////////////////////////
 //! CENTER CHANNELS PART
 // Main monitor for the center column and message listener
+
 function popCenterChat(nameChan) {
 	const page = document.querySelector('.page');
 	const channels = document.querySelector('.channels');
@@ -303,7 +294,6 @@ function getPP(userId) {
 			return response.json(); // Parse JSON first
 		})
 		.then(data => {
-			// console.log("User data:", data); // Now data is defined
 			return data; // Return for downstream use
 		})
 		.catch(error => {
@@ -320,10 +310,6 @@ async function addMessage(mess, sender, id, is_link) {
 	const message = document.createElement('div');
 	message.classList.add('message');
 
-	console.log("USER ID:", userid);
-	console.log("ID:", id);
-	console.log("USER ID === ID: ", userid === id);
-
 	if (id === userid) message.classList.add('sent');
 	else message.classList.add('received');
 
@@ -336,9 +322,6 @@ async function addMessage(mess, sender, id, is_link) {
 	}
 
 	const usernameElement = document.createElement('span');
-	// const sender = messImage.nextElementSibling.textContent;
-	// window.location.href = `/profile/${sender}`;
-	// usernameElement.innerHTML = `<a href="/profile/${sender}">
 	usernameElement.innerHTML = `<img src='${pp}' id="caca">
 								<p class="name">${sender}</p>`;
 
@@ -370,21 +353,12 @@ async function addMessage(mess, sender, id, is_link) {
         messImage.addEventListener('click', async function () {
 			const sender = messImage.nextElementSibling.textContent;
 			loadPage(`/profile/${sender}`);
-            // window.location.href = `/profile/${sender}`;
         });
     });
 
 	chatPage.scrollTop = chatPage.scrollHeight;
 }
 
-// function onChannelOpening(channelName) {
-// 	if (notificationChatSocketSocket.readyState === WebSocket.OPEN) {
-// 		notificationChatSocketSocket.send(JSON.stringify({
-// 			type: 'channel_opened',
-// 			channel_name: channelName
-// 		}));
-// 	}
-// }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //! LEFT CHAN PART
@@ -402,7 +376,6 @@ async function doesUserHaveAccessToChan(idC, idU) {
 			return { success: false, data };
 		})
 		.catch(error => {
-			console.log(error);
 			return { success: false, data: null };
 		});
 }
@@ -435,20 +408,17 @@ async function liveChatFetch() {
 
 		const data = await response.json();
 		if (data.new_message && data.new_message.length > 0) {
-			// console.log(data.new_message);
 			for (var message of data.new_message) {
-				// console.log("Adding message with id = " + message.id);
 				await addMessage(message.message, message.sender, message.idSender, message.is_link);
 				lastMessageId = message.id;
 			}
 		}
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
 function get_chan_id(nameChan) {
-	console.log("avant fetch: ", currentChan);
 	return fetch(`/api/get_chan_id/${nameChan}/`)
 		.then(response => {
 			if (response.status === 404) throw new Error('User not found');
@@ -458,7 +428,7 @@ function get_chan_id(nameChan) {
 			return data; // Return for downstream use
 		})
 		.catch(error => {
-			throw error; // Re-throw for handling in addMessage
+			throw null; // Re-throw for handling in addMessage
 		});
 }
 
@@ -469,14 +439,13 @@ function is_chan_private(idChan) {
 			return response.json(); // Parse JSON first
 		})
 		.then(data => {
-			console.log("je suis la ?!");
 			if (data.is_private)
 				return true;
 			else
 				return false;
 		})
 		.catch(error => {
-			throw error; // Re-throw for handling in addMessage
+			throw null; // Re-throw for handling in addMessage
 		});
 }
 
@@ -490,7 +459,7 @@ function getNameById(id) {
 			return data; // Return for downstream use
 		})
 		.catch(error => {
-			throw error; // Re-throw for handling in addMessage
+			throw null; // Re-throw for handling in addMessage
 		});
 }
 
@@ -557,8 +526,7 @@ async function addChannelToDb(currentChan, pv, ami) {
 		addChannelToList(currentChan, pv, chanId);
 		return 1;
 	} catch (error) {
-		console.error('Erreur: ', error);
-		return 0;
+		return null;
 	}
 }
 
@@ -585,7 +553,7 @@ async function loadChannels() {
 			});
 		}
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -595,7 +563,6 @@ async function invite_button() {
 			if (!response.ok) {
 				throw new Error('Erreur réseau');
 			}
-			console.log("tout est bien reçu");
 			return response.json();
 		})
 		.catch(error => {
@@ -633,18 +600,13 @@ async function postMessage(currentChan, mess, is_link) {
 		if (!response.ok) {
 			throw new Error('Erreur lors de l\'ajout d\'un nouveau message dans le channel');
 		}
+
 		const data = await response.json();
-
-		// notif
-		// if (notificationChatSocketSocket.readyState === WebSocket.OPEN)
-			// markAsRead()
-
-		// Accéder à idSender
 		const idSender = data.message.idSender;
 
 	} catch (error) {
 		alert("Wow ! That's a long message. It should work better if it shrinks down.");
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -673,7 +635,7 @@ async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				idUser: userid, //  L'id du jouueur logged
+				idUser: userid, //  L'id du joueur logged
 				idBlocked: idBlocked, //  L'id de l'utilidateur qui va être bloqué
 			})
 		});
@@ -682,7 +644,7 @@ async function postblocked(idBlocked) { // idBlocked = l'id du joueur à bloquer
 		}
 		const data = await response.json();
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
 
@@ -698,7 +660,7 @@ function getBlocked() {
 			blockedUsersList = data.blocked_users_ids;
 		})
 		.catch(error => {
-			console.error('Erreur lors de la récupération des données :', error);
+			return null;
 		});
 }
 
@@ -719,15 +681,6 @@ async function post_deblock(a) {
 		}
 		const data = await response.json();
 	} catch (error) {
-		console.error('Erreur: ', error);
+		return null;
 	}
 }
-// Fonction pour marquer une notif comme lue
-// function markAsRead() {
-// 	if (notificationChatSocketSocket.readyState == WebSocket.OPEN) {
-// 		notificationChatSocketSocket.send(JSON.stringify({
-// 			'type': 'mark_as_read',
-// 			'channel_name': currentChan,
-// 		}));
-// 	}
-// }getto

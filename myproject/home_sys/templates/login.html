@@ -19,9 +19,10 @@
             <!-- Lottie animations or other effects here -->
         </div>
 
-        <div class="login-error"></div>
-
         <div class="signin-container">
+
+            <div class="login-error"></div>
+
             <!-- login.html -->
             <form class="form1" id="id-signin-form" action="{% url 'signin' %}" method="POST">
                 {% csrf_token %}
@@ -53,6 +54,9 @@
         </div>
 
         <div class="signup-container">
+            
+            <div class="signup-error"></div>
+
             <form class="form2" id="id-signup-form" action="{% url 'signup' %}" method="POST">
                 {% csrf_token %}
 
@@ -120,7 +124,5 @@
             </form>
         </div>
     </div>
-
-    <script src="{% static 'js/login-script.js' %}?v={{ timestamp }}"></script>
 
 {% endblock %}

@@ -1,3 +1,17 @@
+// Sécurité CSRF cookies
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+            let trimmedCookie = cookie.trim();
+            if (trimmedCookie.startsWith('csrftoken=')) {
+                cookieValue = trimmedCookie.split('=')[1];
+            }
+        });
+    }
+    return cookieValue;
+}
+
 function notif_getAddFriendResponse(baliseName, url, dataStatus) {
 	document.querySelectorAll(`${baliseName}`).forEach(button => {
 		button.addEventListener('click', function() {
@@ -14,7 +28,7 @@ function notif_getAddFriendResponse(baliseName, url, dataStatus) {
 			.then(data => {
 				if (data.status === `blocked`) {
 					alert(`Impossible d'accepter car vous êtes bloqué par cet utilisateur.`);
-					loadPage("/notifications/"); // Recharger la page pour mettre à jour la liste
+					loadPage(`https://${window.location.host}/notifications/`); // Recharger la page pour mettre à jour la liste
 				}
 				else if (data.status === `unblockBefore`) {
 					alert(`Pour accepter la demande d'ami de cet utilisateur, veuillez le débloquer.`);
@@ -63,17 +77,6 @@ function notif_getReponse(baliseName, url, dataStatus, msgStart, msgEnd) {
 	});
 }
 
-function getCookie(name) {
-	const cookies = document.cookie.split(';');
-	for (let cookie of cookies) {
-		const [cookieName, cookieValue] = cookie.trim().split('=');
-		if (cookieName === name) {
-			return decodeURIComponent(cookieValue);
-		}
-	}
-	return null;
-}
-
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function notif_fetchAllUsersStatus() {
 
@@ -92,8 +95,17 @@ function notif_fetchAllUsersStatus() {
 			});
 		})
 		.catch(error => {return null;});
-}
 
+	const testTalk = document.querySelector(".talk-friend");
+
+		if (testTalk)
+		{
+			/* Récupérer le user et construire l'url pour la chan priv */
+			testTalk.addEventListener("click", function() {
+				loadPage(`https://${window.location.host}/channels/`)
+			})
+		}
+}
 
 function connectWebSocket_notif_page() {
 	notiffetch = setInterval(notif_fetchAllUsersStatus, 500);

@@ -14,7 +14,10 @@
 
         <script src="https://cdn.lordicon.com/lordicon.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+        
+        <script type="module" src="{% static 'js/app.js' %}"></script>
+        <script src="{% static 'js/login-script.js' %}"></script>
+        
         {% comment %} Game Scripts {% endcomment %}
     	<script src="{% static 'js/game.js' %}"></script>
 	    <script src="{% static 'js/game-distant.js' %}"></script>
@@ -39,7 +42,7 @@
     	{% csrf_token %}
     	<meta name="csrf-token" content="{{ csrf_token }}">	
         
-        <nav class="navbar">
+        <nav class="navbar" style="display: none;">
 
             <ul class="navbar-nav">
 
@@ -97,13 +100,8 @@
 
             
             <!-- PROFILE -->
-            	<li class="nav-item">
-				{% if request.user.is_authenticated%}
-					<a href="{% url 'profile' request.user.username %}" class="nav-icon" id="accounts_link">
-				{% else %}
-					<a class="nav-icon" id="accounts_link">
-				{% endif %}
-				
+                <li class="nav-item" id="user-nav-item">
+                    <a href="#" class="nav-icon" id="accounts_link">
                         <lord-icon
                             src="https://cdn.lordicon.com/hrjifpbq.json"
                             trigger="hover"
@@ -147,70 +145,5 @@
             {% block content %}
             {% endblock %}
         </main>
-
-        {% comment %}
-        <!-- <script>
-
-            const notificationSocket = new WebSocket(
-                'wss://' + window.location.host + '/ws/notifications/'
-            );
-
-            notificationSocket.onopen = function (e) {
-                console.log("WebSocket connecté avec succès !");
-            };
-
-            notificationSocket.onmessage = function (e) {
-                const data = JSON.parse(e.data);
-
-                if (data.type === 'update_status') {
-                    const notif = document.querySelector('.notification-status');
-                    notif.classList.toggle("active", data.has_unread_notifications);
-                }
-            };
-
-            notificationSocket.onclose = function (e) {
-                console.error('WebSocket fermé de manière inattendue');
-            };
-
-            notificationSocket.onerror = function (e) {
-                console.error('Erreur WebSocket :', e);
-            }; 
-        </script>
-    -->
-    {% endcomment %}
-
-
     </body>
-
-        
-        {% comment %} document.addEventListener("DOMContentLoaded", function() {
-            document.body.addEventListener("click", function(event) {
-                const link = event.target.closest("a");
-                if (link && link.href) {
-                    const url = new URL(link.href, window.location.origin);
-
-                    if (url.origin === window.location.origin) {
-                        event.preventDefault() // Empeche le rechargement de toute la page
-                        const templateName = url.pathname.split("/").filter(Boolean).join("_"); //Recup le template par l'url
-                        fetch(`/load/${templateName}/`, {headers: { "X-Request-With": "XMLHttpRequest" } })
-                            .then(response => response.text())
-                            .then(html => {
-                                // Maj des nouveaux elements sur la page
-                                document.getElementById("content").innerHTML = html;
-                                history.pushState(null, "", url.pathname);
-                            })
-                            .catch(error => console.error("Erreur de chargement: ", error));
-                    }
-                }
-            });
-            // Gerer les fleches <- -> sur le site
-            window.addEventListener("popstate", function() {
-                fetch(location.pathname, {headers: { "X-Request-With": "XMLHttpRequest" } })
-                    .then(response => response.text)
-                    .then(html => {
-                        document.getElementById("content").innerHTML = html;
-                    })
-                    .catch(error => console.error("Erreur de navigation: ", error));
-            }); 
-        });{% endcomment %}
 </html>

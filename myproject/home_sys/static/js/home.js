@@ -1,111 +1,123 @@
 // Fonction pour récupérer les statuts de tous les utilisateurs
 function fetchAllUsersStatus() {
-	//fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
-	//.then(response => response.json())
-	//.then(users => {
-	//	// console.log("Users status fetched:", users);
-	//	users.forEach(user => {
-	//		const userElement = document.getElementById(`user-${user.id}`);
-	//		if (userElement) {
-	//			if (user.is_online) {
-	//				userElement.classList.add("active");
-	//			} else {
-	//				userElement.classList.remove("active");
-	//			}
-	//		}
-	//	});
-	//})
-	//.catch(error => console.error('Error fetching users status:', error));
-//
-	//homefetch = setInterval(fetchOnlineUsers, 500);
+	fetch("/api/user-status/") // Remplacez par l'URL de votre endpoint Django
+		.then(response => response.json())
+		.then(users => {
+			users.forEach(user => {
+				const userElement = document.getElementById(`user-${user.id}`);
+				if (userElement) {
+					if (user.is_online) {
+						userElement.classList.add("active");
+					} else {
+						userElement.classList.remove("active");
+					}
+				}
+			});
+		})
+		.catch(error => console.error('Error fetching users status:', error));
 }
 
-/* function connectWebSocket() {
-	const socketStatus = new WebSocket(`wss://${window.location.host}/ws/status/`);
 
-	socketStatus.onopen = function(e) {
-		console.log("WebSocket connection established");
-
-		// Récupérer les statuts de tous les utilisateurs dès que la connexion WebSocket est établie
-		fetchAllUsersStatus();
-	};
-
-	socketStatus.onmessage = function(e) {socketStatus
-		// console.log("WebSocket message received:", e.data);
-		const data = JSON.parse(e.data);
-		const userElement = document.getElementById(`user-${data.user_id}`);
-		// console.log("User Element : ", userElement);
-		if (userElement) {
-			if (data.is_online) {
-				userElement.classList.add("active");
-			} else {
-				userElement.classList.remove("active");
-			}
-		}
-	};
-
-	socketStatus.onclose = function(e) {
-		console.error('WebSocket closed unexpectedly. Reconnecting...');
-		setTimeout(connectWebSocket, 5000); // Reconnecter après 5 secondes
-	};
-
-	socketStatus.onerror = function(e) {
-		console.error('WebSocket error:', e);
-	};
-} */
-
-//connectWebSocket();
-
-
+/**
+ * Récupère et affiche les utilisateurs en ligne et hors ligne de manière optimisée
+ */
 function fetchOnlineUsers() {
-    /* fetch('/api/online-users')
-      .then(response => response.json())
-      .then(data => {
-        const userList = document.getElementById('user-list');
-        const emptyState = document.getElementById('empty-state');
-        
-        // Vider la liste actuelle d'utilisateurs
-		if (userList)
-        	userList.innerHTML = '';
-        
-        // Si des utilisateurs sont en ligne
-        if (data.online_users.length > 0) {
-			if (emptyState)
-          		emptyState.style.display = 'none';
-          	
-			data.online_users.forEach(user => {
-            const userCard = document.createElement('div');
-            userCard.classList.add('user-card');
-            
-            const userAvatar = document.createElement('img');
-            userAvatar.classList.add('user-avatar');
-            userAvatar.src = user.image;
-            userAvatar.alt = user.username;
-            
-            const userName = document.createElement('p');
-            userName.classList.add('user-name');
-            userName.textContent = user.username;
+  fetch('/api/online-users')
+    .then(response => response.json())
+    .then(data => {
+      const userList = document.getElementById('user-list');
+      const offlines = document.getElementById('user-offline');
+      const emptyStateOn = document.getElementById('empty-state-on');
+      const emptyStateOff = document.getElementById('empty-state-off');
 
-            const profileButton = document.createElement('a');
-            profileButton.classList.add('profile-button');
-            profileButton.href = `https://${window.location.host}/profile/${user.username}`;
-            profileButton.textContent = 'profile';
+      // Traitement des utilisateurs en ligne
+      processUserList({
+        container: userList,
+        newUsers: data.online_users,
+        emptyState: emptyStateOn,
+        status: 'online'
+      });
 
-            userCard.appendChild(userAvatar);
-            userCard.appendChild(userName);
-            userCard.appendChild(profileButton);
-            
-			if (userList)
-            	userList.appendChild(userCard);
-          });
-        } else {
-			if (emptyState)
-          		emptyState.style.display = 'block';
-        }
-      }); */
+      // Traitement des utilisateurs hors ligne
+      processUserList({
+        container: offlines,
+        newUsers: data.offline_users,
+        emptyState: emptyStateOff,
+        status: 'offline'
+      });
+    })
+    .catch(error => {
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+    });
+}
+
+/**
+ * Gère la mise à jour optimisée d'une liste d'utilisateurs
+ * @param {Object} params - Paramètres de configuration
+ * @param {HTMLElement} params.container - Conteneur HTML
+ * @param {Array} params.newUsers - Nouvelle liste d'utilisateurs
+ * @param {HTMLElement} params.emptyState - Élément d'état vide
+ * @param {string} params.status - Statut des utilisateurs (online/offline)
+ */
+function processUserList({ container, newUsers, emptyState, status }) {
+  if (!container) return;
+
+  // Masquer/afficher l'état vide
+  if (emptyState) {
+    emptyState.style.display = newUsers.length ? 'none' : 'block';
   }
 
+  // Créer un Set des IDs des nouveaux utilisateurs
+  const newUserIds = new Set(newUsers.map(user => user.id));
+  
+  // Supprimer les cartes des utilisateurs qui ne sont plus dans la liste
+  const existingCards = container.querySelectorAll('.user-card');
+  existingCards.forEach(card => {
+    const userId = card.className.split('-').pop();
+    if (!newUserIds.has(Number(userId))) {
+      card.remove();
+    }
+  });
+
+  // Ajouter seulement les nouveaux utilisateurs
+  newUsers.forEach(user => {
+    const existingCard = container.querySelector(`.user-card.${status}-${user.id}`);
+    if (!existingCard) {
+      createUserCard(container, status, user);
+    }
+  });
+}
+
+/**
+ * Crée une carte utilisateur (inchangée par rapport à votre version)
+ */
+function createUserCard(userlist, card_name, user) {
+  const userCard = document.createElement('div');
+  userCard.className = `user-card ${card_name}-${user.id}`;
+  
+  const userAvatar = document.createElement('img');
+  userAvatar.className = 'user-avatar';
+  userAvatar.src = user.image;
+  userAvatar.alt = `Avatar de ${user.username}`;
+  userAvatar.loading = 'lazy';
+
+  const userName = document.createElement('p');
+  userName.className = 'user-name';
+  userName.textContent = user.username;
+
+  const profileButton = document.createElement('a');
+  profileButton.className = 'profile-button button';
+  profileButton.href = `https://${window.location.host}/profile/${user.username}`;
+  profileButton.textContent = 'Voir le profil';
+  profileButton.ariaLabel = `Profil de ${user.username}`;
+
+  userCard.append(userAvatar, userName, profileButton);
+  userlist?.appendChild(userCard);
+}
+
+// Récupérer les demandes d'amis toutes les 10 secondes
   // Appeler la fonction pour récupérer les utilisateurs en ligne au chargement de la page
+document.addEventListener('DOMContentLoaded', fetchOnlineUsers);
   
-  
-  // Optionnel : mettre à jour la liste toutes les 30 secondes
+
+homefetch = setInterval(fetchOnlineUsers, 500);

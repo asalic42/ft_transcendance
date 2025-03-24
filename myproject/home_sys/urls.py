@@ -16,6 +16,7 @@ urlpatterns = [
     path('check_password_solidity/', check_password_solidity, name='check_password_solidity'),
 
 
+
     # --- Template loading routes ---
     path('profile/<str:username>/', load_template, {'page': 'profile'}, name='profile'),
     path('channels/', load_template, {'page': 'channels'}, name='channels'),
@@ -43,10 +44,8 @@ urlpatterns = [
     # Tournament url
     # Route générique pour toute autre page nécessitant un rendu (ex: about, contact, etc.)
     path('<str:page>/', load_template, name='load_template'),
-    # path('login/', include('loginpage.urls', namespace='loginpage')),
 
     # --- Routes pour les actions et API (inchangées) ---
-    path('signout/', signout, name='signout'),
 
     # --- Authentication routes ---
     path('user-settings/signout/', signout, name='signout'),
@@ -65,20 +64,16 @@ urlpatterns = [
 
     # --- Routes pour les pages en mode SPA ---
 
-    #path('profile/<str:username>/', load_template, {'page': 'profile'}, name='profile'),
-    #path('channels/', load_template, {'page': 'channels'}, name='channels'),
-    #path('notifications/', load_template, {'page': 'notifications'}, name='notifications'),
-    #path('other_game_multi/<int:game_id>/<int:map_id>/', load_template, {'page': 'other_game_multi'}, name='other_game_multi'),
     # Route générique pour toute autre page nécessitant un rendu (ex: about, contact, etc.)
     path('<str:page>/', load_template, name='load_template'),
-    # path('login/', include('loginpage.urls', namespace='loginpage'), name="redirectafter"),
+    
     # --- Routes pour les actions et API (inchangées) ---
-    path('signout/', signout, name='signout'),
-    #path('delete_account/', delete_account, name='delete_account'),
-    #path('delete_success/', delete_success, name='delete_success'),
+    #path('deleteAccount/', delete_account, name='delete_account'),
+    #path('deleteSuccess/', delete_success, name='delete_success'),
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),
     
     # Exemples d'API et endpoints
+    path('api/check-auth/', check_user_authenticated, name='check_user_authenticated'),
     path('api/button-test/', button_test_page, name="button_test_page"),
     #path('api/current-user/', get_current_user_id, name='current_user_id'),
     path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),

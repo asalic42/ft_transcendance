@@ -1,3 +1,22 @@
+// Au tout début du fichier
+window.addEventListener('unhandledrejection', (event) => {
+    event.preventDefault();
+    
+    if (event.reason instanceof TypeError && event.reason.message.includes('fetch')) {
+        alert("Le serveur est down...");
+    }
+});
+
+//console.error = () => {};
+
+// import { PongDistantGame } from './game-distant.js';
+// import { PongGame } from './game.js';
+// import { Bot}
+// import { CasseBriqueGame } from './other_game.js';
+
+
+
+// Sécurité CSRF cookies
 function getCSRFToken() {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -10,23 +29,6 @@ function getCSRFToken() {
     }
     return cookieValue;
 }
-
-var waschan = false;
-var wasNotif = false;
-var wasSettings = false;
-var washome = false;
-
-var gameDistant = false;
-var gameRoom = false;
-var gamePong = false;
-var gameCasseBrique = false;
-var gameBot = false;
-var gameCasseBriqueDistant = false;
-var gameCasseBriqueDistantRoom = false;
-
-window.socket_t = null;
-
-// Sécurité CSRF cookies
 
 // Normalize URL paths - make sure they start with a single '/'
 function normalizeUrl(url) {
@@ -46,6 +48,139 @@ function normalizeUrl(url) {
     let normalizedPath = cleanedUrl ? '/' + cleanedUrl : '/';
     return normalizedPath;
 }
+    
+var waschan = false;
+var wasNotif = false;
+var wasSettings = false;
+var washome = false;
+
+var gameDistant = false;
+var gameRoom = false;
+var gamePong = false;
+var gameCasseBrique = false;
+var gameBot = false;
+var gameCasseBriqueDistant = false;
+var gameCasseBriqueDistantRoom = false;
+window.socket_t = null;
+
+// Ajoute /accounts/ si absent
+// function prependAccounts(url) {
+//     let cleanedUrl = url.replace(/^\/+|\/+$/g, ''); // Nettoie les slashs
+//     return cleanedUrl.startsWith('accounts/') ? '/' + cleanedUrl : '/accounts/' + cleanedUrl;
+// }
+
+// // Fonction de chargement de page via fetch
+// async function loadPage(url, pushState = true) {
+// 	if (url != "accounts/" && url != "/accounts/")
+// 		var finalizedUrl = prependAccounts(url);
+// 	else
+// 		var finalizedUrl = url.replace(/^\/+|\/+$/g, '');
+
+//     return fetch(finalizedUrl, { 
+//         headers: {
+//             "X-Requested-With": "XMLHttpRequest",
+//         },
+//         credentials: 'include'
+//     })
+//     .then(response => response.text())
+//     .then(html => {
+//         let parser = new DOMParser();
+//         let doc = parser.parseFromString(html, "text/html");
+//         let newContent = doc.getElementById("content");
+
+//         if (!newContent) {
+//             window.location.href = finalizedUrl;
+//             return;
+//         }
+//         document.getElementById("content").innerHTML = newContent.innerHTML;
+
+// 		if (document.getElementById('mapSelection')) {
+// 			// Ensure the script has run (safety check)
+// 			if (typeof initializeMapButtons === 'function') {
+// 				initializeMapButtons();
+// 			}
+// 		}
+//         // Réexécution des scripts intégrés
+// 		Array.from(doc.querySelectorAll('script')).forEach(oldScript => {
+// 			const newScript = document.createElement('script');
+//             newScript.type = oldScript.type || 'module';
+// 			if (oldScript.src) {
+// 				// Add cache-buster to prevent stale scripts
+// 				newScript.src = oldScript.src + '?t=' + Date.now();
+// 				newScript.async = false;
+// 			} else {
+// 			    newScript.textContent = oldScript.textContent;
+// 			}
+// 			document.body.appendChild(newScript);
+// 			// Remove the script after execution to avoid clutter
+// 			newScript.onload = () => newScript.remove();
+// 		});
+
+//         if (pushState) history.pushState(null, "", finalizedUrl);
+//     })
+//     .catch(error => console.error("Erreur de chargement:", error));
+// }
+
+// async function handleLinkClick(event) {
+//     const link = event.target.closest("a");
+
+//         if (link && link.getAttribute('href') && !link.hasAttribute("data-full-reload")) {
+//             event.preventDefault();
+//             let urlPath = prependAccounts(link.getAttribute("href"));
+//             console.log("url = ", urlPath);
+//             loadPage(urlPath);
+                
+//             if (urlPath.includes("game-distant-choice")) {
+//                 gameRoom = true;
+//                 await gameDistantRoute();
+//             }
+//             else if (urlPath.includes("/game-distant/")) {
+//                 gameDistant = true;
+//             }
+//             else if (urlPath === '/accounts/game' || urlPath === '/accounts/game/') {
+//                 gamePong = true;
+//                 await gameRoute();
+//             }
+//             else if (urlPath === '/accounts/other_game' ) {
+//                 gameCasseBrique = true;
+//                 await gameCasseBriqueRoute();
+//             }
+//             else {
+//                 if (gameDistant && PongDistantGame.currentGame) {
+//                     PongDistantGame.currentGame.closeSocket();
+//                     gameDistant = false;
+//                 }
+//                 else if (gameRoom) {
+//                     window.RoomGameManager = null;
+//                     gameRoom = false;
+//                 }
+//                 else if (gamePong) {
+//                     window.PongGame = null;
+//                     gamePong = false;
+//                 }
+//                 else if (gameCasseBrique) {
+//                     window.CasseBriqueGame = null;
+//                     gameCasseBrique = false;
+//                 }
+//             }
+//         }
+// }
+
+async function gameCasseBriqueRoute() {
+    if (!window.CasseBriqueGame) {
+        const module = await import('./other_game.js');
+        window.CasseBriqueGame = module.CasseBriqueGame;
+        await new Promise(resolve => {
+            const checkEl = () => {
+                if (document.getElementById('mapSelection'))
+                    resolve();
+                else
+                setTimeout(checkEl, 50);
+            };
+            checkEl();
+        });
+    }
+}
 
 async function gameCasseBriqueDistantRoute() {
     console.log('gameCasseBriqueDistantRoute');
@@ -63,8 +198,7 @@ async function gameCasseBriqueDistantRoute() {
     new CBRoomGameManager();
 }
 
-async function gameCasseBriqueRoute() {
-    if (window.CasseBriqueGame) window.CasseBriqueGame = null;
+async function gameBotRoute() {
 
     if (!window.CasseBriqueGame) {
         await new Promise(resolve => {
@@ -126,7 +260,7 @@ window.loadPage = function(url, pushState = true) {
 
     // Normalize the URL to prevent duplication
     const normalizedUrl = normalizeUrl(url);
-
+    console.log(`normalizedUrl ${normalizedUrl}`);
     // Vérifier si on est sur la page de login ou non
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
     const navbar = document.querySelector('.navbar');
@@ -167,13 +301,21 @@ window.loadPage = function(url, pushState = true) {
         const currentPath = window.location.pathname;
         const isLoginPageNow = currentPath === '/' || currentPath === '';
         if (navbar)
-            {
-                navbar.style.display = isLoginPageNow ? 'none' : 'flex';
-                
-                // Force browser to acknowledge the style change
-                void navbar.offsetWidth;
-            }
+        {
+            navbar.style.display = isLoginPageNow ? 'none' : 'flex';
             
+            // Force browser to acknowledge the style change
+            void navbar.offsetWidth;
+        }
+        
+        if (url === "/") url = `https://${window.location.host}`;
+
+        if (url === `https://${window.location.host}` || url.match("signout"))
+        {
+            navbar.style.display = 'none';
+            launch_login_page();
+        }
+
 		const profileName = document.getElementById('accounts_link').href;
 		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
 			launch_profile();
@@ -208,7 +350,7 @@ window.loadPage = function(url, pushState = true) {
 		}
         else if (url === `https://${window.location.host}/home/` || url === '/home/')
         {
-            fetchAllUsersStatus();
+            // fetchAllUsersStatus();
             washome = true;
         }
 
@@ -223,14 +365,6 @@ window.loadPage = function(url, pushState = true) {
             return ;
         }
 
-        console.log(`gameDistant:${gameDistant} && PongDistantGame.currentGame:${PongDistantGame.currentGame}`)
-        if (gameDistant && PongDistantGame.currentGame) {
-            PongDistantGame.currentGame.closeSocket();
-            gameDistant = false;
-            return ;
-        }
-        console.log(`url.includes("/game-distant/") : ${url.includes("/game-distant/")}`)
-        console.log(`url : ${url}`)
         if (url.includes("/game-distant/")) {
             if (!gameDistant) {
                 const pathParts = window.location.pathname.split('/');
@@ -240,6 +374,11 @@ window.loadPage = function(url, pushState = true) {
                 new PongDistantGame(window.game_id_t, window.id_t_t);
             }
             gameDistant = true;
+            return ;
+        }
+        else if (gameDistant && PongDistantGame.currentGame) {
+            PongDistantGame.currentGame.closeSocket();
+            gameDistant = false;
             return ;
         }
         
@@ -286,12 +425,10 @@ window.loadPage = function(url, pushState = true) {
             gameCasseBrique = false;
         }
 
-        if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
-            CasseBriqueDistantGame.currentGame.closeSocket();
-            gameCasseBriqueDistant = false;
-            window.CasseBriqueGame = null;
-        }
-        else if (url.includes(`/other_game_multi_room/`)) {
+        console.log(`gameCasseBriqueDistant:${gameCasseBriqueDistant}  && CasseBriqueDistantGame.currentGame ${CasseBriqueDistantGame.currentGame}`)
+        console.log(`url.includes("/game-other_game_multi/") : ${url.includes("/other_game_multi/")}`)
+        console.log(`url : ${url}`)
+        if (url.includes(`/other_game_multi_room/`)) {
             gameCasseBriqueDistantRoom = true;
             gameCasseBriqueDistantRoute();
         }
@@ -300,15 +437,22 @@ window.loadPage = function(url, pushState = true) {
             const pathParts = window.location.pathname.split('/');
             new CasseBriqueDistantGame(pathParts[2], pathParts[3]);
         }
+        else if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
+            CasseBriqueDistantGame.currentGame.closeSocket();
+            gameCasseBriqueDistant = false;
+            window.CasseBriqueGame = null;
+        }
         
     })
-    .catch(error => console.error("Erreur de chargement:", error));
+    .catch((error) => {
+        console.error(error);
+    });
 };
 
 // Exposer reinitCoreScripts au scope global - but don't re-attach event handlers
 window.reinitCoreScripts = function() {
     // Initialize any components, but don't re-attach the same event listeners
-    // This prevents duplicate handlers
+    // This prevents duplicate handlersloadPage
     
     // Force navbar display based on current URL
     const currentPath = window.location.pathname;
@@ -319,7 +463,6 @@ window.reinitCoreScripts = function() {
     }
 };
 
-// Single function to handle all link clicks for SPA navigation
 function handleLinkClick(event) {
     let link = event.target.closest("a");
     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
@@ -332,8 +475,16 @@ function handleLinkClick(event) {
 		if (if_tournament && !(link.href.includes("/game-distant/"))) {
 			window.socket_t.onclose = function() {};
 		}
-        loadPage(link.href);
-
+        
+        if (link.href.match("signout"))
+            {
+                const navbar = document.querySelector('.navbar');
+                navbar.style.display = "none";
+                // console.log("1> LINK HREF : ", link.href);
+                // loadPage(`https://${window.location.host}/`);
+                // return ;
+            }
+        checkAuthentication(link.href);
     }
 }
 
@@ -408,7 +559,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (navbar) {
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
-		loadPage(window.location.pathname, false);	
+        checkAuthentication(window.location.pathname);
     });
 
     // Initial navbar setup
@@ -419,6 +570,44 @@ document.addEventListener("DOMContentLoaded", function() {
     if (navbar) {
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
-	if (window.location.pathname != '/')
-		loadPage(window.location.pathname, false);	
+
+    loadPage(window.location.pathname);
+});
+
+
+function checkAuthentication(location) {
+    fetch('/api/check-auth/')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.authenticated) {
+                // Si l'utilisateur n'est pas authentifié, rediriger et écraser l'historique
+                window.location.replace('/'); // Redirection vers la page de login, écrasant l'historique
+            } else {
+                // Si l'utilisateur est authentifié, charger la page
+                return loadPage(location); // Charge la page actuelle
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de la vérification de l\'authentification:', error);
+        });
+
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    function updateAuthUI() {
+        const authLink = document.getElementById('accounts_link');
+        
+        // Vérifie si le user est connecté via une requête AJAX ou cookie
+        fetch('/api/check-auth')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    authLink.href = `/profile/${data.username}`;
+                }
+            });
+    }
+
+    // Appel initial + écouteur pour les événements de connexion
+    updateAuthUI();
+    document.addEventListener('userLoggedIn', updateAuthUI); // À déclencher après connexion
 });

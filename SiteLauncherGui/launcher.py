@@ -248,7 +248,8 @@ class SiteLauncher(QMainWindow):
         
         ip_address = output.split()[0]
 
-        firefox_command = ["firefox", "--private-window", f"https://{ip_address}:5000/"]
+
+        firefox_command = ["brave-browser", " --incognito", f"https://{ip_address}:5000/"]
 
         # Créer un QProcess pour lancer Firefox
         self.firefox_process = QProcess(self)
@@ -304,7 +305,7 @@ class SiteLauncher(QMainWindow):
     def dockerStop(self):
         self.output.append(ansi_to_html("\033[1;34m [SIGNAL] Waiting to stop docker services.\033[0m"))
 
-        docker_stop_cmd = ["sudo", "docker", "compose", "stop"]
+        docker_stop_cmd = ["docker", "compose", "stop"]
 
         docker_stop_process = QProcess(self)
         
