@@ -281,7 +281,7 @@ class SiteLauncher(QMainWindow):
         self.static_process.readyReadStandardOutput.connect(lambda: self.read_output(self.static_process))
         self.static_process.readyReadStandardError.connect(lambda: self.read_output(self.static_process))
             
-        command = ["sudo", "sh", "../SiteLauncherGui/collectstatic.sh"]
+        command = ["sh", "../SiteLauncherGui/collectstatic.sh"]
         self.static_process.start(command[0], command[1:])
 
 
