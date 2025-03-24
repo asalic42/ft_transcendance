@@ -432,7 +432,7 @@ function handleLinkClick(event) {
             // return ;
         }
         console.log("2> LINK HREF : ", link.href);
-        loadPage(link.href);
+        checkAuthentication(link.href);
     }
 }
 
@@ -512,7 +512,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (navbar) {
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
-        checkAuthentication();
+        checkAuthentication(window.location.pathname);
     });
 
     // Initial navbar setup
@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
-function checkAuthentication() {
+function checkAuthentication(location) {
     fetch('/api/check-auth/')
         .then(response => response.json())
         .then(data => {
@@ -537,7 +537,7 @@ function checkAuthentication() {
                 window.location.replace('/'); // Redirection vers la page de login, écrasant l'historique
             } else {
                 // Si l'utilisateur est authentifié, charger la page
-                return loadPage(window.location.pathname, false); // Charge la page actuelle
+                return loadPage(location, false); // Charge la page actuelle
             }
         })
         .catch(error => {

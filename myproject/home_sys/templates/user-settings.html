@@ -48,12 +48,12 @@
                     To update your information, click on Update, then Save.
                 </p>
 
-                <a href="{% url 'signout' %}">VaTeFaireFoutreFdpDeProjet</a>
+                
 
-                <!-- <button class="settings-logout">
-                    <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}">
+                <a href="{% url 'signout' %}" class="settings-logout">
+                    <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}" alt="Logout">
                     Logout
-                </button> -->
+                </a>                
 
                 <button class="settings-delete-account" onclick="window.location.href='{% url 'delete_account' %}'">
                     <img class="delete-svg" src="{% static 'images/delete-profile-svgrepo-com.svg' %}">    
