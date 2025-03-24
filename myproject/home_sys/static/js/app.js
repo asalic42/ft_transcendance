@@ -246,13 +246,14 @@ let errorprint;
 
 // Exposer loadPage au scope global
 window.loadPage = function(url, pushState = true) {
-
     // Normalize the URL to prevent duplication
     const normalizedUrl = normalizeUrl(url);
 
     // Vérifier si on est sur la page de login ou non
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
     const navbar = document.querySelector('.navbar');
+
+    console.log("isLoginPage ? : ", isLoginPage);
 
 
     // Set navbar visibility before loading content
@@ -296,6 +297,14 @@ window.loadPage = function(url, pushState = true) {
             
             // Force browser to acknowledge the style change
             void navbar.offsetWidth;
+        }
+
+        if (url === '/') url = `https://${window.location.host}`;
+        
+        if (url === `https://${window.location.host}` || url.match("signout"))
+        {
+            navbar.style.display = 'none';
+            launch_login_page();
         }
 
 		const profileName = document.getElementById('accounts_link').href;
@@ -386,8 +395,8 @@ window.loadPage = function(url, pushState = true) {
             gameCasseBrique = false;
         }
     })
-    .catch(() => {
-        return null;
+    .catch((error) => {
+        console.error(error);
     });
 };
 
@@ -414,6 +423,15 @@ function handleLinkClick(event) {
         !link.hasAttribute("data-spa-ignore")) {
         
         event.preventDefault();
+        if (link.href.match("signout"))
+        {
+            const navbar = document.querySelector('.navbar');
+            navbar.style.display = "none";
+            // console.log("1> LINK HREF : ", link.href);
+            // loadPage(`https://${window.location.host}/`);
+            // return ;
+        }
+        console.log("2> LINK HREF : ", link.href);
         loadPage(link.href);
     }
 }
@@ -505,6 +523,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (navbar) {
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
-	if (window.location.pathname != '/')
-		loadPage(window.location.pathname, false);	
+	loadPage(window.location.pathname, false);	
 });
+

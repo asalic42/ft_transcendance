@@ -18,10 +18,12 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.contrib import messages
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 
 from zxcvbn import zxcvbn as passwordscore
 
-from .models import Users, Pong, SoloCasseBrique, MultiCasseBrique, Tournaments, MatchsTournaments, Chans, Messages, PrivateChan, CurrentGame, Maps #, SessionIdUser
+from .models import Users, Pong, SoloCasseBrique, MultiCasseBrique, Tournaments, MatchsTournaments, Chans, Messages, PrivateChan, CurrentGame, Maps
 from .utils import add_pong_logic, send_notification_to_user
 
 logger = logging.getLogger(__name__)
@@ -115,13 +117,13 @@ def signup(request):
 		if User.objects.filter(username=username).exists():
 			return JsonResponse({
 				'status': 'error',
-				'message': 'Ce nom d\'utilisateur est déjà pris.'
+				'message': 'Username already taken'
 			}, status=400)
 			
 		if User.objects.filter(email=email).exists():
 			return JsonResponse({
 				'status': 'error',
-				'message': 'Cet email est déjà utilisé.'
+				'message': 'Email already taken'
 			}, status=400)
 			
 		# Create a new user
@@ -129,13 +131,15 @@ def signup(request):
 		
 		user = authenticate(request, username=username, password=password)
 		
+		user_profile = Users.objects.get(user=user)
+		
 		if user is not None:
 			login(request, user)
 
-			#session_key = request.session.session_key
-			#if session_key not in user.active_sessions:
-			#	user.active_sessions.append(session_key)
-			#	user.save()
+			user_profile.logstatus = True
+			user_profile.is_online = True
+			user_profile.session_key = request.session.session_key
+			user_profile.save()
 
 			return JsonResponse({
 				'status': 'success',
@@ -149,10 +153,6 @@ def signup(request):
 			})
 		else:
 			return JsonResponse({'status': 'unauthenticated'})
-			"""  return JsonResponse({
-				'status': 'error',
-				'message': 'Invalid credentials'
-			}, status=400) """
 			
 	# GET requests can return minimal data needed for the signup form
 	return JsonResponse({'status': 'unauthenticated'})
@@ -190,17 +190,24 @@ def signin(request):
         
         user = authenticate(request, username=username, password=password)
         if user is not None:
+			
+            user_profile = Users.objects.get(user=user)
+
+			# Récupérer toutes les sessions actives de l'utilisateur
+            sessions = Session.objects.filter(
+                expire_date__gte=timezone.now(),
+                session_key__in=Users.objects.filter(user=user).values_list('session_key', flat=True)
+            )
+            # Supprimer toutes les sessions sauf la nouvelle
+            for session in sessions:
+                if session.session_key != request.session.session_key:
+                    session.delete()
 
             login(request, user)
 
-            #session_key = request.session.session_key
-            #if session_key not in user.active_sessions:
-            #    user.active_sessions.append(session_key)
-            #    user.save()
-
-            # Mettre à jour le statut de l'utilisateur à 'online'
             try:
-                user_profile = Users.objects.get(user=user)
+                user_profile.session_key = request.session.session_key
+                user_profile.logstatus = True
                 user_profile.is_online = True
                 user_profile.save()
 
@@ -216,8 +223,7 @@ def signin(request):
             except Users.DoesNotExist:
                 return JsonResponse({'status': 'error', 'message': 'User profile not found.'})
         else:
-            return JsonResponse({'status': 'unauthenticated'})
-    
+            return JsonResponse({'status': 'unauthenticated', 'message': 'Wrong user/password'})
     return JsonResponse({'status': 'unauthenticated'})
 
 
@@ -234,22 +240,32 @@ def signin(request):
 
 # Déconnexion de l'utilisateur
 def signout(request):
-	if request.user.is_authenticated:
-		try:
-			user_profile = Users.objects.get(user=request.user)
-			user_profile.is_online = False
-			user_profile.save()
-		except Users.DoesNotExist:
-			pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
+    
+    if request.user.is_authenticated:
+        try:
+            user_profile = Users.objects.get(user=request.user)
+            user_profile.is_online = False
+            user_profile.logstatus = False
+            user_profile.save()
+            
+            # Déconnecter l'utilisateur
+            logout(request)
 
-	logout(request)
-	return JsonResponse({
-        'status': 'success',
-        'redirect': f'https://{settings.IP_ADDR}:5000/'
-    })
+            print("\033[34m1-FLUSH\033[0m")
+            sys.stdout.flush()
+            return render(request, 'login.html')
 
+        except Users.DoesNotExist:
+            print("\033[34m2-FLUSH\033[0m")
+            sys.stdout.flush()
+            pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
 
-
+    print("\033[34m3-FLUSH\033[0m")
+    sys.stdout.flush()
+    return render(request, 'login.html')
+    #return render(request, 'login.html')
+	
+	
 """
 												auth.5)	[CHECK_USERNAME]
 							[---------------------------------------------------------------]
@@ -461,6 +477,9 @@ def load_template(request, page, **kwargs):
 @login_required
 @never_cache
 def home(request):
+
+	if (not request.user.is_authenticated):
+		redirect('index')
 	
 	# Récupérer les utilisateurs et pré-calculer leur statut
 	users = Users.objects.all()
@@ -1067,9 +1086,12 @@ def get_rooms(request):
 """
 def get_online_users(request):
     online_users = Users.objects.filter(is_online=True)
-    users_data = [{"id": users.id, "username": users.name, "image": users.image.url} for users in online_users]
+    offline_users = Users.objects.filter(is_online=False)
+
+    users_online_data = [{"id": users.id, "username": users.name, "image": users.image.url} for users in online_users]
+    users_offline_data = [{"id": users.id, "username": users.name, "image": users.image.url} for users in offline_users]
 	
-    return JsonResponse({"online_users": users_data})
+    return JsonResponse({"online_users": users_online_data, "offline_users" : users_offline_data})
 
 
 """

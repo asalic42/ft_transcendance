@@ -105,6 +105,7 @@ IP_LOCALISATION= env('MAP_IP_LOCALISATION')
 # LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 # LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 LOGIN_URL = '/'  # Ou l'URL de votre choix
+LOGOUT_REDIRECT_URL = f'https://{IP_ADDR}:5000/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -116,7 +117,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',  # Ce middleware est utilisé par social-auth-app-django
     'corsheaders.middleware.CorsMiddleware',
-    #'home_sys.middleware.MultiSessionMiddleware',
+    'home_sys.middleware.NoCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'

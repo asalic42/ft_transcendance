@@ -107,8 +107,8 @@ function launch_settings() {
 			.then(response => response.json())
 			.then(data => {
 				if (data.status === 'success') {
-					// Créer un élément vidéo
 
+					// Créer un élément vidéo
 					var videoContainer = document.getElementById('videoContainer');
 
 					var video = document.createElement('video');
@@ -122,36 +122,36 @@ function launch_settings() {
 
 					// Ajouter un événement pour détecter la fin de la vidéo
 					video.addEventListener('ended', function () {
-
 						const textElement = document.createElement('span');
 						textElement.textContent = 'Seems like you need to refresh or reopen a new page buddy.';
-						textElement.style.position = 'absolute'; // Position absolue pour le superposer
-						textElement.style.top = '50%'; // Centrer verticalement
-						textElement.style.left = '50%'; // Centrer horizontalement
-						textElement.style.transform = 'translate(-50%, -50%)'; // Centrer parfaitement
-						textElement.style.color = 'white'; // Couleur du texte
-						textElement.style.fontSize = '24px'; // Taille du texte
-						textElement.style.zIndex = '1000'; // S'assurer qu'il est au-dessus de la vidéo
-						textElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Fond semi-transparent
-						textElement.style.padding = '10px'; // Espacement autour du texte
-						textElement.style.borderRadius = '5px'; // Coins arrondis
+						textElement.style.position = 'absolute';
+						textElement.style.top = '50%';
+						textElement.style.left = '50%';
+						textElement.style.transform = 'translate(-50%, -50%)';
+						textElement.style.color = 'white';
+						textElement.style.fontSize = '24px';
+						textElement.style.zIndex = '1000';
+						textElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+						textElement.style.padding = '10px';
+						textElement.style.borderRadius = '5px';
 
 						const buttonElement = document.createElement('button');
 						buttonElement.textContent = 'Take me home darling';
-						buttonElement.style.position = 'absolute'; // Position absolue pour le superposer
-						buttonElement.style.top = 'calc(50% + 40px)'; // Placer le bouton sous le texte
-						buttonElement.style.left = '50%'; // Centrer horizontalement
-						buttonElement.style.transform = 'translateX(-50%)'; // Centrer parfaitement
-						buttonElement.style.padding = '10px 20px'; // Espacement autour du texte du bouton
-						buttonElement.style.fontSize = '18px'; // Taille du texte du bouton
-						buttonElement.style.color = '#fff'; // Couleur du texte du bouton
-						buttonElement.style.backgroundColor = '#007bff'; // Couleur de fond du bouton
-						buttonElement.style.border = 'none'; // Pas de bordure
-						buttonElement.style.borderRadius = '5px'; // Coins arrondis
-						buttonElement.style.cursor = 'pointer'; // Curseur pointer pour indiquer que c'est cliquable
+						buttonElement.style.position = 'absolute';
+						buttonElement.style.top = 'calc(50% + 40px)';
+						buttonElement.style.left = '50%';
+						buttonElement.style.transform = 'translateX(-50%)';
+						buttonElement.style.padding = '10px 20px';
+						buttonElement.style.fontSize = '18px';
+						buttonElement.style.color = '#fff';
+						buttonElement.style.backgroundColor = '#007bff';
+						buttonElement.style.border = 'none';
+						buttonElement.style.borderRadius = '5px';
+						buttonElement.style.cursor = 'pointer';
 
 						// Ajouter un événement pour rediriger lors du clic
 						buttonElement.addEventListener('click', function () {
+							// Rediriger vers une nouvelle page (par exemple, la page d'accueil)
 							window.location.href = 'https://www.youtube.com/watch?v=FiARsQSlzDc';
 						});
 
@@ -160,20 +160,21 @@ function launch_settings() {
 					});
 
 					// Ajouter la vidéo au conteneur
-					videoContainer.innerHTML = ''; // S'assurer que le conteneur est vide avant d'ajouter la vidéo
+					videoContainer.innerHTML = '';
 					videoContainer.appendChild(video);
 
 					// Afficher le conteneur et le positionner au-dessus de tout
 					videoContainer.style.display = 'block';
-					videoContainer.style.position = 'fixed'; // Position fixe pour couvrir toute la fenêtre
+					videoContainer.style.position = 'fixed';
 					videoContainer.style.top = '0';
 					videoContainer.style.left = '0';
-					videoContainer.style.zIndex = '1000'; // Un z-index élevé pour être au-dessus de tout
-					videoContainer.style.backgroundColor = 'black'; // Fond noir pour éviter les artefacts
-
+					videoContainer.style.zIndex = '1000';
+					videoContainer.style.backgroundColor = 'black';
 				}
 			})
-			.catch(error => {return null;});
+			.catch(error => {
+				console.error('Error during signout:', error);
+			});
 	});
 
 	/* ------ Pour vérifier si le user/email est valide et est non pris ------ */
