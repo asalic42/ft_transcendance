@@ -48,6 +48,7 @@ function normalizeUrl(url) {
 }
 
 async function gameCasseBriqueDistantRoute() {
+    console.log('gameCasseBriqueDistantRoute');
     if (!window.CBRoomGameManager) {
         await new Promise(resolve => {
             const checkEl = () => {
@@ -183,7 +184,7 @@ window.loadPage = function(url, pushState = true) {
 			clearInterval(liveChat);
 			waschan = false;
 		}
-		else if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
+		if (url === `https://${window.location.host}/channels/` || url === '/channels/') {
             launch_everything();
             waschan = true;
         }

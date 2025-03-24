@@ -94,6 +94,22 @@ function launch_everything() {
 			}
 		});
 	});
+
+	overlay.addEventListener('click', function(event) {
+		// Vérifier si le clic est directement sur l'overlay et non sur un enfant
+		if (event.target === overlay && event.target.display !== 'none') {
+			// Masquer l'overlay et les formulaires
+			overlay.style.display = 'none';
+			document.getElementById('input-channel').classList.remove('show');
+			document.getElementById('input-dm').classList.remove('show');
+			
+			// Réinitialiser le callback pour le canal privé
+			currentPVCallback = null;
+			
+			// Recharger la page des canaux
+			loadPage('/channels/');
+		}
+	});
 }
 
 // Cliquer sur un channel deja creer
@@ -129,10 +145,9 @@ function addMessageListener() {
 
 	const invite = document.getElementById('invite-button');
 	invite.addEventListener('click', async (event) => {
-		const msg = `https://${window.location.host}/game-distant/${userid}/`;
-		postMessage(currentChan, msg, true);
-		await invite_button();
-		loadPage(`https://${window.location.host}/game-distant/${userid}/`);
+		const msg = `https://${window.location.host}/game-distant/${userid}/0/`;
+		await postMessage(currentChan, msg, true);
+		loadPage(`https://${window.location.host}/game-distant/${userid}/0/`);
 	});
 }
 
@@ -399,7 +414,6 @@ function setChannelNamePV(callback) {
 
 	overlay.style.display = 'block';
 	inputContainer.classList.add('show');
-
 	currentPVCallback = callback;
 }
 ////////////////////////////////////////////////

@@ -152,7 +152,7 @@ class PongDistantGame {
 			document.getElementById('disconnected').style.display = "none"; 
 		}
 
-		if (document.getElementById('game').getContext('2d')) {
+		if (document.getElementById('game') && document.getElementById('game').getContext('2d')) {
 			document.getElementById('game').getContext('2d').clearRect(0, 0, document.getElementById('game').width, document.getElementById('game').height);
 		}
 		this.initState();

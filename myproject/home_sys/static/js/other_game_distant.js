@@ -75,6 +75,8 @@ class CasseBriqueDistantGame {
 		this.animationId = 0;
 		this.mapTab = [];
 		this.compteur = 0;
+		this.lastMoveTime = 0;
+		this.moveCooldown = 10; 
 		this.setupListeners();
 		this.setupDOM();
 	}
@@ -97,7 +99,16 @@ class CasseBriqueDistantGame {
 		window.addEventListener('keyup', this.keyHandler);
 	}
 
+	removeListeners() {
+
+		this.keyHandler = (e) => this.handleKey(e);
+		window.removeEventListener('keydown', this.keyHandler);
+		window.removeEventListener('keyup', this.keyHandler);
+	}
+
 	handleKey(e) {
+		if (e.repeat) return;
+
 		this.keys[e.key] = (e.type === 'keydown');
 	}
 
@@ -207,13 +218,13 @@ class CasseBriqueDistantGame {
 	
 		document.getElementById("game1").getContext("2d").beginPath();
 		document.getElementById("game1").getContext("2d").fillStyle = "#ED4EB0";
-		document.getElementById("game1").getContext("2d").roundRect(this.gameState.player1_coords.x1, this.gameState.player1_coords.y1, 120, this.gameState.player1_coords.y2 - this.gameState.player1_coords.y1, 7);
+		document.getElementById("game1").getContext("2d").roundRect(this.gameState.player1_coords.x1, this.gameState.player1_coords.y1, this.gameState.player1_coords.x2 - this.gameState.player1_coords.x1, this.gameState.player1_coords.y2 - this.gameState.player1_coords.y1, 7);
 		document.getElementById("game1").getContext("2d").fill();
 		document.getElementById("game1").getContext("2d").closePath();
 	
 		document.getElementById("game2").getContext("2d").beginPath();
 		document.getElementById("game2").getContext("2d").fillStyle = "#ED4EB0";
-		document.getElementById("game2").getContext("2d").roundRect(this.gameState.player2_coords.x1, this.gameState.player2_coords.y1, 120, this.gameState.player2_coords.y2 - this.gameState.player2_coords.y1, 7);
+		document.getElementById("game2").getContext("2d").roundRect(this.gameState.player2_coords.x1, this.gameState.player2_coords.y1, this.gameState.player2_coords.x2 - this.gameState.player2_coords.x1, this.gameState.player2_coords.y2 - this.gameState.player2_coords.y1, 7);
 		document.getElementById("game2").getContext("2d").fill();
 		document.getElementById("game2").getContext("2d").closePath();
 	}
@@ -280,10 +291,13 @@ class CasseBriqueDistantGame {
 		this.drawBall(this.gameState.ball2_coords, document.getElementById("game2").getContext("2d"));
 	}
 
-	movePlayer() {
+	async movePlayer(sleepTime) {
+		const now = Date.now();
+		if (now - this.lastMoveTime < this.moveCooldown) return;
+		
 		const moveData = {};
 		if (this.keys["ArrowLeft"] || this.keys["ArrowRight"]) {
-			const moveValue = this.keys["ArrowLeft"] ? -4 : 4;
+			const moveValue = this.keys["ArrowLeft"] ? -19 : 19;
 	
 			if (this.currentPlayer === 1) {
 				moveData.player1_coords = { x1: moveValue };			
@@ -298,9 +312,10 @@ class CasseBriqueDistantGame {
 				move: moveData
 			}));
 		}
+		this.lastMoveTime = now;
 	}
 
-	launchAnim(data) {
+	async launchAnim(data) {
 		if (data.number) this.currentPlayer = data.number;
 		if (data.player1_coords) this.gameState.player1_coords = data.player1_coords;
 		if (data.player2_coords) this.gameState.player2_coords = data.player2_coords;
@@ -312,7 +327,7 @@ class CasseBriqueDistantGame {
 		if (data.time && data.time != 0) this.gameState.timeLeft = Math.floor(60 - data.time.toPrecision(2));
 	
 		// this.updateFPS();
-		this.movePlayer();
+		await this.movePlayer(data.sleepTime);
 		this.compteur++;
 		document.getElementById("game1").getContext("2d").clearRect(0, 0, document.getElementById("game1").width, document.getElementById("game1").height);
 		document.getElementById("game2").getContext("2d").clearRect(0, 0, document.getElementById("game2").width, document.getElementById("game2").height);

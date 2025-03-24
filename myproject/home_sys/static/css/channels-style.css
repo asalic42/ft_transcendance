@@ -145,7 +145,6 @@ h1 {
 /* Buttons in the chat (new chan + invite people in it)*/
 .button-chat {
 	font-size: 15px;
-	padding: 10px 14px;
 	margin: 22px;
 	color:#ED4EB0;
 	border-radius: 7px;
@@ -299,6 +298,8 @@ h1 {
 	border-radius: 7px;
 	outline: 2px solid #ED4EB0;
 	border: none;
+	padding-top: 0px;
+	padding-bottom: 0px;
 	background-color: #23232e;
 	color: var(--font-color);
 }
