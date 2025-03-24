@@ -646,7 +646,7 @@ class CasseBriqueGame:
 
 	@database_sync_to_async
 	def fetch_map(self, map_id):
-		selected_map = get_object_or_404(Maps, id=map_id)
+		selected_map = get_object_or_404(Maps, id = map_id)
 		try:
 			with open(selected_map.LinkMaps, 'r') as file:
 				map_data = file.read()
