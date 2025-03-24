@@ -45,7 +45,6 @@ urlpatterns = [
     path('<str:page>/', load_template, name='load_template'),
 
     # --- Routes pour les actions et API (inchangées) ---
-    path('signout/', signout, name='signout'),
 
     # --- Authentication routes ---
     path('user-settings/signout/', signout, name='signout'),
@@ -68,7 +67,6 @@ urlpatterns = [
     path('<str:page>/', load_template, name='load_template'),
     
     # --- Routes pour les actions et API (inchangées) ---
-    path('signout/', signout, name='signout'),
     #path('deleteAccount/', delete_account, name='delete_account'),
     #path('deleteSuccess/', delete_success, name='delete_success'),
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),

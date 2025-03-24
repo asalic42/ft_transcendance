@@ -1,5 +1,4 @@
-from django.contrib.sessions.models import Session
-from django.contrib.auth import logout
+""" SPA MIDDLEWARE """
 
 class SPAMiddleware:
     def __init__(self, get_response):
@@ -12,16 +11,18 @@ class SPAMiddleware:
             request.session.save()
         return response
 
-""" class MultiSessionMiddleware:
+""" NO CACHE MIDDLEWARE """
+
+class NoCacheMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated:
-            session_key = request.session.session_key
-            if session_key not in request.user.active_sessions:
-                # Déconnecter l'utilisateur si l'ID de session n'est pas dans la liste des sessions actives
-                logout(request)
         response = self.get_response(request)
+        
+        # Ajouter les en-têtes pour empêcher la mise en cache
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        
         return response
- """

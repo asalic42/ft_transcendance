@@ -254,6 +254,8 @@ window.loadPage = function(url, pushState = true) {
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
     const navbar = document.querySelector('.navbar');
 
+    console.log("isLoginPage ? : ", isLoginPage);
+
 
     // Set navbar visibility before loading content
     if (navbar) {
@@ -414,6 +416,15 @@ function handleLinkClick(event) {
         !link.hasAttribute("data-spa-ignore")) {
         
         event.preventDefault();
+        if (link.href.match("signout"))
+        {
+            const navbar = document.querySelector('.navbar');
+            navbar.style.display = "none";
+            // console.log("1> LINK HREF : ", link.href);
+            // loadPage(`https://${window.location.host}/`);
+            // return ;
+        }
+        console.log("2> LINK HREF : ", link.href);
         loadPage(link.href);
     }
 }
@@ -508,3 +519,4 @@ document.addEventListener("DOMContentLoaded", function() {
 	if (window.location.pathname != '/')
 		loadPage(window.location.pathname, false);	
 });
+

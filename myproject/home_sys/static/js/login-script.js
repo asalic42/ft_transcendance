@@ -514,7 +514,7 @@ vlp_signinForm.addEventListener('submit', function(e) {
                 window.loadPage(data.redirect);
             }
         } else {
-            console.log("Login : failed.");
+            console.log("Login : failed. | data.status : ", data.status);
             // Afficher l'erreur
 
             const vlp_signinContainer = document.querySelector('.signin-container');

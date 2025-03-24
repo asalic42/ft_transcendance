@@ -36,14 +36,9 @@ function fetchOnlineUsers() {
           	
 			data.online_users.forEach(user => {
             const userCard = document.createElement('div');
-            const userCardOffline = document.querySelector(`.card-${user.id}`);
-            if (userCardOffline)
-            {
-              // pas bon, ne revient pas quand le user se logout
-                userCardOffline.style.display = "none";
-            }
-            userCard.classList.add('user-card');
-            
+
+            userCard.classList.add(`user-card-${user.id}`);
+
             const userAvatar = document.createElement('img');
             userAvatar.classList.add('user-avatar');
             userAvatar.src = user.image;
@@ -62,8 +57,27 @@ function fetchOnlineUsers() {
             userCard.appendChild(userName);
             userCard.appendChild(profileButton);
             
+      // SI carte trouvée dans userList : ça veut dire Online donc affichage offline = none
+      // SINON : ça veut dire offline, display offline = block
 			if (userList)
             	userList.appendChild(userCard);
+              const userCardOnline = document.querySelector(`.user-card-${user.id}`);
+              console.log("UserCard +ONLINE : ", userCardOnline);
+              const userCardOffline = document.querySelector(`.card-${user.id}`);
+              console.log("UserCard -OFFLINE : ", userCardOffline);
+
+
+              if (userCardOnline)
+                {
+                  // pas bon, ne revient pas quand le user se logout
+                  if (userCardOffline)
+                    userCardOffline.style.display = "none";
+                }
+                else
+                {
+                  if (userCardOffline)
+                    userCardOffline.style.display = "block";
+              }
           });
         } else {
 			if (emptyState)
