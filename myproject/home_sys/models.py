@@ -176,4 +176,4 @@ class UserOpenedChannel(models.Model):
 
 class casse_brique_room(models.Model):
 	game_id = models.IntegerField(unique=True)
-	map_id = models.IntegerField(unique=True)
+	map_id = models.IntegerField()

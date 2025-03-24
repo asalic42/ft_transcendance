@@ -294,6 +294,15 @@ class PongConsumer(AsyncWebsocketConsumer):
 				self.room_group_name,
 				{"type": "game_won", "loser": player_number}
 			)
+
+			# Fermeture forcée des autres connexions
+			await self.channel_layer.group_send(
+				self.room_group_name,
+				{
+					'type': 'close_connection',
+					'message': 'Opponent disconnected. You win!'
+				}
+			)
 	
 			# Envoyer match_finished au tournoi UNE FOIS SEULEMENT
 			if self.id_t != 0 and not self.game.reported_to_tournament:
@@ -429,6 +438,13 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'player1_name': event['player1_name'],
 			'player2_name': event['player2_name'],
 		}))
+	
+	async def close_connection(self, event):
+		await self.send(text_data=json.dumps({
+			'type': 'close_connection',
+			'message': event['message']
+		}))
+		await self.close()
 
 	# Compte a rebours avant la game
 	async def start_countdown(self, event):
@@ -824,9 +840,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
-		if not self.game.add_player(self.channel_name, user_id):
-			await self.close()
-			return
+		if len(self.game.players) >= 2 or not self.game.add_player(self.channel_name, user_id):
+ 			return
 
 		await self.channel_layer.group_add(
 			self.room_group_name,
@@ -1239,13 +1254,14 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			
 		countdown_messages = ['3', '2', '1', 'Start!']
 		for message in countdown_messages:
-			await self.channel_layer.group_send(
-				self.room_group_name, {
-					'type': 'start_countdown',
-					'message': message
-				}
-			)
-			await asyncio.sleep(1)
+			if len(self.game.players) == 2:
+				await self.channel_layer.group_send(
+					self.room_group_name, {
+						'type': 'start_countdown',
+						'message': message
+					}
+				)
+				await asyncio.sleep(1)
 
 
 		time_left = 60

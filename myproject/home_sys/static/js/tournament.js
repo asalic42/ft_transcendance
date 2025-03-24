@@ -53,7 +53,7 @@ function launch_tournament() {
 		loadPage(`game-mode-pong/`);
 	}
 
-	window.socket_t.onmessage = function(event) {
+	window.socket_t.onmessage = async function(event) {
 		try {
 			const data = JSON.parse(event.data);
 			if (data.type === "game_link") {
@@ -100,9 +100,9 @@ function launch_tournament() {
 					return new Promise(resolve => setTimeout(resolve, ms));
 				}
 	
-				sleep(5000);
+				await sleep(5000);
 				alert('Tournament is finished. Thanks.');
-				sleep(1000);
+				await sleep(1000);
 				loadPage(`game-mode-pong/`);
 			}
 			if (data.type === "tournament_cancelled") {
