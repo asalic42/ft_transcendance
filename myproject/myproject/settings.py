@@ -116,6 +116,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',  # Ce middleware est utilisé par social-auth-app-django
     'corsheaders.middleware.CorsMiddleware',
+    #'home_sys.middleware.MultiSessionMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
