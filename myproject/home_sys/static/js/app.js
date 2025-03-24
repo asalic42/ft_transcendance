@@ -545,3 +545,22 @@ function checkAuthentication(location) {
         });
 
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    function updateAuthUI() {
+        const authLink = document.getElementById('accounts_link');
+        
+        // Vérifie si le user est connecté via une requête AJAX ou cookie
+        fetch('/api/check-auth')
+            .then(response => response.json())
+            .then(data => {
+                if (data.authenticated) {
+                    authLink.href = `/profile/${data.username}`;
+                }
+            });
+    }
+
+    // Appel initial + écouteur pour les événements de connexion
+    updateAuthUI();
+    document.addEventListener('userLoggedIn', updateAuthUI); // À déclencher après connexion
+});
