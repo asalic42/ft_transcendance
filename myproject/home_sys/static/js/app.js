@@ -239,13 +239,13 @@ let SettingsTimeout;
 let liveChat;
 let homefetch;
 let notiffetch;
-
 let errorprint;
 // Ajouter une variable globale pour tracker les scripts chargés
 /* getCSRFTokenlet loadedScripts = []; */
 
 // Exposer loadPage au scope global
 window.loadPage = function(url, pushState = true) {
+
     // Normalize the URL to prevent duplication
     const normalizedUrl = normalizeUrl(url);
 
@@ -298,9 +298,9 @@ window.loadPage = function(url, pushState = true) {
             // Force browser to acknowledge the style change
             void navbar.offsetWidth;
         }
-
-        if (url === '/') url = `https://${window.location.host}`;
         
+        if (url === "/") url = `https://${window.location.host}`;
+
         if (url === `https://${window.location.host}` || url.match("signout"))
         {
             navbar.style.display = 'none';
@@ -512,7 +512,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (navbar) {
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
-		loadPage(window.location.pathname, false);	
+        checkAuthentication();
     });
 
     // Initial navbar setup
@@ -523,6 +523,25 @@ document.addEventListener("DOMContentLoaded", function() {
     if (navbar) {
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
-	loadPage(window.location.pathname, false);	
+
+    loadPage(window.location.pathname, false);
 });
 
+
+function checkAuthentication() {
+    fetch('/api/check-auth/')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.authenticated) {
+                // Si l'utilisateur n'est pas authentifié, rediriger et écraser l'historique
+                window.location.replace('/'); // Redirection vers la page de login, écrasant l'historique
+            } else {
+                // Si l'utilisateur est authentifié, charger la page
+                return loadPage(window.location.pathname, false); // Charge la page actuelle
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de la vérification de l\'authentification:', error);
+        });
+
+}

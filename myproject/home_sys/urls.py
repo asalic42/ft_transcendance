@@ -72,6 +72,7 @@ urlpatterns = [
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),
     
     # Exemples d'API et endpoints
+    path('api/check-auth/', check_user_authenticated, name='check_user_authenticated'),
     path('api/button-test/', button_test_page, name="button_test_page"),
     #path('api/current-user/', get_current_user_id, name='current_user_id'),
     path('api/add_solo_casse_brique/', add_solo_casse_brique, name='add_solo_casse_brique'),

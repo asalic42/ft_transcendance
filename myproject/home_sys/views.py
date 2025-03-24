@@ -348,9 +348,13 @@ def check_password_solidity(request):
 							[---------------------------------------------------------------]
 
 """
-@login_required
 @never_cache
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def load_template(request, page, **kwargs):
+
+	if (not request.user.is_authenticated):
+		page = "login"
+	
 	template_name = f"{page}.html"
 	context = {}
 
@@ -474,8 +478,8 @@ def load_template(request, page, **kwargs):
 
 """
 
-@login_required
 @never_cache
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def home(request):
 
 	if (not request.user.is_authenticated):
@@ -502,7 +506,7 @@ def home(request):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def delete_account(request):
 	return render(request, 'delete_account.html')
 
@@ -518,7 +522,7 @@ def delete_account(request):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def update_user_info(request):
 	if request.method == 'POST':
 		user = request.user  # Récupère l'utilisateur connecté
@@ -602,7 +606,7 @@ def update_user_info(request):
 """
 	
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def upload_avatar(request):
 	if request.method == 'POST':
 		try:
@@ -644,7 +648,7 @@ def upload_avatar(request):
 
 """
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def settings_user(request):
 	return (render(request, 'user-settings.html'))
 
@@ -675,7 +679,7 @@ def settings_user(request):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def channels_page(request):
 	# Récupérer le profil de l'utilisateur connecté
 	current_user_profile = request.user.users
@@ -970,7 +974,7 @@ def add_pong(request):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def create_current_game(request, sender_id):
 	try:
 		created = CurrentGame.objects.create(game_id=sender_id)
@@ -990,7 +994,7 @@ def create_current_game(request, sender_id):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 @require_http_methods(["POST"])
 def create_room(request):
 	try:
@@ -1027,7 +1031,7 @@ def create_room(request):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def tournament_page(request):
 	existing_ids = set(Tournaments.objects.values_list('id', flat=True))
 	waiting_room = set(tournament_room.objects.values_list('tournament_id', flat=True))
@@ -1069,7 +1073,7 @@ def map_view(request, map_id):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def get_rooms(request):
 	rooms = CurrentGame.objects.all().values("game_id")
 	return JsonResponse(list(rooms), safe=False)
@@ -1117,7 +1121,7 @@ def get_online_users(request):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def add_friend(request, username):
 	if request.method == 'POST':
 		current_user = request.user.users
@@ -1164,7 +1168,7 @@ def add_friend(request, username):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def accept_friend_request(request, username):
 	if request.method == 'POST':
 		try:
@@ -1201,7 +1205,7 @@ def accept_friend_request(request, username):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def decline_friend_request(request, username):
 	if request.method == 'POST':
 		try:
@@ -1226,7 +1230,7 @@ def decline_friend_request(request, username):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def notification_page(request):
 	# Récupérer le profil de l'utilisateur connecté
 	current_user_profile = request.user.users
@@ -1257,7 +1261,7 @@ def notification_page(request):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def block_user(request, username):
 	if request.method == 'POST':
 		try:
@@ -1299,7 +1303,7 @@ def block_user(request, username):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def remove_friend(request, username):
 	if request.method == 'POST':
 		try:
@@ -1328,7 +1332,7 @@ def remove_friend(request, username):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def invite_friend(request, username):
 	if request.method == 'POST':
 		try:
@@ -1505,73 +1509,73 @@ def get_chan_id(request, chanName):
 
 """ ---------------------------------------- AUTRE ---------------------------------------------- """
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_page(request):
 	return (render(request, 'game.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_choice_page(request):
 	return (render(request, 'game-choice.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_mode_pong_page(request):
 	return (render(request, 'game-mode-pong.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_type_pong_page(request):
 	return (render(request, 'game-type-pong.html'))
 
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_distant_page(request, game_id):
 	return (render(request, 'game-distant.html', {'game_id':game_id}))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_distant_page_t(request, game_id, id_t):
 	return (render(request, 'game-distant-t.html', {'game_id':game_id, 'id_t':id_t}))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def game_bot_page(request):
 	return (render(request, 'game-bot.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def other_game(request):
 	return (render(request, 'other_game.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def map_choice(request):
 	return (render(request, 'map_choice.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def tournament_choice(request):
 	tour = tournament_room.objects.all()
 	return render(request, 'tournament_choice.html', {'all_games':tour})
 
-""" @login_required
+""" @login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def casse_brique_room_choice(request):
 	tour = casse_brique_room.objects.all()
 	return render(request, 'other_game_multi_room.html', {'all_games':tour}) """
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def other_game_choice(request):
 	return (render(request, 'other_game_choice.html'))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def other_game_multi(request, game_id, map_id):
 	return (render(request, 'other_game_multi.html', {'game_id':game_id, 'map_id':map_id}))
 
 
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def tournament_page_id(request, id_t):
 	return (render(request, 'tournament.html', {'id_t':id_t}))
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def button_test_page():
 	users_list = User.objects.all()
 	return JsonResponse({'users_list': users_list})
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def get_current_user_id(request):
 	"""Renvoie l'ID de l'utilisateur actuellement connecté"""
 	return JsonResponse({'userId': request.user.id})
@@ -1614,7 +1618,7 @@ def get_users_of_one_tournament(user, id):
 							[---------------------------------------------------------------]
 
 """
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 @require_http_methods(["GET"])
 def get_blocked(request, idPlayer):
 	# Récupérer les IDs des utilisateurs bloqués par l'utilisateur spécifié (idPlayer)
@@ -1637,7 +1641,7 @@ def get_blocked(request, idPlayer):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def remove_blocked_user(request, username):
 	if request.method == 'POST':
 		try:
@@ -1664,7 +1668,7 @@ def remove_blocked_user(request, username):
 
 """
 @ensure_csrf_cookie
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def invitation_declined(request, username):
 	if request.method == 'POST':
 		try:
@@ -1725,7 +1729,13 @@ def delete_success(request):
 
 """
 
-@login_required
+@login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def profile_page(request):
 	return (render(request, 'profile.html'))
 
+
+def check_user_authenticated(request):
+    if request.user.is_authenticated:
+        return JsonResponse({'authenticated': True})
+    else:
+        return JsonResponse({'authenticated': False})
