@@ -1,4 +1,5 @@
 class BotGame {
+	
 	constructor(level)  {
 		this.user_option = level;
 		this.initState();

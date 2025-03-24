@@ -20,7 +20,6 @@ class CBRoomGameManager {
 					container.innerHTML = '<p>Aucune Room</p>';
 				} else {
 					rooms.forEach(room => {
-						console.log("ROOM numero: ", room.map_id);
 						this.mapId = room.map_id;
 						if (userId != room.game_id) {
 							const link = document.createElement('a');
@@ -125,7 +124,7 @@ class CasseBriqueDistantGame {
 	
 	handleServerMessage(event) {
 		const data = JSON.parse(event.data);
-	
+
 		if (data.type == "countdown") {
 			this.countdownBeforeGame(data);
 		}
@@ -161,7 +160,6 @@ class CasseBriqueDistantGame {
 			// Stocker la map si elle est présente dans les données
 			if (data.mapData) {
 				this.mapTab = data.mapData;
-				console.log("Map received from server:", this.mapTab);
 			}
 			
 			document.getElementById("overlay1").style.display = 'none';
@@ -170,14 +168,16 @@ class CasseBriqueDistantGame {
 			this.launchAnim(data);
 		}
 		if (data.type === "close_connection") {
-			alert(data.message);
+			document.getElementById('countdown1').style.display = 'none';
+			document.getElementById('countdown2').style.display = 'none';
+			// alert(data.message);
 			this.socket.close();
 		}
-	};
+	}
 
 	handleServerError(error) {
 		console.log("Erreur socket: ", error);
-	};
+	}
 	
 	handleServerDisconnect() {
 		console.log("Deconnexion du Socket...");

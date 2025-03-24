@@ -64,6 +64,8 @@ async function gameCasseBriqueDistantRoute() {
 }
 
 async function gameCasseBriqueRoute() {
+    if (window.CasseBriqueGame) window.CasseBriqueGame = null;
+
     if (!window.CasseBriqueGame) {
         await new Promise(resolve => {
             const checkEl = () => {
@@ -156,26 +158,26 @@ window.loadPage = function(url, pushState = true) {
             // window.location.href = normalizedUrl;
             return;
         }
-
+        
         document.getElementById("content").innerHTML = newContent.innerHTML;
-
+        
 		if (pushState) history.pushState(null, "", normalizedUrl);
-
+        
         // Double-check navbar visibility after content is loaded
         const currentPath = window.location.pathname;
         const isLoginPageNow = currentPath === '/' || currentPath === '';
         if (navbar)
-        {
-            navbar.style.display = isLoginPageNow ? 'none' : 'flex';
+            {
+                navbar.style.display = isLoginPageNow ? 'none' : 'flex';
+                
+                // Force browser to acknowledge the style change
+                void navbar.offsetWidth;
+            }
             
-            // Force browser to acknowledge the style change
-            void navbar.offsetWidth;
-        }
-
 		const profileName = document.getElementById('accounts_link').href;
 		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
 			launch_profile();
-		
+
 		if (url === `https://${window.location.host}/deleteAccount/` || url === '/deleteAccount/')
 			delete_acc();
 		
@@ -188,7 +190,6 @@ window.loadPage = function(url, pushState = true) {
             launch_everything();
             waschan = true;
         }
-	
 
 		if (wasSettings){
 			clearTimeout(SettingsTimeout);
@@ -211,23 +212,32 @@ window.loadPage = function(url, pushState = true) {
             washome = true;
         }
 
-        if (url.includes("game-distant-choice")) {
+        if (url.includes("/game-distant-choice")) {
             gameRoom = true;
             gameDistantRoute();
+            return ;
         }
         else if (gameRoom) {
             window.RoomGameManager = null;
             gameRoom = false;
+            return ;
         }
 
         if (url.includes("/game-distant/")) {
-			if (if_tournament)
+            if (!gameDistant) {
+                const pathParts = window.location.pathname.split('/');
+                new PongDistantGame(pathParts[2], pathParts[3]);
+            }
+            else if (if_tournament) {
 				new PongDistantGame(window.game_id_t, window.id_t_t);
+            }
 			gameDistant = true;
+            return ;
         }
         else if (gameDistant && PongDistantGame.currentGame) {
 			PongDistantGame.currentGame.closeSocket();
             gameDistant = false;
+            return ;
         }
         
         if (wasNotif)
@@ -241,26 +251,30 @@ window.loadPage = function(url, pushState = true) {
             wasNotif = true;
         }
 
-		if (url.includes("/tournament/")) {
-			// Recharger le contenu du tournoi pour réinitialiser le DOM
-			if_tournament = true;
-			launch_tournament(); // Réinitialiser les listeners WebSocket
-		} else if (if_tournament && !(url.includes("/game-distant/"))) {
-			window.socket_t.close();
-			window.socket_t = null
-			if_tournament = false;
-		}
-		
-        if (url === `https://${window.location.host}/game/` || url === `https://${window.location.host}/game`) {
+        // PROBLEME !!!
+        if (url === `https://${window.location.host}/game/` || url == '/game/') {
             gamePong = true;
             gameRoute();
+            return ;
         }
         else if (gamePong) {
 			window.PongGame = null;
             gamePong = false;
+            return ;
         }
 
-        if (url === `https://${window.location.host}/other_game/`) {
+        if (url.includes("/tournament/")) {
+			// Recharger le contenu du tournoi pour réinitialiser le DOM
+			if_tournament = true;
+			launch_tournament(); // Réinitialiser les listeners WebSocket
+		}
+        else if (if_tournament && !(url.includes("/game-distant/"))) {
+			window.socket_t.close();
+			window.socket_t = null
+			if_tournament = false;
+		}
+
+        if (url.includes('/other_game/')) {
             gameCasseBrique = true;
             gameCasseBriqueRoute();
         }
@@ -269,21 +283,21 @@ window.loadPage = function(url, pushState = true) {
             gameCasseBrique = false;
         }
 
-        if (url.includes(`/other_game_multi_room/`)) {
+        if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
+            CasseBriqueDistantGame.currentGame.closeSocket();
+            gameCasseBriqueDistant = false;
+            window.CasseBriqueGame = null;
+        }
+        else if (url.includes(`/other_game_multi_room/`)) {
             gameCasseBriqueDistantRoom = true;
             gameCasseBriqueDistantRoute();
         }
-
-        if (url.includes(`/other_game_multi/`)) {
+        else if (url.includes(`/other_game_multi/`)) {
             gameCasseBriqueDistant = true;
             const pathParts = window.location.pathname.split('/');
             new CasseBriqueDistantGame(pathParts[2], pathParts[3]);
         }
-        else if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
-            console.log("JE passe par la moi");
-            CasseBriqueDistantGame.currentGame.closeSocket();
-            gameCasseBriqueDistant = false;
-        } 
+        
     })
     .catch(error => console.error("Erreur de chargement:", error));
 };
@@ -334,7 +348,6 @@ function handleFormSubmit(event) {
     if (form.id === "LevelForm") {
         loadPage(location.pathname).then(() => {
             const level = form.elements.levelfield.value;
-            console.log("j'appelle BOT ici");
             const bot_game = new BotGame(level);
             bot_game.start();
         });

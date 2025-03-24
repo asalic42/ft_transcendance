@@ -32,14 +32,17 @@ class CasseBriqueGame {
 
 		this.setupListeners();
 	}
-	
+
 	selectMap() {
 
 		document.getElementById('map-choice').addEventListener('click', (event) => {
-			if (event.target.closest('.mapButton')) {
-				this.selectedMap = event.target.dataset.mapId
+			const mapButton = event.target.closest('.mapButton');
+			if (mapButton) {
+				this.selectedMap = mapButton.dataset.mapId
 				this.launchGame(this.selectedMap);
 			}
+			else
+				console.log("event target closest n'existe pas");
 		});
 	}
 
@@ -311,11 +314,11 @@ class CasseBriqueGame {
 	// MOVE Player & Ball
 	movePlayer() {
 
-		if (this.keys["q"] && this.player1Coords.x1 - this.player1Coords.vx > 0) {
+		if (this.keys["ArrowLeft"] && this.player1Coords.x1 - this.player1Coords.vx >= 0) {
 			this.player1Coords.x1 -= this.player1Coords.vx;
 			this.player1Coords.x2 -= this.player1Coords.vx;
 		}
-		if (this.keys["d"] && this.player1Coords.x2 + this.player1Coords.vx < document.getElementById("game").height) {
+		if (this.keys["ArrowRight"] && this.player1Coords.x2 + this.player1Coords.vx <= document.getElementById("game").width) {
 			this.player1Coords.x1 += this.player1Coords.vx;
 			this.player1Coords.x2 += this.player1Coords.vx;
 		}
