@@ -219,7 +219,7 @@ class PongGame {
 
 	// Bouge le player selon les touches claviers
 	movePlayer() {
-		if (this.keys["z"] && this.player1Coords.y1 - this.player1Coords.vy > 0) {
+		if (this.keys["w"] && this.player1Coords.y1 - this.player1Coords.vy > 0) {
 			this.player1Coords.y1 -= this.player1Coords.vy;
 			this.player1Coords.y2 -= this.player1Coords.vy;
 		}

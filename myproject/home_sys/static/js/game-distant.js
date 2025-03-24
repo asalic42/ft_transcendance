@@ -29,7 +29,6 @@ class RoomGameManager {
 					container.innerHTML = '<p>Aucune Room</p>';
 				} else {
 					rooms.forEach(room => {
-						console.log("ROOM numero: ", room.game_id);
 						const link = document.createElement('a');
 						link.href = `/game-distant/${room.game_id}/0`;
 						link.className = 'game-distant room-link';
@@ -173,7 +172,7 @@ class PongDistantGame {
 	handleServerMessage(event) {
 		try {
 			const data = JSON.parse(event.data);
-	
+
 			if (data.type == "countdown") {
 				const winner1Text = document.getElementById("wrapper-player1");
 				const winner2Text = document.getElementById("wrapper-player2");
@@ -219,6 +218,10 @@ class PongDistantGame {
 	
 			else if (data.type == "game_error") {
 				alert("Sorry, there has been a server side error. Please, change rooms.");
+			}
+			else if (data.type == "close_connection") {
+				document.getElementById('countdown').style.display = 'none';
+				this.socket.close();
 			}
 	
 		} catch (error) {
@@ -393,7 +396,7 @@ class PongDistantGame {
 		}
 		this.drawInnerRectangle("#23232e");
 		await new Promise(r => setTimeout(r, 2000));
-		if (this.id_t) {
+		if (this.id_t != 0) {
 			loadPage(`/tournament/${this.id_t}`);
 		}
 		if (deco == false)
