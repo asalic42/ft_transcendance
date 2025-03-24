@@ -33,7 +33,7 @@ class RoomGameManager {
 						link.href = `/game-distant/${room.game_id}/0`;
 						link.className = 'game-distant room-link';
 						link.innerHTML = `<span class="game-mode">Room ${room.game_id}</span>`;
-						link.addEventListener('click', () => this.joinRoom(room.game_id));
+						link.addEventListener('click', () => loadPage(`/game-distant/${room.game_id}/0`));
 						container.appendChild(link);
 					});
 				}
@@ -86,8 +86,10 @@ class RoomGameManager {
 	async createRoom(gameId) {
 		try {
 			await fetch(`/create_current_game/${gameId}/`)
-			await this.chargingGame();
-			new PongDistantGame(gameId, 0);
+			loadPage(`/game-distant/${gameId}/0/`)
+			// await this.chargingGame();
+
+			// new PongDistantGame(gameId, 0);
 		} catch (error) {
 			console.error("Error when creating a room: ", error);
 		}
@@ -127,6 +129,8 @@ class PongDistantGame {
 			}
 		};
 		this.compteur = 0;
+		this.lastMoveTime = 0;
+		this.moveCooldown = 10; 
 		this.setupDOM();
 		this.setupListeners();
 	}
@@ -212,7 +216,8 @@ class PongDistantGame {
 			}
 	
 			else if (data.type == "game_state") {
-				document.getElementById("overlay").style.display = 'none';
+				if (document.getElementById("overlay"))
+					document.getElementById("overlay").style.display = 'none';
 				this.gameLoop(data, Date.now());
 			}
 	
@@ -220,18 +225,21 @@ class PongDistantGame {
 				alert("Sorry, there has been a server side error. Please, change rooms.");
 			}
 			else if (data.type == "close_connection") {
-				document.getElementById('countdown').style.display = 'none';
+				if (document.getElementById('countdown'))
+					document.getElementById('countdown').style.display = 'none';
 				this.socket.close();
 			}
 	
 		} catch (error) {
-			console.error("Erreur de parsing des données du WebSocket :", error);
+			console.log("Erreur de parsing des données du WebSocket :", error);
 		}
 	}
 
 	handleServerError(error) {
 		console.error("Erreur WebSocket:", error);
 		alert("Game is full, or there has been an error.");
+		this.socket.close();
+		// loadPage('/game-distant-choice/');
 	}
 
 	handleServerDisconnect() {
@@ -244,6 +252,8 @@ class PongDistantGame {
 	}
 
 	handleKey(e) {
+		if (e.repeat) return;
+		
 		this.keys[e.key] = (e.type === 'keydown');
 	}
 
@@ -317,9 +327,12 @@ class PongDistantGame {
 	}
 
 	sendPlayerMove() {
+		const now = Date.now();
+		if (now - this.lastMoveTime < this.moveCooldown) return;
+		
 		const moveData = {};
 		if (this.keys["ArrowUp"] || this.keys["ArrowDown"]) {
-			const moveValue = this.keys["ArrowUp"] ? -3 : 3;
+			const moveValue = this.keys["ArrowUp"] ? -19 : 19;
 			if (this.currentPlayer === 1) {
 				moveData.player1_coords = { y1: moveValue };			
 			} else if (this.currentPlayer === 2) {
@@ -330,6 +343,7 @@ class PongDistantGame {
 		if (Object.keys(moveData).length > 0 && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.send(JSON.stringify(moveData));
 		}
+		this.lastMoveTime = now;
 	}
 	
 	gameLoop(data) {
@@ -426,18 +440,18 @@ class PongDistantGame {
 	}
 
 	closeSocket() {
-		if (this.socket && this.socket.readyState == WebSocket.OPEN) {
+		console.log("Fermeture du socket initiée...");
+		if (this.socket) {
+			this.socket.onopen = null;
+			this.socket.onmessage = null;
+			this.socket.onerror = null;
+			this.socket.onclose = null;
 			this.socket.close();
-
 			window.removeEventListener('keydown', this.keyHandler);
 			window.removeEventListener('keyup', this.keyHandler);
-
-			console.log("Socket ferme !");
-			
+			console.log("Socket fermé !");
 			PongDistantGame.currentGame = null;
-
-			if (!this.id_t)
-				this.stopGame();
+			if (!this.id_t) this.stopGame();
 		}
 	}
 }

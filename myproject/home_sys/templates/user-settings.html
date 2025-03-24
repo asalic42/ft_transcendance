@@ -49,15 +49,17 @@
                     Update, et Save.
                 </p>
 
-                <button class="settings-logout">
-                    <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}">
-                    Logout
-                </button>
-
-                <button class="settings-delete-account" onclick="window.location.href='{% url 'delete_account' %}'">
-                    <img class="delete-svg" src="{% static 'images/delete-profile-svgrepo-com.svg' %}">    
-                    Cut access
-                </button>
+                <div id="button-setting">
+                    <button class="settings-logout">
+                        <img class="logout-svg" src="{% static 'images/logout-svgrepo-com.svg' %}">
+                        Logout
+                    </button>
+    
+                    <a class="settings-delete-account" href="{% url 'delete_account' %}">
+                        <img class="delete-svg" src="{% static 'images/delete-profile-svgrepo-com.svg' %}">    
+                        Cut access
+                    </a>
+                </div>
             </div>
         </div>
     </div>

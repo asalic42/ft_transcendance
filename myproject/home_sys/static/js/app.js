@@ -178,7 +178,7 @@ window.loadPage = function(url, pushState = true) {
 		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
 			launch_profile();
 
-		if (url === `https://${window.location.host}/deleteAccount/` || url === '/deleteAccount/')
+		if (url === `https://${window.location.host}/delete_account/` || url === '/delete_account/')
 			delete_acc();
 		
 		if (waschan) {
@@ -223,20 +223,23 @@ window.loadPage = function(url, pushState = true) {
             return ;
         }
 
+        console.log(`gameDistant:${gameDistant} && PongDistantGame.currentGame:${PongDistantGame.currentGame}`)
+        if (gameDistant && PongDistantGame.currentGame) {
+            PongDistantGame.currentGame.closeSocket();
+            gameDistant = false;
+            return ;
+        }
+        console.log(`url.includes("/game-distant/") : ${url.includes("/game-distant/")}`)
+        console.log(`url : ${url}`)
         if (url.includes("/game-distant/")) {
             if (!gameDistant) {
                 const pathParts = window.location.pathname.split('/');
                 new PongDistantGame(pathParts[2], pathParts[3]);
             }
             else if (if_tournament) {
-				new PongDistantGame(window.game_id_t, window.id_t_t);
+                new PongDistantGame(window.game_id_t, window.id_t_t);
             }
-			gameDistant = true;
-            return ;
-        }
-        else if (gameDistant && PongDistantGame.currentGame) {
-			PongDistantGame.currentGame.closeSocket();
-            gameDistant = false;
+            gameDistant = true;
             return ;
         }
         

@@ -327,10 +327,14 @@ def load_template(request, page, **kwargs):
 		games_T_CB = list(MatchsTournaments.objects.values_list('idTournaments', flat=True)
 						   .distinct()
 						   .order_by("-idTournaments__date"))
+						   
 		tournaments_users = {}
 		tournaments_colors = {}
 		tournaments_date = {}
+		tournaments_winner = {}
+
 		for tournament_id in games_T_CB:
+			
 			tournament = Tournaments.objects.get(id=tournament_id)
 			winner = tournament.winner
 			if users_profile == winner:
@@ -341,6 +345,7 @@ def load_template(request, page, **kwargs):
 			tournaments_date[tournament_id] = tournament.date
 			users_img = get_users_of_one_tournament(users_profile, tournament_id)
 			tournaments_users[tournament_id] = users_img
+			tournaments_winner[tournament_id] = tournament.winner.name if tournament.winner else "Inconnu"
 
 		context = {
 			'user': user,
@@ -351,6 +356,7 @@ def load_template(request, page, **kwargs):
 			'tournaments_users': tournaments_users,
 			'tournaments_colors': tournaments_colors,
 			'tournaments_date': tournaments_date,
+			'tournaments_winner': tournaments_winner
 		}
 
 	elif page == "channels":
@@ -415,6 +421,24 @@ def load_template(request, page, **kwargs):
 		context = {
 			'id_t': kwargs.get('id_t')
 		}	
+	elif page == 'delete_success':
+		if request.user.is_authenticated:
+			user = request.user
+			# Stocker des informations pour afficher dans le template si nécessaire
+			username = user.username  # ou autre info que vous voulez conserver
+			
+			# Désactiver le mot de passe
+			user.set_unusable_password()
+			user.save()
+			
+			# Déconnecter l'utilisateur
+			from django.contrib.auth import logout
+			logout(request)
+			
+			# Passer les informations au template
+			context = {
+				'username': kwargs.get('username')
+			}
 	else:
 		context = {
 		}

@@ -1,6 +1,12 @@
 function delete_acc() {
 // List of image paths
 	
+	const images = [
+		"/static/images/petit_billet.jpg",
+		"/static/images/on_peut_s_arranger.jpg",
+		"/static/images/triste.jpg"
+	];
+	
 
 	// Pick a random image
 	const randomImage = images[Math.floor(Math.random() * images.length)];

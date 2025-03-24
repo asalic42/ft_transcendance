@@ -270,6 +270,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'scores': initial_state_game['scores']
 		}))
 
+		print(f"someone joined. len(self.game.players) :  {len(self.game.players)}")
 		if len(self.game.players) == 1 and not self.game.is_running:
 			await self.create_current_game()
 
@@ -282,7 +283,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 	# Deconnexion du serveur
 	async def disconnect(self, close_code):
 		self.game.is_running = False
-		# self.game.is_over = False
 	
 		if self.channel_name in self.game.players:
 			player_number = self.game.players[self.channel_name]['number']
@@ -304,7 +304,6 @@ class PongConsumer(AsyncWebsocketConsumer):
 				}
 			)
 	
-			# Envoyer match_finished au tournoi UNE FOIS SEULEMENT
 			if self.id_t != 0 and not self.game.reported_to_tournament:
 				self.game.reported_to_tournament = True  # Bloquer les doubles envois
 				tournament_group = f"tournament_{self.id_t}"
@@ -321,6 +320,8 @@ class PongConsumer(AsyncWebsocketConsumer):
 			self.room_group_name,
 			self.channel_name
 		)
+		print(f"someone quitted2. len(self.game.players) :  {len(self.game.players)}")
+		sys.stdout.flush()
 		if len(self.game.players) == 0:
 			await self.delete_current_game()
 		elif len(self.game.players) == 1:

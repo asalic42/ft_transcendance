@@ -64,29 +64,25 @@
 				<div class="game-history-section">
 					<h3>Tournament</h3>
 					{% for T in games_T_CB %}
-					<div class="pong-date" style="width: auto; height: auto; background-color: black; color: white">{{ tournaments_date|get_item:T|date:"d/m/Y H:i" }}</div>
-
-					<div class="pong-history" style="background-color: {{ tournaments_colors|get_item:T }};">
-						<!-- Trophée et utilisateur principal -->
-						<div class="main-user-section">
-							<img src="{% static 'images/trophy.png' %}" alt="Trophy" class="trophy-img">
-							<img src="{{ user.users.image.url }}" alt="Main User" class="main-user-img">
+					<div class="tournament-card" style="border-color: {{ tournaments_colors|get_item:T }};">
+						<div class="tournament-header">
+							<img src="{% static 'images/trophy.png' %}" class="trophy-icon">
+							<span class="tournament-title">Tournoi #{{ T }}</span>
+							<span class="tournament-date">{{ tournaments_date|get_item:T|date:"d/m/Y H:i" }}</span>
 						</div>
-			
-						<!-- Barre centrale -->
-						<div class="center-bar"></div>
-			
-						<!-- Autres utilisateurs -->
-						<div class="other-users-section">
-							{% with t_user_imgs=tournaments_users|get_item:T %}
-								{% for t_user_img in t_user_imgs %}
-									<img src="{{ t_user_img }}" alt="Other User" class="other-user-img">
-								{% endfor %}
-							{% endwith %}
+				
+						<div class="tournament-body">
+							<div class="tournament-result">
+								{% if tournaments_colors|get_item:T == 'green' %}
+								🏆 Victoire - Vous avez gagné ce tournoi !
+								{% else %}
+								❌ Défaite - Vainqueur : {{ tournaments_winner|get_item:T }}
+								{% endif %}
+							</div>
 						</div>
 					</div>
 					{% empty %}
-						<p class="if-no-game">Vous n'avez pas encore joué de tournois</p>
+					<p class="if-no-game">Aucun tournoi joué</p>
 					{% endfor %}
 				</div>
 
@@ -152,7 +148,7 @@
 							<tbody>
 							{% for game in games_S_CB %}
 								<tr>
-									<td>{{ game.date|date:"d/m/Y H:i" }}</td>
+									<td>{{ game.date | date:"d/m/Y H:i" }}</td>
 									<td>{{ game.id_map }}</td>
 									<td>{{ game.score }}</td>
 								</tr>

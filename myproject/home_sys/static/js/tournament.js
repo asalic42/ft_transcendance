@@ -13,7 +13,7 @@ function startButton(link, name, message) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 	button.removeAttribute("disabled");
-	button.textContent = 'Ouvrir le jeu dans un nouvel onglet';
+	button.textContent = 'Ouvrir le jeu';
 	button.style = "position: relative; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer;";
 	document.getElementById("loader").style.display = 'block';
 	document.getElementById('button_id').href = link;
@@ -37,6 +37,7 @@ async function getCurrentPlayerId() { // à lancer au chargement de la page;
 
 function launch_tournament() {
 	let cachedUserId = getCurrentPlayerId; // à lancer au chargement de la page;
+	let alert = false;
 	const id_t = document.querySelector('.container').dataset.idT;
 	window.id_t_t = id_t;
 	if (window.socket_t == null)
@@ -49,7 +50,10 @@ function launch_tournament() {
 	}
 	
 	window.socket_t.onclose = function() {
-		alert("Tournament is full, finished or there has been an error.")
+		if (!alert) {
+			alert("Tournament is full, finished or there has been an error.")
+		}
+		alert = false;
 		loadPage(`game-mode-pong/`);
 	}
 
@@ -101,12 +105,19 @@ function launch_tournament() {
 				}
 	
 				await sleep(5000);
-				alert('Tournament is finished. Thanks.');
+				if (!alert) {
+					alert('Tournament is finished. Thanks.');
+					alert = true;
+				}
 				await sleep(1000);
+				window.socket_t.onclose = function(){}
 				loadPage(`game-mode-pong/`);
 			}
 			if (data.type === "tournament_cancelled") {
-				alert("Tournament is cancelled. Someone disconnected.");
+				if (!alert) {
+					alert("Tournament is cancelled. Someone disconnected.");
+					alert = true;
+				}
 				window.socket_t.onclose = function(){}
 				loadPage(`/game-mode-pong/`);
 			}
@@ -117,7 +128,10 @@ function launch_tournament() {
 				});
 			}
 			if (data.type === "already") {
-				alert("This tournament already ran.")
+				if (!alert) {
+					alert("This tournament already ran.")
+					alert = true;
+				}
 				function sleep(ms) {
 					return new Promise(resolve => setTimeout(resolve, ms));
 				}

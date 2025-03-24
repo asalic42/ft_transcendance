@@ -685,3 +685,81 @@
 	text-shadow: 0 0 5px rgba(38, 39, 39, 0.7);
 }
 
+/* -- Cleaned styles -- */
+.parent-container {
+    gap: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 5%;
+    width: 90%;
+}
+
+/* Tournois - Nouveau style */
+.tournament-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.tournament-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.tournament-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.trophy-icon {
+    width: 35px;
+    height: 35px;
+    filter: drop-shadow(0 0 5px gold);
+}
+
+.tournament-title {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.tournament-date {
+    color: #ccc;
+    font-size: 0.9em;
+    margin-left: auto;
+}
+
+.participants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.participant-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+}
+
+.participant-avatar:hover {
+    transform: scale(1.2);
+    z-index: 2;
+}
+
+.tournament-result {
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    font-weight: bold;
+    text-align: center;
+}

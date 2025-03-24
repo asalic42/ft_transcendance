@@ -50,8 +50,8 @@ urlpatterns = [
 
     # --- Authentication routes ---
     path('user-settings/signout/', signout, name='signout'),
-    path('deleteAccount/', delete_account, name='delete_account'),
-    path('deleteSuccess/', delete_success, name='delete_success'),
+    path('delete_account/', load_template, {'page': 'delete_account'}, name='delete_account'),
+    path('delete_success/', load_template, {'page': 'delete_success'}, name='delete_success'),
 
     # --- API endpoints ---
     path('api/current-user/', get_current_user_id, name='current_user_id'),
@@ -74,8 +74,8 @@ urlpatterns = [
     # path('login/', include('loginpage.urls', namespace='loginpage'), name="redirectafter"),
     # --- Routes pour les actions et API (inchangées) ---
     path('signout/', signout, name='signout'),
-    #path('deleteAccount/', delete_account, name='delete_account'),
-    #path('deleteSuccess/', delete_success, name='delete_success'),
+    #path('delete_account/', delete_account, name='delete_account'),
+    #path('delete_success/', delete_success, name='delete_success'),
     path('create_current_game/<int:sender_id>/', create_current_game, name="create_current_game"),
     
     # Exemples d'API et endpoints
@@ -92,7 +92,7 @@ urlpatterns = [
     # path('get-ip-info/', get_ip_info, name='get_ip_info'),
     # path('user-settings/', settings_user, name='settings_user'),
     
-    path('deleteAccount/get-ip-info/', get_ip_info, name='get_ip_info'),
+    path('delete_account/get-ip-info/', get_ip_info, name='get_ip_info'),
     path('user-settings/', settings_user, name='settings_user'),
     path('user-settings/check_username/', check_username, name='check_username'),
     path('user-settings/check_email/', check_email, name='check_email'),
