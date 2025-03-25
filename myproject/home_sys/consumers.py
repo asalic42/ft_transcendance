@@ -630,11 +630,10 @@ class CasseBriqueGame:
 
 	# Add player to the game if its possible
 	def add_player(self, channel_name, user_id):
-		if len(self.players) >= 2:
-			return False
-		
 		for player in self.players.values():
 			if player['user_id'] == user_id:
+				print("player['user_id'] == user_id true")
+				sys.stdout.flush()
 				return False
 
 		player_number = len(self.players) +1
@@ -815,6 +814,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			self.room_group_name,
 			self.channel_name
 		)
+		print('close 3')
+		sys.stdout.flush()
 		await self.close()
 
 	# Nouveau handler pour fermer les connexions
@@ -832,10 +833,27 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		self.room_group_name = f"game_{self.room_name}"
 		self.game = self.games[self.room_group_name]
 
+		if len(self.game.players) >= 2:
+			await self.accept()
+			await self.channel_layer.group_send(
+				self.room_group_name, {
+					'type': 'game_interrupted',
+					'exclude_name': self.channel_name
+				},
+			)
+
+			await self.send(text_data=json.dumps({
+				'type': 'cheating'
+			}))
+
+			print('close 1')
+			sys.stdout.flush()
+			await self.close(code=4000, reason="Partie complete")
+			return
+
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
-		if len(self.game.players) >= 2 or not self.game.add_player(self.channel_name, user_id):
- 			return
+		self.game.add_player(self.channel_name, user_id)
 
 		await self.channel_layer.group_add(
 			self.room_group_name,
@@ -849,6 +867,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			success = await self.game.load_map(self.map_id)
 			if not success:
 				await self.close()
+				print('close 2')
+				sys.stdout.flush()
 				return
 
 		# Créer les blocs pour le nouveau joueur
@@ -1208,7 +1228,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 		}))
 
 	""" """ """ """ """ """ """ """
-	"""    	Start the game 		"""
+	"""		Start the game 		"""
 	""" """ """ """ """ """ """ """
 	async def start_game_send(self, event):
 		await self.send(text_data=json.dumps({

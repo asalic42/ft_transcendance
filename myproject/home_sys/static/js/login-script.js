@@ -161,7 +161,7 @@ function launch_login_page() {
         e.preventDefault();
         const vlp_signINContainer = document.querySelector('.signup-container');
         const vlp_signUPContainer = document.querySelector('.signin-container');
-
+        notiffetch
         setTimeout(function() {
             if (vlp_signINContainer.style.zIndex == '4') {
                 vlp_signINContainer.style.zIndex = '1'; 

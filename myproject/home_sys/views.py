@@ -1830,6 +1830,6 @@ def profile_page(request):
 
 def check_user_authenticated(request):
     if request.user.is_authenticated:
-        return JsonResponse({'authenticated': True})
+        return JsonResponse({'authenticated': True, 'username' : request.user.username})
     else:
-        return JsonResponse({'authenticated': False})
+        return JsonResponse({'authenticated': False, 'username' : 'undefined'})

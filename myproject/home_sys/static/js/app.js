@@ -259,6 +259,7 @@ window.id_t_t = 0;
 window.loadPage = function(url, pushState = true) {
 
     // Normalize the URL to prevent duplication
+    console.log('loadPage') ;
     const normalizedUrl = normalizeUrl(url);
     console.log(`normalizedUrl ${normalizedUrl}`);
     // Vérifier si on est sur la page de login ou non
@@ -293,8 +294,8 @@ window.loadPage = function(url, pushState = true) {
             return;
         }
         
+        updateAuthUI();
         document.getElementById("content").innerHTML = newContent.innerHTML;
-        
 		if (pushState) history.pushState(null, "", normalizedUrl);
         
         // Double-check navbar visibility after content is loaded
@@ -315,6 +316,9 @@ window.loadPage = function(url, pushState = true) {
             navbar.style.display = 'none';
             launch_login_page();
         }
+
+        // if (url !== "/" && url !== `https://${window.location.host}` && !url.match("signout"))
+        // updateAuthUI();
 
 		const profileName = document.getElementById('accounts_link').href;
 		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
@@ -337,7 +341,7 @@ window.loadPage = function(url, pushState = true) {
 			clearTimeout(SettingsTimeout);
 			wasSettings = false;
 		}
-		else if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
+		if (url === `https://${window.location.host}/user-settings/` || url === '/user-settings/') {
 			launch_settings();
 			wasSettings = true;
 		}
@@ -348,9 +352,11 @@ window.loadPage = function(url, pushState = true) {
 			clearInterval(homefetch);
 			washome = false;
 		}
-        else if (url === `https://${window.location.host}/home/` || url === '/home/')
+        if (url === `https://${window.location.host}/home/` || url === '/home/')
         {
             // fetchAllUsersStatus();
+            console.log('fetching hooooome');
+            homefetch = setInterval(fetchOnlineUsers, 500);
             washome = true;
         }
 
@@ -438,6 +444,7 @@ window.loadPage = function(url, pushState = true) {
             new CasseBriqueDistantGame(pathParts[2], pathParts[3]);
         }
         else if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
+            console.log('closing socket IAUDHFKJABSDJBASJLDBVASD');
             CasseBriqueDistantGame.currentGame.closeSocket();
             gameCasseBriqueDistant = false;
             window.CasseBriqueGame = null;
@@ -464,6 +471,7 @@ window.reinitCoreScripts = function() {
 };
 
 function handleLinkClick(event) {
+    console.log('click');
     let link = event.target.closest("a");
     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
     if (link && link.href && 
@@ -571,11 +579,13 @@ document.addEventListener("DOMContentLoaded", function() {
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
 
+    fetchOnlineUsers();
     loadPage(window.location.pathname);
 });
 
 
 function checkAuthentication(location) {
+    console.log('checkAuthentication');
     fetch('/api/check-auth/')
         .then(response => response.json())
         .then(data => {
@@ -593,21 +603,15 @@ function checkAuthentication(location) {
 
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    function updateAuthUI() {
-        const authLink = document.getElementById('accounts_link');
-        
-        // Vérifie si le user est connecté via une requête AJAX ou cookie
-        fetch('/api/check-auth')
-            .then(response => response.json())
-            .then(data => {
-                if (data.authenticated) {
-                    authLink.href = `/profile/${data.username}`;
-                }
-            });
-    }
-
-    // Appel initial + écouteur pour les événements de connexion
-    updateAuthUI();
-    document.addEventListener('userLoggedIn', updateAuthUI); // À déclencher après connexion
-});
+function updateAuthUI() {
+    const authLink = document.getElementById('accounts_link');
+    
+    // Vérifie si le user est connecté via une requête AJAX ou cookie
+    fetch('/api/check-auth')
+        .then(response => response.json())
+        .then(data => {
+            if (data.authenticated) {
+                authLink.href = `/profile/${data.username}`;
+            }
+        });
+}

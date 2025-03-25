@@ -171,6 +171,7 @@ class CasseBriqueDistantGame {
 			document.getElementById('countdown1').style.display = 'none';
 			document.getElementById('countdown2').style.display = 'none';
 			// alert(data.message);
+			console.log('close 5');
 			this.socket.close();
 		}
 	}
@@ -423,6 +424,7 @@ class CasseBriqueDistantGame {
 
 	closeSocket() {
 		if (this.socket && this.socket.readyState == WebSocket.OPEN) {
+			console.log('close 4');
 			this.socket.close();
 
 			window.removeEventListener('keydown', this.keyHandler);

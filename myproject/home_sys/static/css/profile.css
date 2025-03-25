@@ -35,7 +35,6 @@
 .profile-container {
 	display: flex;
 	flex: 1;
-	margin-top: 2%;
 	margin-right: 50px;
 	justify-content: center; /* Centre horizontalement */
 	align-items: center;
@@ -691,7 +690,7 @@
     gap: 20px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     margin-top: 5%;
     width: 90%;
 }
