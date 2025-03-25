@@ -356,8 +356,13 @@
     font-family: 'Arial', sans-serif;
 }
 
+.game-history-container {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
 .game-history-container::-webkit-scrollbar {
-    display: none; /* Masquer la barre de défilement pour Chrome, Safari et Opera */
+    display: none;
 }
 
 /* Titre principal */

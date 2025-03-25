@@ -78,14 +78,6 @@ initialize_ip_addr() {
 
 ##############################################################
 
-
-# FULL REMOVE + BUILD + LAUNCH
-if [ "$1" == "ev" ];then
-    ./log.sh r-all
-    ./log.sh b-all
-    ./log.sh l
-fi
-
 # FULL BUILD
 if [ "$1" == "b-all" ]; then
     # scriptmanNotify "C'est parti mon build le projet"
@@ -138,42 +130,19 @@ if [ "$1" == "b-all" ]; then
 
 
 	rm -rf static/;
-	echo -e "${BLUE}>Adding line to /etc/hosts... ${NC}"
-
-    # scriptmanNotify "[1/3] J'installe les requirements..."
 
 	pip install --no-cache-dir -r requirements.txt
-	LINE='127.0.0.1	transcendance.42.paris'
-	FILE='/etc/hosts'
-	grep -qF "$LINE" "$FILE" ||  echo "$LINE" | tee -a "$FILE"
 
-    # scriptmanNotify "[2/3] Je build les images docker..."
+    echo -e "${BLUE}> Building docker image and Launching services...${NC}"
+    docker-compose up --build -d
 
-    echo -e "${BLUE}> Building docker image... ${NC}"
-    docker-compose build
+    # sleep 10
+    # echo -e "${PURPLE}> Initialisation de la [VE] HOST_IP${NC}"
+    # initialize_ip_addr $IP
 
-
-    # scriptmanNotify "[3/3] Lancement des services rien que pour toi mon cochon. Refresh quand je disparaitrais."
-    
-    echo -e "${PURPLE}> Launching services...${NC}"
-    docker-compose up # démarre en arrière-plan
-
-    sleep 10
-    echo -e "${PURPLE}> Initialisation de la [VE] HOST_IP${NC}"
-
-    initialize_ip_addr $IP
-    # scriptmanNotify "Fin de la règle b-all bb !"
+    open https://$IP:5000
 
     echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://$IP:5000"
-fi
-
-# SIMPLE BUILD
-if [ "$1" == "b" ]; then
-    echo -e "${BLUE}> Building docker image...${NC}"
-    docker-compose build
-    echo -e "${PURPLE}> Launching services...${NC}"
-    docker-compose up -d
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log l OR https://transcendance.42.paris"
 fi
 
 # FULL REMOVE
@@ -185,26 +154,4 @@ if [ "$1" == "r-all" ]; then
     echo -e "${BLUE}> Removing django cache...${NC}"
 	find . -type d -name "__pycache__" -exec rm -r {} +
     echo -e "${GREEN}> Done.${NC} [For full rebuild] > ./log.sh b-all"
-fi
-
-# SIMPLE REMOVE
-if [ "$1" == "r" ]; then
-    echo -e "${BLUE}> Removing docker image...${NC}"
-    docker-compose down
-    echo -e "${GREEN}> Done.${NC} [For simple rebuild] > ./log.sh b"
-fi
-
-# LAUNCH
-if [ "$1" == "l" ]; then
-
-    echo -e ">> Checking if we have already start docker's services..."
-    if [ "$(docker-compose ps -q | xargs -r docker inspect -f '{{.State.Running}}')" != "true" ]; then
-        echo -e "${BLUE}>${NC} Docker services are not running. ${BLUE}Starting them...${NC}"
-         docker-compose up -d
-    else
-        echo -e "${GREEN}> Docker services are already running.${NC}"
-    fi
-
-    echo -e "${GREEN}> Service is up! Opening browser...${NC}"
-    open https://transcendance.42.paris/signin/
 fi

@@ -614,6 +614,7 @@ class CasseBriqueGame:
 		self.is_running = False
 		self.multiplyer = 0
 		self.timeleft = 0
+		self.is_saved = False
 
 	def reset_game(self):
 		self.scores = {'p1': 0, 'p2': 0 }
@@ -646,7 +647,7 @@ class CasseBriqueGame:
 				'vx': 10
 			}
 			player['block_array'] = []
-			
+		self.is_saved = False
 
 	# Add player to the game if its possible
 	def add_player(self, channel_name, user_id):
@@ -917,6 +918,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 	@database_sync_to_async
 	def save_game_result(self):
+		if (self.game.is_saved):
+			return 
 		try:
 			id_p1 = None
 			id_p2 = None
@@ -943,7 +946,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				map=1  # Vous pouvez adapter ceci selon votre logique
 			)
 			print(f"Game saved successfully: {game_data}")
-			
+			self.game.is_saved = True
 		except Exception as e:
 			print(f"Error saving game result: {str(e)}")
 			# Log plus détaillé de l'erreur
@@ -1304,8 +1307,6 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 		time_left = 60
 		start = time.time()
-		print("yolo")
-		sys.stdout.flush()
 		while self.game.is_running and len(self.game.players) == 2:
 			update_interval = 0.016 # 60 FPS
 			current_time = asyncio.get_event_loop().time()

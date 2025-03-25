@@ -253,16 +253,14 @@ def signout(request):
 
             print("\033[34m1-FLUSH\033[0m")
             sys.stdout.flush()
-            return render(request, 'login.html')
+            return redirect(f'https://{settings.IP_ADDR}:5000/')
 
         except Users.DoesNotExist:
-            print("\033[34m2-FLUSH\033[0m")
-            sys.stdout.flush()
             pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
 
     print("\033[34m3-FLUSH\033[0m")
     sys.stdout.flush()
-    return render(request, 'login.html')
+    return redirect(f'https://{settings.IP_ADDR}:5000/')
     #return render(request, 'login.html')
 	
 	
@@ -506,10 +504,10 @@ def load_template(request, page, **kwargs):
 			user.save()
 			
 			# Déconnecter l'utilisateur
-			from django.contrib.auth import logout
 			logout(request)
 			
 			# Passer les informations au template
+			# page = '';
 			context = {
 				'username': kwargs.get('username')
 			}
@@ -562,10 +560,10 @@ def home(request):
 							[---------------------------------------------------------------]
 
 """
-@ensure_csrf_cookie
+""" @ensure_csrf_cookie
 @login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def delete_account(request):
-	return render(request, 'delete_account.html')
+	return render(request, 'delete_account.html') """
 
 
 
@@ -1756,7 +1754,7 @@ def get_cb_rooms(request):
 
 """
 
-def delete_success(request):
+""" def delete_success(request):
 	# Vérifier si l'utilisateur est authentifié avant de continuer
 	if request.user.is_authenticated:
 		user = request.user
@@ -1774,7 +1772,7 @@ def delete_success(request):
 		return render(request, 'delete_success.html', {'username': username})
 	else:
 		# Rediriger vers une page publique si non authentifié
-		return render(request, 'delete_success.html')
+		return render(request, 'delete_success.html') """
 	
 @login_required
 @require_http_methods(["POST"])

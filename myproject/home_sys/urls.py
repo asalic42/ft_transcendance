@@ -92,6 +92,11 @@ urlpatterns = [
     path('user-settings/check_username/', check_username, name='check_username'),
     path('user-settings/check_email/', check_email, name='check_email'),
     path('user-settings/check_pseudo/', check_pseudo, name='check_pseudo'),
+
+    path('user-settings/signout/check_username/', check_username, name='check_username'),
+    path('user-settings/signout/check_email/', check_email, name='check_email'),
+    path('user-settings/signout/check_password_solidity/', check_password_solidity, name='check_password_solidity'),
+    
     path('user-settings/check_pp/<int:idU>/', check_pp, name='check_pp'),
     path('user-settings/update-user/', update_user_info	, name='update_user_info'),
     path('user-settings/upload-avatar/', upload_avatar, name='upload_avatar'),

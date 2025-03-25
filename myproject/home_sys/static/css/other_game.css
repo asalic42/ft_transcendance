@@ -162,7 +162,7 @@ h3 {
 	font-family:'Thunder-SemiBold';
 	gap: 30px;
 	justify-content: center;
-	font-size: 30px;
+	font-size: 31px;
 	align-items: center;
 	color: white;
 	text-align: center;
@@ -172,7 +172,7 @@ h3 {
 
 #score {
     font-family:'Namaku'; /* Police demandée */
-	font-size: 30px;
+	font-size: 23px;
     position: absolute; /* Permet un positionnement précis */
     top: 10%; /* Position verticale dans le tiers supérieur (ajustez selon vos préférences) */
     left: 13%; /* Position horizontale pour se placer entre la barre des tâches et le jeu */

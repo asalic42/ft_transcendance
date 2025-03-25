@@ -247,7 +247,7 @@ window.loadPage = function(url, pushState = true) {
     const normalizedUrl = normalizeUrl(url);
     console.log(`normalizedUrl ${normalizedUrl}`);
     // Vérifier si on est sur la page de login ou non
-    const isLoginPage = normalizedUrl === '/' || normalizedUrl === '';
+    const isLoginPage = normalizedUrl === '/' || normalizedUrl === '' || String(normalizeUrl).includes('user-settings/signout/');
     const navbar = document.querySelector('.navbar');
 
     // Set navbar visibility before loading content
@@ -294,6 +294,7 @@ window.loadPage = function(url, pushState = true) {
         }
         
         if (url === "/") url = `https://${window.location.host}`;
+        if (String(url).includes("delete_success/")) navbar.style.display = 'none';
 
         if (url === `https://${window.location.host}` || url.match("signout"))
         {
@@ -308,8 +309,6 @@ window.loadPage = function(url, pushState = true) {
             bot_game.stop = true;
             bot_game = null;
         }
-        // if (url !== "/" && url !== `https://${window.location.host}` && !url.match("signout"))
-        // updateAuthUI();
 
 		const profileName = document.getElementById('accounts_link').href;
 		if ((/^https:\/\/[^/]+\/profile\/.+$/.test(url) || /\/profile\/.+$/.test(url) )&& url != profileName)
@@ -577,7 +576,7 @@ function checkAuthentication(location) {
     fetch('/api/check-auth/')
         .then(response => response.json())
         .then(data => {
-            if (!data.authenticated) {
+            if (!data.authenticated && !String(location).includes('delete_success')) {
                 // Si l'utilisateur n'est pas authentifié, rediriger et écraser l'historique
                 window.location.replace('/'); // Redirection vers la page de login, écrasant l'historique
             } else {

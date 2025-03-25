@@ -159,7 +159,7 @@ class CasseBriqueDistantGame {
 				document.getElementById("disconnected").style.display = "block"; // Affiche le message de déconnexion
 				this.winnerWindow(data.loser, true);
 			} else {
-				this.winnerWindow(data.loser, true);
+				this.winnerWindow(data.loser, false);
 			}
 		}
 	
@@ -411,6 +411,12 @@ class CasseBriqueDistantGame {
 					this.resetGame();
 				});
 			}
+		}
+		else {
+			if (document.getElementById("replay-button-p1"))
+				document.getElementById("replay-button-p1").style.display = "none";
+			if (document.getElementById("replay-button-p2"))
+				document.getElementById("replay-button-p2").style.display = "none";
 		}
 	}
 

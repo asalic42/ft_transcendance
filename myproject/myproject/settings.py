@@ -105,7 +105,7 @@ IP_LOCALISATION= env('MAP_IP_LOCALISATION')
 # LOGIN_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 # LOGOUT_REDIRECT_URL = '/'  # Ou l'URL de votre choix
 LOGIN_URL = '/'  # Ou l'URL de votre choix
-LOGOUT_REDIRECT_URL = f'https://{IP_ADDR}:5000/'
+# LOGOUT_REDIRECT_URL = f'https://{IP_ADDR}:5000/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -193,7 +193,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 

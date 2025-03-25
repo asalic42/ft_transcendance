@@ -195,12 +195,12 @@ class CasseBriqueGame {
 	// COLLISION Wall & Blocks & Player
 	isBallHittingPlayer() {
 
-		if (this.ball.hit_player > 0 && this.ball.hit_player < 15) {
+		if (this.ball.hit_player > 0 && this.ball.hit_player < 30) {
 			this.ball.hit_player++;
 			return false;
 		}
 	
-		if (this.ball.hit_player >= 15)
+		if (this.ball.hit_player >= 30)
 			this.ball.hit_player = 0;
 	
 		if (this.ball.coords.x + this.ball.radius / 2 >= this.player1Coords.x1 && this.ball.coords.x - this.ball.radius / 2 <= this.player1Coords.x2 &&
