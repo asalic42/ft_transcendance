@@ -37,7 +37,7 @@ async function getCurrentPlayerId() { // à lancer au chargement de la page;
 
 function launch_tournament() {
 	let cachedUserId = getCurrentPlayerId; // à lancer au chargement de la page;
-	let alert = false;
+	let var_alert = false;
 	const id_t = document.querySelector('.container').dataset.idT;
 	window.id_t_t = id_t;
 	if (window.socket_t == null)
@@ -50,10 +50,10 @@ function launch_tournament() {
 	}
 	
 	window.socket_t.onclose = function() {
-		if (!alert) {
-			alert("Tournament is full, finished or there has been an error.")
+		if (!var_alert) {
+			alert("Tournament is full, finished or there has been an error.");
 		}
-		alert = false;
+		var_alert = false;
 		loadPage(`game-mode-pong/`);
 	}
 
@@ -105,18 +105,18 @@ function launch_tournament() {
 				}
 	
 				await sleep(5000);
-				if (!alert) {
+				if (!var_alert) {
 					alert('Tournament is finished. Thanks.');
-					alert = true;
+					var_alert = true;
 				}
 				await sleep(1000);
 				window.socket_t.onclose = function(){}
 				loadPage(`game-mode-pong/`);
 			}
 			if (data.type === "tournament_cancelled") {
-				if (!alert) {
+				if (!var_alert) {
 					alert("Tournament is cancelled. Someone disconnected.");
-					alert = true;
+					var_alert = true;
 				}
 				window.socket_t.onclose = function(){}
 				loadPage(`/game-mode-pong/`);
@@ -128,9 +128,9 @@ function launch_tournament() {
 				});
 			}
 			if (data.type === "already") {
-				if (!alert) {
+				if (!var_alert) {
 					alert("This tournament already ran.")
-					alert = true;
+					var_alert = true;
 				}
 				function sleep(ms) {
 					return new Promise(resolve => setTimeout(resolve, ms));

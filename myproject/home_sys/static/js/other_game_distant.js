@@ -128,6 +128,22 @@ class CasseBriqueDistantGame {
 		if (data.type == "countdown") {
 			this.countdownBeforeGame(data);
 		}
+
+		if (data.type == 'cheating') {
+			const safeHide = (id) => {
+				const element = document.getElementById(id);
+				if (element) element.style.display = 'none';
+			};
+			['box-scores', 'player1', 'player2' , 'timer', 'game-cb', 'canvas-1', 'canvas-2'].forEach(safeHide);
+			alert('You cheating !!!');
+			loadPage(`https://${window.location.host}/other_game_choice/`);
+		}
+		else if (data.type == "interuption") {
+			alert('Someone is trying to get into your room !\n For security reasons, we\'re going to close the game');
+			loadPage(`https://${window.location.host}/other_game_choice/`);
+			return ;
+		}
+
 		else if (data.type == "players_name") {
 			if (data.player1_name) document.getElementById("playername1").innerText = data.player1_name;
 			if (data.player2_name) document.getElementById("playername2").innerText = data.player2_name;
@@ -170,13 +186,13 @@ class CasseBriqueDistantGame {
 		if (data.type === "close_connection") {
 			document.getElementById('countdown1').style.display = 'none';
 			document.getElementById('countdown2').style.display = 'none';
-			// alert(data.message);
-			console.log('close 5');
 			this.socket.close();
 		}
 	}
 
 	handleServerError(error) {
+		if (error == 4000)
+			alert('La partie est pleine !');
 		console.log("Erreur socket: ", error);
 	}
 	
@@ -222,7 +238,7 @@ class CasseBriqueDistantGame {
 		document.getElementById("game1").getContext("2d").roundRect(this.gameState.player1_coords.x1, this.gameState.player1_coords.y1, this.gameState.player1_coords.x2 - this.gameState.player1_coords.x1, this.gameState.player1_coords.y2 - this.gameState.player1_coords.y1, 7);
 		document.getElementById("game1").getContext("2d").fill();
 		document.getElementById("game1").getContext("2d").closePath();
-	
+
 		document.getElementById("game2").getContext("2d").beginPath();
 		document.getElementById("game2").getContext("2d").fillStyle = "#ED4EB0";
 		document.getElementById("game2").getContext("2d").roundRect(this.gameState.player2_coords.x1, this.gameState.player2_coords.y1, this.gameState.player2_coords.x2 - this.gameState.player2_coords.x1, this.gameState.player2_coords.y2 - this.gameState.player2_coords.y1, 7);
@@ -240,7 +256,7 @@ class CasseBriqueDistantGame {
 		context.arc(ball.coords.x, ball.coords.y, ball.radius, Math.PI * 2, false);
 		context.fill();
 		context.closePath();
-		
+
 		context.beginPath();
 		context.fillStyle = "#23232e";
 		context.arc(ball.coords.x, ball.coords.y, ball.radius - 2, Math.PI * 2, false);

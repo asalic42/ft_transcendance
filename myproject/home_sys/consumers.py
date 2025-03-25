@@ -1,6 +1,7 @@
 import json
 import asyncio
 from collections import defaultdict
+from channels.exceptions import DenyConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from django.shortcuts import get_object_or_404
@@ -238,7 +239,20 @@ class PongConsumer(AsyncWebsocketConsumer):
 		self.game = self.games[self.room_group_name]
 
 		if len(self.game.players) >= 2:
-			await self.close()
+			await self.accept()
+			await self.channel_layer.group_send(
+				self.room_group_name, {
+					'type': 'game_interrupted',
+					'exclude_name': self.channel_name
+				},
+			)
+
+			await self.send(text_data=json.dumps({
+				'type': 'cheating'
+			}))
+
+			await self.close(code=4000, reason="Partie complete")
+			return
 
 		user_id = self.scope['user'].id if self.scope['user'].is_authenticated else None
 
@@ -453,6 +467,12 @@ class PongConsumer(AsyncWebsocketConsumer):
 			'type': 'countdown',
 			'message': event['message']
 		}))
+
+	async def game_interrupted(self, event):
+		if self.channel_name != event.get('exclude_name'):
+			await self.send(text_data=json.dumps({
+				'type': 'interuption'
+			}))
 
 	# Debut du jeu
 	async def start_game(self):
@@ -846,8 +866,6 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				'type': 'cheating'
 			}))
 
-			print('close 1')
-			sys.stdout.flush()
 			await self.close(code=4000, reason="Partie complete")
 			return
 
@@ -1213,6 +1231,12 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 			'message': event['message']
 		}))
 
+	async def game_interrupted(self, event):
+		if self.channel_name != event.get('exclude_name'):
+			await self.send(text_data=json.dumps({
+				'type': 'interuption'
+			}))
+
 	# Envoyer les mises à jour à WebSocket pour un Replay
 	async def new_game(self, event):
 		await self.send(text_data=json.dumps({
@@ -1280,6 +1304,8 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 
 		time_left = 60
 		start = time.time()
+		print("yolo")
+		sys.stdout.flush()
 		while self.game.is_running and len(self.game.players) == 2:
 			update_interval = 0.016 # 60 FPS
 			current_time = asyncio.get_event_loop().time()
@@ -1298,7 +1324,9 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				# if time_left <= 0:
 				end = time.time()
 				self.game.timeleft = end - start
-					
+				
+				print("HEY bitch")
+				sys.stdout.flush()
 				try:
 					elapsed = asyncio.get_event_loop().time() - current_time
 					remaining_time = update_interval - elapsed
@@ -1511,12 +1539,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 					print(f'name: {name}')
 					print(f'name[index]: {name[index]}')
 					sys.stdout.flush()
+					send_i = 1 if (index == 0) else 0
 					await self.channel_layer.send(
 						player_in_pair['channel_name'],
 						{
 							'type': 'send_game_link',
 							'link': game_link,
-							'name_op': name[index],
+							'name_op': name[send_i],
 							'message': message
 						}
 					)	

@@ -1,7 +1,7 @@
 class BotGame {
 	
 	constructor(level)  {
-		this.user_option = level;
+		this.user_option = Number(level);
 		this.initState();
 		this.keyHandler = this.handleKey.bind(this);
 	}
@@ -10,6 +10,7 @@ class BotGame {
 		this.bounce = 0;
 		this.count = {p1: 0, p2: 0};
 		this.stop = false;
+		this.deco = false;
 		this.frameTime = {counter : 0, time : 0};
 		this.totalframeTime = {counter : 0, time : 0};
 		this.bot_time = -1;
@@ -24,9 +25,6 @@ class BotGame {
 
 	// Set up le jeu avant de lancer la game
 	start() {
-		const form = document.getElementById('LevelForm');
-
-		this.user_option = form.elements.levelfield.value;
 		this.setupDOM();
 		this.setupListeners();
 
@@ -37,6 +35,25 @@ class BotGame {
 
 	setupDOM() {
 
+		console.log(`this.user_option ${this.user_option}`);
+		switch (this.user_option) {
+			case 1:
+				this.user_option = 0.5;
+				break;
+			case 2:
+				this.user_option = 4;
+				break;
+			case 3:
+				this.user_option = 7;
+				break;
+			case 4:
+				this.user_option = 9.5;
+				break;
+			default:
+				this.user_option = 5;
+				break;
+		}
+		
 		if (document.getElementById('bot-page')) document.getElementById('bot-page').style.display = 'none';
 		const safeShow = (id) => {
 			const element = document.getElementById(id);
@@ -302,6 +319,8 @@ class BotGame {
 
 	// Annonce du gagnant + add stats a la database
 	async winnerWindow(player) {
+		if (this.deco)
+			return;
 		document.getElementById('bot-game').getContext('2d').clearRect(0, 0, document.getElementById('bot-game').width, document.getElementById('bot-game').height);
 		cancelAnimationFrame(this.animationId);
 	
@@ -419,23 +438,26 @@ class BotGame {
 
 	// Calcul Ball pour le BOT
 	calculateBall() {	
-		let pg_option = 5 - this.user_option;
+		let pg_option = 10 - this.user_option;
 		let count = 0;
 	
 		let cpy_x = this.ball.coords.x;
 		let cpy_y = this.ball.coords.y;
 		let cpy_vx = this.ball.const_vector.vx;
 		let cpy_vy = this.ball.const_vector.vy;
-		while (cpy_x <= this.player2Coords.x1 && ++count < 2000) {
+		while (cpy_x <= this.player2Coords.x1 && ++count < 500) {
 			if (cpy_y > 1080 - this.ball.radius || cpy_y < 0 + this.ball.radius)
 				cpy_vy = -cpy_vy;
 			if (cpy_x < 100 + this.ball.radius)
 				cpy_vx = -cpy_vx;
 			cpy_x += cpy_vx;
 			cpy_y += cpy_vy;
-			this.player2Coords.ball_predicted_hit++;
+			// this.player2Coords.ball_predicted_hit++;
 		}
-		this.player2Coords.ball_predicted_hit = cpy_y - ((this.player2Coords.y1 + 40) + Math.floor(this.bot_getRandomArbitrary(pg_option * -10, pg_option * 10)));
+		console.log(`pg_option (${pg_option})= 10 - this.user_option (${this.user_option});`);
+		const difficulty_offset = Math.random() * pg_option * 10 - (pg_option * 5);
+
+		this.player2Coords.ball_predicted_hit = cpy_y - ((this.player2Coords.y1 + 40) + difficulty_offset);
 		if ((this.player2Coords.ball_predicted_hit < 0 && this.player2Coords.const_vy > 0) || (this.player2Coords.ball_predicted_hit > 0 && this.player2Coords.const_vy < 0))
 			this.player2Coords.const_vy = -this.player2Coords.const_vy;
 	}
@@ -478,6 +500,9 @@ class BotGame {
 
 	bot_getRandomArbitrary(min, max) {
 		var result = Math.random() * (max - min) + min;
+		console.log (`beetween ${(max / 4)} and ${(max / 4)} not working`);
+		if (result < (max / 4) && result > (min / 4))
+			result = this.bot_getRandomArbitrary(min, max);
 		return result;
 	}
 }

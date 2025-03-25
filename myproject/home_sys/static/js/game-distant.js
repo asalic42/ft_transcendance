@@ -189,6 +189,21 @@ class PongDistantGame {
 				winner2Text.style.display = 'none';
 				this.countdownBeforeGame(data);
 			}
+
+			if (data.type == 'cheating') {
+				const safeHide = (id) => {
+					const element = document.getElementById(id);
+					if (element) element.style.display = 'none';
+				};
+				['scores', 'scoreP1', 'scoreP2', 'canvas-container'].forEach(safeHide);
+				alert('You cheating !!!');
+				loadPage(`https://${window.location.host}/game-mode-pong/`);
+			}
+			else if (data.type == "interuption") {
+				alert('Someone is trying to get into your room !\n For security reasons, we\'re going to close the game');
+				loadPage(`https://${window.location.host}/game-mode-pong/`);
+				return ;
+			}
 			
 			else if (data.type == "game_won") {
 				document.getElementById("disconnected").style.display = "block";
@@ -225,8 +240,8 @@ class PongDistantGame {
 				alert("Sorry, there has been a server side error. Please, change rooms.");
 			}
 			else if (data.type == "close_connection") {
-				if (document.getElementById('countdown'))
-					document.getElementById('countdown').style.display = 'none';
+				if (document.getElementById("countdown"))
+					document.getElementById("countdown").style.display = 'none';
 				this.socket.close();
 			}
 	

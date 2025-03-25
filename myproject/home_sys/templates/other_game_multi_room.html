@@ -18,25 +18,6 @@
 		<h1 class="title">Choix de la room</h1>
 		<div class="mode-choices">
 
-			{% comment %} <a href="{% url 'map_choice' %}" class="game-distant">
-				<span class="game-mode">New room</span>
-			</a> {% endcomment %}
-
-			{% comment %} <div id="test">
-				{% if all_games %}
-					<h2 id='text'> Join room : </h2>
-					<div id="rooms-list">
-					{% for room in all_games %}
-						<a href="{% url 'other_game_multi' room.game_id room.map_id %}" class="game-distant" id="choice">
-							<span class="game-mode" id='choice'>Room {{ room.game_id }} map {{ room.map_id }} </span>
-						</a>
-					{% endfor %}
-					</div>
-				{% else %}
-					<p>Aucune Room </p>
-				{% endif %}
-			</div> {% endcomment %}
-
 			<a href="{% url 'map_choice' %}" id="new-room" data-user-id="{{ request.user.id }}">
 				<span class="game-mode">New game</span>
 			</a>

@@ -62,6 +62,7 @@ var gameBot = false;
 var gameCasseBriqueDistant = false;
 var gameCasseBriqueDistantRoom = false;
 window.socket_t = null;
+let bot_game = null;
 
 // Ajoute /accounts/ si absent
 // function prependAccounts(url) {
@@ -168,8 +169,6 @@ window.socket_t = null;
 
 async function gameCasseBriqueRoute() {
     if (!window.CasseBriqueGame) {
-        const module = await import('./other_game.js');
-        window.CasseBriqueGame = module.CasseBriqueGame;
         await new Promise(resolve => {
             const checkEl = () => {
                 if (document.getElementById('mapSelection'))
@@ -179,6 +178,7 @@ async function gameCasseBriqueRoute() {
             };
             checkEl();
         });
+        new CasseBriqueGame();
     }
 }
 
@@ -196,22 +196,6 @@ async function gameCasseBriqueDistantRoute() {
         });
     }
     new CBRoomGameManager();
-}
-
-async function gameBotRoute() {
-
-    if (!window.CasseBriqueGame) {
-        await new Promise(resolve => {
-            const checkEl = () => {
-                if (document.getElementById('mapSelection'))
-                    resolve();
-                else
-                setTimeout(checkEl, 50);
-            };
-            checkEl();
-        });
-    }
-    new CasseBriqueGame();
 }
 
 async function gameRoute() {
@@ -316,7 +300,14 @@ window.loadPage = function(url, pushState = true) {
             navbar.style.display = 'none';
             launch_login_page();
         }
-
+        if (url.includes('game-bot'))
+            gameBot = true;
+        if (gameBot && bot_game) {
+            gameBot = false;
+            bot_game.deco = true;
+            bot_game.stop = true;
+            bot_game = null;
+        }
         // if (url !== "/" && url !== `https://${window.location.host}` && !url.match("signout"))
         // updateAuthUI();
 
@@ -431,9 +422,6 @@ window.loadPage = function(url, pushState = true) {
             gameCasseBrique = false;
         }
 
-        console.log(`gameCasseBriqueDistant:${gameCasseBriqueDistant}  && CasseBriqueDistantGame.currentGame ${CasseBriqueDistantGame.currentGame}`)
-        console.log(`url.includes("/game-other_game_multi/") : ${url.includes("/other_game_multi/")}`)
-        console.log(`url : ${url}`)
         if (url.includes(`/other_game_multi_room/`)) {
             gameCasseBriqueDistantRoom = true;
             gameCasseBriqueDistantRoute();
@@ -444,7 +432,6 @@ window.loadPage = function(url, pushState = true) {
             new CasseBriqueDistantGame(pathParts[2], pathParts[3]);
         }
         else if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
-            console.log('closing socket IAUDHFKJABSDJBASJLDBVASD');
             CasseBriqueDistantGame.currentGame.closeSocket();
             gameCasseBriqueDistant = false;
             window.CasseBriqueGame = null;
@@ -510,7 +497,7 @@ function handleFormSubmit(event) {
     if (form.id === "LevelForm") {
         loadPage(location.pathname).then(() => {
             const level = form.elements.levelfield.value;
-            const bot_game = new BotGame(level);
+            bot_game = new BotGame(level);
             bot_game.start();
         });
         return;
@@ -553,6 +540,7 @@ function handleFormSubmit(event) {
 
 // Initialize the SPA navigation only once when the document loads
 document.addEventListener("DOMContentLoaded", function() {
+
     // Attach event handlers only once
     document.body.addEventListener("click", handleLinkClick);
     document.body.addEventListener("submit", handleFormSubmit);
