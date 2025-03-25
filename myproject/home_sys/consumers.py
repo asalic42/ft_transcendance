@@ -63,7 +63,7 @@ class PongGame:
 	def reset_game(self):
 		self.ball = {
 			'coords': {'x': 960, 'y': 425},
-			'vector': {'vx': get_random_arbitrary(-10, 10), 'vy': get_random_arbitrary(-10, 10)},
+			'vector': {'vx': get_random_arbitrary(-13, 13), 'vy': get_random_arbitrary(-13, 13)},
 			'radius': 13
 		}
 		self.scores = {'p1': 0, 'p2': 0}
@@ -598,7 +598,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 	# Reset de la balle apres chaque score+1
 	def reset_ball(self, direction):
 		self.game.ball['coords'] = {'x': 960, 'y': 475}
-		self.game.ball['vector'] = {'vx': direction, 'vy': get_random_arbitrary(-10, 10)}
+		self.game.ball['vector'] = {'vx': direction, 'vy': get_random_arbitrary(-13, 13)}
 
 
 """ CASSE BRIQUE GAME MULTIPLAYER """
