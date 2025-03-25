@@ -218,29 +218,3 @@ MEDIA_URL = '/media/'
 
 # Répertoire physique sur le disque où les fichiers médias seront stockés
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',  # Chemin vers le fichier de logs
-        },
-    },
-    'loggers': {
-        'channels': {
-            'handlers': ['console'],
-            'level': 'INFO',  # or 'WARNING' if you want even less output
-            'propagate': False,
-        },
-        'daphne': {
-            'handlers': ['console'],
-            'level': 'INFO',  # set to WARNING if necessary
-            'propagate': False,
-        },
-    },
-}
