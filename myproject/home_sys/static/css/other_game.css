@@ -20,15 +20,18 @@ body{
 /* Other game choice */
 
 .page {
-	font-family: 'Thunder-SemiBold';
+	font-family: 'Thunder-VF';
 	text-align: center;
-	position: relative;
+	position: relative;	
 	box-sizing: border-box;
-	top: 250px;
+	top: 200px;
 	width: 70%;
 	border: 3px solid #ED4EB0;
 	border-radius: 50px;
-	display: block;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
 	margin-left: auto;
     margin-right: auto;
 	background: linear-gradient(to bottom right, #232330, #14141e);

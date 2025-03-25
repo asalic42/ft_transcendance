@@ -150,7 +150,7 @@
 .settings-logout {
 	font-weight: bold;
 	width: 100px;
-	height: 41px;
+	height: auto;
 	padding: 10px;
 	padding-left: 20px;
 	color: black;
@@ -159,6 +159,7 @@
 	border-radius: 10px;
 	transition: all 0.2s ease-out;
 	background-color: #f0f0f0;
+	border: 1px solid black;
 }
 
 /* Delete svg */
@@ -183,7 +184,7 @@
 
 .settings-delete-account {
 	/* width: 100px; */
-	height: 19px;
+	height: auto;
 	display:inline-block;
 	padding: 10px;
 	color: black;

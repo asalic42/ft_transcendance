@@ -943,7 +943,7 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				winner_id=winner_id,
 				score_p1=self.game.scores['p1'],
 				score_p2=self.game.scores['p2'],
-				map=1  # Vous pouvez adapter ceci selon votre logique
+				map=self.game.players[self.channel_name]['number']  # Vous pouvez adapter ceci selon votre logique
 			)
 			print(f"Game saved successfully: {game_data}")
 			self.game.is_saved = True
@@ -1476,7 +1476,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	
 	@database_sync_to_async
 	def create_t(self):
-		created = Tournaments.objects.create(pk=self.tournament_id)
+		ids = []
+		for player in TournamentConsumer.players[self.tournament_id]:
+			ids.append(player['user_id'])
+
+		created = Tournaments.objects.create(pk=self.tournament_id, ids=ids)
 		if created:
 			print("game has been added into the database")
 
@@ -1658,9 +1662,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		self.gameFinished[self.tournament_id] += 1
 		print(f"Matchs terminés : {self.gameFinished[self.tournament_id]}/2")
 	
-		# Si 2 matches terminés dans ce round
 		if self.gameFinished[self.tournament_id] == 8:
-			self.gameFinished[self.tournament_id] = 0  # Réinitialiser
+			self.gameFinished[self.tournament_id] = 0
 			self.roundNb[self.tournament_id] += 1
 	
 			# Si 3 rounds terminés, fin du tournoi
@@ -1668,7 +1671,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				print("Fin du tournoi !")
 				await self.tournament_ending()
 			else:
-				await self.start_tournament()  # Lancer le round suivant
+				await self.start_tournament() 
 
 	@database_sync_to_async
 	def get_tournament_results(self):

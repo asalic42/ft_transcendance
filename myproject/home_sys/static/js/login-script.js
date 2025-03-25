@@ -470,6 +470,7 @@ function launch_login_page() {
                 // Explicitly show the navbar before loading new content
                 const navbar = document.querySelector('.navbar');
                 if (navbar) {
+                    is_auth = true;
                     console.log("Login success - Setting navbar display to flex");
                     navbar.style.display = 'flex';
                 }
@@ -555,6 +556,7 @@ function launch_login_page() {
         })
         .then(data => {
             if (data.status === 'success') {
+                is_auth = true;
                 console.log(">>>> SUCCESS <<<<");
                 // Instead of redirecting, load the home page via SPA
                 if (data.html) {

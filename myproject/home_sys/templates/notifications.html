@@ -29,7 +29,7 @@
 		
 					<p class="user-username">{{ other_user }} </p>
 					<button class="remove-friend" data-username="{{ other_user }}">Remove</button>
-					<button class="talk-friend" data-username="{{ other_user }}">Talk 💬​</button>
+					<a class="talk-friend" data-username="{{ other_user }}" href="{% url 'channels' %}">Talk 💬​</a>
 					<!-- <button class="invite-friend" data-username="{{ other_user }}">Invite 🫲</button> -->
 		
 					<!-- Ajout du statut de connexion -->

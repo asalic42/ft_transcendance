@@ -62,32 +62,44 @@ function launch_settings() {
 			});
 	}});
 
-			// Lorsque l'utilisateur choisit un fichier, on déclenche l'upload via AJAX
+	// Lorsque l'utilisateur choisit un fichier, on déclenche l'upload via AJAX
 	$('#s-avatar').on('change', function(event) {
-		// Récupère le fichier choisi
-		var avatar_file = event.target.files[0];  // Le premier fichier choisi
-
-		// Vérifie si un fichier a bien été sélectionné
+		var avatar_file = event.target.files[0];
+	
 		if (!avatar_file) {
 			alert('Veuillez choisir un fichier d\'avatar.');
 			return;
 		}
-
-		// Crée un objet FormData pour envoyer le fichier
+	
+		// Vérification du format (PNG ou JPG)
+		var allowed_extensions = ['.png', '.jpg', '.jpeg'];
+		var file_extension = avatar_file.name.split('.').pop().toLowerCase();
+		
+		if (!allowed_extensions.includes('.' + file_extension)) {
+			alert('❌ Format de fichier non supporté. Utilisez .png ou .jpg.');
+			return;
+		}
+	
+		// Vérification de la taille (max 4 Mo)
+		var max_size = 4 * 1024 * 1024; // 4 Mo en octets
+		if (avatar_file.size > max_size) {
+			alert('❌ Le fichier est trop lourd (max 4 Mo).');
+			return;
+		}
+	
+		// Envoi du fichier si tout est valide
 		var formData = new FormData();
-		formData.append('avatar', avatar_file);  // Ajoute le fichier avatar
-		formData.append('csrfmiddlewaretoken', getCSRFToken());  // CSRF token pour la sécurité
-
-		// On envoie les données via AJAX
+		formData.append('avatar', avatar_file);
+		formData.append('csrfmiddlewaretoken', getCSRFToken());
+	
 		$.ajax({
-			url: '/user-settings/upload-avatar/',  // URL de la vue pour uploader l'avatar
+			url: '/user-settings/upload-avatar/',
 			type: 'POST',
 			data: formData,
-			processData: false,  // Important : ne pas traiter les données
-			contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+			processData: false,
+			contentType: false,
 			success: function(response) {
 				if (response.status === 'success') {
-					// Met à jour l'image de profil sur la page immédiatement
 					$('#avatar-img').attr('src', response.new_avatar_url);
 				} else {
 					alert('❌ Erreur : ' + response.message);
@@ -158,10 +170,10 @@ function launch_settings() {
 		}
 
 		if (InputBalise.value.length > 24) {
-			is_s_user_len_ok.value = false;
+			bool_is_ok.value = false;
 		}
 		else {
-			is_s_user_len_ok.value = true;
+			bool_is_ok.value = true;
 		}
 
 		verifiervaliditeelmt(InputBalise,
@@ -169,11 +181,12 @@ function launch_settings() {
 			bool_taken);
 	}
 
-	function TextColorStatus(InputBalise, bool_taken, bool_is_ok, bool_whitespace)
+	function TextColorStatus(InputBalise, bool_taken, bool_is_ok, bool_whitespace, bool_m)
 	{
 		if (bool_taken.value === true          ||
 				bool_is_ok.value === false     ||
-				bool_whitespace.value === true)
+				bool_whitespace.value === true ||
+				bool_m === false)
 		{
 			InputBalise.style.color = "red";
 		}
@@ -229,17 +242,17 @@ function launch_settings() {
 		TextColorStatus(SusernameInput,
 			is_s_user_already_taken,
 			is_s_user_len_ok,
-			s_user_whitespaces_found);
+			s_user_whitespaces_found, true);
 
 		TextColorStatus(SemailInput,
 			is_s_email_already_taken,
 			is_s_email_len_ok,
-			s_email_whitespaces_found);
+			s_email_whitespaces_found, is_email_valid.value);
 
 		TextColorStatus(SpseudoInput,
 			is_s_pseudo_already_taken,
 			is_s_pseudo_len_ok,
-			s_pseudo_whitespaces_found);
+			s_pseudo_whitespaces_found, true);
 	}
 
 

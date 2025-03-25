@@ -6,6 +6,7 @@ urlpatterns = [
 
     # --- Main entry points ---
     path('', index, name='index'),  # Direct root to index view
+    # path('', load_template, {'page': ''}, name='index'),  # Utilisez load_template
     path('signin/', signin, name='signin'),
     path('signup/', signup, name='signup'),  # Add this line
     path('home/', load_template, {'page': 'home'}, name="home"),

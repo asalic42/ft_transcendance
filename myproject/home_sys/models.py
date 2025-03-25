@@ -2,15 +2,14 @@
 
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import datetime
-
+from django.contrib.postgres.fields import ArrayField
 
 """ USERS """
 
 class Users(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
-	name = models.CharField(max_length = 150)
-	pseudo = models.CharField(max_length=100, blank=True, null=True, default='pseudotest')
+	name = models.CharField(max_length = 30)
+	pseudo = models.CharField(max_length=30, blank=True, null=True, default='pseudotest')
 	date = models.DateTimeField(auto_now_add = True)
 	image = models.ImageField(upload_to='profile_pics/', default='profile_pics/basePP.png')
 	
@@ -24,6 +23,8 @@ class Users(models.Model):
 
 	status = models.BooleanField(default=True)  # Ce champ semble déjà utilisé pour autre chose
 	is_online = models.BooleanField(default=False)  # Nouveau champ pour le statut de connexion
+	has_been_cut = models.BooleanField(default=False)  # Nouveau champ pour le statut de connexion
+
 
 	win_nb = models.IntegerField(default = 0)
 	lose_nb = models.IntegerField(default = 0)
@@ -99,6 +100,7 @@ class Tournaments(models.Model):
 	id = models.IntegerField(primary_key = True)
 	date = models.DateTimeField(auto_now_add = True)
 	winner = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='tournament_wins', null=True)
+	ids = ArrayField(models.IntegerField(primary_key = True), size = 4, null = True)
 
 """ MATCHSTOURNAMENTS """
 

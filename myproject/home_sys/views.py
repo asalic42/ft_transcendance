@@ -30,27 +30,27 @@ logger = logging.getLogger(__name__)
 
 """
 
-						    |>	 AUTHENTICATION      <|
-						    |>	 PROFILE MANAGEMENT  <|
-						    |>   CHANNELS/MESSAGES   <|
-						    |>	 GAME MANAGEMENT     <|
-						    |>	 SOCIAL FEATURES     <|
-						    |>	 UTILITIES/MISC      <|
+							|>	 AUTHENTICATION	  <|
+							|>	 PROFILE MANAGEMENT  <|
+							|>   CHANNELS/MESSAGES   <|
+							|>	 GAME MANAGEMENT	 <|
+							|>	 SOCIAL FEATURES	 <|
+							|>	 UTILITIES/MISC	  <|
 """
 
 
 
 """
-                            [=================================================================]
-                            |                                                                 |
-                            |                        > AUTHENTICATION <                       |
-                            |                                                                 |
-                            |            auth.1) index           auth.5) check_username       |
-                            |            auth.2) signup          auth.6) check_email          |
-                            |            auth.3) signin          auth.7) check_password       |
-                            |            auth.4) signout                                      |
-                            |                                                                 |
-                            [=================================================================]
+							[=================================================================]
+							|																 |
+							|						> AUTHENTICATION <					   |
+							|																 |
+							|			auth.1) index		   auth.5) check_username	   |
+							|			auth.2) signup		  auth.6) check_email		  |
+							|			auth.3) signin		  auth.7) check_password	   |
+							|			auth.4) signout									  |
+							|																 |
+							[=================================================================]
 """
 
 
@@ -170,61 +170,61 @@ def signup(request):
 
 
 def signin(request):
-    if request.user.is_authenticated:
-        return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
-        
-    if request.method == 'POST':
-        content_type = request.META.get('CONTENT_TYPE', '')
-        
-        if 'application/json' in content_type:
-            import json
-            try:
-                data = json.loads(request.body)
-                username = data.get('username')
-                password = data.get('password')
-            except json.JSONDecodeError:
-                return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
-        else:
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
+	if request.user.is_authenticated:
+		return JsonResponse({'status': 'authenticated', 'redirect': reverse('home')})
+		
+	if request.method == 'POST':
+		content_type = request.META.get('CONTENT_TYPE', '')
+		
+		if 'application/json' in content_type:
+			import json
+			try:
+				data = json.loads(request.body)
+				username = data.get('username')
+				password = data.get('password')
+			except json.JSONDecodeError:
+				return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+		else:
+			username = request.POST.get('username')
+			password = request.POST.get('password')
+		
+		user = authenticate(request, username=username, password=password)
+		if user is not None:
 			
-            user_profile = Users.objects.get(user=user)
+			user_profile = Users.objects.get(user=user)
 
 			# Récupérer toutes les sessions actives de l'utilisateur
-            sessions = Session.objects.filter(
-                expire_date__gte=timezone.now(),
-                session_key__in=Users.objects.filter(user=user).values_list('session_key', flat=True)
-            )
-            # Supprimer toutes les sessions sauf la nouvelle
-            for session in sessions:
-                if session.session_key != request.session.session_key:
-                    session.delete()
+			sessions = Session.objects.filter(
+				expire_date__gte=timezone.now(),
+				session_key__in=Users.objects.filter(user=user).values_list('session_key', flat=True)
+			)
+			# Supprimer toutes les sessions sauf la nouvelle
+			for session in sessions:
+				if session.session_key != request.session.session_key:
+					session.delete()
 
-            login(request, user)
+			login(request, user)
 
-            try:
-                user_profile.session_key = request.session.session_key
-                user_profile.logstatus = True
-                user_profile.is_online = True
-                user_profile.save()
+			try:
+				user_profile.session_key = request.session.session_key
+				user_profile.logstatus = True
+				user_profile.is_online = True
+				user_profile.save()
 
-                return JsonResponse({
-                    'status': 'success',
-                    'redirect': reverse('home'),
-                    'user': {
-                        'id': user.id,
-                        'username': user.username,
-                    },
-                    'online_count': Users.objects.filter(is_online=True).count()
-                })
-            except Users.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'User profile not found.'})
-        else:
-            return JsonResponse({'status': 'unauthenticated', 'message': 'Wrong user/password'})
-    return JsonResponse({'status': 'unauthenticated'})
+				return JsonResponse({
+					'status': 'success',
+					'redirect': reverse('home'),
+					'user': {
+						'id': user.id,
+						'username': user.username,
+					},
+					'online_count': Users.objects.filter(is_online=True).count()
+				})
+			except Users.DoesNotExist:
+				return JsonResponse({'status': 'error', 'message': 'User profile not found.'})
+		else:
+			return JsonResponse({'status': 'unauthenticated', 'message': 'Wrong user/password'})
+	return JsonResponse({'status': 'unauthenticated'})
 
 
 """
@@ -240,28 +240,28 @@ def signin(request):
 
 # Déconnexion de l'utilisateur
 def signout(request):
-    
-    if request.user.is_authenticated:
-        try:
-            user_profile = Users.objects.get(user=request.user)
-            user_profile.is_online = False
-            user_profile.logstatus = False
-            user_profile.save()
-            
-            # Déconnecter l'utilisateur
-            logout(request)
+		
+	if request.user.is_authenticated:
+		try:
+			user_profile = Users.objects.get(user=request.user)
+			user_profile.is_online = False
+			user_profile.logstatus = False
+			user_profile.save()
+			
+			# Déconnecter l'utilisateur
+			logout(request)
 
-            print("\033[34m1-FLUSH\033[0m")
-            sys.stdout.flush()
-            return redirect(f'https://{settings.IP_ADDR}:5000/')
+			print("\033[34m1-FLUSH\033[0m")
+			sys.stdout.flush()
+			return redirect(f'https://{settings.IP_ADDR}:5000/')
 
-        except Users.DoesNotExist:
-            pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
+		except Users.DoesNotExist:
+			pass  # Ne rien faire si le profil de l'utilisateur n'est pas trouvé
 
-    print("\033[34m3-FLUSH\033[0m")
-    sys.stdout.flush()
-    return redirect(f'https://{settings.IP_ADDR}:5000/')
-    #return render(request, 'login.html')
+	print("\033[34m3-FLUSH\033[0m")
+	sys.stdout.flush()
+	return redirect(f'https://{settings.IP_ADDR}:5000/')
+	#return render(request, 'login.html')
 	
 	
 """
@@ -324,16 +324,16 @@ def check_password_solidity(request):
 
 
 """
-                            [=================================================================]
-                            |                                                                 |
-                            |                      > PROFILE MANAGEMENT <                     |
-                            |                                                                 |
-                            |       profile.1) load_template       profile.5) upload_avatar   |
-                            |       profile.2) home                profile.6) settings_user   |
-                            |       profile.3) delete_account      							  |
-                            |       profile.4) update_user_info                               |
-                            |                                                                 |
-                            [=================================================================]
+							[=================================================================]
+							|																 |
+							|					  > PROFILE MANAGEMENT <					 |
+							|																 |
+							|	   profile.1) load_template	   profile.5) upload_avatar   |
+							|	   profile.2) home				profile.6) settings_user   |
+							|	   profile.3) delete_account	  							  |
+							|	   profile.4) update_user_info							   |
+							|																 |
+							[=================================================================]
 """
 
 
@@ -350,9 +350,6 @@ def check_password_solidity(request):
 @login_required(login_url=f'https://{settings.IP_ADDR}:5000/')
 def load_template(request, page, **kwargs):
 
-	if (not request.user.is_authenticated):
-		page = "login"
-	
 	template_name = f"{page}.html"
 	context = {}
 
@@ -372,7 +369,8 @@ def load_template(request, page, **kwargs):
 			user = User.objects.get(username=username)
 			users_profile = Users.objects.get(user=user)
 		except User.DoesNotExist:
-			return redirect('home')
+			user = request.user
+			users_profile = Users.objects.get(user=user)
 
 		# Récupération des parties de Pong associées à l'utilisateur
 		games_P = Pong.objects.filter(
@@ -404,27 +402,30 @@ def load_template(request, page, **kwargs):
 		tournaments_colors = {}
 		tournaments_date = {}
 		tournaments_winner = {}
-
+		games_T_CB_SEND = []
 		for tournament_id in games_T_CB:
-			
 			tournament = Tournaments.objects.get(id=tournament_id)
-			winner = tournament.winner
-			if users_profile == winner:
-				tournament_color = 'green'
-			else:
-				tournament_color = 'red'
-			tournaments_colors[tournament_id] = tournament_color
-			tournaments_date[tournament_id] = tournament.date
-			users_img = get_users_of_one_tournament(users_profile, tournament_id)
-			tournaments_users[tournament_id] = users_img
-			tournaments_winner[tournament_id] = tournament.winner.name if tournament.winner else "Inconnu"
+			print(f'\033[34musers_profile.pk\033[0m {users_profile.pk} tournament.ids {tournament.ids}')
+			sys.stdout.flush()
+			if (users_profile.pk in tournament.ids):
+				games_T_CB_SEND.append(tournament_id)
+				winner = tournament.winner
+				if users_profile == winner:
+					tournament_color = 'green'
+				else:
+					tournament_color = 'red'
+				tournaments_colors[tournament_id] = tournament_color
+				tournaments_date[tournament_id] = tournament.date
+				users_img = get_users_of_one_tournament(users_profile, tournament_id)
+				tournaments_users[tournament_id] = users_img
+				tournaments_winner[tournament_id] = tournament.winner.name if tournament.winner else "Inconnu"
 
 		context = {
 			'user': user,
 			'games_P': games_P,
 			'games_S_CB': games_S_CB,
 			'games_M_CB': games_M_CB,
-			'games_T_CB': games_T_CB,
+			'games_T_CB': games_T_CB_SEND,
 			'tournaments_users': tournaments_users,
 			'tournaments_colors': tournaments_colors,
 			'tournaments_date': tournaments_date,
@@ -498,7 +499,13 @@ def load_template(request, page, **kwargs):
 			user = request.user
 			# Stocker des informations pour afficher dans le template si nécessaire
 			username = user.username  # ou autre info que vous voulez conserver
-			
+
+			user_profile = Users.objects.get(user=request.user)
+			user_profile.is_online = False
+			user_profile.logstatus = False
+			user_profile.has_been_cut = True
+			user_profile.save()
+
 			# Désactiver le mot de passe
 			user.set_unusable_password()
 			user.save()
@@ -665,34 +672,47 @@ def update_user_info(request):
 def upload_avatar(request):
 	if request.method == 'POST':
 		try:
-			# Récupère l'utilisateur connecté
 			user = request.user
-
-			# Récupère le fichier avatar envoyé
 			avatar_file = request.FILES.get('avatar')
 
 			if not avatar_file:
 				return JsonResponse({"status": "error", "message": "Aucun fichier sélectionné."})
 
+			# Vérification du type de fichier (PNG ou JPG)
+			allowed_extensions = ['.png', '.jpg', '.jpeg']
+			file_extension = os.path.splitext(avatar_file.name)[1].lower()
+			
+			if file_extension not in allowed_extensions:
+				return JsonResponse({
+					"status": "error",
+					"message": "Format de fichier non supporté. Utilisez .png ou .jpg."
+				})
+
+			# Vérification de la taille du fichier (max 4 Mo)
+			max_size = 4 * 1024 * 1024  # 4 Mo en octets
+			if avatar_file.size > max_size:
+				return JsonResponse({
+					"status": "error",
+					"message": "Le fichier est trop lourd (max 4 Mo)."
+				})
+
 			# Récupère le profil utilisateur
 			user_profile = Users.objects.get(user=user)
-			
-			# Mets à jour l'image de l'utilisateur
 			user_profile.image = avatar_file
-			user_profile.save()  # Sauvegarde le profil avec la nouvelle image
+			user_profile.save()
 
-			# Retourne l'URL de la nouvelle image
 			return JsonResponse({
 				"status": "success",
 				"message": "Avatar mis à jour.",
-				"new_avatar_url": user_profile.image.url  # L'URL de l'image mise à jour
+				"new_avatar_url": user_profile.image.url
 			})
 
 		except Users.DoesNotExist:
 			return JsonResponse({"status": "error", "message": "Profil utilisateur non trouvé."})
 
 	return JsonResponse({"status": "error", "message": "Requête invalide."})
-	
+
+
 """
 											profile.5)	[settings_user]
 							[---------------------------------------------------------------]
@@ -709,17 +729,17 @@ def settings_user(request):
 
 
 """
-                            [=================================================================]
-                            |                                                                 |
-                            |                      > CHANNELS/MESSAGES <                      |
-                            |                                                                 |
-                            |        chan.1) channels_page            chan.6) get_chans       |
-                            |        chan.2) live_chat                chan.7) get_messages    |
-                            |        chan.3) does_channel_exist       chan.8) post_message    |
-                            |        chan.4) post_chan                                        |
-                            |        chan.5) check_duplicate_private_channel                  |
-                            |                                                                 |
-                            [=================================================================]
+							[=================================================================]
+							|																 |
+							|					  > CHANNELS/MESSAGES <					  |
+							|																 |
+							|		chan.1) channels_page			chan.6) get_chans	   |
+							|		chan.2) live_chat				chan.7) get_messages	|
+							|		chan.3) does_channel_exist	   chan.8) post_message	|
+							|		chan.4) post_chan										|
+							|		chan.5) check_duplicate_private_channel				  |
+							|																 |
+							[=================================================================]
 """
 
 
@@ -957,16 +977,16 @@ def post_message(request):
 	
 
 """
-                            [=================================================================]
-                            |                                                                 |
-                            |                      > GAME MANAGEMENT <                        |
-                            |                                                                 |
-                            |     game.1) add_solo_casse_brique     game.5) tournament_page   |
-                            |     game.2) add_pong                  game.6) map_view          |
-                            |     game.3) create_current_game       game.7) get_rooms         |
-                            |     game.4) create_room               game.8) get_online_users  |
-                            |                                                                 |
-                            [=================================================================]
+							[=================================================================]
+							|																 |
+							|					  > GAME MANAGEMENT <						|
+							|																 |
+							|	 game.1) add_solo_casse_brique	 game.5) tournament_page   |
+							|	 game.2) add_pong				  game.6) map_view		  |
+							|	 game.3) create_current_game	   game.7) get_rooms		 |
+							|	 game.4) create_room			   game.8) get_online_users  |
+							|																 |
+							[=================================================================]
 """
 
 
@@ -1144,26 +1164,27 @@ def get_rooms(request):
 
 """
 def get_online_users(request):
-    online_users = Users.objects.filter(is_online=True)
-    offline_users = Users.objects.filter(is_online=False)
+	online_users = Users.objects.filter(is_online=True)
+	offline_users = Users.objects.filter(is_online=False)
 
-    users_online_data = [{"id": users.id, "username": users.name, "image": users.image.url} for users in online_users]
-    users_offline_data = [{"id": users.id, "username": users.name, "image": users.image.url} for users in offline_users]
-	
-    return JsonResponse({"online_users": users_online_data, "offline_users" : users_offline_data})
+	users_online_data = [{"id": users.id, "username": users.name, "image": users.image.url, "deleted": users.has_been_cut} for users in online_users]
+	users_offline_data = [{"id": users.id, "username": users.name, "image": users.image.url, "deleted": users.has_been_cut} for users in offline_users]
+	print(f"{users_offline_data[0]}")
+	sys.stdout.flush()
+	return JsonResponse({"online_users": users_online_data, "offline_users" : users_offline_data})
 
 
 """
-                            [=================================================================]
-                            |                                                                 |
-                            |                      > SOCIAL FEATURES <                        |
-                            |                                                                 |
-                            |      social.1) add_friend              social.5) block_user     |
-                            |      social.2) accept_friend           social.6) remove_friend  |
-                            |      social.3) decline_friend          social.7) invite_friend  |
-                            |      social.4) notification_page       social.8) user_status    |
-                            |                                                                 |
-                            [=================================================================]
+							[=================================================================]
+							|																 |
+							|					  > SOCIAL FEATURES <						|
+							|																 |
+							|	  social.1) add_friend			  social.5) block_user	 |
+							|	  social.2) accept_friend		   social.6) remove_friend  |
+							|	  social.3) decline_friend		  social.7) invite_friend  |
+							|	  social.4) notification_page	   social.8) user_status	|
+							|																 |
+							[=================================================================]
 """
 
 """
@@ -1422,16 +1443,16 @@ def user_status(request):
 
 
 """
-                            [=================================================================]
-                            |                                                                 |
-                            |                        > UTILITIES/MISC <                       |
-                            |                                                                 |
-                            |      util.1) get_ip_info              util.5) is_chan_private   |
-                            |      util.2) check_pp                 util.6) postPv            |
-                            |      util.3) getNameById              util.7) get_chan_id       |
-                            |      util.4) doesUserHaveAccessToChan                           |
-                            |                                                                 |
-                            [=================================================================]
+							[=================================================================]
+							|																 |
+							|						> UTILITIES/MISC <					   |
+							|																 |
+							|	  util.1) get_ip_info			  util.5) is_chan_private   |
+							|	  util.2) check_pp				 util.6) postPv			|
+							|	  util.3) getNameById			  util.7) get_chan_id	   |
+							|	  util.4) doesUserHaveAccessToChan						   |
+							|																 |
+							[=================================================================]
 """
 
 """
@@ -1827,7 +1848,7 @@ def profile_page(request):
 
 
 def check_user_authenticated(request):
-    if request.user.is_authenticated:
-        return JsonResponse({'authenticated': True, 'username' : request.user.username})
-    else:
-        return JsonResponse({'authenticated': False, 'username' : 'undefined'})
+	if request.user.is_authenticated:
+		return JsonResponse({'authenticated': True, 'username' : request.user.username})
+	else:
+		return JsonResponse({'authenticated': False, 'username' : 'undefined'})

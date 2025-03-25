@@ -37,7 +37,7 @@ function launch_everything() {
 		if (!currentPVCallback) return;
 
 		const selectedFriendId = friendSelect.value;
-		const channelName = "TestValue" + userid + selectedFriendId; // Générer le nom du canal
+		const channelName = "TestValue" + Math.floor(Math.random() * 1000000) + Math.floor(Math.random() * 10000000) + selectedFriendId;
 
 		// Validation
 		if (!selectedFriendId) {
@@ -73,6 +73,7 @@ function launch_everything() {
 	newFren.addEventListener('click', () => {
 		// Creation de chan pv + ouverture
 		setChannelNamePV(async function (nameChan, ami) {
+			console.log(`creating chan with name ${nameChan}`);
 			const result = await addChannelToDb(nameChan, 1, ami);
 			if (!result) return;
 			try {
@@ -121,9 +122,10 @@ function addMessageListener() {
 	const sendButton = document.getElementById('send-button');
 	sendButton.addEventListener('click', () => {
 
-		const msg = document.getElementById('message-input').value;
+		let msg = document.getElementById('message-input').value;
 		if (msg != "") {
 			postMessage(currentChan, msg, false);
+			msg = '';
 			document.getElementById('message-input').value = '';	// Vide le champ de saisie
 		}
 	});
@@ -256,8 +258,10 @@ function setChannelName(callback) {
 			event.preventDefault();
 			const name = inputChannel.value;
 			const pattern = /^[a-zA-Z0-9_-]+$/;
-
-			if (name !== '' && pattern.test(name)) {
+			
+			if (name.length > 30)
+				alert(`That name is too long.\nPlease try again (max 30 chars.)`);
+			else if (name !== '' && pattern.test(name)) {
 				overlay.style.display = 'none';
 				inputContainer.classList.remove('show');
 				document.getElementById('channel-name').value = '';
@@ -309,6 +313,8 @@ async function addMessage(mess, sender, id, is_link) {
 
 	const message = document.createElement('div');
 	message.classList.add('message');
+	message.id = `message-${id}`; // Identifiant unique par message
+
 
 	if (id === userid) message.classList.add('sent');
 	else message.classList.add('received');
@@ -549,6 +555,7 @@ async function loadChannels() {
 
 		if (result.status === 'success' && Array.isArray(result.channels)) {
 			result.channels.forEach(channel => {
+				console.log(`adding to the side ${channel.name}`);
 				addChannelToList(channel.name, channel.private, channel.id);
 			});
 		}

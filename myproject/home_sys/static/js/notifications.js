@@ -96,15 +96,16 @@ function notif_fetchAllUsersStatus() {
 		})
 		.catch(error => {return null;});
 
-	const testTalk = document.querySelector(".talk-friend");
-
-		if (testTalk)
-		{
-			/* Récupérer le user et construire l'url pour la chan priv */
-			testTalk.addEventListener("click", function() {
-				loadPage(`https://${window.location.host}/channels/`)
-			})
-		}
+	// const testTalk = document.querySelectorAll(".talk-friend");
+	// testTalk.forEach(function (testT) {
+		// if (testT)
+		// {
+			// /* Récupérer le user et construire l'url pour la chan priv */
+			// testT.addEventListener("click", function() {
+				// loadPage(`/channels/`)
+			// })
+		// }
+	// });
 }
 
 function connectWebSocket_notif_page() {

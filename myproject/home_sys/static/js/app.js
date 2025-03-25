@@ -243,10 +243,11 @@ window.id_t_t = 0;
 window.loadPage = function(url, pushState = true) {
 
     // Normalize the URL to prevent duplication
-    console.log('loadPage') ;
-    const normalizedUrl = normalizeUrl(url);
-    console.log(`normalizedUrl ${normalizedUrl}`);
     // Vérifier si on est sur la page de login ou non
+    if (!is_auth)
+        url = '/';
+    console.log(`is_auth ${is_auth}`);
+    const normalizedUrl = normalizeUrl(url);
     const isLoginPage = normalizedUrl === '/' || normalizedUrl === '' || String(normalizeUrl).includes('user-settings/signout/');
     const navbar = document.querySelector('.navbar');
 
@@ -292,11 +293,17 @@ window.loadPage = function(url, pushState = true) {
             // Force browser to acknowledge the style change
             void navbar.offsetWidth;
         }
-        
+
+        // if (url !== "/" && url != '' && url !== `https://${window.location.host}`)
+            // console.log('changing the url');
+            // url = `https://${window.location.host}`;
+
         if (url === "/") url = `https://${window.location.host}`;
         if (String(url).includes("delete_success/")) navbar.style.display = 'none';
+        
+        console.log(`url : ${url}`);
 
-        if (url === `https://${window.location.host}` || url.match("signout"))
+        if (url === `https://${window.location.host}` || url.match("signout") || url.match("signout"))
         {
             navbar.style.display = 'none';
             launch_login_page();
@@ -342,7 +349,7 @@ window.loadPage = function(url, pushState = true) {
 			clearInterval(homefetch);
 			washome = false;
 		}
-        if (url === `https://${window.location.host}/home/` || url === '/home/')
+        if (url.includes('/home'))
         {
             // fetchAllUsersStatus();
             console.log('fetching hooooome');
@@ -375,7 +382,6 @@ window.loadPage = function(url, pushState = true) {
         else if (gameDistant && PongDistantGame.currentGame) {
             PongDistantGame.currentGame.closeSocket();
             gameDistant = false;
-            return ;
         }
         
         if (wasNotif)
@@ -456,7 +462,7 @@ window.reinitCoreScripts = function() {
     }
 };
 
-function handleLinkClick(event) {
+async function handleLinkClick(event) {
     console.log('click');
     let link = event.target.closest("a");
     // Process only if it's a link, has href, is same origin, and doesn't have data-full-reload
@@ -478,7 +484,7 @@ function handleLinkClick(event) {
                 // loadPage(`https://${window.location.host}/`);
                 // return ;
             }
-        checkAuthentication(link.href);
+        await checkAuthentication(link.href);
     }
 }
 
@@ -538,14 +544,15 @@ function handleFormSubmit(event) {
 }
 
 // Initialize the SPA navigation only once when the document loads
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
 
     // Attach event handlers only once
     document.body.addEventListener("click", handleLinkClick);
     document.body.addEventListener("submit", handleFormSubmit);
 
     // Modifiez le gestionnaire popstate existant
-    window.addEventListener("popstate", function() {
+    let is_auth;
+    window.addEventListener("popstate", async function() {
         // Vérifier si on est sur la page de login
         const currentUrl = window.location.pathname;
         const isLoginPage = currentUrl === '/' || currentUrl === '';
@@ -554,7 +561,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (navbar) {
             navbar.style.display = isLoginPage ? 'none' : 'flex';
         }
-        checkAuthentication(window.location.pathname);
+        await checkAuthentication(window.location.pathname);
     });
 
     // Initial navbar setup
@@ -567,27 +574,32 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     fetchOnlineUsers();
-    loadPage(window.location.pathname);
+    await checkAuthentication(window.location.pathname);
 });
 
-
 function checkAuthentication(location) {
+    let return_value = '';
     console.log('checkAuthentication');
     fetch('/api/check-auth/')
         .then(response => response.json())
         .then(data => {
             if (!data.authenticated && !String(location).includes('delete_success')) {
                 // Si l'utilisateur n'est pas authentifié, rediriger et écraser l'historique
-                window.location.replace('/'); // Redirection vers la page de login, écrasant l'historique
+                console.log('not auth');
+                // return_value = '/'
+                is_auth = false;
+                loadPage('/'); // Modification ici
             } else {
                 // Si l'utilisateur est authentifié, charger la page
+                is_auth = true;
                 return loadPage(location); // Charge la page actuelle
+                // return_value = location;
             }
         })
         .catch(error => {
             console.error('Erreur lors de la vérification de l\'authentification:', error);
         });
-
+    // loadPage(return_value);
 }
 
 function updateAuthUI() {

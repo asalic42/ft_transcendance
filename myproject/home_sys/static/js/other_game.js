@@ -111,7 +111,7 @@ class CasseBriqueGame {
 		this.ball.vector = { vx: this.ball.const_vector.vx, vy: this.ball.const_vector.vy, total : this.ball.const_vector.vy + this.ball.const_vector.vx };
 	
 		// Initials points player 1
-		this.player1Coords = { y1 : document.getElementById("game").height - 50, x1 : (document.getElementById("game").height / 2) - 60, y2 : document.getElementById("game").height - 35, x2 : (document.getElementById("game").height / 2) + 60, const_vx : 20, vx : 20 };
+		this.player1Coords = { y1 : document.getElementById("game").height - 50, x1 : (document.getElementById("game").height / 2) - 60, y2 : document.getElementById("game").height - 35, x2 : (document.getElementById("game").height / 2) + 60, const_vx : 23, vx : 23 };
 	
 		this.gameLoop(Date.now());
 		if (this.isGameOver())
