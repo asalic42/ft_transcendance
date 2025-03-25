@@ -283,12 +283,7 @@ window.loadPage = function(url, pushState = true) {
             gameCasseBrique = false;
         }
 
-        if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
-            CasseBriqueDistantGame.currentGame.closeSocket();
-            gameCasseBriqueDistant = false;
-            window.CasseBriqueGame = null;
-        }
-        else if (url.includes(`/other_game_multi_room/`)) {
+        if (url.includes(`/other_game_multi_room/`)) {
             gameCasseBriqueDistantRoom = true;
             gameCasseBriqueDistantRoute();
         }
@@ -296,6 +291,11 @@ window.loadPage = function(url, pushState = true) {
             gameCasseBriqueDistant = true;
             const pathParts = window.location.pathname.split('/');
             new CasseBriqueDistantGame(pathParts[2], pathParts[3]);
+        }
+        else if (gameCasseBriqueDistant && CasseBriqueDistantGame.currentGame) {
+            CasseBriqueDistantGame.currentGame.closeSocket();
+            gameCasseBriqueDistant = false;
+            window.CasseBriqueGame = null;
         }
         
     })
@@ -391,6 +391,7 @@ function handleFormSubmit(event) {
 
 // Initialize the SPA navigation only once when the document loads
 document.addEventListener("DOMContentLoaded", function() {
+
     // Attach event handlers only once
     document.body.addEventListener("click", handleLinkClick);
     document.body.addEventListener("submit", handleFormSubmit);
@@ -417,5 +418,5 @@ document.addEventListener("DOMContentLoaded", function() {
         navbar.style.display = isLoginPage ? 'none' : 'flex';
     }
 	if (window.location.pathname != '/')
-		loadPage(window.location.pathname, false);	
+		loadPage(window.location.pathname, false);
 });
