@@ -1,66 +1,72 @@
 function launch_settings() {
+	if (!is_auth)
+		return loadPage('/');
+
 	let update_var = {value: false};
 
 	const buttonUpdateSave = document.querySelector(".update-or-save");
 
 	const allInputs = document.querySelectorAll(".settings-user-info input");
 
-	buttonUpdateSave.addEventListener('click', function(e) {
-		e.preventDefault();
+	if (buttonUpdateSave) {
 
-		update_var.value = !update_var.value;
-
-		if (update_var.value === true) {
-			buttonUpdateSave.textContent = "Save";
-			allInputs.forEach(input => {
-				input.style.backgroundColor = "white";
-				input.disabled = false;
-				input.style.color = "black";
-			});
-		} else {
-			buttonUpdateSave.textContent = "Update";
-			allInputs.forEach(input => {
-				input.style.backgroundColor = "#212121";
-				input.disabled = true;
-				input.style.color = "#888888";
-			});
-			
-			// On envoie les nouvelles données quand on clique sur "Save"
-			var new_username = $('#s-username').val(); // Récupère la valeur de l'input username
-			var new_pseudo = $('#s-pseudo').val(); // Récupère la valeur de l'input pseudo
-			var new_email = $('#s-email').val(); // Récupère la valeur de l'input email
-
-			// Crée un objet FormData pour envoyer les données
-			var formData = new FormData();
-			formData.append('username', new_username);
-			formData.append('pseudo', new_pseudo);
-			formData.append('email', new_email);
-			formData.append('csrfmiddlewaretoken', getCSRFToken());  // CSRF token pour sécuriser la requête
-			// On envoie les données via AJAX
-			$.ajaxSetup({
-				headers: {
-					'X-CSRFToken': getCSRFToken(),
-				}
-			});
-			
-			$.ajax({
-				url: '/user-settings/update-user/',
-				type: 'POST',
-				data: formData,
-				processData: false,  // Important : ne pas traiter les données (surtout pour les fichiers)
-				contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
-				success: function(response) {
-					if (response.status === 'success') {
-						alert('Vos informations ont été mises à jour. ✅');
-					} else {
-						alert('❌ Erreur : ' + response.message);
+		buttonUpdateSave.addEventListener('click', function(e) {
+			e.preventDefault();
+	
+			update_var.value = !update_var.value;
+	
+			if (update_var.value === true) {
+				buttonUpdateSave.textContent = "Save";
+				allInputs.forEach(input => {
+					input.style.backgroundColor = "white";
+					input.disabled = false;
+					input.style.color = "black";
+				});
+			} else {
+				buttonUpdateSave.textContent = "Update";
+				allInputs.forEach(input => {
+					input.style.backgroundColor = "#212121";
+					input.disabled = true;
+					input.style.color = "#888888";
+				});
+				
+				// On envoie les nouvelles données quand on clique sur "Save"
+				var new_username = $('#s-username').val(); // Récupère la valeur de l'input username
+				var new_pseudo = $('#s-pseudo').val(); // Récupère la valeur de l'input pseudo
+				var new_email = $('#s-email').val(); // Récupère la valeur de l'input email
+	
+				// Crée un objet FormData pour envoyer les données
+				var formData = new FormData();
+				formData.append('username', new_username);
+				formData.append('pseudo', new_pseudo);
+				formData.append('email', new_email);
+				formData.append('csrfmiddlewaretoken', getCSRFToken());  // CSRF token pour sécuriser la requête
+				// On envoie les données via AJAX
+				$.ajaxSetup({
+					headers: {
+						'X-CSRFToken': getCSRFToken(),
 					}
-				},
-				error: function() {
-					alert('❌ Erreur lors de la mise à jour des informations.');
-				}
-			});
-	}});
+				});
+				
+				$.ajax({
+					url: '/user-settings/update-user/',
+					type: 'POST',
+					data: formData,
+					processData: false,  // Important : ne pas traiter les données (surtout pour les fichiers)
+					contentType: false,  // Important : ne pas définir de type de contenu, FormData s'en charge
+					success: function(response) {
+						if (response.status === 'success') {
+							alert('Vos informations ont été mises à jour. ✅');
+						} else {
+							alert('❌ Erreur : ' + response.message);
+						}
+					},
+					error: function() {
+						alert('❌ Erreur lors de la mise à jour des informations.');
+					}
+				});
+		}});
+	}
 
 	// Lorsque l'utilisateur choisit un fichier, on déclenche l'upload via AJAX
 	$('#s-avatar').on('change', function(event) {
@@ -195,14 +201,17 @@ function launch_settings() {
 		}
 	}
 
-	SusernameInput.addEventListener('keyup', function() {
-		
-		TestValidity(SusernameInput,
-			'check_username/?username',
-			is_s_user_already_taken,
-			is_s_user_len_ok,
-			s_user_whitespaces_found);
-	});
+	if (SusernameInput) {
+
+		SusernameInput.addEventListener('keyup', function() {
+			
+			TestValidity(SusernameInput,
+				'check_username/?username',
+				is_s_user_already_taken,
+				is_s_user_len_ok,
+				s_user_whitespaces_found);
+		});
+	}
 
 	/* Pour l email */
 
@@ -213,29 +222,33 @@ function launch_settings() {
 
 	const SemailInput = document.getElementById("s-email");
 
-	SemailInput.addEventListener('keyup', function() {
-
-		TestValidity(SemailInput,
-			'check_email/?email',
-			is_s_email_already_taken,
-			is_s_email_len_ok,
-			s_email_whitespaces_found);
-
-		is_email_valid.value = validateEmail(SemailInput.value);
-		if (SemailInput.value.trim() === '')
-			is_email_valid.value = true;
-	});
+	if (SemailInput) {
+		SemailInput.addEventListener('keyup', function() {
+	
+			TestValidity(SemailInput,
+				'check_email/?email',
+				is_s_email_already_taken,
+				is_s_email_len_ok,
+				s_email_whitespaces_found);
+	
+			is_email_valid.value = validateEmail(SemailInput.value);
+			if (SemailInput.value.trim() === '')
+				is_email_valid.value = true;
+		});
+	}
 
 	const SpseudoInput = document.getElementById("s-pseudo");
 
-	SpseudoInput.addEventListener('keyup', function() {
-
-		TestValidity(SpseudoInput,
-			'check_pseudo/?pseudo',
-			is_s_pseudo_already_taken,
-			is_s_pseudo_len_ok,
-			s_pseudo_whitespaces_found);
-	});
+	if (SpseudoInput) {
+		SpseudoInput.addEventListener('keyup', function() {
+	
+			TestValidity(SpseudoInput,
+				'check_pseudo/?pseudo',
+				is_s_pseudo_already_taken,
+				is_s_pseudo_len_ok,
+				s_pseudo_whitespaces_found);
+		});
+	}
 
 	function ActiveTextStatusColoration()
 	{
@@ -260,7 +273,7 @@ function launch_settings() {
 
 	function button_update_save_status() {
 
-		if (is_s_user_len_ok.value === false            ||
+		if ((is_s_user_len_ok.value === false            ||
 			is_s_email_len_ok.value === false           ||
 			is_s_pseudo_len_ok.value === false          ||
 
@@ -272,11 +285,11 @@ function launch_settings() {
 			s_pseudo_whitespaces_found.value === true   ||
 			s_email_whitespaces_found.value === true    ||
 			
-			is_email_valid.value === false)
+			is_email_valid.value === false) && buttonUpdateSave)
 		{
 			buttonUpdateSave.disabled = true;
 		}
-		else
+		else if (buttonUpdateSave)
 		{
 			buttonUpdateSave.disabled = false;
 		}

@@ -22,7 +22,6 @@ function fetchAllUsersStatus() {
  * Récupère et affiche les utilisateurs en ligne et hors ligne de manière optimisée
  */
 function fetchOnlineUsers() {
-	console.log('logobi');
 	fetch('/api/online-users')
 		.then(response => response.json())
 		.then(data => {
@@ -46,7 +45,6 @@ function fetchOnlineUsers() {
 				emptyState: emptyStateOff,
 				status: 'offline'
 			});
-			console.log(" =jzshcvhksdllhsksdhs>> ",  data.offline_users);
 		})
 		.catch(error => {
 			console.error('Erreur lors de la récupération des utilisateurs:', error);
@@ -95,7 +93,6 @@ function processUserList({ container, newUsers, emptyState, status }) {
  */
 function createUserCard(userlist, card_name, user) {
 
-	console.log("====> ", user);
 	const userCard = document.createElement('div');
 	userCard.className = `user-card ${card_name}-${user.id}`;
 	
@@ -115,12 +112,8 @@ function createUserCard(userlist, card_name, user) {
 	profileButton.textContent = 'Voir le profil';
 	profileButton.ariaLabel = `Profil de ${user.username}`;
 
-	console.log(`USER ${user.id} DELETED`)
-
 	if (user.deleted === true)
 	{
-		console.log(`USER ${user.id} DELETED`)
-		// profileButton.href = "";
 		profileButton.style.background = "gray";
 		profileButton.textContent = "Locked out user";
 	}

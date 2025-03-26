@@ -17,32 +17,17 @@ NC='\033[0m'
 # HELP
 if [ $# -ne 1 ]; then
     echo -e "${BLUE}[ COMMANDES ]${NC}"
-    echo -e "\n├ ${PURPLE_N}REMOVE + BUILD + LAUNCH${NC}"
-
-    echo -e "│\t> ${YELLOW_N}ev${NC}          ${PURPLE}|${NC} Déconstruction, construction et lancement :"
-    echo -e "│\t\t\tÉquivalent au combo de commandes :  r-all + b-all + l"
     
     echo -e "\n├ ${PURPLE_N}BUILD${NC}"
 
     echo -e "│\t> ${YELLOW_N}b-all${NC}       ${PURPLE}|${NC} Construction complète :"
     echo -e "│\t\t\tCrée les images Docker et les volumes, nécessaire pour un premier setup."
-    
-    echo -e "│\n│\t> ${YELLOW_N}b${NC}           ${PURPLE}|${NC} Construction partielle :"
-    echo -e "│\t\t\tCrée uniquement les images Docker, utile pour les mises à jour sans toucher aux volumes."
    
     echo -e "\n├ ${PURPLE_N}REMOVE${NC}"
 
     echo -e "│\t> ${YELLOW_N}r-all${NC}       ${PURPLE}|${NC} Suppression totale :"
     echo -e "│\t\t\tEnlève toutes les images et volumes Docker,"
     echo -e "│\t\t\t${RED_N}Attention${NC}, toutes les données seront perdues. Utilisez 'b-all' pour un nouveau setup après."
-    
-    echo -e "│\n│\t> ${YELLOW_N}r${NC}           ${PURPLE}|${NC} Suppression partielle :"
-    echo -e "│\t\t\tEnlève uniquement l'image Docker, les volumes restent intacts."
-    
-    echo -e "\n├ ${PURPLE_N}LAUNCH${NC}"
-
-    echo -e "│\t> ${YELLOW_N}l${NC}           ${PURPLE}|${NC} Lancement de l'application :"
-    echo -e "│\t\t\tDémarre les services Docker et ouvre l'application dans le navigateur."
 
     echo -e "\n"
     exit 1
@@ -134,15 +119,13 @@ if [ "$1" == "b-all" ]; then
 	pip install --no-cache-dir -r requirements.txt
 
     echo -e "${BLUE}> Building docker image and Launching services...${NC}"
-    docker-compose up --build -d
+    docker-compose up --build 
 
     # sleep 10
     # echo -e "${PURPLE}> Initialisation de la [VE] HOST_IP${NC}"
     # initialize_ip_addr $IP
 
-    open https://$IP:5000
-
-    echo -e "> ${GREEN}Ready${NC} to use. Next cmd > ./log launch OR https://$IP:5000"
+    echo -e "> ${GREEN}Ready${NC} >> https://$IP:5000"
 fi
 
 # FULL REMOVE

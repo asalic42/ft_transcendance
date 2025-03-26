@@ -16,7 +16,7 @@ function launch_login_page() {
 
     // Fonction pour valider l'email avec une expression régulière
     function flp_validateEmail(email) {
-        const vlp_emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        const vlp_emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,6}$/;;
         return vlp_emailPattern.test(email);
     }
 
@@ -25,6 +25,7 @@ function launch_login_page() {
     let vlp_is_password_strong_enough = {value: false};
     let vlp_is_form_valid = {value: 0};
     let vlp_emailFormatIsValid = {value: false};
+    let vlp_signup_whitspaces = {value: false};
 
     let vlp_is_username_len_respected = {value: true};
     let vlp_is_email_len_respected = {value: true};
@@ -284,7 +285,7 @@ function launch_login_page() {
     vlp_UsernameInput.addEventListener('keyup', function() {
         const vlp_UsernameInputSpan = vlp_UsernameInput.nextElementSibling;
 
-        if (vlp_UsernameInput.value.length > 24) {
+        if (vlp_UsernameInput.value.length > 24 || (vlp_UsernameInput.value.length > 0 && (/^\s*$/.test(vlp_UsernameInput.value) ||  /\s/.test(vlp_UsernameInput.value)))) {
             vlp_is_username_len_respected.value = false;
             vlp_UsernameInput.classList.add("invalid");
             vlp_UsernameInputSpan.classList.add("invalid");

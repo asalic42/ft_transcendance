@@ -1169,8 +1169,7 @@ def get_online_users(request):
 
 	users_online_data = [{"id": users.id, "username": users.name, "image": users.image.url, "deleted": users.has_been_cut} for users in online_users]
 	users_offline_data = [{"id": users.id, "username": users.name, "image": users.image.url, "deleted": users.has_been_cut} for users in offline_users]
-	print(f"{users_offline_data[0]}")
-	sys.stdout.flush()
+
 	return JsonResponse({"online_users": users_online_data, "offline_users" : users_offline_data})
 
 
