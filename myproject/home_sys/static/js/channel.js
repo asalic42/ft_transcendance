@@ -15,6 +15,7 @@ function launch_everything() {
 	let chatVisible = false;
 	let currentChan;
 	let lastMessageId = 0;
+	let messageSeen = [];
 	let liveChan;
 	let blockedUsersList = null;
 	let userid = null;
@@ -184,6 +185,7 @@ async function addChannelToList(nameChan, pv, idChan) {
 
 async function openCenter(printName, nameChan) {
 	lastMessageId = 0;
+	messageSeen = [];
 	popCenterChat(nameChan);
 
 	if (!chatVisible)
@@ -198,9 +200,9 @@ async function openCenter(printName, nameChan) {
 
 	if (liveChat) clearInterval(liveChat);
 
-	liveChat = setInterval(() => {
-		liveChatFetch();
-	}, 250);
+	liveChat = setInterval(async () => {
+		await liveChatFetch();
+	}, 300);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -415,8 +417,11 @@ async function liveChatFetch() {
 		const data = await response.json();
 		if (data.new_message && data.new_message.length > 0) {
 			for (var message of data.new_message) {
-				await addMessage(message.message, message.sender, message.idSender, message.is_link);
-				lastMessageId = message.id;
+				if (!messageSeen.includes(message.id)) {
+					await addMessage(message.message, message.sender, message.idSender, message.is_link);
+					messageSeen.push(message.id);
+					lastMessageId = message.id;
+				}
 			}
 		}
 	} catch (error) {
