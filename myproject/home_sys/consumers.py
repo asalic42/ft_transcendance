@@ -1326,7 +1326,6 @@ class CasseBriqueConsumer(AsyncWebsocketConsumer):
 				end = time.time()
 				self.game.timeleft = end - start
 				
-				print("HEY bitch")
 				sys.stdout.flush()
 				try:
 					elapsed = asyncio.get_event_loop().time() - current_time

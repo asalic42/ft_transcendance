@@ -37,7 +37,7 @@ function launch_everything() {
 		if (!currentPVCallback) return;
 
 		const selectedFriendId = friendSelect.value;
-		const channelName = "TestValue" + Math.floor(Math.random() * 1000000) + Math.floor(Math.random() * 10000000) + selectedFriendId;
+		const channelName = "TestValue" + Math.floor(Math.random() * 100000000) + Math.floor(Math.random() * 100000000) + selectedFriendId;
 
 		// Validation
 		if (!selectedFriendId) {

@@ -190,7 +190,7 @@ h3 {
 	position: absolute;
 	justify-content: center;
 	transform: translate(-50%, -50%);
-	margin-top: 200px; 
+	margin-top: 100px; 
 }
 
 .replay-button {
@@ -201,6 +201,8 @@ h3 {
 	cursor: pointer;
 	font-family: 'coolvetica-condensed-rg';
 	font-size: 30px;
+	left: 50%;
+	position: relative;
 }
 
 .gameOver {

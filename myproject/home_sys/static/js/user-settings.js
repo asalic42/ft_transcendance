@@ -1,7 +1,7 @@
 function launch_settings() {
 	if (!is_auth)
 		return loadPage('/');
-
+	
 	let update_var = {value: false};
 
 	const buttonUpdateSave = document.querySelector(".update-or-save");
